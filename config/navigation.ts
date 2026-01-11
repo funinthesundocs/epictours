@@ -1,40 +1,41 @@
 import {
     LayoutDashboard,
     Inbox,
-    Map,
     Calendar,
-    Ticket,
-    Users,
-    Bus,
-    Briefcase,
+    CalendarRange, // Bookings
+    Map,           // Tours
+    Bus,           // Transportation/Vehicles
+    MapPin,        // Pickup Points
+    Building2,     // Hotels / Org
+    Users,         // Staff
     Phone,
     Bot,
     Headset,
-    Layers,
-    CloudCog,
-    Globe,
-    Share2,
-    PenTool,
-    Receipt,
-    Landmark,
-    Handshake,
-    PieChart,
-    Building2,
-    UserCog,
-    Shield,
-    Layout,
-    type LucideIcon
+    Layers,        // HighLevel
+    CloudCog,      // OTA
+    Globe,         // Website
+    Share2,        // Social
+    PenTool,       // Blog
+    Receipt,       // Billing
+    Landmark,      // Bank
+    Handshake,     // Partners
+    PieChart,      // Reports
+    UserCog,       // Users Settings
+    Shield,        // Permissions
+    Layout,        // Dash Settings
+    LayoutTemplate
 } from "lucide-react";
 
-export interface NavItem {
+export interface NavigationItem {
     title: string;
     href: string;
-    icon: LucideIcon;
+    icon: any;
+    children?: NavigationItem[];
 }
 
 export interface NavSection {
     title?: string; // If present, this is a Collapsible Heading
-    items: NavItem[];
+    items: NavigationItem[];
 }
 
 export const navigation: NavSection[] = [
@@ -55,16 +56,35 @@ export const navigation: NavSection[] = [
     {
         title: "Operations",
         items: [
-            { title: "Tours / Events", href: "/operations/tours", icon: Map },
-            { title: "Calendars", href: "/operations/calendars", icon: Calendar },
-            { title: "Bookings", href: "/operations/bookings", icon: Ticket },
-            { title: "Customers", href: "/operations/customers", icon: Users },
-            { title: "Transportation", href: "/operations/transportation", icon: Bus },
-            { title: "Staff", href: "/operations/staff", icon: Briefcase },
+            {
+                title: "Bookings",
+                href: "/operations/bookings",
+                icon: CalendarRange
+            },
+            {
+                title: "Tours & Manifests",
+                href: "/operations/tours",
+                icon: Map
+            },
+            {
+                title: "Transportation",
+                href: "/operations/transportation",
+                icon: Bus,
+                children: [
+                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
+                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
+                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 }
+                ]
+            },
+            {
+                title: "Staff & Guides",
+                href: "/operations/staff",
+                icon: Users
+            },
         ]
     },
     {
-        title: "Communications",
+        title: "Communication", // Changed from "Communications" to "Communication"
         items: [
             { title: "Phone System", href: "/comms/phone", icon: Phone },
             { title: "AI Agents", href: "/comms/ai-agents", icon: Bot },

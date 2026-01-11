@@ -1,0 +1,81 @@
+"use client";
+
+import { Edit2, ExternalLink, MapPin, Trash2 } from "lucide-react";
+
+interface PickupTableProps {
+    data: any[];
+    onEdit: (item: any) => void;
+    onDelete: (id: string) => void;
+}
+
+export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="text-center py-12 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/10">
+                No locations found.
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-hidden">
+            <table className="w-full text-left">
+                <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
+                    <tr>
+                        <th className="px-6 py-4">Location Name</th>
+                        <th className="px-6 py-4">Map Link</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    {data.map((point) => (
+                        <tr key={point.id} className="hover:bg-white/5 transition-colors group">
+                            <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                    <MapPin size={16} />
+                                </div>
+                                {point.name}
+                            </td>
+                            <td className="px-6 py-4">
+                                {point.map_link ? (
+                                    <a
+                                        href={point.map_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors text-xs"
+                                    >
+                                        View Map <ExternalLink size={12} />
+                                    </a>
+                                ) : (
+                                    <span className="text-zinc-600 italic">No link</span>
+                                )}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => onEdit(point)}
+                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                                        title="Edit"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (confirm("Are you sure you want to delete this location?")) {
+                                                onDelete(point.id);
+                                            }
+                                        }}
+                                        className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}

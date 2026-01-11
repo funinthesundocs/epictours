@@ -89,10 +89,57 @@ export function Sidebar() {
     );
 }
 
-// Helper: Standard Nav Item (Standard Row)
-function NavItem({ item, pathname }: { item: any; pathname: string }) {
-    const isActive = pathname === item.href;
+// Helper: Recursive Nav Item
+function NavItem({ item, pathname, depth = 0 }: { item: any; pathname: string; depth?: number }) {
+    const hasChildren = item.children && item.children.length > 0;
     const Icon = item.icon;
+
+    // Check if itself or any child is active
+    const isActive = pathname === item.href;
+    const isChildActive = hasChildren && item.children.some((child: any) => pathname === child.href);
+
+    // State for toggling children (default open if child active)
+    const [isOpen, setIsOpen] = useState(isChildActive);
+
+    if (hasChildren) {
+        return (
+            <div className="space-y-1">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className={cn(
+                        "w-full group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                        (isActive || isChildActive)
+                            ? "text-cyan-400 font-medium"
+                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    )}
+                    style={{ paddingLeft: `${12 + (depth * 12)}px` }} // Dynamic indent
+                >
+                    <div className="flex items-center gap-3">
+                        <Icon size={18} className={cn("transition-colors", (isActive || isChildActive) ? "text-cyan-400" : "text-zinc-500 group-hover:text-zinc-300")} />
+                        <span>{item.title}</span>
+                    </div>
+                    <ChevronDown size={14} className={cn("transition-transform", isOpen ? "rotate-180" : "")} />
+                </button>
+
+                <AnimatePresence initial={false}>
+                    {isOpen && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="space-y-1">
+                                {item.children.map((child: any) => (
+                                    <NavItem key={child.href} item={child} pathname={pathname} depth={depth + 1} />
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        );
+    }
 
     return (
         <Link
@@ -103,6 +150,7 @@ function NavItem({ item, pathname }: { item: any; pathname: string }) {
                     ? "bg-cyan-500/10 text-cyan-400 font-medium shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
             )}
+            style={{ paddingLeft: `${12 + (depth * 12)}px` }} // Dynamic indent
         >
             <Icon size={18} className={cn("transition-colors", isActive ? "text-cyan-400" : "text-zinc-500 group-hover:text-zinc-300")} />
             <span>{item.title}</span>
