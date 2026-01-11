@@ -1,18 +1,18 @@
 "use client";
 
-import { Edit2, ExternalLink, MapPin, Trash2 } from "lucide-react";
+import { Edit2, MapPin, Phone, Trash2 } from "lucide-react";
 
-interface PickupTableProps {
+interface HotelTableProps {
     data: any[];
     onEdit: (item: any) => void;
     onDelete: (id: string) => void;
 }
 
-export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) {
+export function HotelsTable({ data, onEdit, onDelete }: HotelTableProps) {
     if (!data || data.length === 0) {
         return (
             <div className="text-center py-12 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/10">
-                No locations found.
+                No hotels found.
             </div>
         );
     }
@@ -22,38 +22,42 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
             <table className="w-full text-left">
                 <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
                     <tr>
-                        <th className="px-6 py-4">Location Name</th>
-                        <th className="px-6 py-4">Map Link</th>
+                        <th className="px-6 py-4">Hotel Name</th>
+                        <th className="px-6 py-4">Contact Phone</th>
+                        <th className="px-6 py-4">Assigned Pickup Point</th>
                         <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                    {data.map((point) => (
-                        <tr key={point.id} className="hover:bg-white/5 transition-colors group">
-                            <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                    <MapPin size={16} />
-                                </div>
-                                {point.name}
+                    {data.map((hotel) => (
+                        <tr key={hotel.id} className="hover:bg-white/5 transition-colors group">
+                            <td className="px-6 py-4 font-medium text-white">
+                                {hotel.name}
                             </td>
                             <td className="px-6 py-4">
-                                {point.map_link ? (
-                                    <a
-                                        href={point.map_link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors text-xs"
-                                    >
-                                        View Map <ExternalLink size={12} />
-                                    </a>
+                                {hotel.contact_phone ? (
+                                    <span className="flex items-center gap-2 text-zinc-400">
+                                        <Phone size={14} />
+                                        {hotel.contact_phone}
+                                    </span>
                                 ) : (
-                                    <span className="text-zinc-600 italic">No link</span>
+                                    <span className="text-zinc-600">-</span>
+                                )}
+                            </td>
+                            <td className="px-6 py-4">
+                                {hotel.pickup_points ? (
+                                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-medium border border-cyan-500/20">
+                                        <MapPin size={12} />
+                                        {hotel.pickup_points.name}
+                                    </span>
+                                ) : (
+                                    <span className="text-red-400 text-xs italic">Unassigned</span>
                                 )}
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                     <button
-                                        onClick={() => onEdit(point)}
+                                        onClick={() => onEdit(hotel)}
                                         className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
                                         title="Edit"
                                     >
@@ -61,8 +65,8 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                     </button>
                                     <button
                                         onClick={() => {
-                                            if (confirm("Are you sure you want to delete this location?")) {
-                                                onDelete(point.id);
+                                            if (confirm(`Delete ${hotel.name}?`)) {
+                                                onDelete(hotel.id);
                                             }
                                         }}
                                         className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"

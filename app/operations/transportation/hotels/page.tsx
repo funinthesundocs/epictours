@@ -1,63 +1,134 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Building2, Plus, Phone, MapPin } from "lucide-react";
+import { Building2, Plus, Loader2, Search } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import { HotelsTable } from "@/features/transportation/components/hotels-table";
+import { AddHotelSheet } from "@/features/transportation/components/add-hotel-sheet";
 
-const PLACEHOLDER_HOTELS = [
-    { id: 1, name: "Sheraton Waikiki", phone: "808-922-4422", pickup: "Sheraton Waikiki Bus Depot" },
-    { id: 2, name: "Hilton Hawaiian Village", phone: "808-949-4321", pickup: "Grand Islander Bus Stop" },
-    { id: 3, name: "Halekulani", phone: "808-923-2311", pickup: "Sheraton Waikiki Bus Depot" },
-    { id: 4, name: "Hyatt Regency", phone: "808-923-1234", pickup: "Duke Kahanamoku Statue" },
-];
+export default function HotelsPage() {
+    const [hotels, setHotels] = useState<any[]>([]);
+    const [filteredHotels, setFilteredHotels] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<any>(null);
 
-export default function HotelListPage() {
+    const fetchHotels = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            // Join with pickup_points to get the name
+            const { data, error } = await supabase
+                .from("hotels")
+                .select(`
+                    *,
+                    pickup_points (
+                        name
+                    )
+                `)
+                .order("name");
+
+            if (error) throw error;
+            setHotels(data || []);
+            setFilteredHotels(data || []);
+        } catch (err) {
+            console.error("Error loading hotels:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchHotels();
+    }, [fetchHotels]);
+
+    // Client-side search
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredHotels(hotels);
+            return;
+        }
+        const lowerQ = searchQuery.toLowerCase();
+        const filtered = hotels.filter(h =>
+            h.name.toLowerCase().includes(lowerQ) ||
+            (h.pickup_points?.name || "").toLowerCase().includes(lowerQ)
+        );
+        setFilteredHotels(filtered);
+    }, [searchQuery, hotels]);
+
+    const handleDelete = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from("hotels")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+            fetchHotels();
+        } catch (err) {
+            console.error("Error deleting hotel:", err);
+            alert("Failed to delete hotel.");
+        }
+    };
+
+    const handleEdit = (item: any) => {
+        setEditingItem(item);
+        setIsSheetOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingItem(null);
+        setIsSheetOpen(true);
+    };
+
     return (
         <PageShell
             title="Hotel Directory"
-            description="Manage hotel partners and assign them to specific pickup points."
+            description="Manage hotel partners and their assigned pickup locations."
             icon={Building2}
             action={
-                <button className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors">
+                <button
+                    onClick={handleAddNew}
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors"
+                >
                     <Plus size={16} />
                     Add Hotel
                 </button>
             }
         >
-            <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
-                        <tr>
-                            <th className="px-6 py-4">Hotel Name</th>
-                            <th className="px-6 py-4">Contact</th>
-                            <th className="px-6 py-4">Assigned Pickup Point</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                        {PLACEHOLDER_HOTELS.map((hotel) => (
-                            <tr key={hotel.id} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                                        <Building2 size={16} />
-                                    </div>
-                                    {hotel.name}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-zinc-400">
-                                        <Phone size={14} />
-                                        {hotel.phone}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/5 px-3 py-1.5 rounded-lg w-fit border border-emerald-500/10">
-                                        <MapPin size={14} />
-                                        {hotel.pickup}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search hotels or pickup points..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    />
+                </div>
+
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-64">
+                        <Loader2 className="animate-spin text-cyan-400" size={32} />
+                    </div>
+                ) : (
+                    <HotelsTable
+                        data={filteredHotels}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                )}
             </div>
+
+            <AddHotelSheet
+                isOpen={isSheetOpen}
+                onClose={() => setIsSheetOpen(false)}
+                onSuccess={fetchHotels}
+                initialData={editingItem}
+            />
         </PageShell>
     );
 }
