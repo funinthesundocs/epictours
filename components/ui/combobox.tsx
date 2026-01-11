@@ -43,7 +43,12 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
     }, [value, options]);
 
     // Filter options based on query
-    const filteredOptions = query === ""
+    // Fix: If the query matches the selected value's label exactly, show ALL options (don't filter).
+    // This ensures that when editing (and the field is pre-filled), the user sees the full list, not just the selected item.
+    const selectedOption = normalizedOptions.find(o => o.value === value);
+    const isExactMatch = selectedOption && selectedOption.label === query;
+
+    const filteredOptions = (query === "" || isExactMatch)
         ? normalizedOptions
         : normalizedOptions.filter((opt) =>
             opt.label.toLowerCase().includes(query.toLowerCase())

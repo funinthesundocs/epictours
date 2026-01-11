@@ -2,6 +2,7 @@ import {
     LayoutDashboard,
     Inbox,
     Calendar,
+    CalendarClock,
     CalendarRange, // Bookings
     Map,           // Tours
     Bus,           // Transportation/Vehicles
@@ -73,7 +74,8 @@ export const navigation: NavSection[] = [
                 children: [
                     { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
                     { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
-                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 }
+                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
+                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
                 ]
             },
             {
