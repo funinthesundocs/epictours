@@ -1,0 +1,12 @@
+
+import { createClient } from '@supabase/supabase-js'
+
+// Ensure we fail early if keys are missing in development
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("Supabase keys are missing. Check .env.local")
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)

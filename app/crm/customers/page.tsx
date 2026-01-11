@@ -1,6 +1,8 @@
 import { CustomersPage } from "@/features/crm/customers/page";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
     title: "Customers | EpicTours.ai",
     description: "Customer Relationship Management",
