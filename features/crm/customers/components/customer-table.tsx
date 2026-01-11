@@ -1,11 +1,26 @@
+
 "use client";
 
 import { Customer } from "../types";
 import { StatusBadge } from "./status-badge";
 import { MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CustomerActions } from "./customer-actions";
 
-export function CustomerTable({ data }: { data: Customer[] }) {
+interface CustomerTableProps {
+    data: Customer[];
+    onEdit: (customer: Customer) => void;
+    onDelete: (id: string) => void;
+}
+
+export function CustomerTable({ data, onEdit, onDelete }: CustomerTableProps) {
+    if (data.length === 0) {
+        return (
+            <div className="text-center py-20 text-zinc-500">
+                No customers found. Add your first one to get started.
+            </div>
+        );
+    }
     return (
         <div className="w-full overflow-hidden rounded-xl glass-card border border-white/5">
             <div className="overflow-x-auto">
@@ -45,12 +60,10 @@ export function CustomerTable({ data }: { data: Customer[] }) {
                                     ${customer.total_value.toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4 text-zinc-400">
-                                    {new Date(customer.last_active).toLocaleDateString()}
+                                    {customer.last_active ? new Date(customer.last_active).toLocaleDateString() : "Never"}
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors">
-                                        <MoreHorizontal size={18} />
-                                    </button>
+                                    <CustomerActions customer={customer} onEdit={onEdit} onDelete={onDelete} />
                                 </td>
                             </tr>
                         ))}
