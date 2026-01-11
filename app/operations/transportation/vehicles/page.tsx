@@ -1,58 +1,129 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Bus, Plus } from "lucide-react";
-
-const PLACEHOLDER_VEHICLES = [
-    { id: 1, name: "Van 1", capacity: 14, plate: "ABC-123", status: "Active" },
-    { id: 2, name: "Bus A", capacity: 25, plate: "BUS-999", status: "Maintenance" },
-    { id: 3, name: "VIP SUV", capacity: 6, plate: "VIP-001", status: "Active" },
-];
+import { Bus, Plus, Loader2, Search } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import { VehiclesTable } from "@/features/transportation/components/vehicles-table";
+import { AddVehicleSheet } from "@/features/transportation/components/add-vehicle-sheet";
 
 export default function VehiclesPage() {
+    const [vehicles, setVehicles] = useState<any[]>([]);
+    const [filteredVehicles, setFilteredVehicles] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<any>(null);
+
+    const fetchVehicles = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from("vehicles")
+                .select("*")
+                .order("name");
+
+            if (error) throw error;
+            setVehicles(data || []);
+            setFilteredVehicles(data || []);
+        } catch (err) {
+            console.error("Error loading vehicles:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchVehicles();
+    }, [fetchVehicles]);
+
+    // Client-side search
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredVehicles(vehicles);
+            return;
+        }
+        const lowerQ = searchQuery.toLowerCase();
+        const filtered = vehicles.filter(v =>
+            v.name.toLowerCase().includes(lowerQ) ||
+            v.plate_number?.toLowerCase().includes(lowerQ) ||
+            v.vin_number?.toLowerCase().includes(lowerQ)
+        );
+        setFilteredVehicles(filtered);
+    }, [searchQuery, vehicles]);
+
+    const handleDelete = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from("vehicles")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+            fetchVehicles();
+        } catch (err) {
+            console.error("Error deleting vehicle:", err);
+            alert("Failed to delete vehicle.");
+        }
+    };
+
+    const handleEdit = (vehicle: any) => {
+        setEditingItem(vehicle);
+        setIsSheetOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingItem(null);
+        setIsSheetOpen(true);
+    };
+
     return (
         <PageShell
-            title="Fleet Management"
-            description="Manage your vehicles, capacity, and maintenance status."
+            title="Fleet Vehicles"
+            description="Manage your fleet, compliance, and vehicle specifications."
             icon={Bus}
             action={
-                <button className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors">
+                <button
+                    onClick={handleAddNew}
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors"
+                >
                     <Plus size={16} />
                     Add Vehicle
                 </button>
             }
         >
-            <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
-                        <tr>
-                            <th className="px-6 py-4">Vehicle Name</th>
-                            <th className="px-6 py-4">Capacity</th>
-                            <th className="px-6 py-4">Plate Number</th>
-                            <th className="px-6 py-4">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                        {PLACEHOLDER_VEHICLES.map((vehicle) => (
-                            <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4 font-medium text-white">{vehicle.name}</td>
-                                <td className="px-6 py-4">{vehicle.capacity} pax</td>
-                                <td className="px-6 py-4 font-mono text-cyan-400">{vehicle.plate}</td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                        ${vehicle.status === 'Active'
-                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                            : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                        }
-                                    `}>
-                                        {vehicle.status}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="space-y-4 min-h-[80vh]">
+                {/* Search Bar */}
+                <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search by name, plate, or VIN..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    />
+                </div>
+
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-64">
+                        <Loader2 className="animate-spin text-cyan-400" size={32} />
+                    </div>
+                ) : (
+                    <VehiclesTable
+                        data={filteredVehicles}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                )}
             </div>
+
+            <AddVehicleSheet
+                isOpen={isSheetOpen}
+                onClose={() => setIsSheetOpen(false)}
+                onSuccess={fetchVehicles}
+                initialData={editingItem}
+            />
         </PageShell>
     );
 }

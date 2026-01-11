@@ -18,7 +18,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
     }
 
     return (
-        <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-hidden">
+        <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-x-auto">
             <table className="w-full text-left">
                 <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
                     <tr>
@@ -53,22 +53,28 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                     <button
-                                        onClick={() => onEdit(point)}
-                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit(point);
+                                        }}
+                                        className="p-1.5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors z-10 relative"
                                         title="Edit"
+                                        style={{ pointerEvents: 'auto' }}
                                     >
-                                        <Edit2 size={16} />
+                                        <Edit2 size={14} />
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            if (confirm("Are you sure you want to delete this location?")) {
-                                                onDelete(point.id);
-                                            }
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (confirm("Are you sure you want to delete this location?")) onDelete(point.id);
                                         }}
-                                        className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-1.5 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors z-10 relative"
                                         title="Delete"
+                                        style={{ pointerEvents: 'auto' }}
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={14} />
                                     </button>
                                 </div>
                             </td>

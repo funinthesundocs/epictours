@@ -31,7 +31,7 @@ export function Sidebar() {
 
             {/* Sidebar Container */}
             <aside className={cn(
-                "fixed lg:relative z-40 h-[95vh] w-[280px] my-auto ml-4 transition-all duration-300 ease-in-out",
+                "fixed lg:relative z-40 h-[95vh] w-[240px] my-auto ml-4 transition-all duration-300 ease-in-out",
                 "hidden lg:flex flex-col",
                 isMobileOpen ? "flex top-4 bottom-4 left-0" : "hidden"
             )}>
