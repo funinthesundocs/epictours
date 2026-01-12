@@ -9,9 +9,10 @@ interface CustomSelectProps {
     onChange: (value: string) => void;
     options: string[];
     placeholder?: string;
+    className?: string;
 }
 
-export function CustomSelect({ value, onChange, options, placeholder = "Select..." }: CustomSelectProps) {
+export function CustomSelect({ value, onChange, options, placeholder = "Select...", className }: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group"
+                className={`w-full bg-black/20 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group ${className || "py-2.5"}`}
             >
                 <span className={value ? "text-white" : "text-zinc-500"}>
                     {value || placeholder}
@@ -61,7 +62,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors
-                            ${isSelected ? "bg-cyan-500 text-black font-medium" : "text-zinc-900 hover:bg-cyan-500 hover:text-black"}
+                            ${isSelected ? "bg-primary text-primary-foreground font-medium" : "text-zinc-900 hover:bg-primary hover:text-primary-foreground"}
                         `}
                                 >
                                     <span>{option}</span>

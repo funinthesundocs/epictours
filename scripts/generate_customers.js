@@ -17,7 +17,7 @@ const SOURCES = [
 
 const APPS = ["WhatsApp", "SMS", "Email", "iMessage", "Telegram", "WeChat", "Signal"];
 
-const STATUSES = ["active", "lead", "inactive"];
+const STATUSES = ["Customer", "Lead", "Refund", "Problem"];
 
 const TAGS_POOL = ["vip", "family", "honeymoon", "corporate", "adventure", "golf", "wedding", "senior", "local", "repeat"];
 
@@ -38,7 +38,7 @@ for (let i = 1; i <= 250; i++) {
     const name = `${firstName} ${lastName} ${i}`; // Append index to ensure uniqueness if names collide
     const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.com`;
     const phone = generatePhone();
-    const status = Math.random() > 0.3 ? "active" : (Math.random() > 0.5 ? "lead" : "inactive");
+    const status = Math.random() > 0.3 ? "Customer" : (Math.random() > 0.5 ? "Lead" : (Math.random() > 0.5 ? "Refund" : "Problem"));
 
     // "AP" Column - now a text placeholder
     const totalValue = "-";

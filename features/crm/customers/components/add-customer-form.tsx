@@ -14,7 +14,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 // Options Lists
 const MESSAGING_OPTIONS = ["WhatsApp", "FB Messenger", "Signal", "Telegram", "Viber", "Line", "WeChat"];
 const REFERRAL_OPTIONS = ["Google Ad", "Google Map", "AI Search", "Facebook", "YouTube", "Instagram", "Word of Mouth", "Repeat Customer", "Email Offer", "Other"];
-const STATUS_OPTIONS = ["lead", "active", "inactive", "archived"];
+const STATUS_OPTIONS = ["Lead", "Customer", "Refund", "Problem"];
 
 // Temporary Mock Data - Will trigger DB lookup later
 const MOCK_HOTELS = [
@@ -52,7 +52,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     } = useForm({
         resolver: zodResolver(CustomerSchema),
         defaultValues: {
-            status: "lead" as CustomerStatus,
+            status: "Lead" as CustomerStatus,
             tags: [],
             total_value: 0,
             preferences: {

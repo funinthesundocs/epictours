@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const CustomerStatusSchema = z.enum(["active", "lead", "inactive", "archived"]);
+// Status is now just a string (Flexible)
+export const CustomerStatusSchema = z.string();
 export type CustomerStatus = z.infer<typeof CustomerStatusSchema>;
 
 export const CustomerSchema = z.object({
@@ -8,7 +9,7 @@ export const CustomerSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
-  status: z.enum(["active", "lead", "inactive", "archived"]).default("lead"),
+  status: z.string().default("Lead"),
   total_value: z.number().default(0),
   last_active: z.string().optional(), // ISO Date
   tags: z.array(z.string()).default([]),
