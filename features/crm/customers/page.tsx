@@ -17,7 +17,6 @@ export function CustomersPage() {
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
     const [sourceFilter, setSourceFilter] = useState("");
     const [hotelFilter, setHotelFilter] = useState("");
 
@@ -44,16 +43,11 @@ export function CustomersPage() {
             // 1. Text Search (Expanded to all requested fields)
             if (searchQuery) {
                 const q = searchQuery;
-                // ILIKE for Name, Email, Phone, AP, and JSONB fields.
-                // NOTE: 'status' is an ENUM and cannot be searched properly with ILIKE. Use the Dropdown.
-                query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
+                // ILIKE for Name, Email, Phone, Status, AP, and JSONB fields.
+                query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,status.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
             }
 
-            // 2. Filters
-            // 2. Filters
-            if (statusFilter && statusFilter !== "All Statuses") {
-                query = query.eq('status', statusFilter);
-            }
+            // 2. Filters (Status handled by Search now)
 
             // 3. Sorting
             if (sortConfig) {
@@ -92,7 +86,7 @@ export function CustomersPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [searchQuery, statusFilter, sortConfig, currentPage, rowsPerPage]);
+    }, [searchQuery, sortConfig, currentPage, rowsPerPage]);
 
     // Effect: Trigger Fetch on changes (Debounced Search)
     useEffect(() => {
@@ -110,7 +104,7 @@ export function CustomersPage() {
     // Reset Page on Filter Change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, statusFilter, rowsPerPage]);
+    }, [searchQuery, rowsPerPage]);
 
     const handleSort = (key: string) => {
         setSortConfig(current => ({
@@ -121,7 +115,6 @@ export function CustomersPage() {
 
     const handleReset = () => {
         setSearchQuery("");
-        setStatusFilter("");
         setCurrentPage(1);
     };
 
@@ -184,12 +177,9 @@ export function CustomersPage() {
                 </div>
 
                 {/* New Toolbar */}
-                {/* New Toolbar */}
                 <CustomerToolbar
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
-                    statusFilter={statusFilter}
-                    onStatusChange={setStatusFilter}
                     onReset={handleReset}
                 />
             </div>

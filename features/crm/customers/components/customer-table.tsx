@@ -93,8 +93,8 @@ export function CustomerTable({ data, onEdit, onDelete, sortConfig, onSort }: Cu
                                     <td className="px-6 py-4 text-zinc-400">
                                         {customer.metadata?.source || "-"}
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={customer.status} />
+                                    <td className="px-6 py-4 text-zinc-400">
+                                        {customer.status}
                                     </td>
                                     <td className="px-6 py-4 text-white font-mono">
                                         {customer.total_value}
