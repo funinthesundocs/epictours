@@ -42,9 +42,14 @@ export function CustomersPage() {
 
             // 1. Text Search (Expanded to all requested fields)
             if (searchQuery) {
-                const q = searchQuery;
-                // ILIKE for Name, Email, Phone, Status, AP, and JSONB fields.
-                query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,status.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
+                // Sanitize input to prevent Supabase Parser errors (e.g. "failed to parse logic tree")
+                // We strip special characters that might break the .or() syntax
+                const q = searchQuery.replace(/[(),]/g, " ").trim();
+
+                if (q) {
+                    // ILIKE for Name, Email, Phone, Status, AP, and JSONB fields.
+                    query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,status.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
+                }
             }
 
             // 2. Filters (Status handled by Search now)
