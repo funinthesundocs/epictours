@@ -1,7 +1,7 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { MapPin, Plus, Loader2 } from "lucide-react";
+import { MapPin, Loader2, Plus } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { PickupPointsTable } from "@/features/transportation/components/pickup-points-table";

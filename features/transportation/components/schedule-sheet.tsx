@@ -8,6 +8,7 @@ import { Save, Loader2, Plus, Clock, MapPin, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Combobox } from "@/components/ui/combobox";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 // Master Schema
 const ScheduleSchema = z.object({
@@ -159,13 +160,17 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         }
     };
 
-    const handleRemoveStop = async (id: string) => {
-        if (!confirm("Remove this stop?")) return;
+    const [deletingStopId, setDeletingStopId] = useState<string | null>(null);
+
+    const handleConfirmDeleteStop = async () => {
+        if (!deletingStopId) return;
         try {
-            await supabase.from("schedule_stops").delete().eq("id", id);
+            await supabase.from("schedule_stops").delete().eq("id", deletingStopId);
             if (currentScheduleId) fetchStops(currentScheduleId);
         } catch (err) {
             console.error("Error deleting stop:", err);
+        } finally {
+            setDeletingStopId(null);
         }
     };
 
@@ -241,7 +246,11 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                     </div>
                                     <div className="col-span-1 flex justify-end">
                                         <button
-                                            onClick={() => handleRemoveStop(stop.id)}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeletingStopId(stop.id);
+                                            }}
                                             className="text-zinc-600 hover:text-red-400 transition-colors"
                                         >
                                             <Trash2 size={14} />
@@ -270,6 +279,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                 </div>
                                 <div className="col-span-1 flex justify-end">
                                     <button
+                                        type="button"
                                         onClick={handleAddStop}
                                         disabled={isAddingStop}
                                         className="p-1.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded transition-colors"
@@ -288,6 +298,16 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                     </div>
                 )}
             </div>
+
+            <AlertDialog
+                isOpen={!!deletingStopId}
+                onClose={() => setDeletingStopId(null)}
+                onConfirm={handleConfirmDeleteStop}
+                title="Remove Stop?"
+                description="Are you sure you want to remove this pickup stop from the schedule?"
+                confirmLabel="Remove Stop"
+                isDestructive={true}
+            />
         </SidePanel>
     );
 }

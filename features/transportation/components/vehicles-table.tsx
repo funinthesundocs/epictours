@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Bus, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface Vehicle {
     id: string;
@@ -30,6 +31,7 @@ type SortConfig = {
 
 export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+    const [deletingItem, setDeletingItem] = useState<Vehicle | null>(null);
 
     const handleSort = (key: keyof Vehicle) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -76,80 +78,99 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
     }
 
     return (
-        <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-x-auto">
-            <table className="w-full text-left min-w-[1200px]">
-                <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
-                    <tr>
-                        {[
-                            { key: 'name', label: 'Vehicle Name' },
-                            { key: 'capacity', label: 'Cap' },
-                            { key: 'license_requirement', label: 'License' },
-                            { key: 'plate_number', label: 'Plate' },
-                            { key: 'miles_per_gallon', label: 'MPG' },
-                            { key: 'vin_number', label: 'VIN' },
-                            { key: 'dot_number', label: 'DOT' },
-                            { key: 'rate_per_hour', label: 'Hourly' },
-                            { key: 'fixed_rate', label: 'Fixed' },
-                            { key: 'status', label: 'Status' },
-                        ].map((col) => (
-                            <th
-                                key={col.key}
-                                className="px-4 py-4 cursor-pointer hover:bg-white/5 transition-colors select-none"
-                                onClick={() => handleSort(col.key as keyof Vehicle)}
-                            >
-                                <div className="flex items-center gap-2">
-                                    {col.label}
-                                    <SortIcon column={col.key as keyof Vehicle} />
-                                </div>
-                            </th>
-                        ))}
-                        <th className="px-4 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                    {sortedData.map((v) => (
-                        <tr key={v.id} className="hover:bg-white/5 transition-colors group">
-                            <td className="px-4 py-4 font-medium text-white flex items-center gap-2">
-                                <Bus size={14} className="text-indigo-400" />
-                                {v.name}
-                            </td>
-                            <td className="px-4 py-4">{v.capacity}</td>
-                            <td className="px-4 py-4 text-xs text-zinc-400">{v.license_requirement}</td>
-                            <td className="px-4 py-4 font-mono text-xs">{v.plate_number}</td>
-                            <td className="px-4 py-4">{v.miles_per_gallon}</td>
-                            <td className="px-4 py-4 font-mono text-xs text-zinc-500">{v.vin_number}</td>
-                            <td className="px-4 py-4 font-mono text-xs text-zinc-500">{v.dot_number}</td>
-                            <td className="px-4 py-4 font-mono">{formatCurrency(v.rate_per_hour)}</td>
-                            <td className="px-4 py-4 font-mono">{formatCurrency(v.fixed_rate)}</td>
-                            <td className="px-4 py-4">
-                                <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
-                                    {v.status}
-                                </span>
-                            </td>
-                            <td className="px-4 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                    <button
-                                        onClick={() => onEdit(v)}
-                                        className="p-1.5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
-                                    >
-                                        <Edit2 size={14} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (confirm(`Delete ${v.name}?`)) onDelete(v.id);
-                                        }}
-                                        className="p-1.5 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors z-10 relative"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            </td>
+        <>
+            <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
+                        <tr>
+                            {[
+                                { key: 'name', label: 'Vehicle Name' },
+                                { key: 'capacity', label: 'Cap' },
+                                { key: 'license_requirement', label: 'License' },
+                                { key: 'plate_number', label: 'Plate' },
+                                { key: 'miles_per_gallon', label: 'MPG' },
+                                { key: 'rate_per_hour', label: 'Hourly' },
+                                { key: 'fixed_rate', label: 'Fixed' },
+                                { key: 'status', label: 'Status' },
+                            ].map((col) => (
+                                <th
+                                    key={col.key}
+                                    className="px-2 py-3 cursor-pointer hover:bg-white/5 transition-colors select-none"
+                                    onClick={() => handleSort(col.key as keyof Vehicle)}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        {col.label}
+                                        <SortIcon column={col.key as keyof Vehicle} />
+                                    </div>
+                                </th>
+                            ))}
+                            <th className="px-2 py-3 text-right">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                        {sortedData.map((v) => (
+                            <tr key={v.id} className="hover:bg-white/5 transition-colors group">
+                                <td className="px-2 py-3 font-medium text-white flex items-center gap-2">
+                                    <Bus size={14} className="text-indigo-400" />
+                                    {v.name}
+                                </td>
+                                <td className="px-2 py-3">{v.capacity}</td>
+                                <td className="px-2 py-3 text-xs text-zinc-400">{v.license_requirement}</td>
+                                <td className="px-2 py-3 font-mono text-xs">{v.plate_number}</td>
+                                <td className="px-2 py-3">{v.miles_per_gallon}</td>
+                                <td className="px-2 py-3 font-mono">{formatCurrency(v.rate_per_hour)}</td>
+                                <td className="px-2 py-3 font-mono">{formatCurrency(v.fixed_rate)}</td>
+                                <td className="px-2 py-3">
+                                    <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
+                                        {v.status}
+                                    </span>
+                                </td>
+                                <td className="px-2 py-3 text-right">
+                                    <div className="flex items-center justify-end gap-2 relative z-50">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEdit(v);
+                                            }}
+                                            className="p-1.5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            title="Edit"
+                                        >
+                                            <Edit2 size={14} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeletingItem(v);
+                                            }}
+                                            className="p-1.5 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <AlertDialog
+                isOpen={!!deletingItem}
+                onClose={() => setDeletingItem(null)}
+                onConfirm={() => {
+                    if (deletingItem) {
+                        onDelete(deletingItem.id);
+                        setDeletingItem(null);
+                    }
+                }}
+                title="Delete Vehicle?"
+                description={`Are you sure you want to remove "${deletingItem?.name}"? This action cannot be undone.`}
+                confirmLabel="Delete Vehicle"
+                isDestructive={true}
+            />
+        </>
     );
 }

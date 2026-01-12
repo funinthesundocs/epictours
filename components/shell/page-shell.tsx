@@ -54,7 +54,7 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
             )}
 
             {/* Content Area */}
-            <div className="min-h-[400px] glass-card rounded-xl border border-white/5 p-6 relative overflow-hidden">
+            <div className="min-h-[400px] border border-white/5 p-6 relative">
                 {children ? children : (
                     <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
                         <div className="text-center">
