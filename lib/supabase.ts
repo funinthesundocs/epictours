@@ -1,5 +1,5 @@
-
 import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase_gen'
 
 // Ensure we fail early if keys are missing in development
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -9,4 +9,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.warn("Supabase keys are missing. Check .env.local")
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)

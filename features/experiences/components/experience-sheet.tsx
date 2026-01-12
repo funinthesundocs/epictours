@@ -9,33 +9,11 @@ import * as z from "zod";
 import { Save, Loader2, Info, ClipboardList, Clock, Users, FileText, ChevronDown } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
-import { Experience } from "../types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Experience, ExperienceFormData, ExperienceSchema, NewExperience } from "../types";
 import { cn } from "@/lib/utils";
-
-// LOOSE SCHEMA
-const FormSchema = z.object({
-    id: z.string().optional(),
-    name: z.string().min(1, "Name is required"),
-    slogan: z.string().optional().nullable(),
-    event_type: z.string().optional().nullable(),
-    start_time: z.string().optional().nullable(),
-    end_time: z.string().optional().nullable(),
-    description: z.string().optional().nullable(),
-    min_age: z.any().optional(),
-    max_age: z.any().optional(),
-    min_group_size: z.any().optional(),
-    max_group_size: z.any().optional(),
-    what_to_bring: z.string().optional().nullable(),
-    checkin_details: z.string().optional().nullable(),
-    transport_details: z.string().optional().nullable(),
-    cancellation_policy: z.string().optional().nullable(),
-    restrictions: z.string().optional().nullable(),
-    disclaimer: z.string().optional().nullable(),
-    waiver_link: z.string().optional().nullable(),
-    is_active: z.boolean()
-});
-
-type FormData = z.infer<typeof FormSchema>;
 
 interface ExperienceSheetProps {
     isOpen: boolean;
@@ -73,8 +51,8 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         setValue,
         watch,
         formState: { errors }
-    } = useForm<FormData>({
-        resolver: zodResolver(FormSchema),
+    } = useForm({
+        resolver: zodResolver(ExperienceSchema),
         defaultValues: {
             name: "",
             event_type: "Tour",
@@ -90,45 +68,54 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     useEffect(() => {
         if (isOpen && initialData) {
             reset({
-                ...initialData,
+                id: initialData.id,
+                name: initialData.name || "",
+                event_type: initialData.event_type || "Tour",
+                slogan: initialData.slogan || null,
+
+                // Text Fields
+                description: initialData.description || null,
                 what_to_bring: Array.isArray(initialData.what_to_bring)
                     ? initialData.what_to_bring.join("\n")
                     : "",
-                slogan: initialData.slogan || "",
-                description: initialData.description || "",
+                checkin_details: initialData.checkin_details || null,
+                transport_details: initialData.transport_details || null,
+                cancellation_policy: initialData.cancellation_policy || null,
+                restrictions: initialData.restrictions || null,
+                disclaimer: initialData.disclaimer || null,
+                waiver_link: initialData.waiver_link || null,
+
+                // Numbers (Coerced)
+                min_age: initialData.min_age ?? null,
+                max_age: initialData.max_age ?? null,
+                min_group_size: initialData.min_group_size ?? null,
+                max_group_size: initialData.max_group_size ?? null,
+
                 start_time: initialData.start_time || "07:00 AM",
                 end_time: initialData.end_time || "04:00 PM",
-                checkin_details: initialData.checkin_details || "",
-                transport_details: initialData.transport_details || "",
-                cancellation_policy: initialData.cancellation_policy || "",
-                restrictions: initialData.restrictions || "",
-                disclaimer: initialData.disclaimer || "",
-                waiver_link: initialData.waiver_link || "",
-                min_age: initialData.min_age ?? "",
-                max_age: initialData.max_age ?? "",
-                min_group_size: initialData.min_group_size ?? "",
-                max_group_size: initialData.max_group_size ?? "",
                 is_active: initialData.is_active ?? true,
             });
         } else if (isOpen) {
             reset({
                 name: "",
-                slogan: "",
                 event_type: "Tour",
-                description: "",
+                slogan: null,
+                description: null,
+                what_to_bring: "",
+                checkin_details: null,
+                transport_details: null,
+                cancellation_policy: null,
+                restrictions: null,
+                disclaimer: null,
+                waiver_link: null,
+
+                min_age: null,
+                max_age: null,
+                min_group_size: null,
+                max_group_size: null,
+
                 start_time: "07:00 AM",
                 end_time: "04:00 PM",
-                min_age: "",
-                max_age: "",
-                min_group_size: "",
-                max_group_size: "",
-                what_to_bring: "",
-                checkin_details: "",
-                transport_details: "",
-                cancellation_policy: "",
-                restrictions: "",
-                disclaimer: "",
-                waiver_link: "",
                 is_active: true
             });
         }
@@ -148,53 +135,57 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const onSubmit = async (formData: FormData) => {
-        setIsSubmitting(true);
-        try {
-            // Apply Title Case to Slogan
-            const slogan = formData.slogan
-                ? formData.slogan.replace(/\b\w/g, l => l.toUpperCase())
-                : null;
+    const onSubmit = async (formData: ExperienceFormData) => {
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // Transform Form Data to DB Payload (Strict Type: NewExperience)
+                const dbData: NewExperience = {
+                    name: formData.name,
+                    event_type: formData.event_type || "Tour",
+                    slogan: formData.slogan ? formData.slogan.replace(/\b\w/g, l => l.toUpperCase()) : null,
+                    min_age: formData.min_age ?? null, // Coercion happened in Zod
+                    max_age: formData.max_age ?? null,
+                    min_group_size: formData.min_group_size ?? null,
+                    max_group_size: formData.max_group_size ?? null,
+                    what_to_bring: formData.what_to_bring
+                        ? formData.what_to_bring.split("\n").map(s => s.trim()).filter(Boolean)
+                        : [],
+                    description: formData.description || null,
+                    checkin_details: formData.checkin_details || null,
+                    transport_details: formData.transport_details || null,
+                    cancellation_policy: formData.cancellation_policy || null,
+                    restrictions: formData.restrictions || null,
+                    disclaimer: formData.disclaimer || null,
+                    waiver_link: formData.waiver_link || null,
+                    start_time: formData.start_time || null,
+                    end_time: formData.end_time || null,
+                    is_active: formData.is_active
+                };
 
-            const dbData = {
-                ...formData,
-                slogan,
-                min_age: formData.min_age === "" ? null : Number(formData.min_age),
-                max_age: formData.max_age === "" ? null : Number(formData.max_age),
-                min_group_size: formData.min_group_size === "" ? null : Number(formData.min_group_size),
-                max_group_size: formData.max_group_size === "" ? null : Number(formData.max_group_size),
-                what_to_bring: formData.what_to_bring
-                    ? formData.what_to_bring.split("\n").map(s => s.trim()).filter(Boolean)
-                    : [],
-                description: formData.description || null,
-                checkin_details: formData.checkin_details || null,
-                transport_details: formData.transport_details || null,
-                cancellation_policy: formData.cancellation_policy || null,
-                restrictions: formData.restrictions || null,
-                disclaimer: formData.disclaimer || null,
-                waiver_link: formData.waiver_link || null
-            };
+                // No more isNaN checks needed because Zod coerces to Number or Null
 
-            if (isNaN(dbData.min_age as number)) dbData.min_age = null;
-            if (isNaN(dbData.max_age as number)) dbData.max_age = null;
-            if (isNaN(dbData.min_group_size as number)) dbData.min_group_size = null;
-            if (isNaN(dbData.max_group_size as number)) dbData.max_group_size = null;
+                if (initialData?.id) {
+                    const { error } = await supabase.from("experiences").update(dbData).eq("id", initialData.id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from("experiences").insert([dbData]);
+                    if (error) throw error;
+                }
 
-            if (initialData?.id) {
-                const { error } = await supabase.from("experiences").update(dbData).eq("id", initialData.id);
-                if (error) throw error;
-            } else {
-                const { error } = await supabase.from("experiences").insert([dbData]);
-                if (error) throw error;
+                resolve(true);
+                onSuccess();
+                onClose();
+            } catch (err) {
+                console.error("Error saving experience:", err);
+                reject(err);
             }
-            onSuccess();
-            onClose();
-        } catch (err) {
-            console.error("Error saving experience:", err);
-            alert(`Failed to save experience: ${err instanceof Error ? err.message : "Unknown error"}`);
-        } finally {
-            setIsSubmitting(false);
-        }
+        });
+
+        toast.promise(promise, {
+            loading: 'Saving experience...',
+            success: 'Experience saved successfully.',
+            error: (err) => `Failed to save: ${err instanceof Error ? err.message : 'Unknown error'}`
+        });
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
@@ -223,13 +214,13 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                             <SectionHeader icon={Info} title="Basic Information" />
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className={labelClasses}>Experience Name *</label>
-                                    <input {...register("name")} className={cn(inputClasses, "text-lg font-semibold")} placeholder="e.g. Grand Circle Island Tour" />
+                                    <Label>Experience Name *</Label>
+                                    <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />
                                     {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className={labelClasses}>Slogan / Tagline</label>
-                                    <input {...register("slogan")} className={cn(inputClasses, "capitalize")} placeholder="Short, catchy description..." />
+                                    <Label>Slogan / Tagline</Label>
+                                    <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
                                 </div>
                                 <div className="space-y-2">
                                     <label className={labelClasses}>Event Type</label>
@@ -245,20 +236,20 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                         <div>
                             <SectionHeader icon={Users} title="Capacity & Age" />
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2"><label className={labelClasses}>Min Age</label><input type="number" {...register("min_age")} className={inputClasses} placeholder="0" /></div>
-                                <div className="space-y-2"><label className={labelClasses}>Max Age</label><input type="number" {...register("max_age")} className={inputClasses} placeholder="99" /></div>
-                                <div className="space-y-2"><label className={labelClasses}>Min Group</label><input type="number" {...register("min_group_size")} className={inputClasses} placeholder="1" /></div>
-                                <div className="space-y-2"><label className={labelClasses}>Max Group</label><input type="number" {...register("max_group_size")} className={inputClasses} placeholder="10" /></div>
+                                <div className="space-y-2"><Label>Min Age</Label><Input type="number" {...register("min_age")} placeholder="0" /></div>
+                                <div className="space-y-2"><Label>Max Age</Label><Input type="number" {...register("max_age")} placeholder="99" /></div>
+                                <div className="space-y-2"><Label>Min Group</Label><Input type="number" {...register("min_group_size")} placeholder="1" /></div>
+                                <div className="space-y-2"><Label>Max Group</Label><Input type="number" {...register("max_group_size")} placeholder="10" /></div>
                             </div>
                         </div>
                         <div>
                             <SectionHeader icon={ClipboardList} title="Requirements" />
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className={labelClasses}>What to Bring</label>
+                                    <Label>What to Bring</Label>
                                     <textarea {...register("what_to_bring")} className={cn(inputClasses, "font-mono text-sm")} placeholder={"Sunscreen\nWater\nCamera"} rows={6} />
                                 </div>
-                                <div className="space-y-2"><label className={labelClasses}>Waiver Link</label><input {...register("waiver_link")} className={inputClasses} placeholder="https://..." /></div>
+                                <div className="space-y-2"><Label>Waiver Link</Label><Input {...register("waiver_link")} placeholder="https://..." /></div>
                             </div>
                         </div>
                     </div>
@@ -342,11 +333,11 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                 </div>
 
                                 <div className="col-span-2 space-y-2">
-                                    <label className={labelClasses}>Check-in Details</label>
-                                    <input {...register("checkin_details")} className={inputClasses} placeholder="Meeting point instructions..." />
+                                    <Label>Check-in Details</Label>
+                                    <Input {...register("checkin_details")} placeholder="Meeting point instructions..." />
                                 </div>
                                 <div className="col-span-2 space-y-2">
-                                    <label className={labelClasses}>Transport Details</label>
+                                    <Label>Transport Details</Label>
                                     <textarea {...register("transport_details")} rows={2} className={inputClasses} placeholder="Pickup locations and vehicle info..." />
                                 </div>
                             </div>
@@ -355,9 +346,9 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                         <div>
                             <SectionHeader icon={FileText} title="Experience Details" />
                             <div className="space-y-8">
-                                <div className="space-y-2"><label className={labelClasses}>Full Description</label><textarea {...register("description")} className={cn(inputClasses, "resize-y min-h-[200px] leading-relaxed")} placeholder="Detailed overview..." /></div>
-                                <div className="space-y-2"><label className={labelClasses}>Cancellation Policy</label><textarea {...register("cancellation_policy")} rows={4} className={inputClasses} placeholder="Standard 24h policy..." /></div>
-                                <div className="space-y-2"><label className={labelClasses}>Restrictions & Disclaimer</label><textarea {...register("restrictions")} rows={4} className={inputClasses} placeholder="Medical restrictions..." /></div>
+                                <div className="space-y-2"><Label>Full Description</Label><textarea {...register("description")} className={cn(inputClasses, "resize-y min-h-[200px] leading-relaxed")} placeholder="Detailed overview..." /></div>
+                                <div className="space-y-2"><Label>Cancellation Policy</Label><textarea {...register("cancellation_policy")} rows={4} className={inputClasses} placeholder="Standard 24h policy..." /></div>
+                                <div className="space-y-2"><Label>Restrictions & Disclaimer</Label><textarea {...register("restrictions")} rows={4} className={inputClasses} placeholder="Medical restrictions..." /></div>
                             </div>
                         </div>
                     </div>

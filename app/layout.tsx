@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/shell/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
 const outfit = Outfit({
@@ -31,6 +32,7 @@ export default function RootLayout({
                         {children}
                     </div>
                 </main>
+                <Toaster />
             </body>
         </html>
     );
