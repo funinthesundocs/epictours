@@ -26,3 +26,13 @@
 *   **The Crime**: "I'll just assume the database field is `min_age` (number)".
 *   **The Consequence**: It was `min_age` (string) or `min_age_years` or `age_min`. Zod crash.
 *   **The Fix**: Read `schema.sql` BEFORE writing `form.tsx`.
+
+## 6. The "Native Select" Cheap-Out
+*   **The Crime**: Using `<select>` because it's easier than building a custom dropdown.
+*   **The Consequence**: Breaks the "Dark Mode Premium" aesthetic (white browser default inputs).
+*   **The Fix**: Always use the custom dropdown pattern (Input + Div + Map).
+
+## 7. The "Strict Build" Bottleneck
+*   **The Crime**: Keeping `ignoreBuildErrors: false` during rapid prototyping.
+*   **The Consequence**: 5-minute wait time per restart to fix a single lint warning.
+*   **The Fix**: Set `verify: false` in `next.config.ts` until Stabilization Phase. Use `/restart_production`.

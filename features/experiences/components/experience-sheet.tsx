@@ -39,10 +39,12 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     // Custom Time Picker State
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [showEventTypePicker, setShowEventTypePicker] = useState(false);
 
     // Refs for click outside
     const startWrapperRef = useRef<HTMLDivElement>(null);
     const endWrapperRef = useRef<HTMLDivElement>(null);
+    const eventTypeWrapperRef = useRef<HTMLDivElement>(null);
 
     const {
         register,
@@ -64,6 +66,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
     const startTimeValue = watch("start_time");
     const endTimeValue = watch("end_time");
+    const eventTypeValue = watch("event_type");
 
     useEffect(() => {
         if (isOpen && initialData) {
@@ -129,6 +132,9 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             }
             if (endWrapperRef.current && !endWrapperRef.current.contains(event.target as Node)) {
                 setShowEndPicker(false);
+            }
+            if (eventTypeWrapperRef.current && !eventTypeWrapperRef.current.contains(event.target as Node)) {
+                setShowEventTypePicker(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -197,6 +203,8 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors";
     const labelClasses = "text-xs font-medium text-zinc-400 uppercase tracking-wider ml-1";
 
+    const eventTypeOptions = ["Tour", "Activity", "Transport", "Event"];
+
     return (
         <SidePanel
             isOpen={isOpen}
@@ -222,14 +230,39 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                     <Label>Slogan / Tagline</Label>
                                     <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 relative" ref={eventTypeWrapperRef}>
                                     <label className={labelClasses}>Event Type</label>
-                                    <select {...register("event_type")} className={inputClasses}>
-                                        <option value="Tour">Tour</option>
-                                        <option value="Activity">Activity</option>
-                                        <option value="Transport">Transport</option>
-                                        <option value="Event">Event</option>
-                                    </select>
+                                    <div className="relative">
+                                        <input
+                                            {...register("event_type")}
+                                            className={cn(inputClasses, "cursor-pointer")}
+                                            readOnly
+                                            autoComplete="off"
+                                            onClick={() => setShowEventTypePicker(true)}
+                                            onFocus={() => setShowEventTypePicker(true)}
+                                        />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                                    </div>
+                                    {showEventTypePicker && (
+                                        <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                            {eventTypeOptions.map(type => (
+                                                <div
+                                                    key={type}
+                                                    className={cn(
+                                                        "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                        eventTypeValue === type ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                    )}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault(); // Prevent blur
+                                                        setValue("event_type", type);
+                                                        setShowEventTypePicker(false);
+                                                    }}
+                                                >
+                                                    {type}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
