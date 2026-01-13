@@ -32,7 +32,7 @@
 *   **The Consequence**: Breaks the "Dark Mode Premium" aesthetic (white browser default inputs).
 *   **The Fix**: Always use the custom dropdown pattern (Input + Div + Map).
 
-## 7. The "Strict Build" Bottleneck
-*   **The Crime**: Keeping `ignoreBuildErrors: false` during rapid prototyping.
-*   **The Consequence**: 5-minute wait time per restart to fix a single lint warning.
-*   **The Fix**: Set `verify: false` in `next.config.ts` until Stabilization Phase. Use `/restart_production`.
+## 8. The "Git for Twins" Fallacy
+*   **The Crime**: Pushing to GitHub just to share code with an Agent in another window on the *same machine*.
+*   **The Consequence**: Polluting the commit history with "wip" checkpoints and wasting time.
+*   **The Fix**: Just switch windows. We share the same hard drive. Run "Master Alignment" to sync memory.

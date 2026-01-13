@@ -28,4 +28,5 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
 *   **The "Speed Hack"**: We disabled Type/Lint checking in `next.config.ts` to allow fast iteration. Use `docs/RESTORE_SAFETY_PROTOCOLS.md` to re-enable before major release.
 *   **The "Magic Command"**: Just say `/restart_production`. DO NOT try to fix "localhost didn't respond" manually.
 *   **The "Sheet" Component**: `ExperienceSheet` checks for `handleClickOutside` on multiple refs now. Keep this pattern for future dropdowns.
+*   **Twin Agent Protocol**: If switching chat windows, ALWAYS run the "Alignment Prompt" first to sync local memory. Git pull is not needed for local switches.
 *   **Context Tagging**: We check for `// @read` tags at the top of complex files.
