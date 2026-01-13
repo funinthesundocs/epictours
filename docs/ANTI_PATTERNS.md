@@ -36,3 +36,8 @@
 *   **The Crime**: Pushing to GitHub just to share code with an Agent in another window on the *same machine*.
 *   **The Consequence**: Polluting the commit history with "wip" checkpoints and wasting time.
 *   **The Fix**: Just switch windows. We share the same hard drive. Run "Master Alignment" to sync memory.
+
+## 9. The "Git Pull Refresh" Confusion
+*   **The Crime**: Running `git pull` just to restart the local server.
+*   **The Consequence**: Wastes 5 seconds checking GitHub for code you already have on disk.
+*   **The Fix**: Use `@[/refresh]` (Local Kill -> Nuke -> Build -> Start). Only pull when you know remote has changes.

@@ -1,10 +1,10 @@
 ---
-description: Restarts the production server with the correct specific port constraints.
+description: Restarts the production server with the "Nuclear Clean" strategy to prevent DLL locks.
 ---
 
-1. Kill any existing process on port 3001 and start the production build.
+1. Pre-emptive Kill + Nuclear Clean + Build + Start (Local Refresh Only)
 // turbo-all
-2. Stop and Restart the Server
+2. Execute Optimized Restart Sequence
 ```bash
-cmd /c "npm run build && npm run start -- -p 3001"
+cmd /c "npx kill-port 3000 && rmdir /s /q .next && npm run build && npm run start -- -p 3000"
 ```

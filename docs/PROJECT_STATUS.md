@@ -17,16 +17,19 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
     *   **Ref**: `features/experiences/components/experience-sheet.tsx`.
 
 2.  **✅ Production Workflow**
-    *   **Status**: CODIFIED.
-    *   **Action**: Use `/restart_production` to handle DLL/Restart issues instantly.
+    *   **Status**: OPTIMIZED (Port 3000).
+    *   **Action**: Use `@[/refresh]` for instant local rebuilds. Use `@[/gitpull]` for full sync.
 
 3.  **[NEXT] "Customers" Module**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md`.
     *   **Note**: Ensure we use the new `restart_production` workflow if we hit DB issues.
 
 ## 🧠 Memory Dump (Context for Next Session)
-*   **The "Speed Hack"**: We disabled Type/Lint checking in `next.config.ts` to allow fast iteration. Use `docs/RESTORE_SAFETY_PROTOCOLS.md` to re-enable before major release.
-*   **The "Magic Command"**: Just say `/restart_production`. DO NOT try to fix "localhost didn't respond" manually.
-*   **The "Sheet" Component**: `ExperienceSheet` checks for `handleClickOutside` on multiple refs now. Keep this pattern for future dropdowns.
-*   **Twin Agent Protocol**: If switching chat windows, ALWAYS run the "Alignment Prompt" first to sync local memory. Git pull is not needed for local switches.
+*   **Workflow Shortcodes**:
+    *   `@[/refresh]`: Kill 3000 -> Nuke Cache -> Build -> Start (Local Only).
+    *   `@[/gitpull]`: Kill 3000 -> Pull -> Nuke -> Build -> Start (Full Sync).
+    *   `@[/align]`: Neural Sync Protocol.
+    *   `@[/debrief]`: Save Game Protocol.
+*   **The "Speed Hack"**: We disabled Type/Lint checking in `next.config.ts`.
+*   **Twin Agent Protocol**: Switch windows -> Run `@[/align]`. No Git Pull needed.
 *   **Context Tagging**: We check for `// @read` tags at the top of complex files.
