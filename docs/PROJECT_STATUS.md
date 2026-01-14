@@ -16,6 +16,11 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
     *   **Fix**: Replaced native `<select>` with custom dropdown to match "Dark Mode" standard.
     *   **Ref**: `features/experiences/components/experience-sheet.tsx`.
 
+1.  **✅ Availability Calendar (Prism Deep)**
+    *   **Status**: COMPLETED.
+    *   **Features**: "Deep Core" Design, Multi-View (Month/Week/Day), Cyclical Toggle, Compact Selector, CRUD Actions.
+    *   **Ref**: `features/bookings/components/booking-calendar.tsx`.
+
 2.  **✅ Production Workflow**
     *   **Status**: OPTIMIZED (Port 3000).
     *   **Action**: Use `@[/refresh]` for instant local rebuilds. Use `@[/gitpull]` for full sync.

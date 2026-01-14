@@ -79,3 +79,11 @@ npx kill-port 3001 && npm run build
 ### B. Seed Parity
 **Context**: If you change the Schema (e.g., make `is_active` required), the Seed file `database/14_seed_*.sql` is instantly broken.
 **Rule**: **Atomic Commits**. If you modify `schema.sql`, you MUST check and update `seed.sql` in the same Task.
+
+---
+
+## 11. Typography & Contrast Enforcement
+> **Context**: To ensure legibility and a premium aesthetic on dark backgrounds ("Prism Deep").
+> **Rule**: All "white" text must be either **Pure White** (`text-white`) or **Zinc-400** (`text-zinc-400`).
+> **Constraint**: Do NOT use `text-zinc-500` or darker for any readable content (headers, labels, body).
+> **Why**: `text-zinc-500` is too faint on the matte black/zinc-900 backgrounds, creating accessibility issues.
