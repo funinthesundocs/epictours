@@ -159,6 +159,17 @@ export function BookingCalendar() {
 // --- SUB-COMPONENTS ---
 
 function MonthView({ selectedExperience }: { selectedExperience: string }) {
+    // Abbreviation Mapping
+    const EXP_ABBR: Record<string, string> = {
+        "Mauna Kea Summit": "MKS",
+        "Circle Island Tour": "CIT",
+        "Pearl Harbor Express": "PHE",
+        "Kona Coffee Farm": "KCF",
+        "Manta Ray Night Snorkel": "MRNS"
+    };
+
+    const abbr = EXP_ABBR[selectedExperience] || "EXP";
+
     return (
         <div className="h-full grid grid-cols-7 gap-px bg-zinc-900">
             {/* Headers */}
@@ -183,20 +194,15 @@ function MonthView({ selectedExperience }: { selectedExperience: string }) {
                                     isToday ? "bg-indigo-600 text-white" : "text-zinc-600 group-hover:text-zinc-300" // Adjusted for better vis on black
                                 )}>{day}</span>
 
-                                {/* Event Chips (Conditional Mock Data) */}
-                                {selectedExperience === "Mauna Kea Summit" && day === 13 && (
-                                    <EventChip color="indigo" title="SUMMIT SUNSET" time="14:00" pax="12/14" />
-                                )}
-                                {selectedExperience === "Mauna Kea Summit" && day === 13 && (
-                                    <EventChip color="purple" title="STARGAZE" time="19:00" pax="06/14" />
-                                )}
-
-                                {selectedExperience === "Circle Island Tour" && day === 15 && (
-                                    <EventChip color="emerald" title="ISLAND LOOP" time="07:00" pax="24/24" />
-                                )}
-
-                                {/* Unavailable Patterns */}
-                                {day === 4 && <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5 pointer-events-none"></div>}
+                                {/* Event Chips (Daily Mock Data) */}
+                                <EventChip
+                                    color="cyan"
+                                    abbr={abbr}
+                                    time="14:00"
+                                    bookings="10"
+                                    cap="10 / 29 Capacity"
+                                    note="Need Min of 25"
+                                />
                             </>
                         )}
                     </div>
@@ -396,23 +402,38 @@ function ToolbarButton({
     )
 }
 
-function EventChip({ color, title, time, pax }: { color: string, title: string, time: string, pax: string }) {
+function EventChip({
+    color,
+    abbr,
+    time,
+    bookings,
+    cap,
+    note
+}: {
+    color: string,
+    abbr: string,
+    time: string,
+    bookings: string,
+    cap: string,
+    note?: string
+}) {
     const colorStyles: Record<string, string> = {
-        indigo: "bg-indigo-600/90 text-white hover:bg-indigo-500 border-l-[3px] border-indigo-400",
-        purple: "bg-purple-900/80 text-purple-100 hover:bg-purple-800 border-l-[3px] border-purple-500",
-        emerald: "bg-emerald-900/80 text-emerald-100 hover:bg-emerald-800 border-l-[3px] border-emerald-500",
+        indigo: "bg-indigo-600/90 hover:bg-indigo-500 border-l-[3px] border-indigo-400",
+        cyan: "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400",
+        purple: "bg-purple-900/80 hover:bg-purple-800 border-l-[3px] border-purple-500",
+        emerald: "bg-emerald-900/80 hover:bg-emerald-800 border-l-[3px] border-emerald-500",
     };
 
     // Fallback if color not found
     const style = colorStyles[color] || colorStyles.indigo;
 
     return (
-        <div className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-colors backdrop-blur-md", style)}>
-            <div className="text-[10px] font-bold leading-none mb-1 truncate">{title}</div>
-            <div className="flex justify-between items-center text-[9px] opacity-90 leading-none">
-                <span>{time}</span>
-                <span>{pax}</span>
-            </div>
+        <div className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-colors backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content]", style)}>
+            <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
+            <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
+            <span className="text-white font-bold text-xs leading-tight">{bookings} Bookings</span>
+            <span className="text-white font-bold text-xs leading-tight">{cap}</span>
+            {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
         </div>
     );
 }

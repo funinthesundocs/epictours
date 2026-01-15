@@ -16,9 +16,9 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
     *   **Fix**: Replaced native `<select>` with custom dropdown to match "Dark Mode" standard.
     *   **Ref**: `features/experiences/components/experience-sheet.tsx`.
 
-1.  **✅ Availability Calendar (Prism Deep)**
+1.  **✅ Availability Calendar (Deep Core)**
     *   **Status**: COMPLETED.
-    *   **Features**: "Deep Core" Design, Multi-View (Month/Week/Day), Cyclical Toggle, Compact Selector, CRUD Actions.
+    *   **Features**: Multi-View (Month/Week/Day), Compact Selector, High Contrast Data Chips (Bold White).
     *   **Ref**: `features/bookings/components/booking-calendar.tsx`.
 
 2.  **✅ Production Workflow**

@@ -86,4 +86,5 @@ npx kill-port 3001 && npm run build
 > **Context**: To ensure legibility and a premium aesthetic on dark backgrounds ("Prism Deep").
 > **Rule**: All "white" text must be either **Pure White** (`text-white`) or **Zinc-400** (`text-zinc-400`).
 > **Constraint**: Do NOT use `text-zinc-500` or darker for any readable content (headers, labels, body).
+> **Exception**: For data-heavy components (like Calendar Chips), use **Bold White** (`font-bold text-white`) against colored backgrounds to maximize readability.
 > **Why**: `text-zinc-500` is too faint on the matte black/zinc-900 backgrounds, creating accessibility issues.
