@@ -57,6 +57,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         resolver: zodResolver(ExperienceSchema),
         defaultValues: {
             name: "",
+            short_code: "",
             event_type: "Tour",
             start_time: "07:00 AM",
             end_time: "04:00 PM",
@@ -73,6 +74,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             reset({
                 id: initialData.id,
                 name: initialData.name || "",
+                short_code: initialData.short_code || "",
                 event_type: initialData.event_type || "Tour",
                 slogan: initialData.slogan || null,
 
@@ -101,6 +103,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         } else if (isOpen) {
             reset({
                 name: "",
+                short_code: "",
                 event_type: "Tour",
                 slogan: null,
                 description: null,
@@ -147,6 +150,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                 // Transform Form Data to DB Payload (Strict Type: NewExperience)
                 const dbData: NewExperience = {
                     name: formData.name,
+                    short_code: formData.short_code ? formData.short_code.toUpperCase() : null,
                     event_type: formData.event_type || "Tour",
                     slogan: formData.slogan ? formData.slogan.replace(/\b\w/g, l => l.toUpperCase()) : null,
                     min_age: formData.min_age ?? null, // Coercion happened in Zod
@@ -226,9 +230,15 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                     <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />
                                     {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Slogan / Tagline</Label>
-                                    <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Experience Code</Label>
+                                        <Input {...register("short_code")} className="font-mono uppercase" placeholder="e.g. ACI" maxLength={4} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Slogan / Tagline</Label>
+                                        <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
+                                    </div>
                                 </div>
                                 <div className="space-y-2 relative" ref={eventTypeWrapperRef}>
                                     <label className={labelClasses}>Event Type</label>

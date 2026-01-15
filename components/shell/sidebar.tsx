@@ -76,7 +76,7 @@ export function Sidebar() {
                     {/* User Profile Footer */}
                     <div className="p-4 border-t border-white/5 bg-black/20 shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-purple-500 ring-2 ring-white/10" />
+                            <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
                             <div className="text-sm">
                                 <p className="font-medium text-white">Administrator</p>
                                 <p className="text-xs text-cyan-400">Online</p>

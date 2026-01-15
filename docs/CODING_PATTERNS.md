@@ -88,3 +88,24 @@ npx kill-port 3001 && npm run build
 > **Constraint**: Do NOT use `text-zinc-500` or darker for any readable content (headers, labels, body).
 > **Exception**: For data-heavy components (like Calendar Chips), use **Bold White** (`font-bold text-white`) against colored backgrounds to maximize readability.
 > **Why**: `text-zinc-500` is too faint on the matte black/zinc-900 backgrounds, creating accessibility issues.
+
+---
+
+## 12. "The Double-Tap" (Alignment Protocol)
+> **Context**: To prevent agent drift and unauthorized conceptual shifts.
+> **Rule**: The Agent must Never "Fire and Forget" on complex tasks (Refactors, Debriefs).
+> **Protocol**:
+> 1.  **Draft**: Create a detailed plan/proposal.
+> 2.  **Align**: Present to user via `notify_user` and **STOP**.
+> 3.  **Execute**: Only proceed after explicit user authorization ("PROCEED").
+
+## 13. The "Nuclear Refresh"
+> **Context**: Next.js Server Components and Supabase connections often cache stale data during local dev.
+> **Rule**: When modifying server-side logic (`page.tsx`) or database schema:
+> *   Do NOT rely on Hot Reload (HMR).
+> *   **ALWAYS** use the `@[/refresh]` workflow to kill permissions, clear cache, and rebuild.
+
+## 14. Primary Teal Rule
+> **Context**: To maintain visual consistency in the "Deep Core" design.
+> **Rule**: All active state indicators, "Today" markers, and online status dots must use **Primary Teal** (`cyan-500` to `cyan-400`).
+> **Constraint**: DO NOT use purple, rainbow gradients, or generic green for these system indicators.

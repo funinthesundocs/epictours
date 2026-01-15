@@ -2,13 +2,14 @@ import { z } from "zod";
 import { Database } from "@/types/supabase_gen";
 
 // 1. The "Truth" comes from the Database
-export type Experience = Database['public']['Tables']['experiences']['Row'];
-export type NewExperience = Database['public']['Tables']['experiences']['Insert'];
+export type Experience = Database['public']['Tables']['experiences']['Row'] & { short_code?: string | null };
+export type NewExperience = Database['public']['Tables']['experiences']['Insert'] & { short_code?: string | null };
 
 // 2. The Form Schema is for UI Validation Only
 export const ExperienceSchema = z.object({
     id: z.string().uuid().optional(),
     name: z.string().min(2, "Name is required"),
+    short_code: z.string().max(4, "Max 4 chars").optional().nullable(),
     slogan: z.string().optional().nullable(),
     event_type: z.string().default("Tour"),
 

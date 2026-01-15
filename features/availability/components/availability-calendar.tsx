@@ -20,20 +20,17 @@ import {
 
 type CalendarView = 'month' | 'week' | 'day';
 
-export function BookingCalendar() {
-    const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 13)); // Jan 13, 2026
+export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: string, name: string, short_code?: string }[] }) {
+    const [currentDate, setCurrentDate] = useState(new Date()); // Dynamic Date
     const [view, setView] = useState<CalendarView>('month');
-    const [selectedExperience, setSelectedExperience] = useState("Mauna Kea Summit");
+    // Default to first available experience or fallback
+    const [selectedExperience, setSelectedExperience] = useState(experiences[0]?.name || "Mauna Kea Summit");
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const pickerRef = useRef<HTMLDivElement>(null);
 
-    const experiences = [
-        "Mauna Kea Summit",
-        "Circle Island Tour",
-        "Pearl Harbor Express",
-        "Kona Coffee Farm",
-        "Manta Ray Night Snorkel"
-    ];
+    // Abbreviation Mapping (Dynamic)
+    const currentExp = experiences.find(e => e.name === selectedExperience);
+    const abbr = currentExp?.short_code || "EXP";
 
     // Cycle View Logic
     const cycleView = () => {
@@ -69,6 +66,8 @@ export function BookingCalendar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
     return (
         <div className="w-full h-full bg-black p-6 font-sans flex flex-col gap-6">
             {/* TOP COMPONENT: Control Bar */}
@@ -77,7 +76,7 @@ export function BookingCalendar() {
                 {/* LEFT: Title */}
                 <div className="flex items-center gap-4">
                     <h1 className="text-4xl font-black text-white tracking-tighter shrink-0">
-                        JAN <span className="text-zinc-800">26</span>
+                        {monthNames[currentDate.getMonth()]} <span className="text-zinc-800">{currentDate.getFullYear().toString().slice(-2)}</span>
                     </h1>
 
                     {/* Navigation */}
@@ -108,20 +107,20 @@ export function BookingCalendar() {
                             <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                                 {experiences.map((exp) => (
                                     <div
-                                        key={exp}
+                                        key={exp.id}
                                         className={cn(
                                             "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
-                                            selectedExperience === exp
+                                            selectedExperience === exp.name
                                                 ? "bg-indigo-900/20 text-indigo-400"
                                                 : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                                         )}
                                         onClick={() => {
-                                            setSelectedExperience(exp);
+                                            setSelectedExperience(exp.name);
                                             setIsPickerOpen(false);
                                         }}
                                     >
-                                        {exp}
-                                        {selectedExperience === exp && <Check className="w-3.5 h-3.5" />}
+                                        {exp.name}
+                                        {selectedExperience === exp.name && <Check className="w-3.5 h-3.5" />}
                                     </div>
                                 ))}
                             </div>
@@ -147,10 +146,10 @@ export function BookingCalendar() {
             </div>
 
             {/* CALENDAR CONTENT AREA */}
-            <div className="flex-1 bg-zinc-900 border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl shadow-black relative">
-                {view === 'month' && <MonthView selectedExperience={selectedExperience} />}
-                {view === 'week' && <WeekView selectedExperience={selectedExperience} />}
-                {view === 'day' && <DayView selectedExperience={selectedExperience} />}
+            <div className="flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
+                {view === 'month' && <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} />}
+                {view === 'week' && <div className="h-full flex items-center justify-center text-zinc-500">Weekly View (Component Pending)</div>}
+                {view === 'day' && <div className="h-full flex items-center justify-center text-zinc-500">Daily View (Component Pending)</div>}
             </div>
         </div>
     );
@@ -158,17 +157,12 @@ export function BookingCalendar() {
 
 // --- SUB-COMPONENTS ---
 
-function MonthView({ selectedExperience }: { selectedExperience: string }) {
-    // Abbreviation Mapping
-    const EXP_ABBR: Record<string, string> = {
-        "Mauna Kea Summit": "MKS",
-        "Circle Island Tour": "CIT",
-        "Pearl Harbor Express": "PHE",
-        "Kona Coffee Farm": "KCF",
-        "Manta Ray Night Snorkel": "MRNS"
-    };
+function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperience: string, abbr: string, currentDate: Date }) {
+    // EXP_ABBR removed. Using prop 'abbr' directly.
 
-    const abbr = EXP_ABBR[selectedExperience] || "EXP";
+    // Simple helper to match current real-world day for highlighting
+    const today = new Date();
+    const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
 
     return (
         <div className="h-full grid grid-cols-7 gap-px bg-zinc-900">
@@ -180,18 +174,18 @@ function MonthView({ selectedExperience }: { selectedExperience: string }) {
             {/* Cells */}
             {Array.from({ length: 35 }).map((_, i) => {
                 const day = i - 2;
-                const isToday = day === 13;
+                const isToday = isCurrentMonth && day === today.getDate();
 
                 return (
                     <div key={i} className={cn(
                         "bg-black relative group transition-colors hover:bg-zinc-900/50 p-2 min-h-[100px] flex flex-col pl-3 pt-3", // Added padding
-                        isToday && "bg-zinc-900/30"
+                        isToday && "bg-cyan-950/20"
                     )}>
                         {day > 0 && day <= 31 && (
                             <>
                                 <span className={cn(
                                     "text-sm font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
-                                    isToday ? "bg-indigo-600 text-white" : "text-zinc-600 group-hover:text-zinc-300" // Adjusted for better vis on black
+                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-600 group-hover:text-zinc-300" // Updated to Primary Teal (Cyan) with glow
                                 )}>{day}</span>
 
                                 {/* Event Chips (Daily Mock Data) */}
