@@ -40,7 +40,14 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   **Customer Types**: Full CRUD with "Empty Table" pattern and RLS Seeding.
     *   **Ref**: `app/customers/types/page.tsx`, `database/16_create_customer_types.sql`.
 
-5.  **[NEXT] Duplicate Check Logic**
+5.  **✅ Experience Form - Tabbed Interface**
+    *   **Status**: COMPLETED (Verified).
+    *   **Features**: 
+        *   **Structure**: "The Basics", "Legal & Waivers", "Pricing", "Booking Options".
+        *   **Legal Tab**: Moved Waiver Link, Cancellation Policy, and Restrictions to dedicated tab.
+    *   **Ref**: `features/experiences/components/experience-sheet.tsx`.
+
+6.  **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 ## 🧠 Memory Dump (Context for Next Session)

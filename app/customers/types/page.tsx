@@ -58,6 +58,8 @@ export default function CustomerTypesPage() {
         <PageShell
             title="Customer Types"
             description="Manage customer classifications and segments."
+            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
             action={
                 <button
                     onClick={handleCreate}
@@ -68,19 +70,19 @@ export default function CustomerTypesPage() {
                 </button>
             }
         >
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden h-[calc(100vh-180px)] shadow-2xl">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-full text-zinc-500 animate-pulse">
-                        Loading classifications...
-                    </div>
-                ) : (
+            {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin text-cyan-400">Loading...</div>
+                </div>
+            ) : (
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
                     <CustomerTypesTable
                         data={data}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                     />
-                )}
-            </div>
+                </div>
+            )}
 
             <CustomerTypeSheet
                 isOpen={isSheetOpen}

@@ -10,6 +10,7 @@
     *   **Indicators**: Use `cyan-500` for active states.
 *   **Forms**:
     *   **Inputs**: `bg-black/20` with `border-white/10`. Focus `cyan-500/50`.
+    *   **Tabs**: Use internal `useState` for tabs within SidePanels. Use `animate-in fade-in slide-in-from-right-4` for smooth transitions.
 
 ## 2. Database & RLS
 *   **Local Development**:

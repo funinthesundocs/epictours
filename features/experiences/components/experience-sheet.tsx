@@ -41,6 +41,9 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [showEventTypePicker, setShowEventTypePicker] = useState(false);
 
+    // Tab State
+    const [activeTab, setActiveTab] = useState<"basics" | "pricing" | "booking" | "legal">("basics");
+
     // Refs for click outside
     const startWrapperRef = useRef<HTMLDivElement>(null);
     const endWrapperRef = useRef<HTMLDivElement>(null);
@@ -124,8 +127,11 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                 end_time: "04:00 PM",
                 is_active: false
             });
+            setActiveTab("basics"); // Reset tab on new
         }
     }, [isOpen, initialData, reset]);
+
+    // ... (keep logic same) ...
 
     // Close pickers on click outside
     useEffect(() => {
@@ -209,6 +215,23 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
     const eventTypeOptions = ["Tour", "Activity", "Transport", "Event"];
 
+    // Tab Button Component
+    const TabButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon?: any }) => (
+        <button
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
+                activeTab === id
+                    ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
+            )}
+        >
+            {Icon && <Icon size={16} />}
+            {label}
+        </button>
+    );
+
     return (
         <SidePanel
             isOpen={isOpen}
@@ -217,196 +240,253 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             description="Manage your inventory details."
             width="w-[85vw] max-w-[85vw]"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
-
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 mb-12">
-                    {/* LEFT COLUMN */}
-                    <div className="xl:col-span-4 space-y-10">
-                        <div>
-                            <SectionHeader icon={Info} title="Basic Information" />
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Experience Name *</Label>
-                                    <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />
-                                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Experience Code</Label>
-                                        <Input {...register("short_code")} className="font-mono uppercase" placeholder="e.g. ACI" maxLength={4} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Slogan / Tagline</Label>
-                                        <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
-                                    </div>
-                                </div>
-                                <div className="space-y-2 relative" ref={eventTypeWrapperRef}>
-                                    <label className={labelClasses}>Event Type</label>
-                                    <div className="relative">
-                                        <input
-                                            {...register("event_type")}
-                                            className={cn(inputClasses, "cursor-pointer")}
-                                            readOnly
-                                            autoComplete="off"
-                                            onClick={() => setShowEventTypePicker(true)}
-                                            onFocus={() => setShowEventTypePicker(true)}
-                                        />
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
-                                    </div>
-                                    {showEventTypePicker && (
-                                        <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                            {eventTypeOptions.map(type => (
-                                                <div
-                                                    key={type}
-                                                    className={cn(
-                                                        "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                        eventTypeValue === type ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                    )}
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault(); // Prevent blur
-                                                        setValue("event_type", type);
-                                                        setShowEventTypePicker(false);
-                                                    }}
-                                                >
-                                                    {type}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <SectionHeader icon={Users} title="Capacity & Age" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2"><Label>Min Age</Label><Input type="number" {...register("min_age")} placeholder="0" /></div>
-                                <div className="space-y-2"><Label>Max Age</Label><Input type="number" {...register("max_age")} placeholder="99" /></div>
-                                <div className="space-y-2"><Label>Min Group</Label><Input type="number" {...register("min_group_size")} placeholder="1" /></div>
-                                <div className="space-y-2"><Label>Max Group</Label><Input type="number" {...register("max_group_size")} placeholder="10" /></div>
-                            </div>
-                        </div>
-                        <div>
-                            <SectionHeader icon={ClipboardList} title="Requirements" />
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label>What to Bring</Label>
-                                    <textarea {...register("what_to_bring")} className={cn(inputClasses, "font-mono text-sm")} placeholder={"Sunscreen\nWater\nCamera"} rows={6} />
-                                </div>
-                                <div className="space-y-2"><Label>Waiver Link</Label><Input {...register("waiver_link")} placeholder="https://..." /></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* RIGHT COLUMN */}
-                    <div className="xl:col-span-8 space-y-10">
-                        <div>
-                            <SectionHeader icon={Clock} title="Logistics & Timing" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                {/* Start Time with Custom Picker */}
-                                <div className="space-y-2 relative" ref={startWrapperRef}>
-                                    <label className={labelClasses}>Start Time</label>
-                                    <div className="relative">
-                                        <input
-                                            {...register("start_time")}
-                                            className={cn(inputClasses, "cursor-pointer")}
-                                            placeholder="e.g. 07:00 AM"
-                                            autoComplete="off"
-                                            onClick={() => setShowStartPicker(true)}
-                                            onFocus={() => setShowStartPicker(true)}
-                                        />
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
-                                    </div>
-                                    {showStartPicker && (
-                                        <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                            {timeOptions.map(time => (
-                                                <div
-                                                    key={time}
-                                                    className={cn(
-                                                        "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                        startTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                    )}
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault(); // Prevent blur
-                                                        setValue("start_time", time);
-                                                        setShowStartPicker(false);
-                                                    }}
-                                                >
-                                                    {time}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* End Time with Custom Picker */}
-                                <div className="space-y-2 relative" ref={endWrapperRef}>
-                                    <label className={labelClasses}>End Time</label>
-                                    <div className="relative">
-                                        <input
-                                            {...register("end_time")}
-                                            className={cn(inputClasses, "cursor-pointer")}
-                                            placeholder="e.g. 04:00 PM"
-                                            autoComplete="off"
-                                            onClick={() => setShowEndPicker(true)}
-                                            onFocus={() => setShowEndPicker(true)}
-                                        />
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
-                                    </div>
-                                    {showEndPicker && (
-                                        <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                            {timeOptions.map(time => (
-                                                <div
-                                                    key={time}
-                                                    className={cn(
-                                                        "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                        endTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                    )}
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault(); // Prevent blur
-                                                        setValue("end_time", time);
-                                                        setShowEndPicker(false);
-                                                    }}
-                                                >
-                                                    {time}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="col-span-2 space-y-2">
-                                    <Label>Check-in Details</Label>
-                                    <Input {...register("checkin_details")} placeholder="Meeting point instructions..." />
-                                </div>
-                                <div className="col-span-2 space-y-2">
-                                    <Label>Transport Details</Label>
-                                    <textarea {...register("transport_details")} rows={2} className={inputClasses} placeholder="Pickup locations and vehicle info..." />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <SectionHeader icon={FileText} title="Experience Details" />
-                            <div className="space-y-8">
-                                <div className="space-y-2"><Label>Full Description</Label><textarea {...register("description")} className={cn(inputClasses, "resize-y min-h-[200px] leading-relaxed")} placeholder="Detailed overview..." /></div>
-                                <div className="space-y-2"><Label>Cancellation Policy</Label><textarea {...register("cancellation_policy")} rows={4} className={inputClasses} placeholder="Standard 24h policy..." /></div>
-                                <div className="space-y-2"><Label>Restrictions & Disclaimer</Label><textarea {...register("restrictions")} rows={4} className={inputClasses} placeholder="Medical restrictions..." /></div>
-                            </div>
-                        </div>
-                    </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-0">
+                {/* Tabs Header */}
+                <div className="flex items-center border-b border-white/10 mb-8 sticky top-0 bg-[#0b1115] z-10 -mx-6 px-6 pt-4">
+                    <TabButton id="basics" label="The Basics" icon={Info} />
+                    <TabButton id="legal" label="Legal & Waivers" icon={FileText} />
+                    <TabButton id="pricing" label="Pricing" icon={Users} />
+                    <TabButton id="booking" label="Booking Options" icon={ClipboardList} />
                 </div>
+
+                {/* TAB: THE BASICS */}
+                {activeTab === "basics" && (
+                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 mb-12 animate-in fade-in duration-300 slide-in-from-left-4">
+                        {/* LEFT COLUMN */}
+                        <div className="xl:col-span-4 space-y-10">
+                            <div>
+                                <SectionHeader icon={Info} title="Basic Information" />
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label>Experience Name *</Label>
+                                        <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />
+                                        {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Experience Code</Label>
+                                            <Input {...register("short_code")} className="font-mono uppercase" placeholder="e.g. ACI" maxLength={4} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Slogan / Tagline</Label>
+                                            <Input {...register("slogan")} className="capitalize" placeholder="Short, catchy description..." />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2 relative" ref={eventTypeWrapperRef}>
+                                        <label className={labelClasses}>Event Type</label>
+                                        <div className="relative">
+                                            <input
+                                                {...register("event_type")}
+                                                className={cn(inputClasses, "cursor-pointer")}
+                                                readOnly
+                                                autoComplete="off"
+                                                onClick={() => setShowEventTypePicker(true)}
+                                                onFocus={() => setShowEventTypePicker(true)}
+                                            />
+                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                                        </div>
+                                        {showEventTypePicker && (
+                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                {eventTypeOptions.map(type => (
+                                                    <div
+                                                        key={type}
+                                                        className={cn(
+                                                            "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                            eventTypeValue === type ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                        )}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault(); // Prevent blur
+                                                            setValue("event_type", type);
+                                                            setShowEventTypePicker(false);
+                                                        }}
+                                                    >
+                                                        {type}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <SectionHeader icon={Users} title="Capacity & Age" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2"><Label>Min Age</Label><Input type="number" {...register("min_age")} placeholder="0" /></div>
+                                    <div className="space-y-2"><Label>Max Age</Label><Input type="number" {...register("max_age")} placeholder="99" /></div>
+                                    <div className="space-y-2"><Label>Min Group</Label><Input type="number" {...register("min_group_size")} placeholder="1" /></div>
+                                    <div className="space-y-2"><Label>Max Group</Label><Input type="number" {...register("max_group_size")} placeholder="10" /></div>
+                                </div>
+                            </div>
+                            <div>
+                                <SectionHeader icon={ClipboardList} title="Requirements" />
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label>What to Bring</Label>
+                                        <textarea {...register("what_to_bring")} className={cn(inputClasses, "font-mono text-sm")} placeholder={"Sunscreen\nWater\nCamera"} rows={6} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN */}
+                        <div className="xl:col-span-8 space-y-10">
+                            <div>
+                                <SectionHeader icon={Clock} title="Logistics & Timing" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    {/* Start Time with Custom Picker */}
+                                    <div className="space-y-2 relative" ref={startWrapperRef}>
+                                        <label className={labelClasses}>Start Time</label>
+                                        <div className="relative">
+                                            <input
+                                                {...register("start_time")}
+                                                className={cn(inputClasses, "cursor-pointer")}
+                                                placeholder="e.g. 07:00 AM"
+                                                autoComplete="off"
+                                                onClick={() => setShowStartPicker(true)}
+                                                onFocus={() => setShowStartPicker(true)}
+                                            />
+                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                                        </div>
+                                        {showStartPicker && (
+                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                {timeOptions.map(time => (
+                                                    <div
+                                                        key={time}
+                                                        className={cn(
+                                                            "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                            startTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                        )}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault(); // Prevent blur
+                                                            setValue("start_time", time);
+                                                            setShowStartPicker(false);
+                                                        }}
+                                                    >
+                                                        {time}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* End Time with Custom Picker */}
+                                    <div className="space-y-2 relative" ref={endWrapperRef}>
+                                        <label className={labelClasses}>End Time</label>
+                                        <div className="relative">
+                                            <input
+                                                {...register("end_time")}
+                                                className={cn(inputClasses, "cursor-pointer")}
+                                                placeholder="e.g. 04:00 PM"
+                                                autoComplete="off"
+                                                onClick={() => setShowEndPicker(true)}
+                                                onFocus={() => setShowEndPicker(true)}
+                                            />
+                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                                        </div>
+                                        {showEndPicker && (
+                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                {timeOptions.map(time => (
+                                                    <div
+                                                        key={time}
+                                                        className={cn(
+                                                            "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                            endTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                        )}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault(); // Prevent blur
+                                                            setValue("end_time", time);
+                                                            setShowEndPicker(false);
+                                                        }}
+                                                    >
+                                                        {time}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-2 space-y-2">
+                                        <Label>Check-in Details</Label>
+                                        <Input {...register("checkin_details")} placeholder="Meeting point instructions..." />
+                                    </div>
+                                    <div className="col-span-2 space-y-2">
+                                        <Label>Transport Details</Label>
+                                        <textarea {...register("transport_details")} rows={2} className={inputClasses} placeholder="Pickup locations and vehicle info..." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <SectionHeader icon={FileText} title="Experience Details" />
+                                <div className="space-y-8">
+                                    <div className="space-y-2"><Label>Full Description</Label><textarea {...register("description")} className={cn(inputClasses, "resize-y min-h-[200px] leading-relaxed")} placeholder="Detailed overview..." /></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB: LEGAL & WAIVERS */}
+                {activeTab === "legal" && (
+                    <div className="animate-in fade-in duration-300 slide-in-from-right-4 space-y-10">
+                        <div>
+                            <SectionHeader icon={FileText} title="Legal Policies" />
+                            <div className="grid grid-cols-1 gap-8">
+                                <div className="space-y-2">
+                                    <Label>Cancellation Policy</Label>
+                                    <textarea {...register("cancellation_policy")} rows={6} className={inputClasses} placeholder="Enter your cancellation policy here..." />
+                                    <p className="text-xs text-zinc-500">Visible to customers during checkout and in their booking confirmation.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Restrictions & Disclaimer</Label>
+                                    <textarea {...register("restrictions")} rows={6} className={inputClasses} placeholder="Medical restrictions, accessibility info, liability disclaimers..." />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <SectionHeader icon={ClipboardList} title="Waiver Configuration" />
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label>Digital Waiver Link</Label>
+                                    <Input {...register("waiver_link")} placeholder="https://smartwaiver.com/v/..." />
+                                    <p className="text-xs text-zinc-500">Provide a link to your external digital waiver service (e.g. SmartWaiver).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB: PRICING */}
+                {activeTab === "pricing" && (
+                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4">
+                        <Users size={48} className="mb-4 text-zinc-700" />
+                        <h3 className="text-lg font-medium text-zinc-300">Pricing Configuration</h3>
+                        <p className="text-sm">Manage ticket types, seasonal rates, and adjustments.</p>
+                        <p className="text-xs text-zinc-600 mt-2">Coming soon to the Deep Core.</p>
+                    </div>
+                )}
+
+                {/* TAB: BOOKING OPTIONS */}
+                {activeTab === "booking" && (
+                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4">
+                        <ClipboardList size={48} className="mb-4 text-zinc-700" />
+                        <h3 className="text-lg font-medium text-zinc-300">Booking Options</h3>
+                        <p className="text-sm">Configure cut-off times, availability rules, and instant confirmation.</p>
+                        <p className="text-xs text-zinc-600 mt-2">Coming soon to the Deep Core.</p>
+                    </div>
+                )}
 
                 <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {initialData ? "Update" : "Create"}
                     </button>
-                    {/* Cancel button removed per user request */}
                 </div>
             </form>
         </SidePanel>

@@ -14,6 +14,13 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
     const [deletingItem, setDeletingItem] = useState<any>(null);
 
 
+    if (!data || data.length === 0) {
+        return (
+            <div className="text-center py-12 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/10">
+                No customer types found.
+            </div>
+        );
+    }
 
     return (
         <>
@@ -28,56 +35,47 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
-                        {(!data || data.length === 0) ? (
-                            <tr>
-                                <td colSpan={4} className="px-6 py-12 text-center text-zinc-500">
-                                    No customer types found.
+                        {data.map((type) => (
+                            <tr key={type.id} className="hover:bg-white/5 transition-colors group">
+                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
+                                    {type.name}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                        {type.code}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-zinc-400 text-xs max-w-xs truncate">
+                                    {type.description || "-"}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEdit(type);
+                                            }}
+                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            title="Edit"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeletingItem(type);
+                                            }}
+                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                        ) : (
-                            data.map((type) => (
-                                <tr key={type.id} className="hover:bg-white/5 transition-colors group">
-                                    <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-
-                                        {type.name}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
-                                            {type.code}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-zinc-400 text-xs max-w-xs truncate">
-                                        {type.description || "-"}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onEdit(type);
-                                                }}
-                                                className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setDeletingItem(type);
-                                                }}
-                                                className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                        ))}
                     </tbody>
                 </table>
 
@@ -88,9 +86,6 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                             {/* Header */}
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Code size={16} />
-                                    </div>
                                     <h3 className="text-lg font-bold text-white leading-tight">
                                         {type.name}
                                     </h3>
