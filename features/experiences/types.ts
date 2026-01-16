@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { Database } from "@/types/supabase_gen";
 
+// Helper to handle empty inputs -> null
+const emptyToNull = (val: unknown) => {
+    if (val === "" || val === null || val === undefined) return null;
+    const n = Number(val);
+    return isNaN(n) ? null : n;
+};
+
 // 1. The "Truth" comes from the Database
 export type Experience = Database['public']['Tables']['experiences']['Row'] & { short_code?: string | null };
 export type NewExperience = Database['public']['Tables']['experiences']['Insert'] & { short_code?: string | null };
@@ -17,10 +24,10 @@ export const ExperienceSchema = z.object({
     start_time: z.string().optional().nullable(),
     end_time: z.string().optional().nullable(),
 
-    min_age: z.coerce.number().optional().nullable(),
-    max_age: z.coerce.number().optional().nullable(),
-    min_group_size: z.coerce.number().optional().nullable(),
-    max_group_size: z.coerce.number().optional().nullable(),
+    min_age: z.preprocess(emptyToNull, z.number().nullable().optional()),
+    max_age: z.preprocess(emptyToNull, z.number().nullable().optional()),
+    min_group_size: z.preprocess(emptyToNull, z.number().nullable().optional()),
+    max_group_size: z.preprocess(emptyToNull, z.number().nullable().optional()),
 
     description: z.string().optional().nullable(),
     what_to_bring: z.string().optional().nullable(), // Form uses String (TextArea), DB uses Array
@@ -32,7 +39,7 @@ export const ExperienceSchema = z.object({
     disclaimer: z.string().optional().nullable(),
     waiver_link: z.string().optional().nullable(),
 
-    is_active: z.boolean().default(true)
+    is_active: z.boolean().default(false)
 });
 
 export type ExperienceFormData = z.infer<typeof ExperienceSchema>;

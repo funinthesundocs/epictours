@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Save, Loader2, MapPin } from "lucide-react";
+import { Save, Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 
@@ -120,15 +120,16 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
                     />
                 </div>
 
-                <div className="pt-4 border-t border-white/10">
+                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
                     <button
-                        onClick={handleSubmit(onSubmit)}
+                        type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                        {initialData ? "Save Changes" : "Create Location"}
+                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                        {initialData ? "Update" : "Create"}
                     </button>
+                    {/* Cancel button removed per user request */}
                 </div>
             </form>
         </SidePanel>

@@ -73,17 +73,21 @@ export default function PickupPointsPage() {
                     Add Location
                 </button>
             }
+            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
                     <Loader2 className="animate-spin text-cyan-400" size={32} />
                 </div>
             ) : (
-                <PickupPointsTable
-                    data={points}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                />
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                    <PickupPointsTable
+                        data={points}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                </div>
             )}
 
             <AddPickupSheet

@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Plus, Clock, MapPin, Trash2 } from "lucide-react";
+import { Save, Loader2, Plus, Clock, MapPin, Trash2, Calendar, Route } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Combobox } from "@/components/ui/combobox";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 // Master Schema
 const ScheduleSchema = z.object({
@@ -117,13 +120,10 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             if (!currentScheduleId) {
                 alert("Schedule Created! You can now add stops below.");
             } else {
-                // If updating, we can close or stay open. Let's just notify.
-                // Actually, usually "Save Changes" implies done. 
-                // But for "Live Edit" of stops, the Save button only applies to the top.
+                // If updating, we notify success.
                 onSuccess();
             }
-            // For new items, we stay open to add stops. For edits, we just save metadata.
-            // Let's close if it was an Edit. Stay open if New.
+            // Close if it was an Edit. Stay open if New.
             if (initialData) {
                 onClose();
             }
@@ -174,6 +174,15 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         }
     };
 
+    const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
+        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
+            <Icon size={18} />
+            <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+        </div>
+    );
+
+    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors";
+
     return (
         <SidePanel
             isOpen={isOpen}
@@ -182,34 +191,35 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             description="Manage schedule details and pickup stops."
             width="max-w-2xl"
         >
-            <div className="space-y-8">
+            <div className="pb-12 pt-4 space-y-10">
                 {/* Section 1: Master Details */}
-                <form onSubmit={handleSubmit(handleMasterSubmit)} className="space-y-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                    <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Schedule Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Schedule Name</label>
-                            <input
-                                {...register("name")}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none"
-                                placeholder="e.g. Circle Island"
-                            />
-                            {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Start Time</label>
-                            <input
-                                {...register("start_time")}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none"
-                                placeholder="e.g. 7:00 AM"
-                            />
+                <form onSubmit={handleSubmit(handleMasterSubmit)} className="space-y-6">
+                    <div>
+                        <SectionHeader icon={Calendar} title="Schedule Details" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label>Schedule Name</Label>
+                                <Input
+                                    {...register("name")}
+                                    className="text-lg font-semibold"
+                                    placeholder="e.g. Circle Island"
+                                />
+                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Default Start Time</Label>
+                                <Input
+                                    {...register("start_time")}
+                                    placeholder="e.g. 07:00 AM"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-2">
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors"
+                            className="px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-lg text-sm flex items-center gap-2 transition-colors"
                         >
                             {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                             {currentScheduleId ? "Update Details" : "Create Schedule"}
@@ -217,86 +227,86 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                     </div>
                 </form>
 
-                {/* Section 2: Stops Manager (Only if ID exists) */}
-                {currentScheduleId && (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                            <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Pickup Stops</h3>
-                            <span className="text-xs text-zinc-500">{stops.length} stops configured</span>
-                        </div>
+                {/* Section 2: Stops Manager */}
+                <div>
+                    <SectionHeader icon={Route} title="Route Stops" />
 
-                        <div className="space-y-2">
-                            {/* Header Row */}
-                            <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-zinc-500 px-2">
-                                <div className="col-span-3">Time</div>
-                                <div className="col-span-8">Location</div>
-                                <div className="col-span-1"></div>
-                            </div>
+                    {currentScheduleId ? (
+                        <div className="space-y-4">
+                            {/* Route List */}
+                            <div className="relative pl-4 space-y-4 before:absolute before:left-[23px] before:top-4 before:bottom-4 before:w-0.5 before:bg-white/10">
+                                {stops.map((stop, index) => (
+                                    <div key={stop.id} className="relative flex items-center gap-4 bg-black/20 border border-white/5 p-3 rounded-lg group">
+                                        {/* Dot on timeline */}
+                                        <div className="absolute -left-[27px] w-3 h-3 rounded-full bg-cyan-500 border-2 border-black"></div>
 
-                            {/* Existing Stops */}
-                            {stops.map((stop) => (
-                                <div key={stop.id} className="grid grid-cols-12 gap-2 items-center bg-black/20 border border-white/5 rounded-lg p-2 group">
-                                    <div className="col-span-3 flex items-center gap-2 text-zinc-300 text-sm">
-                                        <Clock size={14} className="text-cyan-500/50" />
-                                        {stop.pickup_time}
-                                    </div>
-                                    <div className="col-span-8 flex items-center gap-2 text-white text-sm">
-                                        <MapPin size={14} className="text-cyan-500/50" />
-                                        {stop.pickup_points?.name || "Unknown Location"}
-                                    </div>
-                                    <div className="col-span-1 flex justify-end">
+                                        <div className="min-w-[80px]">
+                                            <div className="flex items-center gap-1.5 text-cyan-400 font-mono text-sm">
+                                                <Clock size={14} />
+                                                <span>{stop.pickup_time}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 text-white font-medium">
+                                                <MapPin size={14} className="text-zinc-500" />
+                                                {stop.pickup_points?.name || "Unknown Location"}
+                                            </div>
+                                        </div>
+
                                         <button
                                             type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setDeletingStopId(stop.id);
-                                            }}
-                                            className="text-zinc-600 hover:text-red-400 transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); setDeletingStopId(stop.id); }}
+                                            className="opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-red-400 transition-all"
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
 
-                            {/* Add New Stop Row */}
-                            <div className="grid grid-cols-12 gap-2 items-center bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-2 mt-4">
-                                <div className="col-span-3">
-                                    <input
-                                        value={newStopTime}
-                                        onChange={(e) => setNewStopTime(e.target.value)}
-                                        placeholder="Time"
-                                        className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
-                                    />
-                                </div>
-                                <div className="col-span-8">
-                                    <Combobox
-                                        options={pickupOptions}
-                                        value={newStopPickupId}
-                                        onChange={(val) => setNewStopPickupId(val)}
-                                        placeholder="Select Location..."
-                                    />
-                                </div>
-                                <div className="col-span-1 flex justify-end">
+                            {/* Add New Stop Form */}
+                            <div className="mt-8 bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4">
+                                <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">Add New Stop</h4>
+                                <div className="flex gap-3 items-end">
+                                    <div className="w-32 space-y-1">
+                                        <label className="text-xs text-zinc-400">Time</label>
+                                        <input
+                                            value={newStopTime}
+                                            onChange={(e) => setNewStopTime(e.target.value)}
+                                            placeholder="00:00 AM"
+                                            className={cn(inputClasses, "py-2 px-3")}
+                                        />
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <label className="text-xs text-zinc-400">Pickup Location</label>
+                                        <Combobox
+                                            options={pickupOptions}
+                                            value={newStopPickupId}
+                                            onChange={(val) => setNewStopPickupId(val)}
+                                            placeholder="Select Location..."
+                                        />
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={handleAddStop}
                                         disabled={isAddingStop}
-                                        className="p-1.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded transition-colors"
+                                        className="h-[42px] px-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
                                     >
-                                        {isAddingStop ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
+                                        {isAddingStop ? <Loader2 className="animate-spin" size={16} /> : <Plus size={16} />}
+                                        Add
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
-
-                {!currentScheduleId && (
-                    <div className="text-center py-8 text-zinc-500 text-sm italic">
-                        Save the schedule details above to start adding stops.
-                    </div>
-                )}
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12 bg-white/5 border border-white/5 border-dashed rounded-xl text-center">
+                            <Route size={48} className="text-cyan-500/20 mb-4" />
+                            <p className="text-zinc-400 font-medium">Create the schedule first</p>
+                            <p className="text-zinc-500 text-sm mt-1">Once saved, you can add pickup stops here.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <AlertDialog

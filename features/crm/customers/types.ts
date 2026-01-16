@@ -9,7 +9,7 @@ export const CustomerSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
-  status: z.string().default("Lead"),
+  status: z.string().min(1, "Status is required"),
   total_value: z.number().default(0),
   last_active: z.string().optional(), // ISO Date
   tags: z.array(z.string()).default([]),

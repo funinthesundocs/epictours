@@ -91,10 +91,12 @@ export default function VehiclesPage() {
                     Add Vehicle
                 </button>
             }
+            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
-            <div className="space-y-4 min-h-[80vh]">
+            <div className="h-full flex flex-col space-y-4">
                 {/* Search Bar */}
-                <div className="relative max-w-md">
+                <div className="relative w-full max-w-md shrink-0">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                     <input
                         type="text"
@@ -110,11 +112,13 @@ export default function VehiclesPage() {
                         <Loader2 className="animate-spin text-cyan-400" size={32} />
                     </div>
                 ) : (
-                    <VehiclesTable
-                        data={filteredVehicles}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                        <VehiclesTable
+                            data={filteredVehicles}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
+                    </div>
                 )}
             </div>
 

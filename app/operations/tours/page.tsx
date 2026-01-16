@@ -58,18 +58,22 @@ export default function ToursPage() {
                     Add Experience
                 </button>
             }
+            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
-            <div className="space-y-4">
+            <div className="h-full flex flex-col space-y-4">
                 {isLoading ? (
                     <div className="flex justify-center py-12">
                         <Loader2 className="animate-spin text-cyan-400" size={32} />
                     </div>
                 ) : (
-                    <ExperiencesTable
-                        data={data}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                        <ExperiencesTable
+                            data={data}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
+                    </div>
                 )}
             </div>
 

@@ -81,7 +81,7 @@ export function SidePanel({
                         </div>
 
                         {/* Content - Scrollable */}
-                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-cyan-800 scrollbar-track-transparent">
                             {children}
                         </div>
                     </motion.div>

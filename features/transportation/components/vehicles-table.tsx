@@ -15,6 +15,7 @@ interface Vehicle {
     dot_number: string;
     rate_per_hour: number;
     fixed_rate: number;
+    per_pax_rate: number;
     status: string;
 }
 
@@ -79,9 +80,9 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
     return (
         <>
-            <div className="bg-[#0b1115] border border-white/10 rounded-xl overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-black/20 text-zinc-400 text-xs uppercase tracking-wider font-semibold">
+            <div className="h-full overflow-auto relative">
+                <table className="w-full text-left hidden md:table">
+                    <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                         <tr>
                             {[
                                 { key: 'name', label: 'Vehicle Name' },
@@ -89,13 +90,10 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                 { key: 'license_requirement', label: 'License' },
                                 { key: 'plate_number', label: 'Plate' },
                                 { key: 'miles_per_gallon', label: 'MPG' },
-                                { key: 'rate_per_hour', label: 'Hourly' },
-                                { key: 'fixed_rate', label: 'Fixed' },
-                                { key: 'status', label: 'Status' },
                             ].map((col) => (
                                 <th
                                     key={col.key}
-                                    className="px-2 py-3 cursor-pointer hover:bg-white/5 transition-colors select-none"
+                                    className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none"
                                     onClick={() => handleSort(col.key as keyof Vehicle)}
                                 >
                                     <div className="flex items-center gap-2">
@@ -104,39 +102,74 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                     </div>
                                 </th>
                             ))}
-                            <th className="px-2 py-3 text-right">Actions</th>
+                            <th className="px-6 py-4">Rates</th>
+                            <th
+                                className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none"
+                                onClick={() => handleSort('status')}
+                            >
+                                <div className="flex items-center gap-2">
+                                    Status
+                                    <SortIcon column="status" />
+                                </div>
+                            </th>
+                            <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {sortedData.map((v) => (
                             <tr key={v.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-2 py-3 font-medium text-white flex items-center gap-2">
-                                    <Bus size={14} className="text-indigo-400" />
+                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                        <Bus size={16} />
+                                    </div>
                                     {v.name}
                                 </td>
-                                <td className="px-2 py-3">{v.capacity}</td>
-                                <td className="px-2 py-3 text-xs text-zinc-400">{v.license_requirement}</td>
-                                <td className="px-2 py-3 font-mono text-xs">{v.plate_number}</td>
-                                <td className="px-2 py-3">{v.miles_per_gallon}</td>
-                                <td className="px-2 py-3 font-mono">{formatCurrency(v.rate_per_hour)}</td>
-                                <td className="px-2 py-3 font-mono">{formatCurrency(v.fixed_rate)}</td>
-                                <td className="px-2 py-3">
+                                <td className="px-6 py-4">{v.capacity}</td>
+                                <td className="px-6 py-4 text-xs text-zinc-400">{v.license_requirement}</td>
+                                <td className="px-6 py-4 font-mono text-xs">{v.plate_number}</td>
+                                <td className="px-6 py-4">{v.miles_per_gallon}</td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col gap-2">
+                                        {v.rate_per_hour > 0 && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Hourly</span>
+                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.rate_per_hour)}</span>
+                                            </div>
+                                        )}
+                                        {v.fixed_rate > 0 && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Fixed</span>
+                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.fixed_rate)}</span>
+                                            </div>
+                                        )}
+                                        {v.per_pax_rate > 0 && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Per PAX</span>
+                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.per_pax_rate)}</span>
+                                            </div>
+                                        )}
+                                        {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
+                                            <span className="text-zinc-600 italic">-</span>
+                                        )}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
                                     <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
                                         {v.status}
                                     </span>
                                 </td>
-                                <td className="px-2 py-3 text-right">
-                                    <div className="flex items-center justify-end gap-2 relative z-50">
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEdit(v);
                                             }}
-                                            className="p-1.5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
                                             title="Edit"
                                         >
-                                            <Edit2 size={14} />
+                                            <Edit2 size={16} />
                                         </button>
                                         <button
                                             type="button"
@@ -144,10 +177,10 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                                 e.stopPropagation();
                                                 setDeletingItem(v);
                                             }}
-                                            className="p-1.5 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
                                             title="Delete"
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </td>
@@ -155,6 +188,86 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                         ))}
                     </tbody>
                 </table>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4 p-4">
+                    {sortedData.map((v) => (
+                        <div key={v.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                        <Bus size={16} />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white leading-tight">
+                                        {v.name}
+                                    </h3>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => onEdit(v)}
+                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setDeletingItem(v)}
+                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Body Grid */}
+                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
+                                <div className="text-zinc-500">Status</div>
+                                <div>
+                                    <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
+                                        {v.status}
+                                    </span>
+                                </div>
+
+                                <div className="text-zinc-500">Capacity</div>
+                                <div className="text-white">{v.capacity}</div>
+
+                                <div className="text-zinc-500">License</div>
+                                <div className="text-zinc-400 text-xs">{v.license_requirement}</div>
+
+                                <div className="text-zinc-500">Plate</div>
+                                <div className="text-white font-mono text-xs">{v.plate_number}</div>
+
+                                <div className="text-zinc-500">MPG</div>
+                                <div className="text-white">{v.miles_per_gallon}</div>
+
+                                <div className="text-zinc-500">Rates</div>
+                                <div className="flex flex-col gap-2">
+                                    {v.rate_per_hour > 0 && (
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Hourly</span>
+                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.rate_per_hour)}</span>
+                                        </div>
+                                    )}
+                                    {v.fixed_rate > 0 && (
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Fixed</span>
+                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.fixed_rate)}</span>
+                                        </div>
+                                    )}
+                                    {v.per_pax_rate > 0 && (
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Per PAX</span>
+                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.per_pax_rate)}</span>
+                                        </div>
+                                    )}
+                                    {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
+                                        <span className="text-zinc-600 italic">-</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <AlertDialog

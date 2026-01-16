@@ -52,7 +52,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     } = useForm({
         resolver: zodResolver(CustomerSchema),
         defaultValues: {
-            status: "Lead" as CustomerStatus,
+            status: "" as CustomerStatus,
             tags: [],
             total_value: 0,
             preferences: {
@@ -250,22 +250,16 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-3 pt-4">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="flex-1 px-4 py-2.5 border border-white/10 rounded-lg text-zinc-300 hover:bg-white/5 hover:text-white transition-colors text-sm font-semibold"
-                >
-                    Cancel
-                </button>
+            <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(6,182,212,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                    {isSubmitting ? "Saving..." : (initialData ? "Update Customer" : "Create Customer")}
+                    {initialData ? "Update" : "Create"}
                 </button>
+                {/* Cancel button removed per user request */}
             </div>
         </form>
     );

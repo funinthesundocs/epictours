@@ -57,12 +57,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #18181b;
-  /* Zinc 900 */
+  background: #155e75;
+  /* Cyan 800 */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #27272a;
-  /* Zinc 800 */
+  background: #0e7490;
+  /* Cyan 700 */
 }

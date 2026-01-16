@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatCardProps {
     label: string;
@@ -14,13 +15,15 @@ interface PageShellProps {
     stats?: StatCardProps[];
     children?: React.ReactNode;
     action?: React.ReactNode;
+    className?: string; // Root container override
+    contentClassName?: string; // Content wrapper override
 }
 
-export function PageShell({ title, description, icon: Icon, stats, children, action }: PageShellProps) {
+export function PageShell({ title, description, icon: Icon, stats, children, action, className, contentClassName }: PageShellProps) {
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)}>
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 shrink-0">
                 <div className="flex items-start gap-4">
                     {Icon && (
                         <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-cyan-400">
@@ -32,12 +35,12 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
                         <p className="text-zinc-400 text-sm mt-1">{description}</p>
                     </div>
                 </div>
-                {action && <div>{action}</div>}
+                {action && <div className="self-end md:self-auto">{action}</div>}
             </div>
 
             {/* Stats Grid */}
             {stats && stats.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
                     {stats.map((stat, i) => (
                         <div key={i} className="glass-card p-4 rounded-xl border border-white/5 hover:border-cyan-500/30 transition-colors">
                             <div className="flex items-center justify-between mb-2">
@@ -54,16 +57,18 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
             )}
 
             {/* Content Area */}
-            <div className="min-h-[400px] border border-white/5 p-6 relative">
-                {children ? children : (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                        <div className="text-center">
-                            <h3 className="text-4xl font-bold text-zinc-800 uppercase tracking-widest">{title}</h3>
-                            <p className="text-sm text-zinc-700 font-mono mt-2">MODULE::INITIALIZED</p>
-                        </div>
+            {children ? (
+                <div className={cn("min-h-[400px]", contentClassName)}>
+                    {children}
+                </div>
+            ) : (
+                <div className="min-h-[400px] border border-white/5 relative flex items-center justify-center opacity-20 pointer-events-none">
+                    <div className="text-center">
+                        <h3 className="text-4xl font-bold text-zinc-800 uppercase tracking-widest">{title}</h3>
+                        <p className="text-sm text-zinc-700 font-mono mt-2">MODULE::INITIALIZED</p>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

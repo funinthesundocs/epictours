@@ -137,15 +137,16 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                     <p className="text-xs text-zinc-500">Guests at this hotel will be directed to this pickup point.</p>
                 </div>
 
-                <div className="pt-4 border-t border-white/10">
+                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
                     <button
-                        onClick={handleSubmit(onSubmit)}
+                        type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                        {initialData ? "Save Changes" : "Create Hotel"}
+                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                        {initialData ? "Update" : "Create"}
                     </button>
+                    {/* Cancel button removed per user request */}
                 </div>
             </form>
         </SidePanel>

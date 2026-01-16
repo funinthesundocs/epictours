@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, Plus } from "lucide-react";
 import { AddCustomerSheet } from "./components/add-customer-sheet";
 import { CustomerToolbar } from "./components/customer-toolbar";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { cn } from "@/lib/utils";
 
 export function CustomersPage() {
     const [data, setData] = useState<Customer[]>([]);
@@ -147,16 +148,16 @@ export function CustomersPage() {
     const totalPages = Math.ceil(totalItems / rowsPerPage);
 
     return (
-        <div className="h-full flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-white">Customers</h1>
                         <p className="text-zinc-400 text-sm">Manage your relationships and leads.</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 self-end md:self-auto">
                         {/* Rows Selector Aligned */}
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-zinc-500 whitespace-nowrap">Rows:</span>
@@ -202,18 +203,20 @@ export function CustomersPage() {
                 </div>
             ) : (
                 <>
-                    <div className={isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity"}>
-                        <CustomerTable
-                            data={data}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            sortConfig={sortConfig}
-                            onSort={handleSort}
-                        />
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
+                        <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                            <CustomerTable
+                                data={data}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                sortConfig={sortConfig}
+                                onSort={handleSort}
+                            />
+                        </div>
                     </div>
 
                     {/* Pagination Footer */}
-                    <div className="flex items-center justify-between px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
+                    <div className="shrink-0 flex items-center justify-between px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
                         <div>
                             Showing <span className="text-white font-medium">{(currentPage - 1) * rowsPerPage + 1}</span> to <span className="text-white font-medium">{Math.min(currentPage * rowsPerPage, totalItems)}</span> of <span className="text-white font-medium">{totalItems}</span> entries
                         </div>
@@ -223,9 +226,10 @@ export function CustomersPage() {
                                 disabled={currentPage === 1}
                                 className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                Previous
+                                <span className="sm:hidden">&lt;</span>
+                                <span className="hidden sm:inline">Previous</span>
                             </button>
-                            <div className="px-2">
+                            <div className="px-2 text-xs sm:text-sm">
                                 Page <span className="text-white">{currentPage}</span> of <span className="text-white">{Math.max(1, totalPages)}</span>
                             </div>
                             <button
@@ -233,7 +237,8 @@ export function CustomersPage() {
                                 disabled={currentPage >= totalPages}
                                 className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                Next
+                                <span className="sm:hidden">&gt;</span>
+                                <span className="hidden sm:inline">Next</span>
                             </button>
                         </div>
                     </div>

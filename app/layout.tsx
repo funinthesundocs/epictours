@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/shell/sidebar";
+import { PageLayout } from "@/components/shell/page-layout";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
@@ -22,16 +22,14 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <body className={cn(outfit.variable, "bg-background min-h-screen flex antialiased overflow-hidden")}>
-                {/* Global Sidebar (Registry Driven) */}
-                <Sidebar />
-
-                {/* Main Content Area */}
-                <main className="flex-1 relative h-screen overflow-y-auto overflow-x-hidden p-4 lg:p-6">
-                    <div className="max-w-7xl mx-auto space-y-6">
-                        {children}
-                    </div>
-                </main>
+            <body className={cn(outfit.variable, "bg-background min-h-screen antialiased")}>
+                {/* 
+                    PageLayout handles the SidebarProvider, Sidebar, 
+                    and the Main Content area with dynamic margins.
+                */}
+                <PageLayout>
+                    {children}
+                </PageLayout>
                 <Toaster />
             </body>
         </html>

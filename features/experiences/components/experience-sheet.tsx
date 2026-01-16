@@ -61,7 +61,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             event_type: "Tour",
             start_time: "07:00 AM",
             end_time: "04:00 PM",
-            is_active: true
+            is_active: false
         }
     });
 
@@ -122,7 +122,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                 start_time: "07:00 AM",
                 end_time: "04:00 PM",
-                is_active: true
+                is_active: false
             });
         }
     }, [isOpen, initialData, reset]);
@@ -397,12 +397,16 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-4 border-t border-white/10 pt-6 mt-8">
-                    <button type="button" onClick={onClose} className="px-6 py-2 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded flex items-center gap-2 transition">
+                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        Save Changes
+                        {initialData ? "Update" : "Create"}
                     </button>
+                    {/* Cancel button removed per user request */}
                 </div>
             </form>
         </SidePanel>
