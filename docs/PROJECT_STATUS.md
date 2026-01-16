@@ -33,9 +33,15 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
     *   **Status**: OPTIMIZED (Port 3000).
     *   **Action**: Use `@[/refresh]` for instant local rebuilds. Use `@[/gitpull]` for full sync. Use `@[/debrief]` for alignment.
 
-4.  **[NEXT] "Customers" Module**
-    *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md`.
-    *   **Note**: Ensure we use the new `restart_production` workflow if we hit DB issues.
+4.  **✅ "Customers" Module**
+    *   **Status**: COMPLETED.
+    *   **Features**:
+        *   **Refactor**: Promoted to Top-Level Category.
+        *   **Customer Types**: Full CRUD with "Empty Table" pattern and RLS Seeding.
+    *   **Ref**: `app/customers/types/page.tsx`, `database/16_create_customer_types.sql`.
+
+5.  **[NEXT] Duplicate Check Logic**
+    *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 ## 🧠 Memory Dump (Context for Next Session)
 *   **Workflow Shortcodes**:

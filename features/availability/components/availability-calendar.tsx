@@ -5,84 +5,128 @@ import { cn } from "@/lib/utils";
 import {
     ChevronLeft,
     ChevronRight,
-    Calendar as CalendarIcon,
     Plus,
     Edit,
     Copy,
     Trash2,
     ChevronDown,
-    Check,
-    Clock,
-    LayoutGrid,
-    List,
-    AlignLeft
+    Check
 } from "lucide-react";
-
-type CalendarView = 'month' | 'week' | 'day';
 
 export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: string, name: string, short_code?: string }[] }) {
     const [currentDate, setCurrentDate] = useState(new Date()); // Dynamic Date
-    const [view, setView] = useState<CalendarView>('month');
     // Default to first available experience or fallback
     const [selectedExperience, setSelectedExperience] = useState(experiences[0]?.name || "Mauna Kea Summit");
-    const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const pickerRef = useRef<HTMLDivElement>(null);
+
+    // Pickers State
+    const [isExpPickerOpen, setIsExpPickerOpen] = useState(false);
+    const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
+
+    // Refs for click outside
+    const expPickerRef = useRef<HTMLDivElement>(null);
+    const yearPickerRef = useRef<HTMLDivElement>(null);
 
     // Abbreviation Mapping (Dynamic)
     const currentExp = experiences.find(e => e.name === selectedExperience);
     const abbr = currentExp?.short_code || "EXP";
 
-    // Cycle View Logic
-    const cycleView = () => {
-        const views: CalendarView[] = ['month', 'week', 'day'];
-        const nextIndex = (views.indexOf(view) + 1) % views.length;
-        setView(views[nextIndex]);
+    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+    // --- NAVIGATION LOGIC ---
+
+    const handlePrevMonth = () => {
+        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
     };
 
-    const getViewLabel = () => {
-        switch (view) {
-            case 'month': return 'Monthly';
-            case 'week': return 'Weekly';
-            case 'day': return 'Daily';
-        }
+    const handleNextMonth = () => {
+        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
     };
 
-    const getViewIcon = () => {
-        switch (view) {
-            case 'month': return CalendarIcon;
-            case 'week': return LayoutGrid;
-            case 'day': return List;
-        }
+    const handleYearSelect = (year: number) => {
+        setCurrentDate(prev => new Date(year, prev.getMonth(), 1));
+        setIsYearPickerOpen(false);
     };
 
-    // Close picker when clicking outside
+    // Close pickers when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-                setIsPickerOpen(false);
+            if (expPickerRef.current && !expPickerRef.current.contains(event.target as Node)) {
+                setIsExpPickerOpen(false);
+            }
+            if (yearPickerRef.current && !yearPickerRef.current.contains(event.target as Node)) {
+                setIsYearPickerOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    // Generate Year Range (Current - 2 to Current + 5)
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
     return (
         <div className="w-full h-full bg-black p-6 font-sans flex flex-col gap-6">
             {/* TOP COMPONENT: Control Bar */}
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900">
 
-                {/* LEFT: Title */}
-                <div className="flex items-center gap-4">
-                    <h1 className="text-4xl font-black text-white tracking-tighter shrink-0">
-                        {monthNames[currentDate.getMonth()]} <span className="text-zinc-800">{currentDate.getFullYear().toString().slice(-2)}</span>
-                    </h1>
+                {/* LEFT: Title & Navigation */}
+                <div className="flex items-center gap-6">
+                    {/* Date Display with Year Dropdown */}
+                    <div className="flex items-center gap-3">
+                        <span className="text-4xl font-black text-white tracking-tighter">
+                            {monthNames[currentDate.getMonth()]}
+                        </span>
 
-                    {/* Navigation */}
+                        {/* Year Selector */}
+                        <div className="relative" ref={yearPickerRef}>
+                            <button
+                                onClick={() => setIsYearPickerOpen(!isYearPickerOpen)}
+                                title="Change Year"
+                                className="text-4xl font-black text-cyan-500 tracking-tighter flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                                {currentDate.getFullYear().toString().slice(-2)}
+                                <ChevronDown className="w-5 h-5 stroke-[4] mt-1 text-cyan-500" />
+                            </button>
+
+                            {/* Year Dropdown */}
+                            {isYearPickerOpen && (
+                                <div className="absolute top-full left-0 mt-2 w-[100px] bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="max-h-[240px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+                                        {years.map((year) => (
+                                            <div
+                                                key={year}
+                                                className={cn(
+                                                    "px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors border-b border-zinc-900 last:border-0",
+                                                    currentDate.getFullYear() === year
+                                                        ? "bg-cyan-950/30 text-cyan-400"
+                                                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                                )}
+                                                onClick={() => handleYearSelect(year)}
+                                            >
+                                                {year}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Navigation Buttons */}
                     <div className="flex gap-1">
-                        <button className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-                        <button className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                        <button
+                            onClick={handlePrevMonth}
+                            className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={handleNextMonth}
+                            className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
 
@@ -90,20 +134,20 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
                 <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
 
                     {/* COMPACT EXPERIENCE SELECTOR */}
-                    <div className="relative w-[220px] mr-2" ref={pickerRef}>
+                    <div className="relative w-[220px] mr-2" ref={expPickerRef}>
                         <div
                             className={cn(
                                 "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                isPickerOpen && "border-indigo-500/50 bg-zinc-900 ring-1 ring-indigo-500/20"
+                                isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
                             )}
-                            onClick={() => setIsPickerOpen(!isPickerOpen)}
+                            onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
                         >
                             <span className="font-semibold text-sm truncate">{selectedExperience}</span>
-                            <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isPickerOpen && "rotate-180")} />
+                            <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
                         </div>
 
                         {/* Dropdown Menu */}
-                        {isPickerOpen && (
+                        {isExpPickerOpen && (
                             <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                                 {experiences.map((exp) => (
                                     <div
@@ -111,12 +155,12 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
                                         className={cn(
                                             "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
                                             selectedExperience === exp.name
-                                                ? "bg-indigo-900/20 text-indigo-400"
+                                                ? "bg-cyan-900/20 text-cyan-400"
                                                 : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                                         )}
                                         onClick={() => {
                                             setSelectedExperience(exp.name);
-                                            setIsPickerOpen(false);
+                                            setIsExpPickerOpen(false);
                                         }}
                                     >
                                         {exp.name}
@@ -126,15 +170,6 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
                             </div>
                         )}
                     </div>
-
-                    {/* VIEW TOGGLE BUTTON */}
-                    <button
-                        onClick={cycleView}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border bg-zinc-800 text-white border-zinc-700 shadow-lg hover:bg-zinc-700 min-w-[110px] justify-center"
-                    >
-                        {React.createElement(getViewIcon(), { className: "w-3.5 h-3.5" })}
-                        {getViewLabel()}
-                    </button>
 
                     <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
@@ -147,9 +182,7 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
 
             {/* CALENDAR CONTENT AREA */}
             <div className="flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-                {view === 'month' && <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} />}
-                {view === 'week' && <div className="h-full flex items-center justify-center text-zinc-500">Weekly View (Component Pending)</div>}
-                {view === 'day' && <div className="h-full flex items-center justify-center text-zinc-500">Daily View (Component Pending)</div>}
+                <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} />
             </div>
         </div>
     );
@@ -165,10 +198,10 @@ function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperien
     const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
 
     return (
-        <div className="h-full grid grid-cols-7 gap-px bg-zinc-900">
+        <div className="h-full grid grid-cols-7 gap-px bg-zinc-600">
             {/* Headers */}
             {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map(day => (
-                <div key={day} className="bg-zinc-950/80 p-4 text-[10px] font-bold text-zinc-400 uppercase text-center backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-900">{day}</div>
+                <div key={day} className="bg-zinc-950/80 p-4 text-[10px] font-bold text-zinc-500 uppercase text-center backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-900">{day}</div>
             ))}
 
             {/* Cells */}
@@ -185,7 +218,7 @@ function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperien
                             <>
                                 <span className={cn(
                                     "text-sm font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
-                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-600 group-hover:text-zinc-300" // Updated to Primary Teal (Cyan) with glow
+                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300" // Updated to Primary Teal (Cyan) with glow
                                 )}>{day}</span>
 
                                 {/* Event Chips (Daily Mock Data) */}
@@ -202,168 +235,6 @@ function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperien
                     </div>
                 )
             })}
-        </div>
-    )
-}
-
-function WeekView({ selectedExperience }: { selectedExperience: string }) {
-    const hours = Array.from({ length: 14 }, (_, i) => i + 6); // 6 AM to 8 PM
-    const days = [
-        { name: "MON", date: 12 },
-        { name: "TUE", date: 13, today: true },
-        { name: "WED", date: 14 },
-        { name: "THU", date: 15 },
-        { name: "FRI", date: 16 },
-        { name: "SAT", date: 17 },
-        { name: "SUN", date: 18 },
-    ];
-
-    return (
-        <div className="h-full flex flex-col bg-black overflow-hidden font-sans">
-            {/* Week Header */}
-            <div className="flex border-b border-zinc-900">
-                <div className="w-16 shrink-0 bg-zinc-950 border-r border-zinc-900"></div> {/* Time axis spacer */}
-                {days.map(day => (
-                    <div key={day.name} className={cn(
-                        "flex-1 py-4 text-center border-r border-zinc-900 bg-zinc-950/50 backdrop-blur-sm",
-                        day.today && "bg-indigo-900/10"
-                    )}>
-                        <div className="text-[10px] font-bold text-zinc-500 mb-1">{day.name}</div>
-                        <div className={cn(
-                            "text-xl font-bold inline-block",
-                            day.today ? "text-indigo-500" : "text-white"
-                        )}>{day.date}</div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Week Grid */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar flex">
-                {/* Time Axis */}
-                <div className="w-16 shrink-0 border-r border-zinc-900 bg-black">
-                    {hours.map(hour => (
-                        <div key={hour} className="h-20 text-[10px] text-zinc-500 font-bold text-right pr-3 pt-2 border-b border-zinc-900/50">
-                            {hour}:00
-                        </div>
-                    ))}
-                </div>
-
-                {/* Columns */}
-                {days.map(day => (
-                    <div key={day.name} className={cn(
-                        "flex-1 border-r border-zinc-900 relative min-w-[100px]",
-                        day.today && "bg-zinc-900/20"
-                    )}>
-                        {hours.map(hour => (
-                            <div key={hour} className="h-20 border-b border-zinc-900/50"></div>
-                        ))}
-
-                        {/* Mock Events (Absolute positioning simulation) */}
-                        {day.today && hourToPx(14, 20) && selectedExperience.includes("Mauna") && (
-                            <div className="absolute top-[160px] left-1 right-1 h-[60px] bg-indigo-900/80 border-l-2 border-indigo-500 rounded px-2 py-1 cursor-pointer hover:bg-indigo-800 transition-colors">
-                                <div className="text-[10px] font-bold text-indigo-200">MAUNA KEA</div>
-                                <div className="text-[9px] text-indigo-400">14:00 - 15:00</div>
-                            </div>
-                        )}
-
-                        {day.name === "THU" && selectedExperience.includes("Circle") && (
-                            <div className="absolute top-[20px] left-1 right-1 h-[140px] bg-emerald-900/80 border-l-2 border-emerald-500 rounded px-2 py-1 cursor-pointer hover:bg-emerald-800 transition-colors">
-                                <div className="text-[10px] font-bold text-emerald-200">ISLAND LOOP</div>
-                                <div className="text-[9px] text-emerald-400">07:00 - 10:30</div>
-                            </div>
-                        )}
-
-                        {/* Current Time Indicator (Visual Mock) */}
-                        {day.today && (
-                            <div className="absolute top-[200px] w-full border-t-2 border-indigo-500 z-10 flex items-center">
-                                <div className="w-2 h-2 bg-indigo-500 rounded-full -ml-1"></div>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
-}
-
-function DayView({ selectedExperience }: { selectedExperience: string }) {
-    const timeSlots = [
-        { time: "08:00", events: [] },
-        { time: "09:00", events: [] },
-        { time: "10:00", events: [] },
-        { time: "11:00", events: [] },
-        { time: "12:00", events: [] },
-        { time: "13:00", events: [] },
-        { time: "14:00", events: [{ title: "MAUNA KEA SUMMIT", duration: "4h", pax: "12/14", revenue: "$2,400", status: "confirmed" }] },
-        { time: "15:00", events: [] },
-        { time: "16:00", events: [] },
-        { time: "17:00", events: [] },
-        { time: "18:00", events: [] },
-        { time: "19:00", events: [{ title: "STARGAZE EXPERIENCE", duration: "2h", pax: "06/14", revenue: "$900", status: "pending" }] },
-        { time: "20:00", events: [] },
-    ];
-
-    return (
-        <div className="h-full flex flex-col bg-black">
-            {/* Day Header */}
-            <div className="p-6 border-b border-zinc-900 bg-zinc-950/50 backdrop-blur-sm flex justify-between items-end">
-                <div>
-                    <div className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-1">Tuesday</div>
-                    <div className="text-5xl font-black text-white">13 JAN</div>
-                </div>
-                <div className="flex gap-8 text-right">
-                    <div>
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Availability</div>
-                        <div className="text-2xl font-bold text-white">42%</div>
-                    </div>
-                    <div>
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Revenue</div>
-                        <div className="text-2xl font-bold text-emerald-500">$3,300</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Day Schedule */}
-            <div className="flex-1 overflow-y-auto p-6">
-                <div className="max-w-4xl mx-auto space-y-4">
-                    {timeSlots.map((slot, i) => (
-                        <div key={i} className="flex gap-6 group">
-                            <div className="w-16 pt-2 text-right">
-                                <span className="text-sm font-bold text-zinc-600 group-hover:text-zinc-400 transition-colors">{slot.time}</span>
-                            </div>
-
-                            <div className="flex-1 min-h-[60px] border-l border-zinc-800 pl-6 pb-6 relative">
-                                <div className="absolute left-[-5px] top-[10px] w-2.5 h-2.5 rounded-full bg-zinc-900 border-2 border-zinc-700 group-hover:border-zinc-500 transition-colors"></div>
-
-                                {slot.events.length > 0 ? (
-                                    slot.events.map((evt, idx) => (
-                                        <div key={idx} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 hover:bg-zinc-800/80 transition-all cursor-pointer shadow-lg group/card">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={cn("w-2 h-2 rounded-full", evt.status === 'confirmed' ? "bg-indigo-500" : "bg-purple-500")}></div>
-                                                    <h3 className="font-bold text-white text-lg tracking-tight">{evt.title}</h3>
-                                                </div>
-                                                <span className={cn(
-                                                    "px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider",
-                                                    evt.status === 'confirmed' ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                                )}>{evt.status}</span>
-                                            </div>
-
-                                            <div className="flex gap-6 text-xs text-zinc-400 font-medium">
-                                                <div className="flex items-center gap-1.5"><Clock size={12} /> {evt.duration}</div>
-                                                <div className="flex items-center gap-1.5"><LayoutGrid size={12} /> {evt.pax} PAX</div>
-                                                <div className="flex items-center gap-1.5 text-emerald-500"><Check size={12} /> {evt.revenue}</div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="h-full border-b border-dashed border-zinc-900/50"></div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
         </div>
     )
 }
@@ -432,7 +303,7 @@ function EventChip({
     );
 }
 
-// Just a dummy helper to avoid TS errors in the mock WeekView
+// Just a dummy helper to avoid TS errors if referenced elsewhere (unlikely now)
 function hourToPx(start: number, end: number) {
     return true;
 }

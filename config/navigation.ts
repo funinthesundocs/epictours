@@ -52,25 +52,36 @@ export const navigation: NavSection[] = [
                 href: "/inbox",
                 icon: Inbox,
             },
+
+        ]
+    },
+    {
+        title: "Customers",
+        items: [
             {
-                title: "Customers",
+                title: "All Customers",
                 href: "/customers",
-                icon: Users,
+                icon: Users
             },
+            {
+                title: "Customer Types",
+                href: "/customers/types",
+                icon: Users
+            }
         ]
     },
     {
         title: "Operations",
         items: [
             {
-                title: "Availabilities",
-                href: "/operations/bookings",
-                icon: CalendarRange
-            },
-            {
                 title: "Experiences",
                 href: "/operations/tours",
                 icon: Map
+            },
+            {
+                title: "Availabilities",
+                href: "/operations/bookings",
+                icon: CalendarRange
             },
             {
                 title: "Transportation",
