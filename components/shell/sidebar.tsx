@@ -74,6 +74,7 @@ export function Sidebar() {
                     <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800">
                         {navigation.map((section, idx) => {
                             // Section Header Logic
+                            // Navigation Items
                             if (section.title) {
                                 if (isCollapsed) {
                                     // In collapsed mode, wrap the items in a "section tile"
@@ -92,17 +93,15 @@ export function Sidebar() {
                                         isOpen={openSection === section.title}
                                         onToggle={() => toggleSection(section.title!)}
                                         pathname={pathname}
+                                        onMobileItemClick={() => setIsMobileOpen(false)}
                                     />
                                 );
                             }
                             // Fallback for flat lists (Dashboard etc)
-                            // If collapsed, we can just render them directly or wrap them too if desired.
-                            // For consistency, let's wrap them if they are a group, but usually dashboard is single.
-                            // Let's just render them.
                             return (
                                 <div key={idx} className={cn("space-y-1 mb-6", isCollapsed && "mb-2")}>
                                     {section.items.map((item) => (
-                                        <NavItem key={item.href} item={item} pathname={pathname} isCollapsed={isCollapsed} />
+                                        <NavItem key={item.href} item={item} pathname={pathname} isCollapsed={isCollapsed} onMobileItemClick={() => setIsMobileOpen(false)} />
                                     ))}
                                 </div>
                             );
@@ -131,7 +130,7 @@ export function Sidebar() {
 // Helper Components
 // ----------------------------------------------------------------------
 
-function NavItem({ item, pathname, depth = 0, isCollapsed = false }: { item: any; pathname: string; depth?: number; isCollapsed?: boolean }) {
+function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemClick }: { item: any; pathname: string; depth?: number; isCollapsed?: boolean; onMobileItemClick?: () => void }) {
     const hasChildren = item.children && item.children.length > 0;
     const Icon = item.icon;
     const isActive = pathname === item.href;
@@ -140,7 +139,6 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false }: { item: any
     const [isOpen, setIsOpen] = useState(isChildActive);
 
     // Collapsed Mode Rendering (Flat, Icon Only)
-    // No borders on individual items, just highlight
     if (isCollapsed) {
         return (
             <Link
@@ -189,7 +187,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false }: { item: any
                         >
                             <div className="space-y-1">
                                 {item.children.map((child: any) => (
-                                    <NavItem key={child.href} item={child} pathname={pathname} depth={depth + 1} isCollapsed={false} />
+                                    <NavItem key={child.href} item={child} pathname={pathname} depth={depth + 1} isCollapsed={false} onMobileItemClick={onMobileItemClick} />
                                 ))}
                             </div>
                         </motion.div>
@@ -210,6 +208,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false }: { item: any
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
             )}
             style={{ paddingLeft: `${12 + (depth * 12)}px` }}
+            onClick={() => onMobileItemClick?.()}
         >
             <Icon size={18} className={cn("transition-colors", isActive ? "text-cyan-400" : "text-zinc-500 group-hover:text-zinc-300")} />
             <span className="truncate">{item.title}</span>
@@ -222,12 +221,14 @@ function CollapsibleSection({
     section,
     isOpen,
     onToggle,
-    pathname
+    pathname,
+    onMobileItemClick
 }: {
     section: NavSection;
     isOpen: boolean;
     onToggle: () => void;
     pathname: string;
+    onMobileItemClick?: () => void;
 }) {
     const isChildActive = section.items.some(item => pathname.startsWith(item.href));
 
@@ -258,7 +259,7 @@ function CollapsibleSection({
                     >
                         <div className="space-y-1 pt-1 pb-2">
                             {section.items.map((item) => (
-                                <NavItem key={item.href} item={item} pathname={pathname} />
+                                <NavItem key={item.href} item={item} pathname={pathname} onMobileItemClick={onMobileItemClick} />
                             ))}
                         </div>
                     </motion.div>
