@@ -239,10 +239,11 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             title={initialData ? "Edit Experience" : "New Experience"}
             description="Manage your inventory details."
             width="w-[85vw] max-w-[85vw]"
+            contentClassName="p-0"
         >
             <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-0">
                 {/* Tabs Header */}
-                <div className="flex items-center border-b border-white/10 mb-8 sticky top-0 bg-[#0b1115] z-10 -mx-6 px-6 pt-4">
+                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10 px-6">
                     <TabButton id="basics" label="The Basics" icon={Info} />
                     <TabButton id="legal" label="Legal & Waivers" icon={FileText} />
                     <TabButton id="pricing" label="Pricing" icon={Users} />
@@ -251,7 +252,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                 {/* TAB: THE BASICS */}
                 {activeTab === "basics" && (
-                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 mb-12 animate-in fade-in duration-300 slide-in-from-left-4">
+                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 mb-12 animate-in fade-in duration-300 slide-in-from-left-4 px-6 pt-8">
                         {/* LEFT COLUMN */}
                         <div className="xl:col-span-4 space-y-10">
                             <div>
@@ -429,7 +430,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                 {/* TAB: LEGAL & WAIVERS */}
                 {activeTab === "legal" && (
-                    <div className="animate-in fade-in duration-300 slide-in-from-right-4 space-y-10">
+                    <div className="animate-in fade-in duration-300 slide-in-from-right-4 space-y-10 px-6 pt-8">
                         <div>
                             <SectionHeader icon={FileText} title="Legal Policies" />
                             <div className="grid grid-cols-1 gap-8">
@@ -460,7 +461,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                 {/* TAB: PRICING */}
                 {activeTab === "pricing" && (
-                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4">
+                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
                         <Users size={48} className="mb-4 text-zinc-700" />
                         <h3 className="text-lg font-medium text-zinc-300">Pricing Configuration</h3>
                         <p className="text-sm">Manage ticket types, seasonal rates, and adjustments.</p>
@@ -470,7 +471,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                 {/* TAB: BOOKING OPTIONS */}
                 {activeTab === "booking" && (
-                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4">
+                    <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
                         <ClipboardList size={48} className="mb-4 text-zinc-700" />
                         <h3 className="text-lg font-medium text-zinc-300">Booking Options</h3>
                         <p className="text-sm">Configure cut-off times, availability rules, and instant confirmation.</p>

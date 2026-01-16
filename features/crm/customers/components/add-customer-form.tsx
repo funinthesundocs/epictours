@@ -52,7 +52,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     } = useForm({
         resolver: zodResolver(CustomerSchema),
         defaultValues: {
-            status: "" as CustomerStatus,
+            status: (initialData?.status || "Lead") as CustomerStatus,
             tags: [],
             total_value: 0,
             preferences: {
@@ -73,22 +73,29 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     useEffect(() => {
         if (initialData) {
             reset({
-                ...initialData,
-                // Ensure nested objects are merged correctly if missing in initialData
+                // Ensure explicit handling of nulls for Zod
+                phone: initialData.phone || null,
+                avatar_url: initialData.avatar_url || null,
+                last_active: initialData.last_active || null,
+                // Nested objects
                 preferences: {
                     ...initialData.preferences,
-                    notes: initialData.preferences?.notes || "",
+                    notes: initialData.preferences?.notes || null,
+                    accessibility: initialData.preferences?.accessibility || null,
+                    preferred_messaging_app: initialData.preferences?.preferred_messaging_app || null
                 },
                 metadata: {
                     ...initialData.metadata,
-                    source: initialData.metadata?.source || undefined,
-                    hotel: initialData.metadata?.hotel || ""
+                    source: initialData.metadata?.source || null,
+                    hotel: initialData.metadata?.hotel || null,
+                    campaign: initialData.metadata?.campaign || null
                 }
             });
         }
     }, [initialData, reset]);
 
     const onSubmit = async (data: FormData) => {
+        console.log("🚀 onSubmit called with data:", data);
         setIsSubmitting(true);
         setSubmitError(null);
 
@@ -130,13 +137,22 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
         } catch (err: any) {
             console.error("Error saving customer:", err);
             setSubmitError(err.message || "Failed to save profile.");
+            // Also explicitly alert if it's not a validation error
+            if (err.message && !err.message.includes("Validation")) {
+                alert(`Database Error: ${err.message}`);
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    const onError = (errors: any) => {
+        console.error("Form Validation Errors:", JSON.stringify(errors, null, 2));
+        setSubmitError("Validation failed. Check console for details.");
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
 
             {/* 1. Identity */}
             <div className="space-y-4">
@@ -199,7 +215,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-300">Preferred Messaging</label>
                         <CustomSelect
-                            value={watch("preferences.preferred_messaging_app")}
+                            value={watch("preferences.preferred_messaging_app") || undefined}
                             onChange={(val) => setValue("preferences.preferred_messaging_app", val as any, { shouldValidate: true })}
                             options={MESSAGING_OPTIONS}
                             placeholder="Select App..."
@@ -212,7 +228,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-300">Referral Source</label>
                         <CustomSelect
-                            value={watch("metadata.source")}
+                            value={watch("metadata.source") || undefined}
                             onChange={(val) => setValue("metadata.source", val as any, { shouldValidate: true })}
                             options={REFERRAL_OPTIONS}
                             placeholder="Select Source..."
@@ -227,6 +243,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                             options={STATUS_OPTIONS}
                             placeholder="Select Status..."
                         />
+                        {errors.status && <p className="text-xs text-red-400">{errors.status.message}</p>}
                     </div>
                 </div>
 

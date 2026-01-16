@@ -60,7 +60,7 @@ export const navigation: NavSection[] = [
         items: [
             {
                 title: "All Customers",
-                href: "/customers",
+                href: "/crm/customers",
                 icon: Users
             },
             {

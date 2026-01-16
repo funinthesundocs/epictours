@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/shell/page-shell";
-import { CustomerTypesTable } from "@/features/customers/components/customer-types-table";
-import { CustomerTypeSheet } from "@/features/customers/components/customer-type-sheet";
+import { CustomerTypesTable } from "@/features/customer-types/components/customer-types-table";
+import { CustomerTypeSheet } from "@/features/customer-types/components/customer-type-sheet";
 import { supabase } from "@/lib/supabase";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 
 export default function CustomerTypesPage() {
     const [data, setData] = useState<any[]>([]);
@@ -71,8 +71,9 @@ export default function CustomerTypesPage() {
             }
         >
             {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin text-cyan-400">Loading...</div>
+                <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
+                    <Loader2 size={24} className="animate-spin" />
+                    Loading...
                 </div>
             ) : (
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">

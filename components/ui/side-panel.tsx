@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 interface SidePanelProps {
     isOpen: boolean;
     onClose: () => void;
@@ -11,6 +13,7 @@ interface SidePanelProps {
     description?: string;
     children: React.ReactNode;
     width?: string; // Allow custom width, default to 'max-w-md'
+    contentClassName?: string;
 }
 
 export function SidePanel({
@@ -19,7 +22,8 @@ export function SidePanel({
     title,
     description,
     children,
-    width = "max-w-md"
+    width = "max-w-md",
+    contentClassName = "p-6"
 }: SidePanelProps) {
 
     // Close on Escape key
@@ -81,7 +85,7 @@ export function SidePanel({
                         </div>
 
                         {/* Content - Scrollable */}
-                        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-cyan-800 scrollbar-track-transparent">
+                        <div className={cn("flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-800 scrollbar-track-transparent", contentClassName)}>
                             {children}
                         </div>
                     </motion.div>

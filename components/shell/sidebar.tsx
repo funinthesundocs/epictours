@@ -15,7 +15,18 @@ export function Sidebar() {
     const { isCollapsed, toggleCollapse } = useSidebar();
 
     // Accordion State
-    const [openSection, setOpenSection] = useState<string | null>("Operations");
+    const [openSection, setOpenSection] = useState<string | null>(() => {
+        // Find which section should be open based on current path
+        const activeSection = navigation.find(section =>
+            section.title &&
+            section.items.some(item =>
+                pathname === item.href ||
+                pathname.startsWith(item.href + "/") ||
+                (item.children && item.children.some(child => pathname.startsWith(child.href)))
+            )
+        );
+        return activeSection?.title || null;
+    });
 
     const toggleSection = (title: string) => {
         if (isCollapsed) return; // Disable accordion when collapsed

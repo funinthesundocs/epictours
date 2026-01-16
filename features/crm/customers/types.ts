@@ -5,26 +5,26 @@ export const CustomerStatusSchema = z.string();
 export type CustomerStatus = z.infer<typeof CustomerStatusSchema>;
 
 export const CustomerSchema = z.object({
-  id: z.string().uuid().optional(), // Optional for creation
+  id: z.string().uuid().optional(),
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  status: z.string().min(1, "Status is required"),
+  phone: z.string().optional().nullable(),
+  status: z.string().default("Lead"),
   total_value: z.number().default(0),
-  last_active: z.string().optional(), // ISO Date
+  last_active: z.string().optional().nullable(),
   tags: z.array(z.string()).default([]),
   avatar_url: z.string().optional().nullable(),
 
   // JSONB Fields (Flexible Data)
   preferences: z.object({
-    dietary: z.array(z.string()).default([]), // e.g., ["Vegan", "Gluten-Free"]
-    accessibility: z.string().optional(),
+    dietary: z.array(z.string()).default([]),
+    accessibility: z.string().optional().nullable(),
 
     emergency_contact: z.object({
-      name: z.string().optional(),
-      phone: z.string().optional(),
-      relationship: z.string().optional()
-    }).optional(),
+      name: z.string().optional().nullable(),
+      phone: z.string().optional().nullable(),
+      relationship: z.string().optional().nullable()
+    }).optional().nullable(),
     marketing_consent: z.object({
       email: z.boolean().default(true),
       sms: z.boolean().default(false),
@@ -38,8 +38,8 @@ export const CustomerSchema = z.object({
       "Viber",
       "Line",
       "WeChat"
-    ]).optional(),
-    notes: z.string().optional()
+    ]).optional().nullable(),
+    notes: z.string().optional().nullable()
   }).default({}),
 
   // Technical Metadata
@@ -55,9 +55,9 @@ export const CustomerSchema = z.object({
       "Repeat Customer",
       "Email Offer",
       "Other"
-    ]).optional(),
-    campaign: z.string().optional(),
-    hotel: z.string().optional() // Current Hotel / Accommodation
+    ]).optional().nullable(),
+    campaign: z.string().optional().nullable(),
+    hotel: z.string().optional().nullable()
   }).default({})
 });
 
