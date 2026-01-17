@@ -53,20 +53,9 @@ export const navigation: NavSection[] = [
                 href: "/inbox",
                 icon: Inbox,
             },
-
-        ]
-    },
-    {
-        title: "Customers",
-        items: [
             {
                 title: "All Customers",
                 href: "/crm/customers",
-                icon: Users
-            },
-            {
-                title: "Customer Types",
-                href: "/customers/types",
                 icon: Users
             }
         ]
@@ -74,32 +63,14 @@ export const navigation: NavSection[] = [
     {
         title: "Operations",
         items: [
-            {
-                title: "Experiences",
-                href: "/operations/tours",
-                icon: Map
-            },
+
             {
                 title: "Availabilities",
                 href: "/operations/bookings",
                 icon: CalendarRange
             },
-            {
-                title: "Transportation",
-                href: "/operations/transportation",
-                icon: Bus,
-                children: [
-                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
-                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
-                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
-                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
-                ]
-            },
-            {
-                title: "Staff",
-                href: "/operations/staff",
-                icon: Users
-            },
+
+
         ]
     },
     {
@@ -123,7 +94,7 @@ export const navigation: NavSection[] = [
     {
         title: "Finance",
         items: [
-            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
+
             { title: "Billing", href: "/finance/billing", icon: Receipt },
             { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark },
             { title: "Partners", href: "/finance/partners", icon: Handshake },
@@ -133,7 +104,7 @@ export const navigation: NavSection[] = [
     {
         title: "Settings",
         items: [
-            { title: "Organization", href: "/settings/organization", icon: Building2 },
+
             {
                 title: "Users",
                 href: "/settings/users",
@@ -144,7 +115,29 @@ export const navigation: NavSection[] = [
                 ]
             },
             { title: "Permissions", href: "/settings/permissions", icon: Shield },
-            { title: "Dash Settings", href: "/settings/dash", icon: Layout },
+            {
+                title: "Setup",
+                href: "/settings/dash",
+                icon: Layout,
+                children: [
+                    { title: "Organization", href: "/settings/organization", icon: Building2 },
+                    { title: "Experiences", href: "/operations/tours", icon: Map },
+                    { title: "Customer Types", href: "/customers/types", icon: Users },
+                    { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
+                    { title: "Staff", href: "/operations/staff", icon: Users },
+                    {
+                        title: "Transportation",
+                        href: "/operations/transportation",
+                        icon: Bus,
+                        children: [
+                            { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
+                            { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
+                            { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
+                            { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
+                        ]
+                    }
+                ]
+            },
         ]
     }
 ];
