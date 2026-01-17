@@ -20,6 +20,11 @@
         CREATE POLICY "Allow public access" ON table_name FOR ALL USING (true) WITH CHECK (true);
         ```
 
-## 3. Navigation
+## 3. Logic & State
+*   **Math Safety**:
+    *   **Inputs**: Always explicitly cast form inputs to `Number()` before performing arithmetic, especially in `useFieldArray` loops or calculated columns.
+    *   `const total = Number(price) + Number(tax);`
+
+## 4. Navigation
 *   **Structure**: Group related items into Categories (Collapsible or Headings).
 *   **Icons**: Consistent usage across sidebar and pages.

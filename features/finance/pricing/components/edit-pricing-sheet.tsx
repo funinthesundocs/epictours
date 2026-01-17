@@ -1,0 +1,364 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Save, Loader2, Info, Users, Plus, Trash2, DollarSign, Percent, ChevronDown } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { SidePanel } from "@/components/ui/side-panel";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// Zod Schemas
+const PricingRateSchema = z.object({
+    id: z.string().optional(),
+    tier: z.enum(['Retail', 'Online', 'Special', 'Custom']),
+    customer_type_id: z.string().min(1, "Type required"),
+    price: z.coerce.number().min(0),
+    tax_percentage: z.coerce.number().min(0).max(100).default(0).optional(),
+});
+
+const PricingScheduleSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(1, "Name is required"),
+    notes: z.string().optional().nullable(),
+    rates: z.array(PricingRateSchema)
+});
+
+type PricingScheduleFormData = z.infer<typeof PricingScheduleSchema>;
+
+interface EditPricingSheetProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+    initialData?: { id: string, name: string, notes: string | null };
+}
+
+export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: EditPricingSheetProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [activeTab, setActiveTab] = useState<"Retail" | "Online" | "Special" | "Custom">("Retail");
+    const [customerTypes, setCustomerTypes] = useState<{ id: string, name: string, description: string }[]>([]);
+    const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        watch,
+        setValue,
+        formState: { errors }
+    } = useForm<PricingScheduleFormData>({
+        resolver: zodResolver(PricingScheduleSchema),
+        defaultValues: {
+            name: "",
+            notes: "",
+            rates: []
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "rates"
+    });
+
+    // Fetch Customer Types on mount
+    useEffect(() => {
+        const fetchTypes = async () => {
+            const { data } = await supabase.from("customer_types" as any).select("id, name, description").order("name");
+            if (data) setCustomerTypes(data as any);
+        };
+        fetchTypes();
+    }, []);
+
+    // Load Data on Open
+    useEffect(() => {
+        const loadSchedule = async () => {
+            if (isOpen && initialData) {
+                // Fetch existing rates
+                const { data: rates } = await supabase
+                    .from("pricing_rates" as any)
+                    .select("*")
+                    .eq("schedule_id", initialData.id);
+
+                reset({
+                    id: initialData.id,
+                    name: initialData.name,
+                    notes: initialData.notes,
+                    rates: (rates as any) || []
+                });
+            } else if (isOpen) {
+                // New Mode
+                reset({
+                    name: "",
+                    notes: "",
+                    rates: []
+                });
+            }
+        };
+        loadSchedule();
+    }, [isOpen, initialData, reset]);
+
+
+    const onSubmit: any = async (data: PricingScheduleFormData) => {
+        setIsSubmitting(true);
+        try {
+            let scheduleId = data.id;
+
+            // 1. Save Header (Schedule)
+            if (scheduleId) {
+                const { error } = await supabase
+                    .from("pricing_schedules" as any)
+                    .update({ name: data.name, notes: data.notes })
+                    .eq("id", scheduleId);
+                if (error) throw error;
+            } else {
+                const { data: newSchedule, error } = await supabase
+                    .from("pricing_schedules" as any)
+                    .insert([{ name: data.name, notes: data.notes }])
+                    .select()
+                    .single();
+                if (error) throw error;
+                scheduleId = (newSchedule as any).id;
+            }
+
+            // 2. Save Rates (Delete All & Re-insert Strategy for Simplicity)
+            // Ideally use upsert, but delete-insert is safer for "removed" rows
+            if (scheduleId) {
+                // Delete old
+                await supabase.from("pricing_rates" as any).delete().eq("schedule_id", scheduleId);
+
+                // Insert new
+                if (data.rates.length > 0) {
+                    const ratesToInsert = data.rates.map(r => ({
+                        schedule_id: scheduleId,
+                        customer_type_id: r.customer_type_id,
+                        tier: r.tier,
+                        price: r.price,
+                        tax_percentage: r.tax_percentage
+                    }));
+                    const { error: ratesError } = await supabase.from("pricing_rates" as any).insert(ratesToInsert);
+                    if (ratesError) throw ratesError;
+                }
+            }
+
+            toast.success("Pricing Schedule Saved");
+            onSuccess();
+            onClose();
+
+        } catch (err: any) {
+            console.error("Error saving pricing:", err);
+            toast.error(err.message || "Failed to save");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Helper to get fields for current tab
+    const currentTabFields = fields.map((field, index) => ({ ...field, index })).filter(f => f.tier === activeTab);
+
+    // Tab Button Component (Copied from ExperienceSheet)
+    const TabButton = ({ id, label }: { id: typeof activeTab, label: string }) => (
+        <button
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
+                activeTab === id
+                    ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
+            )}
+        >
+            {label}
+        </button>
+    );
+
+    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors";
+
+    return (
+        <SidePanel
+            isOpen={isOpen}
+            onClose={onClose}
+            title={initialData ? "Edit Pricing Schedule" : "New Pricing Schedule"}
+            description="Manage multi-tiered pricing rates."
+            width="w-[85vw] max-w-4xl"
+            contentClassName="p-0"
+        >
+            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-0 h-full flex flex-col">
+
+                {/* Header Fields (Always Visible) */}
+                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>Schedule Name *</Label>
+                            <Input {...register("name")} placeholder="e.g. 2026 Standard Rates" className="text-lg font-semibold" />
+                            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Internal Notes</Label>
+                            <Input {...register("notes")} placeholder="Reference info..." />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs Header */}
+                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10 px-6">
+                    <TabButton id="Retail" label="Retail Rates" />
+                    <TabButton id="Online" label="Online Rates" />
+                    <TabButton id="Special" label="Special Rates" />
+                    <TabButton id="Custom" label="Custom Rates" />
+                </div>
+
+                {/* Tab Content Area */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    <div className="space-y-4 animate-in fade-in duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{activeTab} Pricing</h3>
+                        </div>
+
+                        {currentTabFields.length === 0 && (
+                            <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-500">
+                                <p>No rates configured for {activeTab}.</p>
+                            </div>
+                        )}
+
+                        <div className="space-y-3">
+                            {currentTabFields.map((item) => {
+                                const price = Number(watch(`rates.${item.index}.price`) || 0);
+                                const tax = Number(watch(`rates.${item.index}.tax_percentage`) || 0);
+                                const total = price + (price * (tax / 100));
+
+                                return (
+                                    <div key={item.id} className="grid grid-cols-12 gap-3 items-end bg-white/5 p-4 rounded-xl border border-white/5 relative">
+                                        {/* Hidden Tier Field */}
+                                        <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
+
+                                        {/* Customer Type (Custom Dropdown) */}
+                                        <div className="col-span-4 space-y-1 relative">
+                                            <Label className="text-xs text-zinc-400">Customer Type</Label>
+                                            <div
+                                                className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
+                                                }}
+                                            >
+                                                <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
+                                                    {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
+                                                </span>
+                                                <ChevronDown size={14} className="text-zinc-500" />
+                                            </div>
+
+                                            {/* Dropdown Options */}
+                                            {openDropdownIndex === item.index && (
+                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                    {customerTypes.map(type => (
+                                                        <div
+                                                            key={type.id}
+                                                            className={cn(
+                                                                "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                                watch(`rates.${item.index}.customer_type_id`) === type.id
+                                                                    ? "bg-cyan-500/10 text-cyan-400"
+                                                                    : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                            )}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setValue(`rates.${item.index}.customer_type_id`, type.id);
+                                                                setOpenDropdownIndex(null);
+                                                            }}
+                                                        >
+                                                            {type.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
+
+                                            {errors.rates?.[item.index]?.customer_type_id && (
+                                                <p className="text-xs text-red-500">Required</p>
+                                            )}
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="col-span-2 space-y-1">
+                                            <Label className="text-xs text-zinc-400">Price ($)</Label>
+                                            <div className="relative">
+                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                <input
+                                                    type="number" step="0.01"
+                                                    {...register(`rates.${item.index}.price`)}
+                                                    className={cn(inputClasses, "pl-8 text-right")}
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Tax */}
+                                        <div className="col-span-2 space-y-1">
+                                            <Label className="text-xs text-zinc-400">Tax (%)</Label>
+                                            <div className="relative">
+                                                <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                <input
+                                                    type="number" step="0.01"
+                                                    {...register(`rates.${item.index}.tax_percentage`)}
+                                                    className={cn(inputClasses, "pr-8 text-right")}
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Total (Calculated) */}
+                                        <div className="col-span-3 space-y-1">
+                                            <Label className="text-xs text-zinc-400">Total ($)</Label>
+                                            <div className="relative">
+                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                <div className={cn(inputClasses, "pl-8 text-right bg-white/5 text-zinc-300 cursor-not-allowed")}>
+                                                    {total.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Delete */}
+                                        <div className="col-span-1 flex justify-end pb-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => remove(item.index)}
+                                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
+                            className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-500 hover:text-cyan-400 transition-colors"
+                        >
+                            <Plus size={16} />
+                            Add Row
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex justify-end items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    >
+                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                        Save Schedule
+                    </button>
+                </div>
+            </form>
+        </SidePanel>
+    );
+}

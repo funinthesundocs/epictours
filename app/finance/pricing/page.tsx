@@ -1,108 +1,94 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Users, Plus, Loader2, Search } from "lucide-react";
+import { Coins, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { StaffTable } from "@/features/operations/staff/components/staff-table";
-import { AddStaffSheet } from "@/features/operations/staff/components/add-staff-sheet";
-import { CompensationSheet } from "@/features/operations/staff/components/compensation-sheet";
+import { PricingSchedulesTable } from "@/features/finance/pricing/components/pricing-table";
+import { EditPricingSheet } from "@/features/finance/pricing/components/edit-pricing-sheet";
 
-export default function StaffPage() {
-    const [staff, setStaff] = useState<any[]>([]);
-    const [filteredStaff, setFilteredStaff] = useState<any[]>([]);
+export default function PricingPage() {
+    const [schedules, setSchedules] = useState<any[]>([]);
+    const [filteredSchedules, setFilteredSchedules] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
-    // Sheet States
-    const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-    const [editingStaff, setEditingStaff] = useState<any>(null); // For Add/Edit Sheet
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [editingSchedule, setEditingSchedule] = useState<any>(null);
 
-    const [isCompSheetOpen, setIsCompSheetOpen] = useState(false);
-    const [compStaff, setCompStaff] = useState<{ id: string, name: string } | null>(null); // For Comp Sheet
-
-    const fetchStaff = useCallback(async () => {
+    const fetchSchedules = useCallback(async () => {
         setIsLoading(true);
         try {
             const { data, error } = await supabase
-                .from("staff")
-                .select("*, role:roles(name)")
+                .from("pricing_schedules" as any)
+                .select("*")
                 .order("name");
 
             if (error) throw error;
-            setStaff(data || []);
-            setFilteredStaff(data || []);
+            setSchedules(data || []);
+            setFilteredSchedules(data || []);
         } catch (err) {
-            console.error("Error loading staff:", err);
+            console.error("Error loading schedules:", err);
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchStaff();
-    }, [fetchStaff]);
+        fetchSchedules();
+    }, [fetchSchedules]);
 
-    // Client-side search
+    // Client-side search (Name + Notes)
     useEffect(() => {
         if (!searchQuery.trim()) {
-            setFilteredStaff(staff);
+            setFilteredSchedules(schedules);
             return;
         }
         const lowerQ = searchQuery.toLowerCase();
-        const filtered = staff.filter(s =>
+        const filtered = schedules.filter(s =>
             s.name.toLowerCase().includes(lowerQ) ||
-            s.email?.toLowerCase().includes(lowerQ) ||
-            s.role?.name?.toLowerCase().includes(lowerQ) ||
-            s.phone?.toLowerCase().includes(lowerQ) ||
-            s.messaging_app?.toLowerCase().includes(lowerQ) ||
             s.notes?.toLowerCase().includes(lowerQ)
         );
-        setFilteredStaff(filtered);
-    }, [searchQuery, staff]);
+        setFilteredSchedules(filtered);
+    }, [searchQuery, schedules]);
 
     const handleDelete = async (id: string) => {
         try {
             const { error } = await supabase
-                .from("staff")
+                .from("pricing_schedules" as any)
                 .delete()
                 .eq("id", id);
 
             if (error) throw error;
-            fetchStaff();
+            fetchSchedules();
         } catch (err) {
-            console.error("Error deleting staff:", err);
-            alert("Failed to delete staff.");
+            console.error("Error deleting schedule:", err);
+            alert("Failed to delete schedule.");
         }
     };
 
-    const handleEdit = (staffMember: any) => {
-        setEditingStaff(staffMember);
-        setIsAddSheetOpen(true);
+    const handleEdit = (schedule: any) => {
+        setEditingSchedule(schedule);
+        setIsSheetOpen(true);
     };
 
     const handleAddNew = () => {
-        setEditingStaff(null);
-        setIsAddSheetOpen(true);
-    };
-
-    const handleCompensation = (staffMember: any) => {
-        setCompStaff({ id: staffMember.id, name: staffMember.name });
-        setIsCompSheetOpen(true);
+        setEditingSchedule(null);
+        setIsSheetOpen(true);
     };
 
     return (
         <PageShell
-            title="Staff Management"
-            description="Manage team members, roles, and compensation structures."
-            icon={Users}
+            title="Pricing Schedules"
+            description="Manage multi-tiered pricing structures for your experiences."
+            icon={Coins}
             action={
                 <button
                     onClick={handleAddNew}
                     className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
-                    Add Staff
+                    New Schedule
                 </button>
             }
             className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
@@ -114,7 +100,7 @@ export default function StaffPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                     <input
                         type="text"
-                        placeholder="Search staff..."
+                        placeholder="Search schedules..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
@@ -127,30 +113,21 @@ export default function StaffPage() {
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
-                        <StaffTable
-                            data={filteredStaff}
+                        <PricingSchedulesTable
+                            data={filteredSchedules}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            onCompensation={handleCompensation}
                         />
                     </div>
                 )}
             </div>
 
-            <AddStaffSheet
-                isOpen={isAddSheetOpen}
-                onClose={() => setIsAddSheetOpen(false)}
-                onSuccess={fetchStaff}
-                initialData={editingStaff}
+            <EditPricingSheet
+                isOpen={isSheetOpen}
+                onClose={() => setIsSheetOpen(false)}
+                onSuccess={fetchSchedules}
+                initialData={editingSchedule}
             />
-
-            <CompensationSheet
-                isOpen={isCompSheetOpen}
-                onClose={() => setIsCompSheetOpen(false)}
-                staffId={compStaff?.id || null}
-                staffName={compStaff?.name || ""}
-            />
-
         </PageShell>
     );
 }

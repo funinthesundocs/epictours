@@ -1,5 +1,5 @@
 # 📡 Project Status & Active Mission
-> **Last Updated**: 2026-01-15
+> **Last Updated**: 2026-01-17
 > **Current Phase**: "Experiences Module Finalization"
 
 ## 🟢 Operational Status
@@ -47,7 +47,16 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   **Legal Tab**: Moved Waiver Link, Cancellation Policy, and Restrictions to dedicated tab.
     *   **Ref**: `features/experiences/components/experience-sheet.tsx`.
 
-6.  **[NEXT] Duplicate Check Logic**
+7.  **✅ Pricing Schedules Management**
+    *   **Status**: COMPLETED.
+    *   **Features**:
+        *   **Multi-Tab Sheet**: Modeled after Experiences (Retail, Online, Special, Custom).
+        *   **Dynamic Calculations**: Auto-totaling Price + Tax logic with safe casting.
+        *   **Native Tables**: Implemented high-performance native HTML tables.
+        *   **RLS Policies**: Configured for Public Access during dev.
+    *   **Ref**: `features/finance/pricing/*`, `database/pricing_setup.sql`.
+
+8.  **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 ## 🧠 Memory Dump (Context for Next Session)
@@ -60,3 +69,4 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
 *   **Twin Agent Protocol**: Switch windows -> Run `@[/align]`. No Git Pull needed.
 *   **Context Tagging**: We check for `// @read` tags at the top of complex files.
 *   **Primary Color**: **Teal/Cyan** (`cyan-500`) is the Law. No Purple/Rainbows for status indicators.
+*   **Math Safety**: Always cast form inputs to `Number()` before arithmetic (e.g. `const total = Number(price) + Number(tax)`).

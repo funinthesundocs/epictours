@@ -24,7 +24,8 @@ import {
     UserCog,       // Users Settings
     Shield,        // Permissions
     Layout,        // Dash Settings
-    LayoutTemplate
+    LayoutTemplate,
+    Coins
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -95,7 +96,7 @@ export const navigation: NavSection[] = [
                 ]
             },
             {
-                title: "Staff & Guides",
+                title: "Staff",
                 href: "/operations/staff",
                 icon: Users
             },
@@ -122,6 +123,7 @@ export const navigation: NavSection[] = [
     {
         title: "Finance",
         items: [
+            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
             { title: "Billing", href: "/finance/billing", icon: Receipt },
             { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark },
             { title: "Partners", href: "/finance/partners", icon: Handshake },
@@ -132,7 +134,15 @@ export const navigation: NavSection[] = [
         title: "Settings",
         items: [
             { title: "Organization", href: "/settings/organization", icon: Building2 },
-            { title: "Users", href: "/settings/users", icon: UserCog },
+            {
+                title: "Users",
+                href: "/settings/users",
+                icon: UserCog,
+                children: [
+                    { title: "All Users", href: "/settings/users", icon: UserCog },
+                    { title: "Roles", href: "/settings/users/roles", icon: Shield }
+                ]
+            },
             { title: "Permissions", href: "/settings/permissions", icon: Shield },
             { title: "Dash Settings", href: "/settings/dash", icon: Layout },
         ]
