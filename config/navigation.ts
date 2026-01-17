@@ -25,7 +25,8 @@ import {
     Shield,        // Permissions
     Layout,        // Dash Settings
     LayoutTemplate,
-    Coins
+    Coins,
+    Settings
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -68,6 +69,17 @@ export const navigation: NavSection[] = [
                 title: "Availabilities",
                 href: "/operations/bookings",
                 icon: CalendarRange
+            },
+            {
+                title: "Transportation",
+                href: "/operations/transportation",
+                icon: Bus,
+                children: [
+                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
+                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
+                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
+                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
+                ]
             },
 
 
@@ -120,22 +132,11 @@ export const navigation: NavSection[] = [
                 href: "/settings/dash",
                 icon: Layout,
                 children: [
-                    { title: "Organization", href: "/settings/organization", icon: Building2 },
                     { title: "Experiences", href: "/operations/tours", icon: Map },
+                    { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
                     { title: "Customer Types", href: "/customers/types", icon: Users },
                     { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
                     { title: "Staff", href: "/operations/staff", icon: Users },
-                    {
-                        title: "Transportation",
-                        href: "/operations/transportation",
-                        icon: Bus,
-                        children: [
-                            { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
-                            { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
-                            { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
-                            { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
-                        ]
-                    }
                 ]
             },
         ]
