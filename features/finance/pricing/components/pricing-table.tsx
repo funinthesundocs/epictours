@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2, Search, Coins } from "lucide-react";
+import { Edit2, Trash2, Search, Coins } from "lucide-react";
 
 interface PricingSchedule {
     id: string;
@@ -26,9 +26,9 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
     }
 
     return (
-        <div className="h-full overflow-auto relative rounded-xl border border-white/5 bg-[#0b1115]">
+        <div className="h-full overflow-auto relative">
             <table className="w-full text-left">
-                <thead className="bg-[#0f172a]/50 text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-10 backdrop-blur-sm border-b border-white/5">
+                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
                         <th className="px-6 py-4 font-medium">Notes</th>
@@ -59,13 +59,13 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
 
                             {/* Actions */}
                             <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-end gap-2">
                                     <button
                                         onClick={() => onEdit(schedule)}
                                         className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
                                         title="Edit Schedule"
                                     >
-                                        <Edit size={16} />
+                                        <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => {

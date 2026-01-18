@@ -681,7 +681,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                         className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save className="mr-2" size={16} />}
-                        Save Schedule
+                        Save Booking Options
                     </Button>
                 </div>
             </form>

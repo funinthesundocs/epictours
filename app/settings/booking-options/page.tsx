@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Settings, List } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
+import { PageShell } from "@/components/shell/page-shell";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -97,54 +98,49 @@ export default function BookingOptionsPage() {
     );
 
     return (
-        <div className="flex flex-col h-full bg-[#0b1115] text-white p-6 gap-6 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between shrink-0">
-                <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                            <List size={24} />
-                        </div>
-                        Booking Options
-                    </h1>
-                    <p className="text-zinc-400 mt-1">Configure option schedules for booking flows</p>
-                </div>
-
+        <PageShell
+            title="Booking Options"
+            description="Configure option schedules for booking flows."
+            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
+            action={
                 <Button
                     onClick={handleCreate}
                     className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
                 >
-                    <Plus className="mr-2 h-4 w-4" /> New Schedule
+                    <Plus className="mr-2 h-4 w-4" /> New Booking Option
                 </Button>
-            </div>
-
-            {/* Toolbar */}
-            <div className="flex items-center gap-4 shrink-0">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    <Input
-                        placeholder="Search schedules..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-[#0f172a]/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20"
-                    />
-                </div>
-            </div>
-
-            {/* Table Area */}
-            <div className="flex-1 min-h-0">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-full text-zinc-500 animate-pulse">
-                        Loading schedules...
+            }
+        >
+            <div className="h-full flex flex-col space-y-4">
+                {/* Toolbar */}
+                <div className="flex items-center gap-4 shrink-0">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                        <Input
+                            placeholder="Search schedules..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 bg-[#0f172a]/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20"
+                        />
                     </div>
-                ) : (
-                    <BookingOptionsTable
-                        data={filteredSchedules}
-                        onEdit={handleEdit}
-                        onDuplicate={handleDuplicate}
-                        onDelete={handleDelete}
-                    />
-                )}
+                </div>
+
+                {/* Table Area */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-full text-zinc-500 animate-pulse">
+                            Loading schedules...
+                        </div>
+                    ) : (
+                        <BookingOptionsTable
+                            data={filteredSchedules}
+                            onEdit={handleEdit}
+                            onDuplicate={handleDuplicate}
+                            onDelete={handleDelete}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Edit Sheet */}
@@ -154,6 +150,6 @@ export default function BookingOptionsPage() {
                 onSuccess={fetchSchedules}
                 initialData={editingSchedule}
             />
-        </div>
+        </PageShell>
     );
 }

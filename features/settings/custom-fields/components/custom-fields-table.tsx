@@ -1,11 +1,20 @@
 "use client";
 
-import { Edit, Trash2, Search, Type, List, CheckSquare, Hash, Truck, Heading, Copy, Lock, Globe, Calendar as CalendarIcon, ToggleLeft, ChevronDown } from "lucide-react";
+import { Edit2, Trash2, Search, Type, List, CheckSquare, Hash, Truck, Heading, Copy, Lock, Globe, Calendar as CalendarIcon, ToggleLeft, ChevronDown, ListFilter } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 
 interface CustomField {
     id: string;
@@ -17,8 +26,12 @@ interface CustomField {
     options: any;
 }
 
+export type FilterType = 'all' | 'text' | 'dropdown' | 'checkbox' | 'calendar';
+
 interface CustomFieldsTableProps {
     data: CustomField[];
+    activeFilter: string;
+    onFilterChange: (filter: string) => void;
     onEdit: (field: CustomField) => void;
     onDuplicate: (field: CustomField) => void;
     onDelete: (id: string) => void;
@@ -35,23 +48,65 @@ const TYPE_ICONS: Record<string, any> = {
     date: CalendarIcon
 };
 
-export function CustomFieldsTable({ data, onEdit, onDuplicate, onDelete }: CustomFieldsTableProps) {
+// Filter Categories (Shared Definition)
+const FILTER_OPTS = [
+    { id: "all", label: "All Types" },
+    { id: "text", label: "Text Input" },
+    { id: "dropdown", label: "Drop Down" },
+    { id: "checkbox", label: "Checkbox" },
+    { id: "calendar", label: "Calendar" }
+];
+
+export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, onDuplicate, onDelete }: CustomFieldsTableProps) {
     if (data.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
                 <Search size={48} className="mb-4 opacity-20" />
                 <p>No custom fields found.</p>
+                {activeFilter !== 'all' && (
+                    <Button variant="link" onClick={() => onFilterChange('all')} className="mt-2 text-cyan-400">
+                        Clear Filters
+                    </Button>
+                )}
             </div>
         );
     }
 
     return (
-        <div className="h-full overflow-auto relative rounded-xl border border-white/5 bg-[#0b1115]">
+        <div className="h-full overflow-auto relative">
             <table className="w-full text-left">
-                <thead className="bg-[#0f172a]/50 text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-10 backdrop-blur-sm border-b border-white/5">
+                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Object Name</th>
-                        <th className="px-6 py-4 font-medium">Type</th>
+                        <th className="px-6 py-4 font-medium">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className={cn(
+                                        "flex items-center gap-2 hover:text-white transition-colors outline-none",
+                                        activeFilter !== 'all' && "text-cyan-400"
+                                    )}>
+                                        Type
+                                        {activeFilter !== 'all' ? <ListFilter size={14} /> : <ChevronDown size={14} />}
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-[180px] bg-[#1a1f2e] border-white/10 text-zinc-300">
+                                    <DropdownMenuLabel className="text-xs uppercase text-zinc-500 font-bold">Filter By Type</DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-white/5" />
+                                    {FILTER_OPTS.map((opt) => (
+                                        <DropdownMenuItem
+                                            key={opt.id}
+                                            onClick={() => onFilterChange(opt.id)}
+                                            className={cn(
+                                                "text-xs focus:bg-cyan-500/10 focus:text-cyan-400 cursor-pointer",
+                                                activeFilter === opt.id && "bg-cyan-500/10 text-cyan-400"
+                                            )}
+                                        >
+                                            {opt.label}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </th>
                         <th className="px-6 py-4 font-medium">Visibility</th>
                         <th className="px-6 py-4 font-medium w-[30%]">Object Preview</th>
                         <th className="px-6 py-4 font-medium text-right w-[120px]">Actions</th>
@@ -207,18 +262,18 @@ export function CustomFieldsTable({ data, onEdit, onDuplicate, onDelete }: Custo
                                 <td className="px-6 py-4 text-right align-top">
                                     <div className="flex items-center justify-end gap-2 mt-2">
                                         <button
+                                            onClick={() => onEdit(field)}
+                                            className="p-2 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
+                                            title="Edit Field"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
                                             onClick={() => onDuplicate(field)}
                                             className="p-2 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
                                             title="Duplicate Field"
                                         >
                                             <Copy size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => onEdit(field)}
-                                            className="p-2 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
-                                            title="Edit Field"
-                                        >
-                                            <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => {
