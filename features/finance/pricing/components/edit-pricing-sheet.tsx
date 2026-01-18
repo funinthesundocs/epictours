@@ -12,10 +12,10 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// Zod Schemas
+// Zod Schemas - tier is now dynamic string
 const PricingRateSchema = z.object({
     id: z.string().optional(),
-    tier: z.enum(['Retail', 'Online', 'Special', 'Custom']),
+    tier: z.string().min(1, "Tier required"),
     customer_type_id: z.string().min(1, "Type required"),
     price: z.coerce.number().min(0),
     tax_percentage: z.coerce.number().min(0).max(100).default(0).optional(),
@@ -39,9 +39,12 @@ interface EditPricingSheetProps {
 
 export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: EditPricingSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [activeTab, setActiveTab] = useState<"Retail" | "Online" | "Special" | "Custom">("Retail");
+    const [activeTab, setActiveTab] = useState<string>(""); // Dynamic - will be set from first variation
     const [customerTypes, setCustomerTypes] = useState<{ id: string, name: string, description: string }[]>([]);
+    const [pricingVariations, setPricingVariations] = useState<{ id: string, name: string }[]>([]);
     const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
+    const [isLoadingVariations, setIsLoadingVariations] = useState(true);
+    const [copyToAll, setCopyToAll] = useState(false); // Copy pricing to all variations
 
     const {
         register,
@@ -65,13 +68,37 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         name: "rates"
     });
 
-    // Fetch Customer Types on mount
+    // Fetch Pricing Variations and Customer Types on mount
     useEffect(() => {
-        const fetchTypes = async () => {
-            const { data } = await supabase.from("customer_types" as any).select("id, name, description").order("name");
-            if (data) setCustomerTypes(data as any);
+        const fetchData = async () => {
+            setIsLoadingVariations(true);
+            try {
+                // Fetch Pricing Variations
+                const { data: variations } = await supabase
+                    .from("pricing_variations" as any)
+                    .select("id, name, sort_order")
+                    .order("sort_order", { ascending: true });
+
+                if (variations && variations.length > 0) {
+                    setPricingVariations(variations as any);
+                    // Set first variation as default active tab
+                    setActiveTab((variations as any)[0].name);
+                }
+
+                // Fetch Customer Types
+                const { data: types } = await supabase
+                    .from("customer_types" as any)
+                    .select("id, name, description")
+                    .order("name");
+
+                if (types) setCustomerTypes(types as any);
+            } catch (err) {
+                console.error("Error loading data:", err);
+            } finally {
+                setIsLoadingVariations(false);
+            }
         };
-        fetchTypes();
+        fetchData();
     }, []);
 
     // Load Data on Open
@@ -126,20 +153,40 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             }
 
             // 2. Save Rates (Delete All & Re-insert Strategy for Simplicity)
-            // Ideally use upsert, but delete-insert is safer for "removed" rows
             if (scheduleId) {
                 // Delete old
                 await supabase.from("pricing_rates" as any).delete().eq("schedule_id", scheduleId);
 
-                // Insert new
-                if (data.rates.length > 0) {
-                    const ratesToInsert = data.rates.map(r => ({
+                // Prepare rates to insert
+                let ratesToInsert: any[] = [];
+
+                if (copyToAll && pricingVariations.length > 0) {
+                    // Copy current tab's rates to ALL variations
+                    const currentTabRates = data.rates.filter(r => r.tier === activeTab);
+
+                    for (const variation of pricingVariations) {
+                        for (const rate of currentTabRates) {
+                            ratesToInsert.push({
+                                schedule_id: scheduleId,
+                                customer_type_id: rate.customer_type_id,
+                                tier: variation.name, // Set tier to each variation name
+                                price: rate.price,
+                                tax_percentage: rate.tax_percentage
+                            });
+                        }
+                    }
+                } else {
+                    // Normal save - only save configured rates
+                    ratesToInsert = data.rates.map(r => ({
                         schedule_id: scheduleId,
                         customer_type_id: r.customer_type_id,
                         tier: r.tier,
                         price: r.price,
                         tax_percentage: r.tax_percentage
                     }));
+                }
+
+                if (ratesToInsert.length > 0) {
                     const { error: ratesError } = await supabase.from("pricing_rates" as any).insert(ratesToInsert);
                     if (ratesError) throw ratesError;
                 }
@@ -160,19 +207,19 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
     // Helper to get fields for current tab
     const currentTabFields = fields.map((field, index) => ({ ...field, index })).filter(f => f.tier === activeTab);
 
-    // Tab Button Component (Copied from ExperienceSheet)
-    const TabButton = ({ id, label }: { id: typeof activeTab, label: string }) => (
+    // Dynamic Tab Button Component
+    const TabButton = ({ variationName }: { variationName: string }) => (
         <button
             type="button"
-            onClick={() => setActiveTab(id)}
+            onClick={() => setActiveTab(variationName)}
             className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
-                activeTab === id
+                "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors min-w-0",
+                activeTab === variationName
                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
                     : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
             )}
         >
-            {label}
+            <span className="truncate">{variationName} Rates</span>
         </button>
     );
 
@@ -187,7 +234,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             width="w-[85vw] max-w-4xl"
             contentClassName="p-0"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-0 h-full flex flex-col">
+            <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="pb-12 pt-0 h-full flex flex-col">
 
                 {/* Header Fields (Always Visible) */}
                 <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
@@ -204,151 +251,176 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                     </div>
                 </div>
 
-                {/* Tabs Header */}
-                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10 px-6">
-                    <TabButton id="Retail" label="Retail Rates" />
-                    <TabButton id="Online" label="Online Rates" />
-                    <TabButton id="Special" label="Special Rates" />
-                    <TabButton id="Custom" label="Custom Rates" />
+                {/* Dynamic Tabs Header */}
+                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10 px-6 overflow-x-auto">
+                    {isLoadingVariations ? (
+                        <div className="flex items-center justify-center py-3 w-full">
+                            <Loader2 className="animate-spin text-zinc-500" size={16} />
+                            <span className="ml-2 text-zinc-500 text-sm">Loading variations...</span>
+                        </div>
+                    ) : pricingVariations.length === 0 ? (
+                        <div className="py-3 text-zinc-500 text-sm w-full text-center">
+                            No pricing variations configured. Add some in Settings → Pricing Variations.
+                        </div>
+                    ) : (
+                        pricingVariations.map(v => (
+                            <TabButton key={v.id} variationName={v.name} />
+                        ))
+                    )}
                 </div>
 
                 {/* Tab Content Area */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    <div className="space-y-4 animate-in fade-in duration-300">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{activeTab} Pricing</h3>
-                        </div>
-
-                        {currentTabFields.length === 0 && (
-                            <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-500">
-                                <p>No rates configured for {activeTab}.</p>
+                    {pricingVariations.length > 0 && activeTab && (
+                        <div className="space-y-4 animate-in fade-in duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{activeTab} Pricing</h3>
                             </div>
-                        )}
 
-                        <div className="space-y-3">
-                            {currentTabFields.map((item) => {
-                                const price = Number(watch(`rates.${item.index}.price`) || 0);
-                                const tax = Number(watch(`rates.${item.index}.tax_percentage`) || 0);
-                                const total = price + (price * (tax / 100));
+                            {currentTabFields.length === 0 && (
+                                <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-500">
+                                    <p>No rates configured for {activeTab}.</p>
+                                </div>
+                            )}
 
-                                return (
-                                    <div key={item.id} className="grid grid-cols-12 gap-3 items-end bg-white/5 p-4 rounded-xl border border-white/5 relative">
-                                        {/* Hidden Tier Field */}
-                                        <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
+                            <div className="space-y-3">
+                                {currentTabFields.map((item) => {
+                                    const price = Number(watch(`rates.${item.index}.price`) || 0);
+                                    const tax = Number(watch(`rates.${item.index}.tax_percentage`) || 0);
+                                    const total = price + (price * (tax / 100));
 
-                                        {/* Customer Type (Custom Dropdown) */}
-                                        <div className="col-span-4 space-y-1 relative">
-                                            <Label className="text-xs text-zinc-400">Customer Type</Label>
-                                            <div
-                                                className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
-                                                }}
-                                            >
-                                                <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
-                                                    {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
-                                                </span>
-                                                <ChevronDown size={14} className="text-zinc-500" />
-                                            </div>
+                                    return (
+                                        <div key={item.id} className="grid grid-cols-12 gap-3 items-end bg-white/5 p-4 rounded-xl border border-white/5 relative">
+                                            {/* Hidden Tier Field - uses activeTab dynamically */}
+                                            <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
 
-                                            {/* Dropdown Options */}
-                                            {openDropdownIndex === item.index && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                                    {customerTypes.map(type => (
-                                                        <div
-                                                            key={type.id}
-                                                            className={cn(
-                                                                "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                watch(`rates.${item.index}.customer_type_id`) === type.id
-                                                                    ? "bg-cyan-500/10 text-cyan-400"
-                                                                    : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                            )}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setValue(`rates.${item.index}.customer_type_id`, type.id);
-                                                                setOpenDropdownIndex(null);
-                                                            }}
-                                                        >
-                                                            {type.name}
-                                                        </div>
-                                                    ))}
+                                            {/* Customer Type (Custom Dropdown) */}
+                                            <div className="col-span-4 space-y-1 relative">
+                                                <Label className="text-xs text-zinc-400">Customer Type</Label>
+                                                <div
+                                                    className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
+                                                    }}
+                                                >
+                                                    <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
+                                                        {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
+                                                    </span>
+                                                    <ChevronDown size={14} className="text-zinc-500" />
                                                 </div>
-                                            )}
 
-                                            <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
+                                                {/* Dropdown Options */}
+                                                {openDropdownIndex === item.index && (
+                                                    <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                        {customerTypes.map(type => (
+                                                            <div
+                                                                key={type.id}
+                                                                className={cn(
+                                                                    "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                                    watch(`rates.${item.index}.customer_type_id`) === type.id
+                                                                        ? "bg-cyan-500/10 text-cyan-400"
+                                                                        : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                                )}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setValue(`rates.${item.index}.customer_type_id`, type.id);
+                                                                    setOpenDropdownIndex(null);
+                                                                }}
+                                                            >
+                                                                {type.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
 
-                                            {errors.rates?.[item.index]?.customer_type_id && (
-                                                <p className="text-xs text-red-500">Required</p>
-                                            )}
-                                        </div>
+                                                <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
 
-                                        {/* Price */}
-                                        <div className="col-span-2 space-y-1">
-                                            <Label className="text-xs text-zinc-400">Price ($)</Label>
-                                            <div className="relative">
-                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                <input
-                                                    type="number" step="0.01"
-                                                    {...register(`rates.${item.index}.price`)}
-                                                    className={cn(inputClasses, "pl-8 text-right")}
-                                                    placeholder="0.00"
-                                                />
+                                                {errors.rates?.[item.index]?.customer_type_id && (
+                                                    <p className="text-xs text-red-500">Required</p>
+                                                )}
                                             </div>
-                                        </div>
 
-                                        {/* Tax */}
-                                        <div className="col-span-2 space-y-1">
-                                            <Label className="text-xs text-zinc-400">Tax (%)</Label>
-                                            <div className="relative">
-                                                <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                <input
-                                                    type="number" step="0.01"
-                                                    {...register(`rates.${item.index}.tax_percentage`)}
-                                                    className={cn(inputClasses, "pr-8 text-right")}
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Total (Calculated) */}
-                                        <div className="col-span-3 space-y-1">
-                                            <Label className="text-xs text-zinc-400">Total ($)</Label>
-                                            <div className="relative">
-                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                <div className={cn(inputClasses, "pl-8 text-right bg-white/5 text-zinc-300 cursor-not-allowed")}>
-                                                    {total.toFixed(2)}
+                                            {/* Price */}
+                                            <div className="col-span-2 space-y-1">
+                                                <Label className="text-xs text-zinc-400">Price ($)</Label>
+                                                <div className="relative">
+                                                    <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                    <input
+                                                        type="number" step="0.01"
+                                                        {...register(`rates.${item.index}.price`)}
+                                                        className={cn(inputClasses, "pl-8 text-right")}
+                                                        placeholder="0.00"
+                                                    />
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Delete */}
-                                        <div className="col-span-1 flex justify-end pb-1">
-                                            <button
-                                                type="button"
-                                                onClick={() => remove(item.index)}
-                                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            {/* Tax */}
+                                            <div className="col-span-2 space-y-1">
+                                                <Label className="text-xs text-zinc-400">Tax (%)</Label>
+                                                <div className="relative">
+                                                    <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                    <input
+                                                        type="number" step="0.01"
+                                                        {...register(`rates.${item.index}.tax_percentage`)}
+                                                        className={cn(inputClasses, "pr-8 text-right")}
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Total (Calculated) */}
+                                            <div className="col-span-3 space-y-1">
+                                                <Label className="text-xs text-zinc-400">Total ($)</Label>
+                                                <div className="relative">
+                                                    <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                    <div className={cn(inputClasses, "pl-8 text-right bg-white/5 text-zinc-300 cursor-not-allowed")}>
+                                                        {total.toFixed(2)}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Delete */}
+                                            <div className="col-span-1 flex justify-end pb-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => remove(item.index)}
+                                                    className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
+                                className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-500 hover:text-cyan-400 transition-colors"
+                            >
+                                <Plus size={16} />
+                                Add Row
+                            </button>
                         </div>
-
-                        <button
-                            type="button"
-                            onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                            className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-500 hover:text-cyan-400 transition-colors"
-                        >
-                            <Plus size={16} />
-                            Add Row
-                        </button>
-                    </div>
+                    )}
                 </div>
 
-                <div className="flex justify-end items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    {/* Copy to All Checkbox */}
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                            type="checkbox"
+                            checked={copyToAll}
+                            onChange={(e) => setCopyToAll(e.target.checked)}
+                            className="w-4 h-4 rounded border-white/20 bg-black/30 text-cyan-500 focus:ring-cyan-500/50 focus:ring-offset-0 cursor-pointer"
+                        />
+                        <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                            Copy to all variations
+                        </span>
+                    </label>
+
                     <button
                         type="submit"
                         disabled={isSubmitting}
@@ -362,3 +434,4 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         </SidePanel>
     );
 }
+

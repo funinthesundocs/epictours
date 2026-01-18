@@ -69,6 +69,19 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
 9.  **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
+10. **✅ Pricing Variations Module**
+    *   **Status**: COMPLETED.
+    *   **Features**:
+        *   Full CRUD with drag-and-drop priority ordering (`sort_order`).
+        *   Dynamic tabs in Pricing Schedules driven by this table.
+        *   "Copy to All Variations" checkbox for bulk rate application.
+    *   **DB Changes**: Added `sort_order` column, dropped `tier` CHECK constraint.
+    *   **Ref**: `features/settings/pricing-variations/*`, `database/pricing_variations_setup.sql`.
+
+11. **✅ Settings Navigation Flattened**
+    *   **Status**: COMPLETED.
+    *   Removed "Setup" subfolder, all items now direct children of Settings.
+
 ## 🧠 Memory Dump (Context for Next Session)
 *   **Workflow Shortcodes**:
     *   `@[/refresh]`: Kill 3000 -> Nuke Cache -> Build -> Start (Local Only).

@@ -31,3 +31,14 @@
 
 ## 5. Known Benign Warnings
 *   **GoTrueClient**: "Multiple GoTrueClient instances detected" in the console is a known benign warning in this dev environment and can be ignored.
+
+## 6. Testing Protocol
+*   **Skip Automated Browser Testing**: The browser subagent is thorough but SLOW.
+*   **Preferred Flow**: Build → Start Server → Ask user to manually test → Get feedback.
+*   **When to use browser**: Only for demo recordings or walkthroughs when user explicitly requests.
+
+## 7. Dynamic Database Fields
+*   **Avoid CHECK constraints** on fields that may become dynamic (e.g., `tier`, `status`, `type`).
+*   **Pattern**: Use `TEXT NOT NULL` instead of `TEXT CHECK (IN ('A', 'B', 'C'))`.
+*   **Migration**: If constraint exists, drop with `ALTER TABLE x DROP CONSTRAINT constraint_name;`
+

@@ -41,3 +41,14 @@
 *   **The Crime**: Running `git pull` just to restart the local server.
 *   **The Consequence**: Wastes 5 seconds checking GitHub for code you already have on disk.
 *   **The Fix**: Use `@[/refresh]` (Local Kill -> Nuke -> Build -> Start). Only pull when you know remote has changes.
+
+## 10. The "Browser Test Everything" Slowdown
+*   **The Crime**: Using browser subagent to verify every single UI change.
+*   **The Consequence**: 3-5 minute delays per test. User frustration. Queue timeouts.
+*   **The Fix**: Build, start server, ask user to test. Reserve browser for recordings only.
+
+## 11. The "Hardcoded Enum" Constraint Trap
+*   **The Crime**: Using `CHECK (tier IN ('Retail', 'Online'))` on columns meant to be dynamic.
+*   **The Consequence**: Dynamic data (from related tables) gets rejected. 400 errors.
+*   **The Fix**: Use plain `TEXT NOT NULL`. Validate at application layer if needed.
+

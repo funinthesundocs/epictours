@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS pricing_rates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     schedule_id UUID REFERENCES pricing_schedules(id) ON DELETE CASCADE NOT NULL,
     customer_type_id UUID REFERENCES customer_types(id) ON DELETE CASCADE, -- Optional if type deleted? Or strict?
-    tier TEXT NOT NULL CHECK (tier IN ('Retail', 'Online', 'Special', 'Custom')),
+    tier TEXT NOT NULL, -- Dynamic: stores pricing variation name from pricing_variations table
     price DECIMAL(10, 2) DEFAULT 0.00,
     tax_percentage DECIMAL(5, 2) DEFAULT 0.00,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,

@@ -133,6 +133,7 @@ export const navigation: NavSection[] = [
             { title: "Booking Options", href: "/settings/booking-options", icon: List },
             { title: "Customer Types", href: "/customers/types", icon: Users },
             { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
+            { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers },
             { title: "Staff", href: "/operations/staff", icon: Users },
         ]
     }
