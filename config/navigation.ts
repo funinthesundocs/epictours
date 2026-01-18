@@ -128,19 +128,12 @@ export const navigation: NavSection[] = [
                 ]
             },
             { title: "Permissions", href: "/settings/permissions", icon: Shield },
-            {
-                title: "Setup",
-                href: "/settings/dash",
-                icon: Layout,
-                children: [
-                    { title: "Experiences", href: "/operations/tours", icon: Map },
-                    { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
-                    { title: "Booking Options", href: "/settings/booking-options", icon: List },
-                    { title: "Customer Types", href: "/customers/types", icon: Users },
-                    { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
-                    { title: "Staff", href: "/operations/staff", icon: Users },
-                ]
-            },
+            { title: "Experiences", href: "/operations/tours", icon: Map },
+            { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
+            { title: "Booking Options", href: "/settings/booking-options", icon: List },
+            { title: "Customer Types", href: "/customers/types", icon: Users },
+            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
+            { title: "Staff", href: "/operations/staff", icon: Users },
         ]
     }
 ];
