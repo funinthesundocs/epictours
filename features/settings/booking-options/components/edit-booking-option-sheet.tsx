@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, Copy, List, Eye, EyeOff } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, Copy, List, Eye, EyeOff, Calendar as CalendarIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -61,13 +61,105 @@ type BookingOptionScheduleFormData = z.infer<typeof BookingOptionScheduleSchema>
 interface SortableItemProps {
     id: string;
     item: any;
+    fieldDef?: any; // Full field definition with options
     index: number;
     onRemove: () => void;
     onToggleRequired: (val: boolean) => void;
     onTogglePublic: (val: boolean) => void;
 }
 
-function SortableItem({ id, item, index, onRemove, onToggleRequired, onTogglePublic }: SortableItemProps) {
+// --- Field Preview Component ---
+function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
+    const inputClasses = "w-full bg-black/30 border border-white/10 rounded-md px-3 py-2 text-sm text-white placeholder:text-zinc-600 flex items-center";
+
+    if (type === 'text' || type === 'textarea') {
+        return (
+            <div className={cn(inputClasses, type === 'textarea' ? 'h-12 items-start' : '')}>
+                <span className="opacity-40 italic text-xs">{type === 'textarea' ? 'Multi-line text...' : 'Text input...'}</span>
+            </div>
+        );
+    }
+
+    if (type === 'select' || type === 'quantity') {
+        const options = fieldDef?.options || [];
+        return (
+            <div className="relative group/preview">
+                <div className={cn(inputClasses, "justify-between cursor-default group-hover/preview:border-cyan-500/30 transition-colors")}>
+                    <span className="text-zinc-500 text-xs">Select option...</span>
+                    <ChevronDown size={14} className="text-zinc-600" />
+                </div>
+                {options.length > 0 && (
+                    <div className="absolute top-full left-0 mt-1 w-full bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl z-30 hidden group-hover/preview:block py-1">
+                        {options.slice(0, 3).map((o: any) => (
+                            <div key={o.value} className="px-3 py-1.5 text-xs text-zinc-300 hover:bg-cyan-500/10 hover:text-cyan-400">
+                                {o.label}
+                            </div>
+                        ))}
+                        {options.length > 3 && (
+                            <div className="px-3 py-1.5 text-xs text-zinc-500 italic border-t border-white/5">
+                                +{options.length - 3} more
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    if (type === 'checkbox') {
+        const options = fieldDef?.options || [{ label: 'Option A' }, { label: 'Option B' }];
+        const isMulti = fieldDef?.options?.settings?.allow_multiselect;
+        return (
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {options.slice(0, 3).map((opt: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2">
+                        <div className={cn(
+                            "w-3 h-3 border border-white/30 flex-shrink-0",
+                            isMulti ? "rounded" : "rounded-full"
+                        )} />
+                        <span className="text-xs text-zinc-500">{opt.label}</span>
+                    </div>
+                ))}
+                {options.length > 3 && <span className="text-xs text-zinc-600">+{options.length - 3}</span>}
+            </div>
+        );
+    }
+
+    if (type === 'date') {
+        return (
+            <div className={cn(inputClasses, "justify-between")}>
+                <span className="text-zinc-500 text-xs">Pick a date...</span>
+                <CalendarIcon size={14} className="text-zinc-600" />
+            </div>
+        );
+    }
+
+    if (type === 'header') {
+        return (
+            <div className="border-b border-cyan-500/30 pb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">{fieldDef?.label || 'Section'}</span>
+            </div>
+        );
+    }
+
+    if (type === 'transport') {
+        return (
+            <div className={cn(inputClasses, "justify-between")}>
+                <span className="text-zinc-500 text-xs">Select Hotel...</span>
+                <ChevronDown size={14} className="text-zinc-600" />
+            </div>
+        );
+    }
+
+    // Default fallback
+    return (
+        <div className={inputClasses}>
+            <span className="opacity-40 italic text-xs">Field preview</span>
+        </div>
+    );
+}
+
+function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, onTogglePublic }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -88,57 +180,64 @@ function SortableItem({ id, item, index, onRemove, onToggleRequired, onTogglePub
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/5 group hover:border-white/10 transition-colors"
+            className="bg-white/5 p-4 rounded-lg border border-white/5 group hover:border-white/10 transition-colors"
         >
-            {/* Drag Handle */}
-            <div {...attributes} {...listeners} className="cursor-grab text-zinc-600 hover:text-zinc-400 p-1">
-                <GripVertical size={16} />
-            </div>
-
-            {/* Field Info */}
-            <div className="flex-1">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-200">{item.label || "Unknown Field"}</span>
-                    <span className="text-[10px] uppercase bg-black/40 text-zinc-500 px-1.5 py-0.5 rounded border border-white/5">{item.type || "field"}</span>
+            {/* Top Row: Label + Controls */}
+            <div className="flex items-center gap-3 mb-3">
+                {/* Drag Handle */}
+                <div {...attributes} {...listeners} className="cursor-grab text-zinc-600 hover:text-zinc-400 p-1">
+                    <GripVertical size={16} />
                 </div>
-            </div>
 
-            {/* Visibility Toggle */}
-            {/* Visibility Toggle (Private) */}
-            <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
-                <span
-                    onClick={() => onTogglePublic(!item.is_public)}
-                    className={cn("text-xs font-medium transition-colors cursor-pointer select-none", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                {/* Field Info */}
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-zinc-200">{item.label || "Unknown Field"}</span>
+                        <span className="text-[10px] uppercase bg-black/40 text-zinc-500 px-1.5 py-0.5 rounded border border-white/5">{item.type || "field"}</span>
+                    </div>
+                </div>
+
+                {/* Visibility Toggle */}
+                <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
+                    <span
+                        onClick={() => onTogglePublic(!item.is_public)}
+                        className={cn("text-xs font-medium transition-colors cursor-pointer select-none", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                    >
+                        {!item.is_public ? "Private" : "Public"}
+                    </span>
+                    <Switch
+                        checked={!item.is_public}
+                        onCheckedChange={(val) => onTogglePublic(!val)}
+                        className="data-[state=checked]:bg-cyan-500"
+                    />
+                </div>
+
+                {/* Required Toggle */}
+                <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
+                    <span className={cn("text-xs font-medium", item.required ? "text-cyan-400" : "text-zinc-500")}>
+                        {item.required ? "Required" : "Optional"}
+                    </span>
+                    <Switch
+                        checked={item.required}
+                        onCheckedChange={onToggleRequired}
+                        className="data-[state=checked]:bg-cyan-500"
+                    />
+                </div>
+
+                {/* Remove */}
+                <button
+                    type="button"
+                    onClick={onRemove}
+                    className="text-zinc-600 hover:text-red-400 p-1 transition-colors"
                 >
-                    {!item.is_public ? "Private" : "Public"}
-                </span>
-                <Switch
-                    checked={!item.is_public}
-                    onCheckedChange={(val) => onTogglePublic(!val)}
-                    className="data-[state=checked]:bg-cyan-500"
-                />
+                    <Trash2 size={16} />
+                </button>
             </div>
 
-            {/* Required Toggle */}
-            <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
-                <span className={cn("text-xs font-medium", item.required ? "text-cyan-400" : "text-zinc-500")}>
-                    {item.required ? "Required" : "Optional"}
-                </span>
-                <Switch
-                    checked={item.required}
-                    onCheckedChange={onToggleRequired}
-                    className="data-[state=checked]:bg-cyan-500"
-                />
+            {/* Bottom Row: Visual Preview */}
+            <div className="ml-9 mr-2">
+                <FieldPreview type={item.type} fieldDef={fieldDef} />
             </div>
-
-            {/* Remove */}
-            <button
-                type="button"
-                onClick={onRemove}
-                className="text-zinc-600 hover:text-red-400 p-1 transition-colors"
-            >
-                <Trash2 size={16} />
-            </button>
         </div>
     );
 }
@@ -252,10 +351,10 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 id: initialData.id,
                 name: initialData.name,
                 description: initialData.description,
-                config_retail: initialData.config_retail || [],
-                config_online: initialData.config_online || [],
-                config_special: initialData.config_special || [],
-                config_custom: initialData.config_custom || []
+                config_retail: hydrateConfig(initialData.config_retail || []),
+                config_online: hydrateConfig(initialData.config_online || []),
+                config_special: hydrateConfig(initialData.config_special || []),
+                config_custom: hydrateConfig(initialData.config_custom || [])
             });
         } else if (isOpen) {
             reset({
@@ -412,7 +511,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             width="w-[85vw] max-w-4xl"
             contentClassName="p-0"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-0 h-full flex flex-col">
+            <form onSubmit={handleSubmit(onSubmit, (errors) => console.error("Form Validation Errors:", errors))} className="pb-12 pt-0 h-full flex flex-col">
                 {/* Header Config */}
                 <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -530,6 +629,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                                             key={field.id}
                                             id={field.id}
                                             item={displayItem}
+                                            fieldDef={fieldDef}
                                             index={index}
                                             onRemove={() => currentArray.remove(index)}
                                             onToggleRequired={(val) => {
