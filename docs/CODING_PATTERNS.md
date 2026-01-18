@@ -28,3 +28,6 @@
 ## 4. Navigation
 *   **Structure**: Group related items into Categories (Collapsible or Headings).
 *   **Icons**: Consistent usage across sidebar and pages.
+
+## 5. Known Benign Warnings
+*   **GoTrueClient**: "Multiple GoTrueClient instances detected" in the console is a known benign warning in this dev environment and can be ignored.

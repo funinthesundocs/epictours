@@ -26,7 +26,8 @@ import {
     Layout,        // Dash Settings
     LayoutTemplate,
     Coins,
-    Settings
+    Settings,
+    List
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -134,6 +135,7 @@ export const navigation: NavSection[] = [
                 children: [
                     { title: "Experiences", href: "/operations/tours", icon: Map },
                     { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
+                    { title: "Booking Options", href: "/settings/booking-options", icon: List },
                     { title: "Customer Types", href: "/customers/types", icon: Users },
                     { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
                     { title: "Staff", href: "/operations/staff", icon: Users },

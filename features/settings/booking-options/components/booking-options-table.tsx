@@ -1,0 +1,120 @@
+"use client";
+
+import { Edit, Trash2, Search, Copy, Calendar, List, CheckSquare } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+
+interface BookingOptionSchedule {
+    id: string;
+    name: string;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
+    config_retail: any[];
+    config_online: any[];
+    config_special: any[];
+    config_custom: any[];
+}
+
+interface BookingOptionsTableProps {
+    data: BookingOptionSchedule[];
+    onEdit: (schedule: BookingOptionSchedule) => void;
+    onDuplicate: (schedule: BookingOptionSchedule) => void;
+    onDelete: (id: string) => void;
+}
+
+export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: BookingOptionsTableProps) {
+    if (data.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
+                <Search size={48} className="mb-4 opacity-20" />
+                <p>No booking option schedules found.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-full overflow-auto relative rounded-xl border border-white/5 bg-[#0b1115]">
+            <table className="w-full text-left">
+                <thead className="bg-[#0f172a]/50 text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-10 backdrop-blur-sm border-b border-white/5">
+                    <tr>
+                        <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
+                        <th className="px-6 py-4 font-medium w-[40%]">Description</th>
+                        <th className="px-6 py-4 font-medium">Field Count</th>
+                        <th className="px-6 py-4 font-medium text-right w-[120px]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    {data.map((schedule) => {
+                        // Calculate total unique fields across configs or just show Retail count as proxy
+                        const fieldCount = (schedule.config_retail?.length || 0);
+
+                        return (
+                            <tr key={schedule.id} className="hover:bg-white/5 transition-colors group">
+                                {/* Name */}
+                                <td className="px-6 py-4 font-medium text-white align-top">
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                            <List size={16} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span>{schedule.name}</span>
+                                            <span className="text-xs text-zinc-500 font-normal">Created {new Date(schedule.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {/* Description */}
+                                <td className="px-6 py-4 align-top">
+                                    <div className="pt-3 text-zinc-400">
+                                        {schedule.description || <span className="opacity-30 italic">No description</span>}
+                                    </div>
+                                </td>
+
+                                {/* Count */}
+                                <td className="px-6 py-4 align-top">
+                                    <div className="flex items-center gap-2 pt-3">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-400">
+                                            {fieldCount} Fields
+                                        </span>
+                                    </div>
+                                </td>
+
+                                {/* Actions */}
+                                <td className="px-6 py-4 text-right align-top">
+                                    <div className="flex items-center justify-end gap-2 mt-2">
+                                        <button
+                                            onClick={() => onDuplicate(schedule)}
+                                            className="p-2 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+                                            title="Duplicate Schedule"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => onEdit(schedule)}
+                                            className="p-2 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
+                                            title="Edit Schedule"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm("Are you sure? This action cannot be undone.")) {
+                                                    onDelete(schedule.id);
+                                                }
+                                            }}
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            title="Delete Schedule"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
+}

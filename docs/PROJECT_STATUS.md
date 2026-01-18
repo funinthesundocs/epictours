@@ -56,7 +56,17 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   **RLS Policies**: Configured for Public Access during dev.
     *   **Ref**: `features/finance/pricing/*`, `database/pricing_setup.sql`.
 
-8.  **[NEXT] Duplicate Check Logic**
+8.  **✅ Booking Options Management**
+    *   **Status**: COMPLETED (UI/Structure only).
+    *   **Known Defect**: "Save Schedule" silently fails. Debugging was inconclusive and is DEFERRED.
+    *   **Features**:
+        *   Multi-tab Schedule Builder (Retail, Online, Special, Custom).
+        *   Drag-and-Drop Reordering (`dnd-kit`).
+        *   "Save to All Variations" Logic.
+        *   "Public/Private" Visibility Toggle.
+    *   **Ref**: `features/settings/booking-options/*`, `database/booking_options_setup.sql`.
+
+9.  **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 ## 🧠 Memory Dump (Context for Next Session)
