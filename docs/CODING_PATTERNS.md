@@ -43,3 +43,11 @@
 *   **Pattern**: Use `TEXT NOT NULL` instead of `TEXT CHECK (IN ('A', 'B', 'C'))`.
 *   **Migration**: If constraint exists, drop with `ALTER TABLE x DROP CONSTRAINT constraint_name;`
 
+## 8. Dark Theme Date/Time Pickers
+*   **Problem**: Browser native date/time pickers default to light theme calendar popups.
+*   **Solution**: Add `style={{ colorScheme: 'dark' }}` to date/time inputs.
+*   **Example**:
+    ```tsx
+    <input type="date" style={{ colorScheme: 'dark' }} />
+    <input type="time" style={{ colorScheme: 'dark' }} />
+    ```

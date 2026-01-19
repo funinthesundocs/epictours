@@ -1,6 +1,6 @@
 # 📡 Project Status & Active Mission
-> **Last Updated**: 2026-01-17
-> **Current Phase**: "Experiences Module Finalization"
+> **Last Updated**: 2026-01-18
+> **Current Phase**: "Availability Module Refinements"
 
 ## 🟢 Operational Status
 *   **EpicTours Core**: ✅ Initialized
@@ -92,6 +92,20 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
 11. **✅ Settings Navigation Flattened**
     *   **Status**: COMPLETED.
     *   Removed "Setup" subfolder, all items now direct children of Settings.
+
+12. **✅ Edit Availability Sheet**
+    *   **Status**: COMPLETED (UI/Layout).
+    *   **Features**:
+        *   2-Column Layout (85vw, 33%/67% split matching ExperienceSheet)
+        *   Staff Assignment (Driver/Guide filter from staff table, "Name (Role)" display)
+        *   Route Schedule Integration (from schedules table)
+        *   Customer Types section with dedicated Smile icon header
+        *   Default all 7 days selected on Repeat click
+        *   Dark theme date/time pickers (`colorScheme: 'dark'`)
+        *   Standardized button sizes (`px-4 py-2.5`)
+        *   Header spacing improvements (`pb-4`)
+    *   **Ref**: `features/availability/components/edit-availability-sheet.tsx`.
+
 
 ## 🧠 Memory Dump (Context for Next Session)
 *   **Workflow Shortcodes**:

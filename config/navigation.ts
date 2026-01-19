@@ -123,7 +123,7 @@ export const navigation: NavSection[] = [
                 href: "/settings/users",
                 icon: UserCog,
                 children: [
-                    { title: "All Users", href: "/settings/users", icon: UserCog },
+                    { title: "Staff", href: "/operations/staff", icon: Users },
                     { title: "Roles", href: "/settings/users/roles", icon: Shield }
                 ]
             },
@@ -134,7 +134,6 @@ export const navigation: NavSection[] = [
             { title: "Customer Types", href: "/customers/types", icon: Users },
             { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
             { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers },
-            { title: "Staff", href: "/operations/staff", icon: Users },
         ]
     }
 ];

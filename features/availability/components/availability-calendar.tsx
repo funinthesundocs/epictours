@@ -13,7 +13,13 @@ import {
     Check
 } from "lucide-react";
 
-export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: string, name: string, short_code?: string }[] }) {
+export function AvailabilityCalendar({
+    experiences = [],
+    onEventClick
+}: {
+    experiences: { id: string, name: string, short_code?: string }[],
+    onEventClick?: (date: string) => void
+}) {
     const [currentDate, setCurrentDate] = useState(new Date()); // Dynamic Date
     // Default to first available experience or fallback
     const [selectedExperience, setSelectedExperience] = useState(experiences[0]?.name || "Mauna Kea Summit");
@@ -182,7 +188,7 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
 
             {/* CALENDAR CONTENT AREA */}
             <div className="flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-                <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} />
+                <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} onEventClick={onEventClick} />
             </div>
         </div>
     );
@@ -190,7 +196,12 @@ export function AvailabilityCalendar({ experiences = [] }: { experiences: { id: 
 
 // --- SUB-COMPONENTS ---
 
-function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperience: string, abbr: string, currentDate: Date }) {
+function MonthView({ selectedExperience, abbr, currentDate, onEventClick }: {
+    selectedExperience: string,
+    abbr: string,
+    currentDate: Date,
+    onEventClick?: (date: string) => void
+}) {
     // EXP_ABBR removed. Using prop 'abbr' directly.
 
     // Simple helper to match current real-world day for highlighting
@@ -209,16 +220,21 @@ function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperien
                 const day = i - 2;
                 const isToday = isCurrentMonth && day === today.getDate();
 
+                // Build date string for this cell
+                const cellDate = day > 0 && day <= 31
+                    ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                    : null;
+
                 return (
                     <div key={i} className={cn(
-                        "bg-black relative group transition-colors hover:bg-zinc-900/50 p-2 min-h-[100px] flex flex-col pl-3 pt-3", // Added padding
+                        "bg-black relative group transition-colors hover:bg-zinc-900/50 p-2 min-h-[100px] flex flex-col pl-3 pt-3",
                         isToday && "bg-cyan-950/20"
                     )}>
                         {day > 0 && day <= 31 && (
                             <>
                                 <span className={cn(
                                     "text-sm font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
-                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300" // Updated to Primary Teal (Cyan) with glow
+                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300"
                                 )}>{day}</span>
 
                                 {/* Event Chips (Daily Mock Data) */}
@@ -229,6 +245,7 @@ function MonthView({ selectedExperience, abbr, currentDate }: { selectedExperien
                                     bookings="10"
                                     cap="10 / 29 Capacity"
                                     note="Need Min of 25"
+                                    onClick={() => cellDate && onEventClick?.(cellDate)}
                                 />
                             </>
                         )}
@@ -273,14 +290,16 @@ function EventChip({
     time,
     bookings,
     cap,
-    note
+    note,
+    onClick
 }: {
     color: string,
     abbr: string,
     time: string,
     bookings: string,
     cap: string,
-    note?: string
+    note?: string,
+    onClick?: () => void
 }) {
     const colorStyles: Record<string, string> = {
         indigo: "bg-indigo-600/90 hover:bg-indigo-500 border-l-[3px] border-indigo-400",
@@ -293,7 +312,10 @@ function EventChip({
     const style = colorStyles[color] || colorStyles.indigo;
 
     return (
-        <div className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-colors backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content]", style)}>
+        <div
+            className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-colors backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content]", style)}
+            onClick={onClick}
+        >
             <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
             <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
             <span className="text-white font-bold text-xs leading-tight">{bookings} Bookings</span>

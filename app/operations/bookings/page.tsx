@@ -1,5 +1,5 @@
 import { PageShell } from "@/components/shell/page-shell";
-import { AvailabilityCalendar } from "@/features/availability/components/availability-calendar";
+import { AvailabilityCalendarWrapper } from "@/features/availability/components/availability-calendar-wrapper";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,8 @@ export default async function BookingsPage() {
             title="Availability Calendar"
             description="Publish and Manage Your Availabilities"
         >
-            <AvailabilityCalendar experiences={experiences || []} />
+            <AvailabilityCalendarWrapper experiences={experiences || []} />
         </PageShell>
     );
 }
+
