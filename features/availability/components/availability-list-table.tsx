@@ -1,0 +1,156 @@
+"use client";
+
+import { Edit2, Trash2, Calendar, Clock, Users, Repeat, MapPin, StickyNote } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface Availability {
+    id: string;
+    experience_id?: string;
+    start_date: string;
+    is_repeating: boolean;
+    repeat_days?: string[];
+    duration_type: 'all_day' | 'time_range';
+    start_time?: string;
+    hours_long?: number;
+    max_capacity: number;
+    online_booking_status: 'open' | 'closed';
+    private_announcement?: string;
+    transportation_route_id?: string;
+    staff_ids?: string[];
+    // Enriched fields for UI
+    staff_display?: string;
+    route_name?: string;
+}
+
+interface AvailabilityListTableProps {
+    data: Availability[];
+    onEdit?: (id: string, availability: Availability) => void;
+}
+
+export function AvailabilityListTable({ data, onEdit }: AvailabilityListTableProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="h-full flex items-center justify-center bg-zinc-900 border border-zinc-800 rounded-2xl">
+                <div className="text-zinc-500 text-sm">No availabilities found for this month.</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-full overflow-auto relative bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl">
+            <table className="w-full text-left">
+                <thead className="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-zinc-800">
+                    <tr>
+                        <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4">Activity Date</th>
+                        <th className="px-6 py-4">Duration</th>
+                        <th className="px-6 py-4">Capacity</th>
+                        <th className="px-6 py-4">Route Schedule</th>
+                        <th className="px-6 py-4">Assigned Staff</th>
+                        <th className="px-6 py-4">Private Note</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800 text-sm text-zinc-300">
+                    {data.map((item) => (
+                        <tr key={item.id} className="hover:bg-cyan-950/10 transition-colors group cursor-pointer" onClick={() => onEdit?.(item.id, item)}>
+                            {/* Status */}
+                            <td className="px-6 py-4">
+                                <span className={cn(
+                                    "px-2 py-1 rounded text-xs font-bold uppercase",
+                                    item.online_booking_status === 'open'
+                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                )}>
+                                    {item.online_booking_status}
+                                </span>
+                            </td>
+
+                            {/* Date */}
+                            <td className="px-6 py-4">
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-white flex items-center gap-2">
+                                        <Calendar size={14} className="text-cyan-500" />
+                                        {item.start_date}
+                                    </span>
+                                    {item.is_repeating && (
+                                        <span className="text-xs text-zinc-500 flex items-center gap-1 mt-1">
+                                            <Repeat size={12} />
+                                            {item.repeat_days?.join(", ")}
+                                        </span>
+                                    )}
+                                </div>
+                            </td>
+
+                            {/* Duration */}
+                            <td className="px-6 py-4">
+                                {item.duration_type === 'all_day' ? (
+                                    <span className="text-zinc-400 italic flex items-center gap-2"><Clock size={14} /> All Day</span>
+                                ) : (
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-white flex items-center gap-2">
+                                            <Clock size={14} className="text-cyan-500" />
+                                            {item.start_time?.slice(0, 5)}
+                                        </span>
+                                        <span className="text-xs text-zinc-500">{item.hours_long} Hours</span>
+                                    </div>
+                                )}
+                            </td>
+
+                            {/* Capacity */}
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                    <Users size={14} className="text-zinc-500" />
+                                    <span>{item.max_capacity} pax</span>
+                                </div>
+                            </td>
+
+                             {/* Route Schedule */}
+                             <td className="px-6 py-4">
+                                <div className="flex items-center gap-2 text-zinc-300">
+                                    <MapPin size={14} className="text-zinc-500" />
+                                    <span>{item.route_name || <span className="text-zinc-600 italic">-</span>}</span>
+                                </div>
+                            </td>
+
+                            {/* Staff */}
+                            <td className="px-6 py-4 text-zinc-400 max-w-[200px] truncate" title={item.staff_display}>
+                                {item.staff_display || <span className="text-zinc-600 italic">Unassigned</span>}
+                            </td>
+
+                            {/* Private Note */}
+                            <td className="px-6 py-4 text-zinc-400 max-w-[200px] truncate" title={item.private_announcement}>
+                                {item.private_announcement ? (
+                                    <div className="flex items-center gap-2">
+                                        <StickyNote size={14} className="text-zinc-500" />
+                                        {item.private_announcement}
+                                    </div>
+                                ) : (
+                                    <span className="text-zinc-600 italic">-</span>
+                                )}
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        onClick={() => onEdit?.(item.id, item)}
+                                        className="p-2 hover:bg-zinc-800 rounded text-zinc-400 hover:text-white transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        className="p-2 hover:bg-red-950/20 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+

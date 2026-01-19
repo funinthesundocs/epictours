@@ -1,0 +1,77 @@
+
+> epictours@0.1.0 prebuild
+> npx kill-port 3001 || true
+
+Process on port 3001 killed
+
+> epictours@0.1.0 build
+> cross-env NODE_OPTIONS='--no-deprecation' next build
+
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: A dynamic link library (DLL) initialization routine failed.
+\\?\D:\Antigravity\Workspaces\Epictours\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+  Skipping creating a lockfile at D:\Antigravity\Workspaces\Epictours\.next\lock because we're using WASM bindings
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: A dynamic link library (DLL) initialization routine failed.
+\\?\D:\Antigravity\Workspaces\Epictours\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Using external babel configuration from D:\Antigravity\Workspaces\Epictours\.babelrc
+⚠ It looks like there is a custom Babel configuration that can be removed.
+✓ Compiled successfully in 9.1s
+  Skipping validation of types
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/36) ...
+  Generating static pages using 31 workers (9/36) 
+  Generating static pages using 31 workers (18/36) 
+  Generating static pages using 31 workers (27/36) 
+✓ Generating static pages using 31 workers (36/36) in 430.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /comms/ai-agents
+├ ○ /comms/highlevel
+├ ○ /comms/live-agents
+├ ○ /comms/phone
+├ ƒ /crm/customers
+├ ○ /customers
+├ ○ /customers/types
+├ ○ /debug-clicks
+├ ○ /finance/bank-accounts
+├ ○ /finance/billing
+├ ○ /finance/partners
+├ ○ /finance/pricing
+├ ○ /finance/reports
+├ ○ /inbox
+├ ƒ /operations/bookings
+├ ○ /operations/calendars
+├ ○ /operations/staff
+├ ○ /operations/tours
+├ ○ /operations/transportation
+├ ○ /operations/transportation/hotels
+├ ○ /operations/transportation/pickup-points
+├ ○ /operations/transportation/schedules
+├ ○ /operations/transportation/vehicles
+├ ○ /settings/booking-options
+├ ○ /settings/custom-fields
+├ ○ /settings/dash
+├ ○ /settings/organization
+├ ○ /settings/permissions
+├ ○ /settings/pricing-variations
+├ ○ /settings/users
+├ ○ /settings/users/roles
+├ ○ /visibility/blog
+├ ○ /visibility/ota
+├ ○ /visibility/social
+└ ○ /visibility/website
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

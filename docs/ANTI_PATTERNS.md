@@ -52,3 +52,13 @@
 *   **The Consequence**: Dynamic data (from related tables) gets rejected. 400 errors.
 *   **The Fix**: Use plain `TEXT NOT NULL`. Validate at application layer if needed.
 
+## 12. The "Orphan Record" Trap
+*   **The Crime**: Creating a child record (e.g. Availability) without passing the Parent ID (e.g. Experience ID) to the creation form.
+*   **The Consequence**: Record saves successfully but has `NULL` parent_id. Does not appear in filtered lists. "Ghost Data".
+*   **The Fix**: Lift state. If the Parent ID lives in a filter/dropdown, pass it explicitly to the Create Sheet's `initialData`.
+
+## 13. The "Null vs Optional" Zod Trap
+*   **The Crime**: Using `z.string().optional()` for a database field that can be `NULL`.
+*   **The Consequence**: Validation fails with "Expected string, received null" because `optional()` only handles `undefined`.
+*   **The Fix**: Always use `z.string().optional().nullable()` for nullable DB columns.
+

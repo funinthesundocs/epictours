@@ -10,19 +10,32 @@ import {
     Copy,
     Trash2,
     ChevronDown,
-    Check
+    Check,
+    Grid,
+    List
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { Availability, AvailabilityListTable } from "./availability-list-table";
 
 export function AvailabilityCalendar({
     experiences = [],
-    onEventClick
+    onEventClick,
+    onEditEvent
 }: {
     experiences: { id: string, name: string, short_code?: string }[],
-    onEventClick?: (date: string) => void
+    onEventClick?: (date: string, experienceId?: string) => void,
+    onEditEvent?: (availability: Availability) => void
 }) {
     const [currentDate, setCurrentDate] = useState(new Date()); // Dynamic Date
     // Default to first available experience or fallback
     const [selectedExperience, setSelectedExperience] = useState(experiences[0]?.name || "Mauna Kea Summit");
+    const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+
+    // Data State
+    const [availabilities, setAvailabilities] = useState<Availability[]>([]);
+    const [staffMap, setStaffMap] = useState<Record<string, string>>({});
+    const [routeMap, setRouteMap] = useState<Record<string, string>>({});
+    const [isLoading, setIsLoading] = useState(false);
 
     // Pickers State
     const [isExpPickerOpen, setIsExpPickerOpen] = useState(false);
@@ -37,6 +50,58 @@ export function AvailabilityCalendar({
     const abbr = currentExp?.short_code || "EXP";
 
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+    // ... (Data Fetching omitted for brevity, logic remains same) ...
+    // Note: Re-implementing Data Fetching hook here to be safe and complete, or just keep header and change return.
+    // To be safe, I will include the full updated function body structure or use precise targeting.
+
+    // 1. Fetch Reference Data (Staff & Routes)
+    useEffect(() => {
+        const fetchRefs = async () => {
+            const { data: staff } = await supabase.from('staff' as any).select('id, name');
+            const { data: routes } = await supabase.from('schedules' as any).select('id, name');
+
+            if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.name])));
+            if (routes) setRouteMap(Object.fromEntries((routes as any[]).map(r => [r.id, r.name])));
+        };
+        fetchRefs();
+    }, []);
+
+    // 2. Fetch Availabilities for Current Month & Experience
+    useEffect(() => {
+        if (!currentExp?.id) return;
+
+        const fetchAvail = async () => {
+            setIsLoading(true);
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const startOfMonth = new Date(year, month, 1);
+            const endOfMonth = new Date(year, month + 1, 0);
+
+            const { data, error } = await supabase
+                .from('availabilities' as any)
+                .select('*')
+                .eq('experience_id', currentExp.id)
+                .gte('start_date', startOfMonth.toISOString().split('T')[0])
+                .lte('start_date', endOfMonth.toISOString().split('T')[0])
+                .order('start_date', { ascending: true });
+
+            if (error) {
+                console.error("Error fetching availabilities:", error);
+            } else if (data) {
+                const enriched: Availability[] = data.map((item: any) => ({
+                    ...item,
+                    staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
+                    route_name: routeMap[item.transportation_route_id] || ""
+                }));
+                setAvailabilities(enriched);
+            }
+            setIsLoading(false);
+        }
+
+        fetchAvail();
+    }, [currentExp, currentDate, staffMap, routeMap]);
+
 
     // --- NAVIGATION LOGIC ---
 
@@ -119,7 +184,7 @@ export function AvailabilityCalendar({
                         </div>
                     </div>
 
-                    {/* Navigation Buttons */}
+                    {/* Navigation Buttons (Only allow month nav in calendar mode or if list respects month) */}
                     <div className="flex gap-1">
                         <button
                             onClick={handlePrevMonth}
@@ -177,22 +242,69 @@ export function AvailabilityCalendar({
                         )}
                     </div>
 
+                    {/* View Toggle */}
+                    <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
+                        <button
+                            onClick={() => setViewMode('calendar')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'calendar' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            )}
+                            title="Calendar View"
+                        >
+                            <Grid size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'list' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            )}
+                            title="List View"
+                        >
+                            <List size={16} />
+                        </button>
+                    </div>
+
                     <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
-                    <ToolbarButton icon={Plus} label="Create" />
+                    <ToolbarButton
+                        icon={Plus}
+                        label="Create"
+                        onClick={() => onEventClick?.(currentDate.toISOString().split('T')[0], currentExp?.id)}
+                    />
                     <ToolbarButton icon={Edit} label="Edit" />
                     <ToolbarButton icon={Copy} label="Duplicate" />
                     <ToolbarButton icon={Trash2} label="Delete" danger />
                 </div>
             </div>
 
-            {/* CALENDAR CONTENT AREA */}
-            <div className="flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-                <MonthView selectedExperience={selectedExperience} abbr={abbr} currentDate={currentDate} onEventClick={onEventClick} />
+            {/* CONTENT AREA */}
+            <div className={cn(
+                "flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative",
+                viewMode === 'list' && "bg-transparent border-0 shadow-none overflow-visible"
+            )}>
+                {viewMode === 'calendar' ? (
+                    <MonthView
+                        selectedExperience={selectedExperience}
+                        abbr={abbr}
+                        currentDate={currentDate}
+                        onEventClick={(date) => onEventClick?.(date, currentExp?.id)}
+                    />
+                ) : (
+                    <AvailabilityListTable
+                        data={availabilities}
+                        onEdit={(id, item) => {
+                            // Pass the full item to the edit handler
+                            onEditEvent?.(item);
+                        }}
+                    />
+                )}
             </div>
         </div>
     );
 }
+
 
 // --- SUB-COMPONENTS ---
 
@@ -262,22 +374,26 @@ function ToolbarButton({
     icon: Icon,
     label,
     active = false,
-    danger = false
+    danger = false,
+    onClick
 }: {
     icon: any,
     label: string,
     active?: boolean,
-    danger?: boolean
+    danger?: boolean,
+    onClick?: () => void
 }) {
     return (
-        <button className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
-            active
-                ? "bg-zinc-800 text-white border-zinc-700 shadow-lg"
-                : danger
-                    ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
-                    : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800"
-        )}>
+        <button
+            onClick={onClick}
+            className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
+                active
+                    ? "bg-zinc-800 text-white border-zinc-700 shadow-lg"
+                    : danger
+                        ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
+                        : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800"
+            )}>
             <Icon className="w-3.5 h-3.5" />
             {label}
         </button>
@@ -329,3 +445,4 @@ function EventChip({
 function hourToPx(start: number, end: number) {
     return true;
 }
+

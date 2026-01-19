@@ -26,31 +26,31 @@ import {
 // Schema
 const AvailabilitySchema = z.object({
     id: z.string().optional(),
-    experience_id: z.string().optional(),
+    experience_id: z.string().optional().nullable(),
     start_date: z.string().min(1, "Start date required"),
 
     // Repeat
     is_repeating: z.boolean().default(false),
     repeat_days: z.array(z.string()).default([]),
-    end_date: z.string().optional(),
+    end_date: z.string().optional().nullable(),
 
     // Duration
     duration_type: z.enum(["all_day", "time_range"]).default("all_day"),
-    start_time: z.string().optional(),
-    hours_long: z.coerce.number().min(0).optional(),
+    start_time: z.string().optional().nullable(),
+    hours_long: z.coerce.number().min(0).optional().nullable(),
 
     // Capacity
     max_capacity: z.coerce.number().min(0).default(0),
     customer_type_ids: z.array(z.string()).default([]),
 
     // Schedules
-    booking_option_schedule_id: z.string().optional(),
-    pricing_schedule_id: z.string().optional(),
-    transportation_route_id: z.string().optional(),
+    booking_option_schedule_id: z.string().optional().nullable(),
+    pricing_schedule_id: z.string().optional().nullable(),
+    transportation_route_id: z.string().optional().nullable(),
     staff_ids: z.array(z.string()).default([]),
 
     // Info
-    private_announcement: z.string().optional(),
+    private_announcement: z.string().optional().nullable(),
     online_booking_status: z.enum(["open", "closed"]).default("open"),
 });
 
@@ -183,9 +183,15 @@ export function EditAvailabilitySheet({
         if (!isOpen) return;
 
         if (initialData) {
+            // Sanitize nulls to empty strings for inputs
+            const safeData = { ...initialData };
+            Object.keys(safeData).forEach(key => {
+                if (safeData[key] === null) safeData[key] = "";
+            });
+
             reset({
-                ...initialData,
-                start_date: initialData.start_date || selectedDate || "",
+                ...safeData,
+                start_date: safeData.start_date || selectedDate || "",
             });
         } else {
             reset({
@@ -235,13 +241,14 @@ export function EditAvailabilitySheet({
         setIsSubmitting(true);
         try {
             const payload = {
+                experience_id: data.experience_id,
                 start_date: data.start_date,
                 is_repeating: data.is_repeating,
                 repeat_days: data.is_repeating ? data.repeat_days : [],
-                end_date: data.is_repeating ? data.end_date : null,
+                end_date: data.is_repeating ? (data.end_date || null) : null,
                 duration_type: data.duration_type,
-                start_time: data.duration_type === "time_range" ? data.start_time : null,
-                hours_long: data.duration_type === "time_range" ? data.hours_long : null,
+                start_time: data.duration_type === "time_range" ? (data.start_time || null) : null,
+                hours_long: data.duration_type === "time_range" ? (data.hours_long || null) : null,
                 max_capacity: data.max_capacity,
                 customer_type_ids: data.customer_type_ids,
                 booking_option_schedule_id: data.booking_option_schedule_id || null,

@@ -1,5 +1,14 @@
 # 💎 Coding Patterns & Standards
 
+## 0. The Prime Directive: Comparative Analysis
+*   **Trigger**: When a feature (e.g., Save Button) fails.
+*   **Protocol**:
+    1.  **Stop**. Do not guess the error.
+    2.  **Locate** a parallel feature that works (e.g., Experience Save Button).
+    3.  **Read** the working file (using `view_file`) line-by-line.
+    4.  **Diff** against your broken file.
+    5.  **Copy** the working logic exactly (Logic patterns, Zod schemas, Initialization).
+
 ## 1. UI Components (Deep Core)
 *   **Tables**:
     *   **Headers**: Always visible, even when empty.
