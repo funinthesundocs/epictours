@@ -66,6 +66,17 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   "Public/Private" Visibility Toggle.
     *   **Ref**: `features/settings/booking-options/*`, `database/booking_options_setup.sql`.
 
+9.  **✅ Custom Fields - UI Standardization**
+    *   **Status**: COMPLETED.
+    *   **Features**:
+        *   **Header Filters**: Refactored page-level filters into "Type" column dropdown (`DropdownMenu`).
+        *   **Standardization**: Updated scrolling, icons, and action button order to match Customer List.
+    *   **Ref**: `features/settings/custom-fields/*`, `components/ui/dropdown-menu.tsx`.
+
+10. **✅ Setup Section Cleanup**
+    *   **Status**: COMPLETED.
+    *   **Action**: Standardized "Edit" icons (Edit2) and enforced "Edit First" action button rule across all setup tables.
+
 9.  **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 

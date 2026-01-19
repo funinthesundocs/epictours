@@ -5,6 +5,7 @@
     *   **Headers**: Always visible, even when empty.
     *   **Empty State**: Use a `<tr><td colSpan={4} ...>Message</td></tr>` inside `<tbody>` instead of a wrapper `div`. This maintains layout stability.
     *   **Styling**: `bg-black` or `bg-zinc-900` backgrounds. Text `zinc-300`. Headers `zinc-400`.
+    *   **Dropdowns**: Use the `DropdownMenu` component (`@/components/ui/dropdown-menu.tsx`) for actions and complex filters. NEVER use page-level horizontal scroll buttons for complex filters; put them in the column header.
 *   **Icons**:
     *   **Action Buttons**: Use `lucide-react` icons (16px).
     *   **Indicators**: Use `cyan-500` for active states.

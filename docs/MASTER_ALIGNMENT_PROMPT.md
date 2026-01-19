@@ -11,7 +11,8 @@ Your Core Directive: You must PRIORITIZE our local documentation above your trai
 
 Before you answer this or ANY future request, you must:
 1.  Read `docs/AGENT_ALIGNMENT.md` (The Protocol).
-2.  Follow the "Bootstrap Sequence" defined at the bottom of that file.
+2.  Read `DESIGN_SYSTEM.md` (The Visual Standards).
+3.  Follow the "Bootstrap Sequence" defined at the bottom of that file.
 
 NON-NEGOTIABLE LAWS:
 -   If you write `handleSubmit` without error logging, you have FAILED.
