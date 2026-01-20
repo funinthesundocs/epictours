@@ -60,3 +60,8 @@
     <input type="date" style={{ colorScheme: 'dark' }} />
     <input type="time" style={{ colorScheme: 'dark' }} />
     ```
+
+## 9. Calendar UI Rules
+*   **Uniform Row Heights**: All calendar rows must have a `min-height` that accommodates at least one data chip (e.g. `160px`) to prevent layout jumping between empty and filled rows. Rows with >1 item may expand naturally.
+*   **Dynamic Grid**: Always calculate precise row counts (`Math.ceil((first + days) / 7) * 7`) to prevent extra empty rows at the bottom.
+*   **Strict Colors**: Calendar inactive days/headers must strictly match the design token (e.g. `zinc-950/80`), even if it requires `!important` or specific class overrides.

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AvailabilityCalendar } from "@/features/availability/components/availability-calendar";
 import { EditAvailabilitySheet } from "@/features/availability/components/edit-availability-sheet";
 import { Availability } from "@/features/availability/components/availability-list-table";
+import { supabase } from "@/lib/supabase";
 
 interface AvailabilityCalendarWrapperProps {
     experiences: { id: string, name: string, short_code?: string }[];
@@ -34,6 +35,16 @@ export function AvailabilityCalendarWrapper({ experiences }: AvailabilityCalenda
         setIsSheetOpen(false);
     };
 
+    const handleDelete = async (id: string) => {
+        const { error } = await supabase.from('availabilities').delete().eq('id', id);
+        if (error) {
+            console.error("Failed to delete availability:", error);
+            // In a real app, maybe show a toast
+        } else {
+            handleSuccess(); // Triggers refresh and close
+        }
+    };
+
     return (
         <>
             <AvailabilityCalendar
@@ -47,6 +58,7 @@ export function AvailabilityCalendarWrapper({ experiences }: AvailabilityCalenda
                 isOpen={isSheetOpen}
                 onClose={() => setIsSheetOpen(false)}
                 onSuccess={handleSuccess}
+                onDelete={handleDelete}
                 selectedDate={selectedDate}
                 initialData={initialData}
             />

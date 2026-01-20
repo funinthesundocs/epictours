@@ -20,8 +20,10 @@ import {
     X,
     Repeat,
     CalendarDays,
-    Smile
+    Smile,
+    Trash2
 } from "lucide-react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 // Schema
 const AvailabilitySchema = z.object({
@@ -79,9 +81,11 @@ export function EditAvailabilitySheet({
     onClose,
     onSuccess,
     initialData,
-    selectedDate
-}: EditAvailabilitySheetProps) {
+    selectedDate,
+    onDelete
+}: EditAvailabilitySheetProps & { onDelete?: (id: string) => void }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     // Reference data
     const [customerTypes, setCustomerTypes] = useState<{ id: string, name: string }[]>([]);
@@ -578,6 +582,17 @@ export function EditAvailabilitySheet({
 
                 {/* Footer */}
                 <div className="flex justify-end items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    {isEditMode && onDelete && (
+                        <button
+                            type="button"
+                            onClick={() => setIsDeleteDialogOpen(true)}
+                            className="mr-auto px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <Trash2 size={16} />
+                            Delete
+                        </button>
+                    )}
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -595,7 +610,22 @@ export function EditAvailabilitySheet({
                     </button>
                 </div>
             </form>
-        </SidePanel>
+
+            <AlertDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirm={() => {
+                    if (initialData?.id) {
+                        onDelete?.(initialData.id);
+                        setIsDeleteDialogOpen(false);
+                    }
+                }}
+                title="Delete Availability?"
+                description="Are you sure you want to delete this availability? This cannot be undone."
+                confirmLabel="Delete"
+                isDestructive={true}
+            />
+        </SidePanel >
     );
 }
 

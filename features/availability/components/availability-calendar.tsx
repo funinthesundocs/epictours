@@ -300,7 +300,9 @@ export function AvailabilityCalendar({
                         selectedExperience={selectedExperience}
                         abbr={abbr}
                         currentDate={currentDate}
-                        onEventClick={(date) => onEventClick?.(date, currentExp?.id)}
+                        availabilities={availabilities}
+                        onEventClick={(date, id) => onEventClick?.(date, id)}
+                        onEditEvent={onEditEvent}
                     />
                 ) : (
                     <AvailabilityListTable
@@ -320,57 +322,85 @@ export function AvailabilityCalendar({
 
 // --- SUB-COMPONENTS ---
 
-function MonthView({ selectedExperience, abbr, currentDate, onEventClick }: {
+function MonthView({ selectedExperience, abbr, currentDate, availabilities, onEventClick, onEditEvent }: {
     selectedExperience: string,
     abbr: string,
     currentDate: Date,
-    onEventClick?: (date: string) => void
+    availabilities: Availability[],
+    onEventClick?: (date: string, experienceId?: string) => void,
+    onEditEvent?: (availability: Availability) => void
 }) {
-    // EXP_ABBR removed. Using prop 'abbr' directly.
+    // Helper for date checks
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-    // Simple helper to match current real-world day for highlighting
+    // 1. Calculate Grid offsets
+    const firstDayIndex = new Date(year, month, 1).getDay(); // 0 (Sun) - 6 (Sat)
+    const daysInMonth = new Date(year, month + 1, 0).getDate(); // 28 - 31
+
     const today = new Date();
-    const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
+    const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
     return (
-        <div className="h-full grid grid-cols-7 gap-px bg-zinc-600">
+        <div className="h-full grid grid-cols-7 gap-px bg-zinc-600 overflow-y-auto">
             {/* Headers */}
             {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map(day => (
-                <div key={day} className="bg-zinc-950/80 p-4 text-[10px] font-bold text-zinc-500 uppercase text-center backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-900">{day}</div>
+                <div key={day} className="bg-zinc-950/80 p-4 text-sm font-bold text-zinc-500 uppercase text-center backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-900">{day}</div>
             ))}
 
-            {/* Cells */}
-            {Array.from({ length: 35 }).map((_, i) => {
-                const day = i - 2;
-                const isToday = isCurrentMonth && day === today.getDate();
+            {/* Cells: Dynamic calculation to avoid extra rows */}
+            {Array.from({ length: Math.ceil((firstDayIndex + daysInMonth) / 7) * 7 }).map((_, i) => {
+                const dayNumber = i - firstDayIndex + 1;
+                const isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
 
-                // Build date string for this cell
-                const cellDate = day > 0 && day <= 31
-                    ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                // Build ISO Date string (YYYY-MM-DD) for matching
+                const cellDateString = isValidDay
+                    ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`
                     : null;
+
+                const isToday = isCurrentMonth && dayNumber === today.getDate();
+
+                // Filter Availabilities for this day
+                const daysEvents = isValidDay && cellDateString
+                    ? availabilities.filter(a => a.start_date === cellDateString)
+                    : [];
 
                 return (
                     <div key={i} className={cn(
-                        "bg-black relative group transition-colors hover:bg-zinc-900/50 p-2 min-h-[100px] flex flex-col pl-3 pt-3",
-                        isToday && "bg-cyan-950/20"
-                    )}>
-                        {day > 0 && day <= 31 && (
+                        "relative group transition-colors p-2 min-h-[160px] flex flex-col pl-3 pt-3 gap-1",
+                        // Out of month OR Today -> Zinc 950/80. Else (Valid Day) -> Black, Hover -> Zinc 950/80.
+                        (!isValidDay || isToday) ? "bg-zinc-950/80" : "bg-black hover:bg-zinc-950/80"
+                    )}
+                        onClick={() => {
+                            if (isValidDay && cellDateString) {
+                                // If user clicks empty space, trigger create (pass date only)
+                                // If they click a chip, that chip handles proper edit ID
+                                // We'll let the parent handle the "Create" logic if no ID passed, or rely on the (+) button
+                            }
+                        }}
+                    >
+                        {isValidDay && (
                             <>
                                 <span className={cn(
-                                    "text-sm font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
+                                    "text-base font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
                                     isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300"
-                                )}>{day}</span>
+                                )}>{dayNumber}</span>
 
-                                {/* Event Chips (Daily Mock Data) */}
-                                <EventChip
-                                    color="cyan"
-                                    abbr={abbr}
-                                    time="14:00"
-                                    bookings="10"
-                                    cap="10 / 29 Capacity"
-                                    note="Need Min of 25"
-                                    onClick={() => cellDate && onEventClick?.(cellDate)}
-                                />
+                                {daysEvents.map((event) => (
+                                    <EventChip
+                                        key={event.id}
+                                        color="cyan"
+                                        abbr={abbr}
+                                        time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                        bookings="0 Bookings"
+                                        cap={`0 / ${event.max_capacity} Capacity`}
+                                        note={event.private_announcement}
+                                        onClick={(e) => {
+                                            e?.stopPropagation(); // Prevent parent click
+                                            onEditEvent?.(event);
+                                        }}
+                                    />
+                                ))}
                             </>
                         )}
                     </div>
@@ -427,17 +457,9 @@ function EventChip({
     bookings: string,
     cap: string,
     note?: string,
-    onClick?: () => void
+    onClick?: (e?: React.MouseEvent) => void
 }) {
-    const colorStyles: Record<string, string> = {
-        indigo: "bg-indigo-600/90 hover:bg-indigo-500 border-l-[3px] border-indigo-400",
-        cyan: "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400",
-        purple: "bg-purple-900/80 hover:bg-purple-800 border-l-[3px] border-purple-500",
-        emerald: "bg-emerald-900/80 hover:bg-emerald-800 border-l-[3px] border-emerald-500",
-    };
-
-    // Fallback if color not found
-    const style = colorStyles[color] || colorStyles.indigo;
+    const style = "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400";
 
     return (
         <div

@@ -80,7 +80,10 @@ export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityLi
                                     <div className="flex flex-col">
                                         <span className="font-semibold text-white flex items-center gap-2">
                                             <Calendar size={14} className="text-cyan-500" />
-                                            {item.start_date}
+                                            {(() => {
+                                                const [y, m, d] = item.start_date.split('-');
+                                                return `${m}-${d}-${y}`;
+                                            })()}
                                         </span>
                                         {item.is_repeating && (
                                             <span className="text-xs text-zinc-500 flex items-center gap-1 mt-1">

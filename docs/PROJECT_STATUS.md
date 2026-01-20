@@ -1,6 +1,6 @@
 # 📡 Project Status & Active Mission
-> **Last Updated**: 2026-01-18
-> **Current Phase**: "Availability Module Refinements"
+> **Last Updated**: 2026-01-20
+> **Current Phase**: "Availability Module Verification"
 
 ## 🟢 Operational Status
 *   **EpicTours Core**: ✅ Initialized
@@ -77,8 +77,6 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
     *   **Status**: COMPLETED.
     *   **Action**: Standardized "Edit" icons (Edit2) and enforced "Edit First" action button rule across all setup tables.
 
-9.  **[NEXT] Duplicate Check Logic**
-    *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 10. **✅ Pricing Variations Module**
     *   **Status**: COMPLETED.
@@ -100,7 +98,12 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   **Context Aware**: "Create" button automatically links new records to the active Experience and Month.
         *   **List View**: Rich columns including computed Staff Names and Route Names.
         *   **Edit Integration**: Full read/write cycle working. List auto-refreshes on save.
+        *   **Calendar Polish**: `zinc-950/80` theme, `text-sm` headers, `160px` uniform row height.
+        *   **Interactions**: Empty cell click -> Create. Edit Sheet -> Delete workflow.
     *   **Ref**: `features/availability/*`.
+
+13. **[NEXT] Duplicate Check Logic**
+    *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 
 ## 🧠 Memory Dump (Context for Next Session)
