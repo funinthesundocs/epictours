@@ -102,6 +102,17 @@ export function AvailabilityCalendar({
         fetchAvail();
     }, [currentExp, currentDate, staffMap, routeMap]);
 
+    const handleDelete = async (id: string) => {
+        const { error } = await supabase.from('availabilities' as any).delete().eq('id', id);
+        if (error) {
+            console.error("Failed to delete availability:", error);
+            alert("Failed to delete. Check console.");
+        } else {
+            setAvailabilities(prev => prev.filter(item => item.id !== id));
+        }
+    };
+
+
 
     // --- NAVIGATION LOGIC ---
 
@@ -298,6 +309,7 @@ export function AvailabilityCalendar({
                             // Pass the full item to the edit handler
                             onEditEvent?.(item);
                         }}
+                        onDelete={handleDelete}
                     />
                 )}
             </div>
