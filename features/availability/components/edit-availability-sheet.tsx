@@ -49,6 +49,7 @@ const AvailabilitySchema = z.object({
     booking_option_schedule_id: z.string().optional().nullable(),
     pricing_schedule_id: z.string().optional().nullable(),
     transportation_route_id: z.string().optional().nullable(),
+    vehicle_id: z.string().optional().nullable(),
     staff_ids: z.array(z.string()).default([]),
 
     // Info
@@ -92,6 +93,7 @@ export function EditAvailabilitySheet({
     const [bookingSchedules, setBookingSchedules] = useState<{ id: string, name: string }[]>([]);
     const [pricingSchedules, setPricingSchedules] = useState<{ id: string, name: string }[]>([]);
     const [transportationSchedules, setTransportationSchedules] = useState<{ id: string, name: string }[]>([]);
+    const [vehicles, setVehicles] = useState<{ id: string, name: string }[]>([]);
     const [staff, setStaff] = useState<{ id: string, name: string, role: { name: string } | null }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -155,6 +157,14 @@ export function EditAvailabilitySheet({
                     .select("id, name")
                     .order("name");
                 setTransportationSchedules((transSchedules as any) || []);
+
+                // Fetch Vehicles
+                const { data: vehs } = await supabase
+                    .from("vehicles" as any)
+                    .select("id, name")
+                    .eq("status", "active")
+                    .order("name");
+                setVehicles((vehs as any) || []);
 
                 // Fetch Staff (Drivers and Guides only)
                 const { data: staffData, error: staffError } = await supabase
@@ -241,15 +251,46 @@ export function EditAvailabilitySheet({
         }
     };
 
+    // Helper to generate dates
+    const generateRepeatDates = (start: string, end: string, days: string[]): string[] => {
+        const dates: string[] = [];
+        const currentDate = new Date(start + "T00:00:00"); // Force local time parsing
+        const endDate = new Date(end + "T00:00:00");
+        const dayMap: { [key: string]: number } = { "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6 };
+
+        // Normalize checks
+        if (isNaN(currentDate.getTime()) || isNaN(endDate.getTime())) return [];
+
+        // Loop
+        while (currentDate <= endDate) {
+            const dayIndex = currentDate.getDay();
+            // Find key for this index
+            const dayKey = Object.keys(dayMap).find(key => dayMap[key] === dayIndex);
+
+            if (dayKey && days.includes(dayKey)) {
+                // Format YYYY-MM-DD manually to avoid timezone shifts
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const day = String(currentDate.getDate()).padStart(2, '0');
+                dates.push(`${year}-${month}-${day}`);
+            }
+
+            // Next day
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return dates;
+    };
+
     const onSubmit = async (data: AvailabilityFormData) => {
         setIsSubmitting(true);
         try {
-            const payload = {
+            // Base Payload template
+            const basePayload = {
                 experience_id: data.experience_id,
-                start_date: data.start_date,
-                is_repeating: data.is_repeating,
-                repeat_days: data.is_repeating ? data.repeat_days : [],
-                end_date: data.is_repeating ? (data.end_date || null) : null,
+                // start_date varies
+                is_repeating: false, // Independent copies
+                repeat_days: [],     // Clear repeat data on children
+                end_date: null,      // Clear end date on children
                 duration_type: data.duration_type,
                 start_time: data.duration_type === "time_range" ? (data.start_time || null) : null,
                 hours_long: data.duration_type === "time_range" ? (data.hours_long || null) : null,
@@ -258,25 +299,60 @@ export function EditAvailabilitySheet({
                 booking_option_schedule_id: data.booking_option_schedule_id || null,
                 pricing_schedule_id: data.pricing_schedule_id || null,
                 transportation_route_id: data.transportation_route_id || null,
+                vehicle_id: data.vehicle_id || null,
                 staff_ids: data.staff_ids,
                 private_announcement: data.private_announcement || null,
                 online_booking_status: data.online_booking_status,
             };
 
-            if (data.id) {
-                const { error } = await supabase
-                    .from("availabilities" as any)
-                    .update(payload)
-                    .eq("id", data.id);
-                if (error) throw error;
-            } else {
-                const { error } = await supabase
-                    .from("availabilities" as any)
-                    .insert([payload]);
-                if (error) throw error;
+            // 1. Calculate Target Dates
+            let targetDates: string[] = [data.start_date];
+            if (data.is_repeating && data.end_date && data.repeat_days.length > 0) {
+                const rangeDates = generateRepeatDates(data.start_date, data.end_date, data.repeat_days);
+                // Merge unique, just in case start_date isn't in repeat_days (user choice: enforce or include?)
+                // Standard logic: The Start Date is always included. The Range adds others.
+                // We use Set to remove duplicates if start_date is also generated.
+                targetDates = Array.from(new Set([...targetDates, ...rangeDates])).sort();
             }
 
-            toast.success("Availability saved");
+            // 2. Handle Edit Mode (Update Primary, Insert Restrictions)
+            if (data.id) {
+                // Update the PRIMARY record (the one currently open)
+                const { error: updateError } = await supabase
+                    .from("availabilities" as any)
+                    .update({ ...basePayload, start_date: data.start_date }) // Ensure start date is set
+                    .eq("id", data.id);
+                if (updateError) throw updateError;
+
+                // If repeating, we Insert the *others*
+                // Filter out the date of the primary record so we don't dupe it
+                const otherDates = targetDates.filter(d => d !== data.start_date);
+                if (otherDates.length > 0) {
+                    const newRows = otherDates.map(date => ({
+                        ...basePayload,
+                        start_date: date
+                    }));
+
+                    const { error: insertError } = await supabase
+                        .from("availabilities" as any)
+                        .insert(newRows);
+                    if (insertError) throw insertError;
+                }
+
+            } else {
+                // 3. Handle Create Mode (Batch Insert All)
+                const newRows = targetDates.map(date => ({
+                    ...basePayload,
+                    start_date: date
+                }));
+
+                const { error: insertError } = await supabase
+                    .from("availabilities" as any)
+                    .insert(newRows);
+                if (insertError) throw insertError;
+            }
+
+            toast.success(`Successfully saved ${targetDates.length} availability slot(s)`);
             onSuccess();
             onClose();
         } catch (err: any) {
@@ -531,6 +607,19 @@ export function EditAvailabilitySheet({
                                                 <option value="">Select Route Schedule...</option>
                                                 {transportationSchedules.map(s => (
                                                     <option key={s.id} value={s.id}>{s.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-zinc-400 mb-2">Vehicle</label>
+                                            <select
+                                                {...register("vehicle_id")}
+                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
+                                            >
+                                                <option value="">Select Vehicle...</option>
+                                                {vehicles.map(v => (
+                                                    <option key={v.id} value={v.id}>{v.name}</option>
                                                 ))}
                                             </select>
                                         </div>

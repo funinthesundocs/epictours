@@ -12,7 +12,10 @@ import {
     ChevronDown,
     Check,
     Grid,
-    List
+    List,
+    MousePointer2,
+    X,
+    CopyCheck
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Availability, AvailabilityListTable } from "./availability-list-table";
@@ -35,11 +38,103 @@ export function AvailabilityCalendar({
     const [availabilities, setAvailabilities] = useState<Availability[]>([]);
     const [staffMap, setStaffMap] = useState<Record<string, string>>({});
     const [routeMap, setRouteMap] = useState<Record<string, string>>({});
+    const [vehicleMap, setVehicleMap] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
 
     // Pickers State
     const [isExpPickerOpen, setIsExpPickerOpen] = useState(false);
     const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
+
+    // BATCH SELECTION STATE
+    const [isSelectMode, setIsSelectMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Clear selection when mode changes
+    useEffect(() => {
+        if (!isSelectMode) setSelectedIds(new Set());
+    }, [isSelectMode]);
+
+    // Global Mouse Up to stop dragging
+    useEffect(() => {
+        const handleMouseUp = () => setIsDragging(false);
+        window.addEventListener('mouseup', handleMouseUp);
+        return () => window.removeEventListener('mouseup', handleMouseUp);
+    }, []);
+
+    // Selection Handlers
+    const toggleSelection = (id: string, forceState?: boolean) => {
+        if (!isSelectMode) return;
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (forceState !== undefined) {
+                forceState ? next.add(id) : next.delete(id);
+            } else {
+                next.has(id) ? next.delete(id) : next.add(id);
+            }
+            return next;
+        });
+    };
+
+    const handleBatchDelete = async () => {
+        if (!confirm(`Delete ${selectedIds.size} items?`)) return;
+
+        setIsLoading(true);
+        const { error } = await supabase
+            .from('availabilities' as any)
+            .delete()
+            .in('id', Array.from(selectedIds));
+
+        if (error) {
+            console.error(error);
+            alert("Failed to delete items");
+        } else {
+            // Optimistic update
+            setAvailabilities(prev => prev.filter(a => !selectedIds.has(a.id)));
+            setSelectedIds(new Set());
+            setIsSelectMode(false);
+        }
+        setIsLoading(false);
+    };
+
+    const handleBatchDuplicate = async () => {
+        if (!confirm(`Duplicate ${selectedIds.size} items?`)) return;
+
+        setIsLoading(true);
+        const itemsToClone = availabilities.filter(a => selectedIds.has(a.id));
+
+        // Prepare payloads (remove ID, created_at, etc)
+        const payloads = itemsToClone.map(item => {
+            const { id, created_at, updated_at, route_name, staff_display, vehicle_name, ...rest } = item as any;
+            return {
+                ...rest,
+                // Ensure unique constraints handled if any? Tables usually allow same time different ID.
+            };
+        });
+
+        const { error } = await supabase.from('availabilities' as any).insert(payloads);
+
+        if (error) {
+            console.error(error);
+            alert("Failed to duplicate items");
+        } else {
+            // Force refresh is easiest here to get new IDs
+            // Re-trigger the fetch effect by toggling a dummy state or just...
+            // Actually, we can just call setAvailabilities with re-fetch, but let's just use the existing effect dependency?
+            // HACK: Quick toggle view mode or just rely on parent? 
+            // Better: trigger a re-fetch manually. 
+            // For now, reload window is harsh. Let's toggle viewMode safely? 
+            // Actually, let's just call the effect... but it depends on currentExp. 
+            // Simple hack: toggle currentDate then toggle back? No.
+            // Let's just alert success and user navigates or waits.
+            // Ideally: refetch.
+            alert("Duplicated successfully! Refreshing view...");
+            setCurrentDate(new Date(currentDate)); // Trigger effect
+            setSelectedIds(new Set());
+            setIsSelectMode(false);
+        }
+        setIsLoading(false);
+    };
 
     // Refs for click outside
     const expPickerRef = useRef<HTMLDivElement>(null);
@@ -60,9 +155,11 @@ export function AvailabilityCalendar({
         const fetchRefs = async () => {
             const { data: staff } = await supabase.from('staff' as any).select('id, name');
             const { data: routes } = await supabase.from('schedules' as any).select('id, name');
+            const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name');
 
             if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.name])));
             if (routes) setRouteMap(Object.fromEntries((routes as any[]).map(r => [r.id, r.name])));
+            if (vehicles) setVehicleMap(Object.fromEntries((vehicles as any[]).map(v => [v.id, v.name])));
         };
         fetchRefs();
     }, []);
@@ -92,7 +189,8 @@ export function AvailabilityCalendar({
                 const enriched: Availability[] = data.map((item: any) => ({
                     ...item,
                     staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
-                    route_name: routeMap[item.transportation_route_id] || ""
+                    route_name: routeMap[item.transportation_route_id] || "",
+                    vehicle_name: vehicleMap[item.vehicle_id] || ""
                 }));
                 setAvailabilities(enriched);
             }
@@ -279,14 +377,43 @@ export function AvailabilityCalendar({
 
                     <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
+                    <div className="w-px h-8 bg-zinc-900 mx-2"></div>
+
                     <ToolbarButton
                         icon={Plus}
                         label="Create"
                         onClick={() => onEventClick?.(currentDate.toISOString().split('T')[0], currentExp?.id)}
+                        disabled={isSelectMode}
                     />
-                    <ToolbarButton icon={Edit} label="Edit" />
-                    <ToolbarButton icon={Copy} label="Duplicate" />
-                    <ToolbarButton icon={Trash2} label="Delete" danger />
+
+                    <ToolbarButton
+                        icon={isSelectMode ? X : MousePointer2}
+                        label={isSelectMode ? "Cancel" : "Select"}
+                        active={isSelectMode}
+                        onClick={() => setIsSelectMode(!isSelectMode)}
+                    />
+
+                    {isSelectMode && (
+                        <>
+                            <div className="w-px h-8 bg-zinc-900 mx-2 animate-in fade-in slide-in-from-right-4"></div>
+
+                            <ToolbarButton
+                                icon={CopyCheck}
+                                label={`Duplicate (${selectedIds.size})`}
+                                onClick={handleBatchDuplicate}
+                                disabled={selectedIds.size === 0}
+                                className="animate-in fade-in zoom-in-95"
+                            />
+                            <ToolbarButton
+                                icon={Trash2}
+                                label={`Delete (${selectedIds.size})`}
+                                danger
+                                onClick={handleBatchDelete}
+                                disabled={selectedIds.size === 0}
+                                className="animate-in fade-in zoom-in-95"
+                            />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -303,6 +430,12 @@ export function AvailabilityCalendar({
                         availabilities={availabilities}
                         onEventClick={(date, id) => onEventClick?.(date, id)}
                         onEditEvent={onEditEvent}
+                        // Selection Props
+                        isSelectMode={isSelectMode}
+                        selectedIds={selectedIds}
+                        isDragging={isDragging}
+                        onToggleSelection={toggleSelection}
+                        onSetIsDragging={setIsDragging}
                     />
                 ) : (
                     <AvailabilityListTable
@@ -322,13 +455,32 @@ export function AvailabilityCalendar({
 
 // --- SUB-COMPONENTS ---
 
-function MonthView({ selectedExperience, abbr, currentDate, availabilities, onEventClick, onEditEvent }: {
+function MonthView({
+    selectedExperience,
+    abbr,
+    currentDate,
+    availabilities,
+    onEventClick,
+    onEditEvent,
+    // Destructure new props
+    isSelectMode,
+    selectedIds,
+    isDragging,
+    onToggleSelection,
+    onSetIsDragging
+}: {
     selectedExperience: string,
     abbr: string,
     currentDate: Date,
     availabilities: Availability[],
     onEventClick?: (date: string, experienceId?: string) => void,
-    onEditEvent?: (availability: Availability) => void
+    onEditEvent?: (availability: Availability) => void,
+    // New Props
+    isSelectMode?: boolean,
+    selectedIds?: Set<string>,
+    isDragging?: boolean,
+    onToggleSelection?: (id: string, force?: boolean) => void,
+    onSetIsDragging?: (v: boolean) => void
 }) {
     // Helper for date checks
     const year = currentDate.getFullYear();
@@ -397,7 +549,24 @@ function MonthView({ selectedExperience, abbr, currentDate, availabilities, onEv
                                         note={event.private_announcement}
                                         onClick={(e) => {
                                             e?.stopPropagation(); // Prevent parent click
-                                            onEditEvent?.(event);
+                                            if (!isSelectMode) {
+                                                onEditEvent?.(event);
+                                            }
+                                        }}
+                                        // Drag Logic
+                                        selected={selectedIds?.has(event.id)}
+                                        onMouseDown={(e) => {
+                                            if (isSelectMode) {
+                                                e.stopPropagation();
+                                                onSetIsDragging?.(true);
+                                                // Toggle on mouse down
+                                                onToggleSelection?.(event.id);
+                                            }
+                                        }}
+                                        onMouseEnter={() => {
+                                            if (isSelectMode && isDragging) {
+                                                onToggleSelection?.(event.id, true);
+                                            }
                                         }}
                                     />
                                 ))}
@@ -417,24 +586,31 @@ function ToolbarButton({
     label,
     active = false,
     danger = false,
+    disabled = false,
+    className,
     onClick
 }: {
     icon: any,
     label: string,
     active?: boolean,
     danger?: boolean,
+    disabled?: boolean,
+    className?: string,
     onClick?: () => void
 }) {
     return (
         <button
             onClick={onClick}
+            disabled={disabled}
             className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
                 active
-                    ? "bg-zinc-800 text-white border-zinc-700 shadow-lg"
+                    ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-500/50"
                     : danger
                         ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
-                        : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800"
+                        : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800",
+                disabled && "opacity-50 cursor-not-allowed pointer-events-none grayscale",
+                className
             )}>
             <Icon className="w-3.5 h-3.5" />
             {label}
@@ -449,6 +625,9 @@ function EventChip({
     bookings,
     cap,
     note,
+    selected,
+    onMouseDown,
+    onMouseEnter,
     onClick
 }: {
     color: string,
@@ -457,14 +636,21 @@ function EventChip({
     bookings: string,
     cap: string,
     note?: string,
+    selected?: boolean,
+    onMouseDown?: (e: React.MouseEvent) => void,
+    onMouseEnter?: () => void,
     onClick?: (e?: React.MouseEvent) => void
 }) {
-    const style = "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400";
+    const style = selected
+        ? "bg-cyan-500 border-2 border-white/80 shadow-[0_0_15px_rgba(6,182,212,0.6)] saturate-150 scale-[1.02] z-10"
+        : "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400";
 
     return (
         <div
-            className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-colors backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content]", style)}
+            className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none", style)}
             onClick={onClick}
+            onMouseDown={onMouseDown}
+            onMouseEnter={onMouseEnter}
         >
             <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
             <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>

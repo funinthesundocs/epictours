@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2, Calendar, Clock, Users, Repeat, MapPin, StickyNote } from "lucide-react";
+import { Edit2, Trash2, Calendar, Clock, Users, Repeat, MapPin, StickyNote, Bus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Availability {
@@ -16,10 +16,12 @@ export interface Availability {
     online_booking_status: 'open' | 'closed';
     private_announcement?: string;
     transportation_route_id?: string;
+    vehicle_id?: string;
     staff_ids?: string[];
     // Enriched fields for UI
     staff_display?: string;
     route_name?: string;
+    vehicle_name?: string;
 }
 
 interface AvailabilityListTableProps {
@@ -55,6 +57,7 @@ export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityLi
                             <th className="px-6 py-4">Duration</th>
                             <th className="px-6 py-4">Capacity</th>
                             <th className="px-6 py-4">Route Schedule</th>
+                            <th className="px-6 py-4">Vehicle</th>
                             <th className="px-6 py-4">Assigned Staff</th>
                             <th className="px-6 py-4">Private Note</th>
                             <th className="px-6 py-4 text-right">Actions</th>
@@ -128,6 +131,14 @@ export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityLi
                                     <div className="flex items-center gap-2 text-zinc-300">
                                         <MapPin size={14} className="text-zinc-500" />
                                         <span>{item.route_name || <span className="text-zinc-600 italic">-</span>}</span>
+                                    </div>
+                                </td>
+
+                                {/* Vehicle */}
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Bus size={14} className="text-zinc-500" />
+                                        <span>{item.vehicle_name || <span className="text-zinc-600 italic">-</span>}</span>
                                     </div>
                                 </td>
 
