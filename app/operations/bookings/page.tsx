@@ -1,23 +1,15 @@
 import { PageShell } from "@/components/shell/page-shell";
-import { AvailabilityCalendarWrapper } from "@/features/availability/components/availability-calendar-wrapper";
-import { supabase } from "@/lib/supabase";
+import { BookingsCalendarWrapper } from "@/features/bookings/components/bookings-calendar-wrapper";
 
 export const dynamic = "force-dynamic";
 
-export default async function BookingsPage() {
-    // Fetch active experiences sorted by name
-    const { data: experiences } = await supabase
-        .from('experiences')
-        .select('id, name, short_code')
-        .eq('is_active', true)
-        .order('name') as any;
-
+export default function BookingsPage() {
     return (
         <PageShell
-            title="Availability Calendar"
-            description="Publish and Manage Your Availabilities"
+            title="Bookings Calendar"
+            description="View availability and create new bookings"
         >
-            <AvailabilityCalendarWrapper experiences={experiences || []} />
+            <BookingsCalendarWrapper />
         </PageShell>
     );
 }

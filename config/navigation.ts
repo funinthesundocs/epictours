@@ -68,6 +68,11 @@ export const navigation: NavSection[] = [
 
             {
                 title: "Availabilities",
+                href: "/operations/availability",
+                icon: Calendar
+            },
+            {
+                title: "Bookings",
                 href: "/operations/bookings",
                 icon: CalendarRange
             },
