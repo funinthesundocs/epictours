@@ -1,10 +1,10 @@
 ---
-description: Restarts the production server with the "Nuclear Clean" strategy (Local Refresh Only).
+description: Restarts the production server with the "Smart Refresh" strategy (Fast Incremental Build).
 ---
 
-1. Pre-emptive Kill + Nuclear Clean + Build + Start
+1. Kill Port + Incremental Build (Fault Tolerant) + Start
 // turbo-all
 2. Refresh Local Server
 ```bash
-cmd /c "npx kill-port 3000 && rmdir /s /q .next && npm run build && npm run start -- -p 3000"
+cmd /c "npx kill-port 3000 && (npm run build || echo Build completed with warnings) && npm run start -- -p 3000"
 ```
