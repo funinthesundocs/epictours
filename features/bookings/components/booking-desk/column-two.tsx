@@ -34,7 +34,7 @@ export function ColumnTwo({
         const optId = opt.id || opt.field_id || String(Math.random());
         const currentValue = optionValues[optId];
 
-        const inputClasses = "w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none transition-colors";
+        const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
         const selectClasses = cn(inputClasses, "appearance-none cursor-pointer");
 
         switch (opt.type) {
@@ -67,7 +67,7 @@ export function ColumnTwo({
                 return (
                     <div className="flex flex-col gap-2">
                         {opt.options?.filter((o: any) => o.value !== undefined).map((o: any, i: number) => {
-                            const isSelected = isMulti 
+                            const isSelected = isMulti
                                 ? selectedValues.includes(o.value)
                                 : currentValue === o.value;
 
@@ -142,6 +142,16 @@ export function ColumnTwo({
                             <Plus size={14} className="text-zinc-400" />
                         </button>
                     </div>
+                );
+
+            case 'date':
+                return (
+                    <input
+                        type="date"
+                        value={currentValue || ""}
+                        onChange={(e) => handleValueChange(optId, e.target.value)}
+                        className={inputClasses}
+                    />
                 );
 
             case 'text':
@@ -238,7 +248,7 @@ export function ColumnTwo({
                                     <div className="text-sm font-medium text-white flex items-center gap-2">
                                         {opt.label || "Unnamed Option"}
                                         {opt.required && (
-                                            <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">Required</span>
+                                            <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">Required</span>
                                         )}
                                     </div>
                                     {opt.description && (

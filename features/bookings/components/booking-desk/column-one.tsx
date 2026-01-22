@@ -73,24 +73,33 @@ export function ColumnOne({
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
             {/* Header Info */}
-            <div className="p-4 bg-zinc-900/50 rounded-xl border border-zinc-800 space-y-2">
-                <div className="flex items-center gap-2 text-cyan-400 font-bold uppercase text-xs tracking-wider">
+            <div className="p-4 bg-black/20 rounded-xl border border-white/10 space-y-3">
+                <div className="flex items-center gap-2 text-cyan-400 font-bold uppercase text-xs tracking-wider border-b border-white/5 pb-2">
                     {availability.experience_name || "Unknown Experience"}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <div className="text-zinc-500 text-xs uppercase font-bold">Date</div>
-                        <div className="text-white font-medium">{availability.start_date}</div>
+                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Date</div>
+                        <div className="text-white font-medium">
+                            {(() => {
+                                const [y, m, d] = availability.start_date.split('-');
+                                return `${m}-${d}-${y}`;
+                            })()}
+                        </div>
                     </div>
                     <div>
-                        <div className="text-zinc-500 text-xs uppercase font-bold">Time</div>
+                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Time</div>
                         <div className="text-white font-medium">
                             {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
                         </div>
                     </div>
-                    <div className="col-span-2 border-t border-zinc-800 pt-2 mt-1">
-                        <div className="text-zinc-500 text-xs uppercase font-bold">Vehicle</div>
-                        <div className="text-white font-medium truncate">{availability.vehicle_name || 'Unassigned'}</div>
+                    <div className="col-span-2">
+                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Availability ID</div>
+                        <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>{availability.id}</div>
+                    </div>
+                    <div className="col-span-2 border-t border-white/5 pt-2">
+                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Capacity</div>
+                        <div className="text-white font-medium">{availability.max_capacity} Pax</div>
                     </div>
                 </div>
             </div>
@@ -174,11 +183,11 @@ export function ColumnOne({
                 <select
                     value={selectedScheduleId || ""}
                     onChange={(e) => setSelectedScheduleId(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                 >
-                    <option value="" disabled>Select a schedule...</option>
+                    <option value="" disabled className="bg-zinc-900">Select a schedule...</option>
                     {schedules.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
+                        <option key={s.id} value={s.id} className="bg-zinc-900">{s.name}</option>
                     ))}
                 </select>
             </div>
@@ -192,11 +201,11 @@ export function ColumnOne({
                 <select
                     value={selectedTier}
                     onChange={(e) => setSelectedTier(e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                     disabled={tiers.length === 0}
                 >
                     {tiers.map(t => (
-                        <option key={t.name} value={t.name}>{t.name}</option>
+                        <option key={t.name} value={t.name} className="bg-zinc-900">{t.name}</option>
                     ))}
                 </select>
             </div>
