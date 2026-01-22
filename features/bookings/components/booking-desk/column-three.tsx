@@ -2,13 +2,7 @@
 
 import { DollarSign, Receipt } from "lucide-react";
 
-interface PricingRate {
-    customer_type_id: string;
-    price: number;
-    tax_percentage: number;
-    tier: string;
-    customer_type_name?: string;
-}
+import { PricingRate } from "@/features/bookings/types";
 
 interface ColumnThreeProps {
     currentRates: PricingRate[];

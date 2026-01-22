@@ -18,6 +18,7 @@ export interface Availability {
     transportation_route_id?: string;
     vehicle_id?: string;
     pricing_schedule_id?: string;
+    booking_option_schedule_id?: string;
     staff_ids?: string[];
     // Enriched fields for UI
     staff_display?: string;

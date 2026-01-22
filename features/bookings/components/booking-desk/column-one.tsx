@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Customer, PricingSchedule, PricingTier, PricingRate } from "@/features/bookings/types";
 import {
     Command,
     CommandEmpty,
@@ -20,27 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { QuickAddCustomerDialog } from "./quick-add-customer-dialog";
 
-// Duplicated interfaces to avoid circular dependency with BookingDesk.tsx
-interface Customer {
-    id: string;
-    name: string;
-    email: string;
-}
-interface PricingSchedule {
-    id: string;
-    name: string;
-}
-interface PricingTier {
-    name: string;
-    sort_order: number;
-}
-interface PricingRate {
-    customer_type_id: string;
-    price: number;
-    tax_percentage: number;
-    tier: string;
-    customer_type_name?: string;
-}
+
 
 interface ColumnOneProps {
     availability: Availability;

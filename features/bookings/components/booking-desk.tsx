@@ -6,14 +6,14 @@ import { Availability } from "@/features/availability/components/availability-li
 import { ColumnOne } from "./booking-desk/column-one";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { ColumnTwo } from "./booking-desk/column-two";
 import { ColumnThree } from "./booking-desk/column-three";
 import { ColumnFour } from "./booking-desk/column-four";
 import {
     Customer, PricingSchedule, PricingTier, PricingRate,
     BookingOption, BookingOptionSchedule
-} from "../types";
+} from "@/features/bookings/types";
 
 interface BookingDeskProps {
     isOpen: boolean;
@@ -45,6 +45,9 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
     // Pax: { [customer_type_id]: count }
     const [paxCounts, setPaxCounts] = useState<Record<string, number>>({});
 
+    // Custom Fields Cache
+    const [customFieldsCache, setCustomFieldsCache] = useState<Record<string, any>>({});
+
     const [isSaving, setIsSaving] = useState(false);
 
     // --- Effects ---
@@ -63,6 +66,9 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
         // Default Schedule
         if (availability.pricing_schedule_id) {
             setSelectedScheduleId(availability.pricing_schedule_id);
+        }
+        if (availability.booking_option_schedule_id) {
+            setSelectedOptionScheduleId(availability.booking_option_schedule_id);
         }
 
         const fetchData = async () => {
@@ -87,6 +93,24 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
             // Booking Option Schedules
             const { data: optSchedData } = await supabase.from('booking_option_schedules' as any).select('*').order('name');
             if (optSchedData) setOptionSchedules(optSchedData as unknown as BookingOptionSchedule[]);
+
+            // Fetch Custom Fields for Options
+            console.log("DEBUG: Fetching custom_field_definitions...");
+            const { data: cfData, error: cfError } = await supabase.from('custom_field_definitions' as any).select('*');
+
+            if (cfError) {
+                console.error("DEBUG: Error fetching CFs:", cfError);
+            } else {
+                console.log("DEBUG: CF Data received:", cfData?.length);
+                if (cfData) {
+                    const map: Record<string, any> = {};
+                    cfData.forEach((cf: any) => {
+                        map[cf.id] = cf;
+                        console.log("DEBUG: Caching CF:", cf.id, cf.label);
+                    });
+                    setCustomFieldsCache(map);
+                }
+            }
         };
         fetchData();
     }, [isOpen, availability]);
@@ -139,7 +163,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
 
         setIsSaving(true);
         try {
-            const { error } = await supabase.from('bookings').insert({
+            const { error } = await supabase.from('bookings' as any).insert({
                 availability_id: availability.id,
                 customer_id: selectedCustomer.id,
                 status: 'confirmed',
@@ -168,10 +192,33 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
     const canSave = !!selectedCustomer && totalPax > 0;
 
     // Derived: Current Options
+    // Derived: Current Options (Resolved)
     const currentOptionSchedule = optionSchedules.find(s => s.id === selectedOptionScheduleId);
-    const currentOptionsList: BookingOption[] = currentOptionSchedule
-        ? (currentOptionSchedule as any)[`config_${selectedOptionVariation}`] || [] // dyn access
-        : [];
+    let rawOptions: BookingOption[] = [];
+
+    if (currentOptionSchedule) {
+        // Safe access to config properties
+        const s = currentOptionSchedule as any;
+        if (selectedOptionVariation === 'retail') rawOptions = s.config_retail || [];
+        else if (selectedOptionVariation === 'online') rawOptions = s.config_online || [];
+        else if (selectedOptionVariation === 'special') rawOptions = s.config_special || [];
+        else if (selectedOptionVariation === 'custom') rawOptions = s.config_custom || [];
+    }
+
+    const currentOptionsList = rawOptions.map(opt => {
+        // If it's a linked custom field
+        if (opt.field_id && customFieldsCache[opt.field_id]) {
+            const cf = customFieldsCache[opt.field_id];
+            return {
+                ...opt,
+                label: cf.label,
+                type: cf.type,
+                options: cf.options,
+                price: opt.price || 0
+            };
+        }
+        return opt;
+    });
 
     return (
         <SidePanel
@@ -207,16 +254,12 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                 {/* COLUMN 2: Options & Notes */}
                 <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
                     <ColumnTwo
-                        notes={notes}
-                        setNotes={setNotes}
                         optionSchedules={optionSchedules}
                         selectedOptionScheduleId={selectedOptionScheduleId}
                         setSelectedOptionScheduleId={setSelectedOptionScheduleId}
                         selectedVariation={selectedOptionVariation}
                         setSelectedVariation={setSelectedOptionVariation}
                         currentOptions={currentOptionsList}
-                        selectedOptions={selectedOptions}
-                        setSelectedOptions={setSelectedOptions}
                     />
                 </div>
 
