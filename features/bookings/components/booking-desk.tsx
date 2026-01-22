@@ -37,6 +37,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
     const [selectedOptionScheduleId, setSelectedOptionScheduleId] = useState<string | null>(null);
     const [selectedOptionVariation, setSelectedOptionVariation] = useState<string>("retail");
     const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({}); // id -> qty
+    const [optionValues, setOptionValues] = useState<Record<string, any>>({}); // Option field values
 
     // Selections
     const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null);
@@ -62,6 +63,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
         setSelectedCustomer(null);
         setNotes("");
         setPaxCounts({});
+        setOptionValues({});
         setIsSaving(false);
         // Default Schedule
         if (availability.pricing_schedule_id) {
@@ -260,6 +262,8 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                         selectedVariation={selectedOptionVariation}
                         setSelectedVariation={setSelectedOptionVariation}
                         currentOptions={currentOptionsList}
+                        optionValues={optionValues}
+                        setOptionValues={setOptionValues}
                     />
                 </div>
 
