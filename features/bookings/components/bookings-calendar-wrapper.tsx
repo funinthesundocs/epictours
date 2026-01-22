@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BookingsCalendar } from "./bookings-calendar";
-import { CreateBookingSheet } from "./create-booking-sheet";
+import { BookingDesk } from "./booking-desk";
 import { Availability } from "@/features/availability/components/availability-list-table";
 
 export function BookingsCalendarWrapper() {
@@ -30,10 +30,9 @@ export function BookingsCalendarWrapper() {
                 key={refreshTrigger}
             />
 
-            <CreateBookingSheet
+            <BookingDesk // Changed from CreateBookingSheet
                 isOpen={isSheetOpen}
                 onClose={() => setIsSheetOpen(false)}
-                onSuccess={handleSuccess}
                 availability={selectedAvailability}
             />
         </>

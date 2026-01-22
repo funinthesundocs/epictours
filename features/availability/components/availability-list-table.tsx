@@ -17,11 +17,14 @@ export interface Availability {
     private_announcement?: string;
     transportation_route_id?: string;
     vehicle_id?: string;
+    pricing_schedule_id?: string;
     staff_ids?: string[];
     // Enriched fields for UI
     staff_display?: string;
     route_name?: string;
     vehicle_name?: string;
+    experience_name?: string; // New
+    experience_short_code?: string; // New attempt to fix EXP label too
 }
 
 interface AvailabilityListTableProps {

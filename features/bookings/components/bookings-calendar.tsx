@@ -74,7 +74,9 @@ export function BookingsCalendar({
                     ...item,
                     staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
                     route_name: routeMap[item.transportation_route_id] || "",
-                    vehicle_name: vehicleMap[item.vehicle_id] || ""
+                    vehicle_name: vehicleMap[item.vehicle_id] || "",
+                    experience_name: expMap[item.experience_id || ""]?.name || "",
+                    experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP"
                 }));
                 setAvailabilities(enriched);
             }
@@ -235,7 +237,7 @@ function MonthView({
                                 {daysEvents.map((event) => (
                                     <EventChip
                                         key={event.id}
-                                        abbr={expMap[event.experience_id || ""]?.short_code || "EXP"}
+                                        abbr={event.experience_short_code || "EXP"}
                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         bookings="0 Bookings"
                                         cap={`0 / ${event.max_capacity} Capacity`}

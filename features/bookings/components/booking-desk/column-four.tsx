@@ -1,0 +1,53 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Mail, Send } from "lucide-react";
+
+interface ColumnFourProps {
+    onSave: () => void;
+    isSaving: boolean;
+    canSave: boolean;
+}
+
+export function ColumnFour({ onSave, isSaving, canSave }: ColumnFourProps) {
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500 delay-300 h-full flex flex-col">
+            <h3 className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                <Send size={16} className="text-cyan-500" />
+                Actions
+            </h3>
+
+            <div className="flex-1 space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-zinc-900/30 border border-zinc-800 rounded-lg">
+                    <div className="bg-zinc-800 p-2 rounded-full">
+                        <Mail size={16} className="text-zinc-400" />
+                    </div>
+                    <div>
+                        <div className="text-sm font-medium text-white">Email Confirmation</div>
+                        <div className="text-xs text-zinc-500">Send automatic receipt to customer</div>
+                    </div>
+                    {/* Toggle Placeholder */}
+                    <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
+                        <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-500 rounded-full" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-auto space-y-3">
+                <Button
+                    onClick={onSave}
+                    disabled={!canSave || isSaving}
+                    className="w-full h-12 bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-lg"
+                >
+                    {isSaving ? "Creating Booking..." : "Create Booking"}
+                </Button>
+
+                {!canSave && (
+                    <p className="text-xs text-center text-red-400">
+                        Please select a customer and at least one passenger.
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
