@@ -256,6 +256,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                 {/* COLUMN 2: Options & Notes */}
                 <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
                     <ColumnTwo
+                        availability={availability}
                         optionSchedules={optionSchedules}
                         selectedOptionScheduleId={selectedOptionScheduleId}
                         setSelectedOptionScheduleId={setSelectedOptionScheduleId}

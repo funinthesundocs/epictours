@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Save, Plus, Trash2, Type, List, GripVertical, Eye, Settings, ListPlus, ChevronDown, Check } from "lucide-react";
+import { X, Save, Plus, Trash2, Type, List, GripVertical, Eye, Settings, ListPlus, ChevronDown, Check, MapPin } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -36,7 +36,7 @@ const formSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(3, "Name must be at least 3 chars").regex(/^[a-z0-9_]+$/, "Only lowercase letters, numbers, and underscores"),
     label: z.string().min(1, "Label is required"),
-    type: z.enum(['text', 'textarea', 'select', 'quantity', 'checkbox', 'transport', 'header', 'date']),
+    type: z.enum(['text', 'textarea', 'select', 'quantity', 'checkbox', 'transport', 'header', 'date', 'smart_pickup']),
     description: z.string().optional(),
     is_internal: z.boolean().default(false),
     options: z.array(optionSchema),
@@ -60,6 +60,7 @@ const FIELD_TYPES = [
     { value: 'checkbox', label: 'Checkbox', icon: List },
     { value: 'date', label: 'Date Picker', icon: List },
     { value: 'transport', label: 'Hotel & Transport', icon: Settings },
+    { value: 'smart_pickup', label: 'Smart Pickup (Location & Time)', icon: MapPin },
     { value: 'header', label: 'Section Header', icon: Type },
 ];
 
@@ -501,6 +502,35 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                         {currentType === 'header' && (
                                             <div className="py-2 border-b border-white/10 mt-4">
                                                 <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{form.watch("label")}</h3>
+                                            </div>
+                                        )}
+
+                                        {currentType === 'smart_pickup' && (
+                                            <div className="space-y-3">
+                                                <div className="relative">
+                                                    <select className={cn(inputClasses, "appearance-none w-full cursor-not-allowed opacity-100")} disabled defaultValue="">
+                                                        <option value="" disabled>-- Select Pickup Hotel --</option>
+                                                        <option>Sheraton Waikiki</option>
+                                                        <option>Hilton Hawaiian Village</option>
+                                                        <option>Hyatt Regency</option>
+                                                    </select>
+                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                                </div>
+                                                <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3">
+                                                    <div className="mt-0.5 text-cyan-500">
+                                                        <MapPin size={16} />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
+                                                        <div className="text-sm text-zinc-200 font-medium">Sheraton Waikiki (Aloha Landing)</div>
+                                                        <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                                            <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">7:15 AM</span>
+                                                            <div className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
+                                                                Map <ExternalLink size={10} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
 

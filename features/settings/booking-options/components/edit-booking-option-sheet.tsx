@@ -151,6 +151,17 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
         );
     }
 
+    if (type === 'smart_pickup') {
+        return (
+            <div className={cn(inputClasses, "justify-between")}>
+                <select className="w-full bg-transparent appearance-none text-xs text-zinc-500 cursor-not-allowed outline-none" disabled>
+                    <option>Pickup Hotel (Smart)...</option>
+                </select>
+                <ChevronDown size={14} className="text-zinc-600 absolute right-3 pointer-events-none" />
+            </div>
+        );
+    }
+
     // Default fallback
     return (
         <div className={inputClasses}>

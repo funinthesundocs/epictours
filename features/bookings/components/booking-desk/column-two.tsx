@@ -1,10 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { BookingOption, BookingOptionSchedule } from "@/features/bookings/types";
-import { Settings, ChevronDown, Plus, Minus } from "lucide-react";
+import { Availability } from "@/features/availability/components/availability-list-table";
+import { Settings, ChevronDown, Plus, Minus, MapPin, Loader2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 interface ColumnTwoProps {
+    availability: Availability;
     // Options
     optionSchedules: BookingOptionSchedule[];
     selectedOptionScheduleId: string | null;
@@ -18,11 +22,66 @@ interface ColumnTwoProps {
 }
 
 export function ColumnTwo({
+    availability,
     optionSchedules, selectedOptionScheduleId, setSelectedOptionScheduleId,
     selectedVariation, setSelectedVariation,
     currentOptions,
     optionValues, setOptionValues
 }: ColumnTwoProps) {
+
+    // --- Smart Pickup Logic ---
+    const [hotels, setHotels] = useState<any[]>([]);
+    const [pickupPoints, setPickupPoints] = useState<any[]>([]);
+    const [scheduleStops, setScheduleStops] = useState<any[]>([]);
+    const [isLoadingSmartData, setIsLoadingSmartData] = useState(false);
+
+    useEffect(() => {
+        const fetchSmartData = async () => {
+            setIsLoadingSmartData(true);
+            try {
+                // 1. Fetch Hotels
+                const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').order('name');
+                if (hotelsData) setHotels(hotelsData);
+
+                // 2. Fetch Pickup Points
+                const { data: ppData } = await supabase.from('pickup_points' as any).select('id, name, map_link');
+                if (ppData) setPickupPoints(ppData);
+
+                // 3. Fetch Schedule Stops if route exists
+                if (availability.transportation_route_id) {
+                    // Assumption: route_id maps to schedule_id
+                    const { data: stopsData } = await supabase
+                        .from('schedule_stops' as any)
+                        .select('pickup_point_id, pickup_time')
+                        .eq('schedule_id', availability.transportation_route_id);
+                    if (stopsData) setScheduleStops(stopsData);
+                }
+            } catch (err) {
+                console.error("Error fetching smart pickup data", err);
+            } finally {
+                setIsLoadingSmartData(false);
+            }
+        };
+
+        fetchSmartData();
+    }, [availability.transportation_route_id]);
+
+    const resolvePickupDetails = (hotelId: string) => {
+        if (!hotelId) return null;
+        const hotel = hotels.find(h => h.id === hotelId);
+        if (!hotel || !hotel.pickup_point_id) return null;
+
+        const pickupPoint = pickupPoints.find(p => p.id === hotel.pickup_point_id);
+        const stop = scheduleStops.find(s => s.pickup_point_id === hotel.pickup_point_id);
+
+        return {
+            locationName: pickupPoint?.name || "Unknown Location",
+            mapLink: pickupPoint?.map_link,
+            time: stop?.pickup_time || "Not Scheduled"
+        };
+    };
+
+    // --- Standard Logic ---
 
     // Handle value change for an option
     const handleValueChange = (optionId: string, value: any) => {
@@ -36,6 +95,54 @@ export function ColumnTwo({
 
         const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
         const selectClasses = cn(inputClasses, "appearance-none cursor-pointer");
+
+        if (opt.type === 'smart_pickup') {
+            const pickupDetails = resolvePickupDetails(currentValue);
+
+            return (
+                <div className="space-y-3">
+                    <div className="relative">
+                        <select
+                            value={currentValue || ""}
+                            onChange={(e) => handleValueChange(optId, e.target.value)}
+                            className={selectClasses}
+                            disabled={isLoadingSmartData}
+                        >
+                            <option value="">{isLoadingSmartData ? "Loading..." : "-- Select Pickup Hotel --"}</option>
+                            {hotels.map(h => (
+                                <option key={h.id} value={h.id}>{h.name}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                    </div>
+
+                    {currentValue && pickupDetails && (
+                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                            <div className="mt-0.5 text-cyan-500 flex-shrink-0">
+                                <MapPin size={16} />
+                            </div>
+                            <div className="space-y-1 min-w-0">
+                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
+                                <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
+                                <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
+                                    {pickupDetails.mapLink && (
+                                        <a
+                                            href={pickupDetails.mapLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
+                                        >
+                                            Map <ExternalLink size={10} />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
 
         switch (opt.type) {
             case 'select':
