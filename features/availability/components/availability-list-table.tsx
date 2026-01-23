@@ -32,13 +32,46 @@ interface AvailabilityListTableProps {
     data: Availability[];
     onEdit?: (id: string, availability: Availability) => void;
     onDelete: (id: string) => void;
+    // Bulk selection props
+    selectedIds?: Set<string>;
+    onSelectionChange?: (ids: Set<string>) => void;
+    isBulkMode?: boolean;
 }
 
 import { useState } from "react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
-export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityListTableProps) {
+export function AvailabilityListTable({
+    data,
+    onEdit,
+    onDelete,
+    selectedIds = new Set(),
+    onSelectionChange,
+    isBulkMode = false
+}: AvailabilityListTableProps) {
     const [deletingItem, setDeletingItem] = useState<Availability | null>(null);
+
+    const allSelected = data.length > 0 && data.every(item => selectedIds.has(item.id));
+    const someSelected = data.some(item => selectedIds.has(item.id)) && !allSelected;
+
+    const handleSelectAll = () => {
+        if (allSelected) {
+            onSelectionChange?.(new Set());
+        } else {
+            onSelectionChange?.(new Set(data.map(item => item.id)));
+        }
+    };
+
+    const handleSelectItem = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const newSelection = new Set(selectedIds);
+        if (newSelection.has(id)) {
+            newSelection.delete(id);
+        } else {
+            newSelection.add(id);
+        }
+        onSelectionChange?.(newSelection);
+    };
 
     if (!data || data.length === 0) {
         return (
@@ -50,11 +83,21 @@ export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityLi
 
     return (
         <>
-            <div className="h-full overflow-auto relative bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl">
+            <div className="h-full overflow-auto relative bg-[#0b1115] border border-white/10 rounded-xl">
                 <table className="w-full text-left">
-                    {/* ... existing table code ... */}
-                    <thead className="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-zinc-800">
+                    <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                         <tr>
+                            {isBulkMode && (
+                                <th className="px-4 py-4 w-12">
+                                    <input
+                                        type="checkbox"
+                                        checked={allSelected}
+                                        ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                                        onChange={handleSelectAll}
+                                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
+                                    />
+                                </th>
+                            )}
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4">Activity Date</th>
                             <th className="px-6 py-4">Start Time</th>
@@ -69,7 +112,24 @@ export function AvailabilityListTable({ data, onEdit, onDelete }: AvailabilityLi
                     </thead>
                     <tbody className="divide-y divide-zinc-800 text-sm text-zinc-300">
                         {data.map((item) => (
-                            <tr key={item.id} className="hover:bg-cyan-950/10 transition-colors group cursor-pointer" onClick={() => onEdit?.(item.id, item)}>
+                            <tr
+                                key={item.id}
+                                className={cn(
+                                    "hover:bg-cyan-950/10 transition-colors group cursor-pointer",
+                                    selectedIds.has(item.id) && "bg-cyan-950/20"
+                                )}
+                                onClick={() => isBulkMode ? handleSelectItem(item.id, { stopPropagation: () => { } } as React.MouseEvent) : onEdit?.(item.id, item)}
+                            >
+                                {isBulkMode && (
+                                    <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.has(item.id)}
+                                            onChange={(e) => handleSelectItem(item.id, e as unknown as React.MouseEvent)}
+                                            className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                    </td>
+                                )}
                                 {/* Status */}
                                 <td className="px-6 py-4">
                                     <span className={cn(

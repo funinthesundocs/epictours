@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Availability, AvailabilityListTable } from "./availability-list-table";
+import { BulkActionToolbar } from "./bulk-action-toolbar";
+import { BulkEditSheet } from "./bulk-edit-sheet";
+import { Settings2 } from "lucide-react";
 
 export function AvailabilityCalendar({
     experiences = [],
@@ -49,6 +52,7 @@ export function AvailabilityCalendar({
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDragging, setIsDragging] = useState(false);
+    const [isDirectBulkEditOpen, setIsDirectBulkEditOpen] = useState(false);
 
     // Clear selection when mode changes
     useEffect(() => {
@@ -380,40 +384,31 @@ export function AvailabilityCalendar({
                     <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
                     <ToolbarButton
-                        icon={Plus}
-                        label="Create"
-                        onClick={() => onEventClick?.(currentDate.toISOString().split('T')[0], currentExp?.id)}
-                        disabled={isSelectMode}
-                    />
-
-                    <ToolbarButton
-                        icon={isSelectMode ? X : MousePointer2}
-                        label={isSelectMode ? "Cancel" : "Select"}
+                        icon={MousePointer2}
+                        label="Select"
                         active={isSelectMode}
                         onClick={() => setIsSelectMode(!isSelectMode)}
                     />
 
-                    {isSelectMode && (
-                        <>
-                            <div className="w-px h-8 bg-zinc-900 mx-2 animate-in fade-in slide-in-from-right-4"></div>
+                    {/* Spacer to push buttons to far right */}
+                    <div className="flex-1"></div>
 
-                            <ToolbarButton
-                                icon={CopyCheck}
-                                label={`Duplicate (${selectedIds.size})`}
-                                onClick={handleBatchDuplicate}
-                                disabled={selectedIds.size === 0}
-                                className="animate-in fade-in zoom-in-95"
-                            />
-                            <ToolbarButton
-                                icon={Trash2}
-                                label={`Delete (${selectedIds.size})`}
-                                danger
-                                onClick={handleBatchDelete}
-                                disabled={selectedIds.size === 0}
-                                className="animate-in fade-in zoom-in-95"
-                            />
-                        </>
-                    )}
+                    {/* Update Button - Opens bulk edit directly */}
+                    <ToolbarButton
+                        icon={Edit}
+                        label="Update"
+                        onClick={() => setIsDirectBulkEditOpen(true)}
+                        disabled={isSelectMode}
+                    />
+
+                    {/* Create Button - Far Right, Cyan */}
+                    <ToolbarButton
+                        icon={Plus}
+                        label="Create"
+                        primary
+                        onClick={() => onEventClick?.(currentDate.toISOString().split('T')[0], currentExp?.id)}
+                        disabled={isSelectMode}
+                    />
                 </div>
             </div>
 
@@ -423,31 +418,79 @@ export function AvailabilityCalendar({
                 viewMode === 'list' && "bg-transparent border-0 shadow-none overflow-visible"
             )}>
                 {viewMode === 'calendar' ? (
-                    <MonthView
-                        selectedExperience={selectedExperience}
-                        abbr={abbr}
-                        currentDate={currentDate}
-                        availabilities={availabilities}
-                        onEventClick={(date, id) => onEventClick?.(date, id)}
-                        onEditEvent={onEditEvent}
-                        // Selection Props
-                        isSelectMode={isSelectMode}
-                        selectedIds={selectedIds}
-                        isDragging={isDragging}
-                        onToggleSelection={toggleSelection}
-                        onSetIsDragging={setIsDragging}
-                    />
+                    <div className="flex flex-col h-full">
+                        {/* Bulk Action Toolbar for Calendar View */}
+                        {isSelectMode && (
+                            <BulkActionToolbar
+                                selectedCount={selectedIds.size}
+                                selectedIds={selectedIds}
+                                onClearSelection={() => setSelectedIds(new Set())}
+                                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                                onExitBulkMode={() => {
+                                    setIsSelectMode(false);
+                                    setSelectedIds(new Set());
+                                }}
+                                onDuplicate={handleBatchDuplicate}
+                            />
+                        )}
+                        <div className="flex-1 min-h-0">
+                            <MonthView
+                                selectedExperience={selectedExperience}
+                                abbr={abbr}
+                                currentDate={currentDate}
+                                availabilities={availabilities}
+                                onEventClick={(date, id) => onEventClick?.(date, id)}
+                                onEditEvent={onEditEvent}
+                                // Selection Props
+                                isSelectMode={isSelectMode}
+                                selectedIds={selectedIds}
+                                isDragging={isDragging}
+                                onToggleSelection={toggleSelection}
+                                onSetIsDragging={setIsDragging}
+                            />
+                        </div>
+                    </div>
                 ) : (
-                    <AvailabilityListTable
-                        data={availabilities}
-                        onEdit={(id, item) => {
-                            // Pass the full item to the edit handler
-                            onEditEvent?.(item);
-                        }}
-                        onDelete={handleDelete}
-                    />
+                    <div className="flex flex-col h-full">
+                        {/* Bulk Action Toolbar - shown in select mode */}
+                        {isSelectMode && (
+                            <BulkActionToolbar
+                                selectedCount={selectedIds.size}
+                                selectedIds={selectedIds}
+                                onClearSelection={() => setSelectedIds(new Set())}
+                                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                                onExitBulkMode={() => {
+                                    setIsSelectMode(false);
+                                    setSelectedIds(new Set());
+                                }}
+                                onDuplicate={handleBatchDuplicate}
+                            />
+                        )}
+                        <div className="flex-1 min-h-0">
+                            <AvailabilityListTable
+                                data={availabilities}
+                                onEdit={(id, item) => {
+                                    // Pass the full item to the edit handler
+                                    if (!isSelectMode) onEditEvent?.(item);
+                                }}
+                                onDelete={handleDelete}
+                                selectedIds={selectedIds}
+                                onSelectionChange={setSelectedIds}
+                                isBulkMode={isSelectMode}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
+
+            {/* Direct Bulk Edit Sheet - opened from header Update button */}
+            <BulkEditSheet
+                isOpen={isDirectBulkEditOpen}
+                onClose={() => setIsDirectBulkEditOpen(false)}
+                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                selectedIds={new Set()}
+                showDateRangeSelector
+            />
         </div>
     );
 }
@@ -590,6 +633,7 @@ function ToolbarButton({
     label,
     active = false,
     danger = false,
+    primary = false,
     disabled = false,
     className,
     onClick
@@ -598,6 +642,7 @@ function ToolbarButton({
     label: string,
     active?: boolean,
     danger?: boolean,
+    primary?: boolean,
     disabled?: boolean,
     className?: string,
     onClick?: () => void
@@ -608,11 +653,13 @@ function ToolbarButton({
             disabled={disabled}
             className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
-                active
-                    ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-500/50"
-                    : danger
-                        ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
-                        : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800",
+                primary
+                    ? "bg-cyan-500 text-black border-cyan-400 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    : active
+                        ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-500/50"
+                        : danger
+                            ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
+                            : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800",
                 disabled && "opacity-50 cursor-not-allowed pointer-events-none grayscale",
                 className
             )}>
