@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { SidePanel } from "@/components/ui/side-panel";
 import { supabase } from "@/lib/supabase";
+import { Combobox } from "@/components/ui/combobox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -22,7 +23,13 @@ import {
     Trash2,
     Bus,
     X,
-    Plus
+    Plus,
+    Hash,
+    EyeOff,
+    CalendarDays,
+    FileText,
+    MapPin,
+    UserCheck
 } from "lucide-react";
 
 interface BulkEditSheetProps {
@@ -61,13 +68,40 @@ const UPDATE_OPTIONS: { type: UpdateType; label: string; icon: any; description:
     { type: 'delete', label: 'Delete Availabilities', icon: Trash2, description: 'Remove selected slots' },
 ];
 
-// Filter types for Column 2
-type FilterType = 'date_range' | 'status' | 'experience' | 'time_range';
+// Filter types for Column 1 (matching FareHarbor)
+type FilterType =
+    | 'date_range'
+    | 'status'
+    | 'time_range'
+    | 'day_of_week'
+    | 'unlisted_status'
+    | 'has_bookings'
+    | 'ending_between'
+    | 'duration'
+    | 'public_headline'
+    | 'private_headline'
+    | 'notes'
+    | 'capacity'
+    | 'customer_type'
+    | 'pickup_route'
+    | 'crew';
 
 const FILTER_OPTIONS: { type: FilterType; label: string; icon: any; description: string }[] = [
     { type: 'date_range', label: 'Date Range', icon: Calendar, description: 'Filter by start date range' },
-    { type: 'status', label: 'Booking Status', icon: Power, description: 'Filter by open/closed status' },
-    { type: 'time_range', label: 'Time Range', icon: Clock, description: 'Filter by start time' },
+    { type: 'day_of_week', label: 'Day of Week', icon: CalendarDays, description: 'Filter by weekday' },
+    { type: 'status', label: 'Online Booking Status', icon: Power, description: 'Filter by open/closed status' },
+    { type: 'unlisted_status', label: 'Unlisted Status', icon: EyeOff, description: 'Filter by visibility' },
+    { type: 'has_bookings', label: 'Has Bookings', icon: UserCheck, description: 'Filter slots with reservations' },
+    { type: 'time_range', label: 'Starting Between', icon: Clock, description: 'Filter by start time' },
+    { type: 'ending_between', label: 'Ending Between', icon: Clock, description: 'Filter by end time' },
+    { type: 'duration', label: 'Length in Hours', icon: Clock, description: 'Filter by duration' },
+    { type: 'public_headline', label: 'Public Headline', icon: FileText, description: 'Search public title' },
+    { type: 'private_headline', label: 'Private Headline', icon: FileText, description: 'Search internal title' },
+    { type: 'notes', label: 'Notes', icon: MessageSquare, description: 'Search notes field' },
+    { type: 'capacity', label: 'Total Capacity', icon: Users, description: 'Filter by max capacity' },
+    { type: 'customer_type', label: 'Customer Type', icon: Users, description: 'Filter by customer type' },
+    { type: 'pickup_route', label: 'Pickup Route', icon: MapPin, description: 'Filter by route' },
+    { type: 'crew', label: 'Crew', icon: Users, description: 'Filter by assigned staff' },
 ];
 
 export function BulkEditSheet({
@@ -90,13 +124,29 @@ export function BulkEditSheet({
     const [selectedUpdateTypes, setSelectedUpdateTypes] = useState<UpdateType[]>([]);
     const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
 
-    // Filter selection state for Column 2
+    // Filter selection state for Column 1
     const [selectedFilters, setSelectedFilters] = useState<FilterType[]>([]);
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+    const filterScrollRef = useRef<HTMLDivElement>(null);
     const [filterValues, setFilterValues] = useState({
         status: "" as "" | "open" | "closed",
         time_start: "",
         time_end: "",
+        day_of_week: [] as number[], // 0=Sun, 1=Mon, etc.
+        unlisted_status: "" as "" | "listed" | "unlisted",
+        has_bookings: "" as "" | "yes" | "no",
+        ending_time_start: "",
+        ending_time_end: "",
+        duration_min: "",
+        duration_max: "",
+        public_headline: "",
+        private_headline: "",
+        notes: "",
+        capacity_min: "",
+        capacity_max: "",
+        customer_type_id: "",
+        pickup_route_id: "",
+        crew_ids: [] as string[],
     });
 
     // Field values
@@ -120,6 +170,8 @@ export function BulkEditSheet({
     const [transportationSchedules, setTransportationSchedules] = useState<{ id: string, name: string }[]>([]);
     const [vehicles, setVehicles] = useState<{ id: string, name: string }[]>([]);
     const [staff, setStaff] = useState<{ id: string, name: string, role: { name: string } | null }[]>([]);
+    const [customerTypes, setCustomerTypes] = useState<{ id: string, name: string }[]>([]);
+    const [pickupRoutes, setPickupRoutes] = useState<{ id: string, name: string }[]>([]);
 
     // Fetch reference data
     useEffect(() => {
@@ -161,6 +213,20 @@ export function BulkEditSheet({
                     s.role?.name && ['Driver', 'Guide'].includes(s.role.name)
                 );
                 setStaff(filteredStaff as any);
+
+                // Fetch customer types for filter
+                const { data: custTypes } = await supabase
+                    .from("customer_types" as any)
+                    .select("id, name")
+                    .order("name");
+                setCustomerTypes((custTypes as any) || []);
+
+                // Fetch pickup routes (schedules) for filter
+                const { data: routes } = await supabase
+                    .from("schedules" as any)
+                    .select("id, name")
+                    .order("name");
+                setPickupRoutes((routes as any) || []);
             } catch (err) {
                 console.error("Error loading reference data:", err);
             } finally {
@@ -178,7 +244,26 @@ export function BulkEditSheet({
             setIsFieldDropdownOpen(false);
             setSelectedFilters([]);
             setIsFilterDropdownOpen(false);
-            setFilterValues({ status: "", time_start: "", time_end: "" });
+            setFilterValues({
+                status: "",
+                time_start: "",
+                time_end: "",
+                day_of_week: [],
+                unlisted_status: "",
+                has_bookings: "",
+                ending_time_start: "",
+                ending_time_end: "",
+                duration_min: "",
+                duration_max: "",
+                public_headline: "",
+                private_headline: "",
+                notes: "",
+                capacity_min: "",
+                capacity_max: "",
+                customer_type_id: "",
+                pickup_route_id: "",
+                crew_ids: [],
+            });
             setDateRangeStart("");
             setDateRangeEnd("");
             setFilteredIds(new Set());
@@ -202,6 +287,13 @@ export function BulkEditSheet({
     const addFilter = (type: FilterType) => {
         if (!selectedFilters.includes(type)) {
             setSelectedFilters([...selectedFilters, type]);
+            // Scroll to bottom after adding filter so Add Filter button stays visible
+            setTimeout(() => {
+                filterScrollRef.current?.scrollTo({
+                    top: filterScrollRef.current.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
         }
         setIsFilterDropdownOpen(false);
     };
@@ -378,7 +470,7 @@ export function BulkEditSheet({
                         <div className="flex-1 overflow-hidden grid grid-cols-3 divide-x divide-white/10">
 
                             {/* Column 2: Change (What to update) */}
-                            <div className="flex flex-col bg-zinc-900/50 order-2">
+                            <div className="flex flex-col bg-zinc-900/50 order-2 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">2</span>
@@ -426,16 +518,16 @@ export function BulkEditSheet({
 
                                             {/* Dropdown */}
                                             {isFieldDropdownOpen && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-30 max-h-[300px] overflow-y-auto">
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl z-30 max-h-[300px] overflow-y-auto">
                                                     {availableOptions.map(option => (
                                                         <button
                                                             key={option.type}
                                                             onClick={() => addUpdateType(option.type)}
-                                                            className="w-full text-left px-3 py-3 hover:bg-white/5 transition-all flex items-center gap-3 border-b border-zinc-800 last:border-b-0"
+                                                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-3 text-zinc-300 group"
                                                         >
-                                                            <option.icon size={18} className="text-zinc-500" />
+                                                            <option.icon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="text-sm font-medium text-zinc-300">{option.label}</div>
+                                                                <div className="text-sm font-medium">{option.label}</div>
                                                                 <div className="text-xs text-zinc-500 truncate">{option.description}</div>
                                                             </div>
                                                         </button>
@@ -456,7 +548,7 @@ export function BulkEditSheet({
                             </div>
 
                             {/* Column 1: For these availabilities (Selection Info) */}
-                            <div className="flex flex-col bg-zinc-900/30 order-1">
+                            <div className="flex flex-col bg-zinc-900/30 order-1 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">1</span>
@@ -469,7 +561,7 @@ export function BulkEditSheet({
                                         }
                                     </p>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-4">
+                                <div ref={filterScrollRef} className="flex-1 overflow-y-auto p-4">
                                     {showDateRangeSelector ? (
                                         // Date Range Selector
                                         <div className="space-y-4">
@@ -517,7 +609,7 @@ export function BulkEditSheet({
 
                                                 {/* Selected Filters - Anchored with inputs inside */}
                                                 {selectedFilters.includes('status') && (
-                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50 overflow-hidden">
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
                                                         <div className="px-3 py-2 flex items-center gap-3">
                                                             <Power size={16} className="text-cyan-400" />
                                                             <div className="flex-1 min-w-0">
@@ -531,25 +623,26 @@ export function BulkEditSheet({
                                                             </button>
                                                         </div>
                                                         <div className="px-3 pb-3">
-                                                            <select
+                                                            <Combobox
                                                                 value={filterValues.status}
-                                                                onChange={(e) => setFilterValues(prev => ({ ...prev, status: e.target.value as any }))}
-                                                                className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
-                                                            >
-                                                                <option value="">Any</option>
-                                                                <option value="open">Open</option>
-                                                                <option value="closed">Closed</option>
-                                                            </select>
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, status: val as any }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    { value: 'open', label: 'Open' },
+                                                                    { value: 'closed', label: 'Closed' }
+                                                                ]}
+                                                                placeholder="Select status..."
+                                                            />
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 {selectedFilters.includes('time_range') && (
-                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50 overflow-hidden">
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
                                                         <div className="px-3 py-2 flex items-center gap-3">
                                                             <Clock size={16} className="text-cyan-400" />
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="text-sm font-medium text-cyan-400">Time Range</div>
+                                                                <div className="text-sm font-medium text-cyan-400">Starting Between</div>
                                                             </div>
                                                             <button
                                                                 onClick={() => removeFilter('time_range')}
@@ -565,7 +658,7 @@ export function BulkEditSheet({
                                                                     type="time"
                                                                     value={filterValues.time_start}
                                                                     onChange={(e) => setFilterValues(prev => ({ ...prev, time_start: e.target.value }))}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
@@ -575,10 +668,419 @@ export function BulkEditSheet({
                                                                     type="time"
                                                                     value={filterValues.time_end}
                                                                     onChange={(e) => setFilterValues(prev => ({ ...prev, time_end: e.target.value }))}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Day of Week Filter */}
+                                                {selectedFilters.includes('day_of_week') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <CalendarDays size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Day of Week</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('day_of_week')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3 flex flex-wrap gap-1">
+                                                            {['Su', 'M', 'T', 'W', 'Th', 'F', 'S'].map((day, idx) => (
+                                                                <button
+                                                                    key={idx}
+                                                                    onClick={() => {
+                                                                        const current = filterValues.day_of_week;
+                                                                        if (current.includes(idx)) {
+                                                                            setFilterValues(prev => ({ ...prev, day_of_week: current.filter(d => d !== idx) }));
+                                                                        } else {
+                                                                            setFilterValues(prev => ({ ...prev, day_of_week: [...current, idx] }));
+                                                                        }
+                                                                    }}
+                                                                    className={cn(
+                                                                        "px-2.5 py-1 rounded text-xs font-medium transition-colors",
+                                                                        filterValues.day_of_week.includes(idx)
+                                                                            ? "bg-cyan-500 text-black"
+                                                                            : "bg-black/50 text-zinc-400 hover:bg-white/10"
+                                                                    )}
+                                                                >
+                                                                    {day}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Unlisted Status Filter */}
+                                                {selectedFilters.includes('unlisted_status') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <EyeOff size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Unlisted Status</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('unlisted_status')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <Combobox
+                                                                value={filterValues.unlisted_status}
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, unlisted_status: val as any }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    { value: 'listed', label: 'Listed (Public)' },
+                                                                    { value: 'unlisted', label: 'Unlisted (Hidden)' }
+                                                                ]}
+                                                                placeholder="Select visibility..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Has Bookings Filter */}
+                                                {selectedFilters.includes('has_bookings') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <UserCheck size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Has Bookings</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('has_bookings')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <Combobox
+                                                                value={filterValues.has_bookings}
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, has_bookings: val as any }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    { value: 'yes', label: 'Has Bookings' },
+                                                                    { value: 'no', label: 'No Bookings' }
+                                                                ]}
+                                                                placeholder="Select booking status..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Ending Between Filter */}
+                                                {selectedFilters.includes('ending_between') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <Clock size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Ending Between</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('ending_between')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">From</label>
+                                                                <input
+                                                                    type="time"
+                                                                    value={filterValues.ending_time_start}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, ending_time_start: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    style={{ colorScheme: 'dark' }}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">To</label>
+                                                                <input
+                                                                    type="time"
+                                                                    value={filterValues.ending_time_end}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, ending_time_end: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    style={{ colorScheme: 'dark' }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Duration Filter */}
+                                                {selectedFilters.includes('duration') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <Clock size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Length in Hours</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('duration')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">Min</label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="0.5"
+                                                                    min="0"
+                                                                    value={filterValues.duration_min}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, duration_min: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    placeholder="0"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">Max</label>
+                                                                <input
+                                                                    type="number"
+                                                                    step="0.5"
+                                                                    min="0"
+                                                                    value={filterValues.duration_max}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, duration_max: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    placeholder="24"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Public Headline Filter */}
+                                                {selectedFilters.includes('public_headline') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <FileText size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Public Headline</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('public_headline')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <input
+                                                                type="text"
+                                                                value={filterValues.public_headline}
+                                                                onChange={(e) => setFilterValues(prev => ({ ...prev, public_headline: e.target.value }))}
+                                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                placeholder="Search public title..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Private Headline Filter */}
+                                                {selectedFilters.includes('private_headline') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <FileText size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Private Headline</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('private_headline')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <input
+                                                                type="text"
+                                                                value={filterValues.private_headline}
+                                                                onChange={(e) => setFilterValues(prev => ({ ...prev, private_headline: e.target.value }))}
+                                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                placeholder="Search internal title..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Notes Filter */}
+                                                {selectedFilters.includes('notes') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <MessageSquare size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Notes</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('notes')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <input
+                                                                type="text"
+                                                                value={filterValues.notes}
+                                                                onChange={(e) => setFilterValues(prev => ({ ...prev, notes: e.target.value }))}
+                                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                placeholder="Search notes..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Capacity Filter */}
+                                                {selectedFilters.includes('capacity') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <Users size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Total Capacity</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('capacity')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">Min</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={filterValues.capacity_min}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_min: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    placeholder="0"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs text-zinc-400 mb-1">Max</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={filterValues.capacity_max}
+                                                                    onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_max: e.target.value }))}
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
+                                                                    placeholder="100"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Customer Type Filter */}
+                                                {selectedFilters.includes('customer_type') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <Users size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Customer Type</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('customer_type')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <Combobox
+                                                                value={filterValues.customer_type_id}
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, customer_type_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    ...customerTypes.map(ct => ({ value: ct.id, label: ct.name }))
+                                                                ]}
+                                                                placeholder="Select customer type..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Pickup Route Filter */}
+                                                {selectedFilters.includes('pickup_route') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <MapPin size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Pickup Route</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('pickup_route')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3">
+                                                            <Combobox
+                                                                value={filterValues.pickup_route_id}
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, pickup_route_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    ...pickupRoutes.map(r => ({ value: r.id, label: r.name }))
+                                                                ]}
+                                                                placeholder="Select pickup route..."
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Crew Filter */}
+                                                {selectedFilters.includes('crew') && (
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                                                        <div className="px-3 py-2 flex items-center gap-3">
+                                                            <Users size={16} className="text-cyan-400" />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-cyan-400">Crew</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => removeFilter('crew')}
+                                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                            >
+                                                                <X size={14} className="text-zinc-400 hover:text-white" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="px-3 pb-3 max-h-[150px] overflow-y-auto">
+                                                            {staff.map(s => (
+                                                                <label key={s.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/5 px-1 rounded">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={filterValues.crew_ids.includes(s.id)}
+                                                                        onChange={(e) => {
+                                                                            if (e.target.checked) {
+                                                                                setFilterValues(prev => ({ ...prev, crew_ids: [...prev.crew_ids, s.id] }));
+                                                                            } else {
+                                                                                setFilterValues(prev => ({ ...prev, crew_ids: prev.crew_ids.filter(id => id !== s.id) }));
+                                                                            }
+                                                                        }}
+                                                                        className="rounded border-white/20 bg-black text-cyan-500 focus:ring-cyan-500"
+                                                                    />
+                                                                    <span className="text-xs text-zinc-300">{s.name}</span>
+                                                                    {s.role?.name && (
+                                                                        <span className="text-xs text-zinc-500">({s.role.name})</span>
+                                                                    )}
+                                                                </label>
+                                                            ))}
+                                                            {staff.length === 0 && (
+                                                                <div className="text-xs text-zinc-500 py-2">No staff found</div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
@@ -595,16 +1097,16 @@ export function BulkEditSheet({
                                                         </button>
 
                                                         {isFilterDropdownOpen && (
-                                                            <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-30 max-h-[200px] overflow-y-auto">
+                                                            <div className="absolute bottom-full left-0 right-0 mb-1 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl z-30 max-h-[300px] overflow-y-auto">
                                                                 {availableFilters.filter(f => f.type !== 'date_range').map(option => (
                                                                     <button
                                                                         key={option.type}
                                                                         onClick={() => addFilter(option.type)}
-                                                                        className="w-full text-left px-3 py-2 hover:bg-white/5 transition-all flex items-center gap-3 border-b border-zinc-800 last:border-b-0"
+                                                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-3 text-zinc-300 group"
                                                                     >
-                                                                        <option.icon size={16} className="text-zinc-500" />
+                                                                        <option.icon size={16} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                                                                         <div className="flex-1 min-w-0">
-                                                                            <div className="text-sm font-medium text-zinc-300">{option.label}</div>
+                                                                            <div className="text-sm font-medium">{option.label}</div>
                                                                             <div className="text-xs text-zinc-500 truncate">{option.description}</div>
                                                                         </div>
                                                                     </button>
@@ -624,7 +1126,7 @@ export function BulkEditSheet({
 
                                                 {/* Selected Filters - Anchored with inputs inside */}
                                                 {selectedFilters.includes('date_range') && (
-                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50 overflow-hidden">
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
                                                         <div className="px-3 py-2 flex items-center gap-3">
                                                             <Calendar size={16} className="text-cyan-400" />
                                                             <div className="flex-1 min-w-0">
@@ -644,7 +1146,7 @@ export function BulkEditSheet({
                                                                     type="date"
                                                                     value={dateRangeStart}
                                                                     onChange={(e) => setDateRangeStart(e.target.value)}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
@@ -654,7 +1156,7 @@ export function BulkEditSheet({
                                                                     type="date"
                                                                     value={dateRangeEnd}
                                                                     onChange={(e) => setDateRangeEnd(e.target.value)}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
@@ -663,7 +1165,7 @@ export function BulkEditSheet({
                                                 )}
 
                                                 {selectedFilters.includes('status') && (
-                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50 overflow-hidden">
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
                                                         <div className="px-3 py-2 flex items-center gap-3">
                                                             <Power size={16} className="text-cyan-400" />
                                                             <div className="flex-1 min-w-0">
@@ -677,21 +1179,22 @@ export function BulkEditSheet({
                                                             </button>
                                                         </div>
                                                         <div className="px-3 pb-3">
-                                                            <select
+                                                            <Combobox
                                                                 value={filterValues.status}
-                                                                onChange={(e) => setFilterValues(prev => ({ ...prev, status: e.target.value as any }))}
-                                                                className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
-                                                            >
-                                                                <option value="">Any</option>
-                                                                <option value="open">Open</option>
-                                                                <option value="closed">Closed</option>
-                                                            </select>
+                                                                onChange={(val) => setFilterValues(prev => ({ ...prev, status: val as any }))}
+                                                                options={[
+                                                                    { value: '', label: 'Any' },
+                                                                    { value: 'open', label: 'Open' },
+                                                                    { value: 'closed', label: 'Closed' }
+                                                                ]}
+                                                                placeholder="Select status..."
+                                                            />
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 {selectedFilters.includes('time_range') && (
-                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50 overflow-hidden">
+                                                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
                                                         <div className="px-3 py-2 flex items-center gap-3">
                                                             <Clock size={16} className="text-cyan-400" />
                                                             <div className="flex-1 min-w-0">
@@ -711,7 +1214,7 @@ export function BulkEditSheet({
                                                                     type="time"
                                                                     value={filterValues.time_start}
                                                                     onChange={(e) => setFilterValues(prev => ({ ...prev, time_start: e.target.value }))}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
@@ -721,7 +1224,7 @@ export function BulkEditSheet({
                                                                     type="time"
                                                                     value={filterValues.time_end}
                                                                     onChange={(e) => setFilterValues(prev => ({ ...prev, time_end: e.target.value }))}
-                                                                    className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+                                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer"
                                                                     style={{ colorScheme: 'dark' }}
                                                                 />
                                                             </div>
@@ -741,16 +1244,16 @@ export function BulkEditSheet({
                                                         </button>
 
                                                         {isFilterDropdownOpen && (
-                                                            <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-30 max-h-[200px] overflow-y-auto">
+                                                            <div className="absolute bottom-full left-0 right-0 mb-1 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl z-30 max-h-[300px] overflow-y-auto">
                                                                 {availableFilters.map(option => (
                                                                     <button
                                                                         key={option.type}
                                                                         onClick={() => addFilter(option.type)}
-                                                                        className="w-full text-left px-3 py-2 hover:bg-white/5 transition-all flex items-center gap-3 border-b border-zinc-800 last:border-b-0"
+                                                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-3 text-zinc-300 group"
                                                                     >
-                                                                        <option.icon size={16} className="text-zinc-500" />
+                                                                        <option.icon size={16} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                                                                         <div className="flex-1 min-w-0">
-                                                                            <div className="text-sm font-medium text-zinc-300">{option.label}</div>
+                                                                            <div className="text-sm font-medium">{option.label}</div>
                                                                             <div className="text-xs text-zinc-500 truncate">{option.description}</div>
                                                                         </div>
                                                                     </button>
@@ -766,7 +1269,7 @@ export function BulkEditSheet({
                             </div>
 
                             {/* Column 3: To (New Value) */}
-                            <div className="flex flex-col bg-zinc-900/20 order-3">
+                            <div className="flex flex-col bg-zinc-900/20 order-3 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">3</span>
@@ -860,58 +1363,54 @@ export function BulkEditSheet({
 
                                                         {/* Route */}
                                                         {type === 'transportation_route_id' && (
-                                                            <select
+                                                            <Combobox
                                                                 value={values.transportation_route_id}
-                                                                onChange={(e) => setValues(prev => ({ ...prev, transportation_route_id: e.target.value }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white"
-                                                            >
-                                                                <option value="">None</option>
-                                                                {transportationSchedules.map(s => (
-                                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                                ))}
-                                                            </select>
+                                                                onChange={(val) => setValues(prev => ({ ...prev, transportation_route_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...transportationSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                                ]}
+                                                                placeholder="Select route..."
+                                                            />
                                                         )}
 
                                                         {/* Vehicle */}
                                                         {type === 'vehicle_id' && (
-                                                            <select
+                                                            <Combobox
                                                                 value={values.vehicle_id}
-                                                                onChange={(e) => setValues(prev => ({ ...prev, vehicle_id: e.target.value }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white"
-                                                            >
-                                                                <option value="">None</option>
-                                                                {vehicles.map(v => (
-                                                                    <option key={v.id} value={v.id}>{v.name}</option>
-                                                                ))}
-                                                            </select>
+                                                                onChange={(val) => setValues(prev => ({ ...prev, vehicle_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...vehicles.map(v => ({ value: v.id, label: v.name }))
+                                                                ]}
+                                                                placeholder="Select vehicle..."
+                                                            />
                                                         )}
 
                                                         {/* Pricing */}
                                                         {type === 'pricing_schedule_id' && (
-                                                            <select
+                                                            <Combobox
                                                                 value={values.pricing_schedule_id}
-                                                                onChange={(e) => setValues(prev => ({ ...prev, pricing_schedule_id: e.target.value }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white"
-                                                            >
-                                                                <option value="">None</option>
-                                                                {pricingSchedules.map(s => (
-                                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                                ))}
-                                                            </select>
+                                                                onChange={(val) => setValues(prev => ({ ...prev, pricing_schedule_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...pricingSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                                ]}
+                                                                placeholder="Select pricing..."
+                                                            />
                                                         )}
 
                                                         {/* Booking Options */}
                                                         {type === 'booking_option_schedule_id' && (
-                                                            <select
+                                                            <Combobox
                                                                 value={values.booking_option_schedule_id}
-                                                                onChange={(e) => setValues(prev => ({ ...prev, booking_option_schedule_id: e.target.value }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white"
-                                                            >
-                                                                <option value="">None</option>
-                                                                {bookingSchedules.map(s => (
-                                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                                ))}
-                                                            </select>
+                                                                onChange={(val) => setValues(prev => ({ ...prev, booking_option_schedule_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...bookingSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                                ]}
+                                                                placeholder="Select booking options..."
+                                                            />
                                                         )}
 
                                                         {/* Staff */}
