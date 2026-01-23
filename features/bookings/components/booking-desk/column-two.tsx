@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookingOption, BookingOptionSchedule } from "@/features/bookings/types";
 import { Availability } from "@/features/availability/components/availability-list-table";
+import { GlassCombobox } from "@/components/ui/glass-combobox";
 import { Settings, ChevronDown, Plus, Minus, MapPin, Loader2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -101,46 +102,43 @@ export function ColumnTwo({
 
             return (
                 <div className="space-y-3">
-                    <div className="relative">
-                        <select
-                            value={currentValue || ""}
-                            onChange={(e) => handleValueChange(optId, e.target.value)}
-                            className={selectClasses}
-                            disabled={isLoadingSmartData}
-                        >
-                            <option value="">{isLoadingSmartData ? "Loading..." : "-- Select Pickup Hotel --"}</option>
-                            {hotels.map(h => (
-                                <option key={h.id} value={h.id}>{h.name}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-                    </div>
+                    <GlassCombobox
+                        value={currentValue || ""}
+                        onChange={(val) => handleValueChange(optId, val)}
+                        options={hotels.map(h => ({ label: h.name, value: h.id }))}
+                        placeholder={isLoadingSmartData ? "Loading..." : "Select Pickup Hotel"}
+                        searchPlaceholder="Search hotel..."
+                        className={inputClasses}
+                        disabled={isLoadingSmartData}
+                    />
 
-                    {currentValue && pickupDetails && (
-                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                            <div className="mt-0.5 text-cyan-500 flex-shrink-0">
-                                <MapPin size={16} />
-                            </div>
-                            <div className="space-y-1 min-w-0">
-                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
-                                <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
-                                <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
-                                    {pickupDetails.mapLink && (
-                                        <a
-                                            href={pickupDetails.mapLink}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
-                                        >
-                                            Map <ExternalLink size={10} />
-                                        </a>
-                                    )}
+                    {
+                        currentValue && pickupDetails && (
+                            <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                                <div className="mt-0.5 text-cyan-500 flex-shrink-0">
+                                    <MapPin size={16} />
+                                </div>
+                                <div className="space-y-1 min-w-0">
+                                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
+                                    <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
+                                    <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                        <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
+                                        {pickupDetails.mapLink && (
+                                            <a
+                                                href={pickupDetails.mapLink}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
+                                            >
+                                                Map <ExternalLink size={10} />
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )
+                    }
+                </div >
             );
         }
 
@@ -200,13 +198,13 @@ export function ColumnTwo({
                                         "flex items-center gap-3 px-3 py-2 rounded-lg border text-left text-sm transition-colors",
                                         isSelected
                                             ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
-                                            : "bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                                            : "bg-black/20 border-white/10 text-zinc-300 hover:border-white/20"
                                     )}
                                 >
                                     <div className={cn(
                                         "w-4 h-4 border flex items-center justify-center flex-shrink-0",
                                         isMulti ? "rounded" : "rounded-full",
-                                        isSelected ? "border-cyan-500 bg-cyan-500" : "border-zinc-600"
+                                        isSelected ? "border-cyan-500 bg-cyan-500" : "border-white/20"
                                     )}>
                                         {isSelected && (
                                             <div className={cn(
@@ -230,7 +228,7 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, Math.max(0, numValue - 1))}
-                            className="p-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors"
+                            className="p-2 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
                         >
                             <Minus size={14} className="text-zinc-400" />
                         </button>
@@ -244,7 +242,7 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, numValue + 1)}
-                            className="p-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors"
+                            className="p-2 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
                         >
                             <Plus size={14} className="text-zinc-400" />
                         </button>
@@ -305,7 +303,7 @@ export function ColumnTwo({
                         <select
                             value={selectedOptionScheduleId || ""}
                             onChange={(e) => setSelectedOptionScheduleId(e.target.value || null)}
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
+                            className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
                         >
                             <option value="">-- No Options --</option>
                             {optionSchedules.map(sch => (
@@ -324,7 +322,7 @@ export function ColumnTwo({
                             <select
                                 value={selectedVariation}
                                 onChange={(e) => setSelectedVariation(e.target.value)}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
+                                className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
                             >
                                 <option value="retail">Retail</option>
                                 <option value="online">Online</option>
@@ -378,3 +376,5 @@ export function ColumnTwo({
         </div>
     );
 }
+
+

@@ -129,7 +129,7 @@ export function ColumnOne({
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openCustomerSearch}
-                                className="w-full justify-between bg-black border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                                className="w-full justify-between bg-black/20 border-white/10 text-white hover:bg-zinc-900 hover:text-white"
                             >
                                 {selectedCustomer ? selectedCustomer.name : "Select customer..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -228,7 +228,7 @@ export function ColumnOne({
                                         <div className="text-sm font-bold text-white">{rate.customer_type_name}</div>
                                         <div className="text-xs text-cyan-400 font-mono">${rate.price.toFixed(2)}</div>
                                     </div>
-                                    <div className="flex items-center gap-3 bg-black rounded-md p-1 border border-zinc-800">
+                                    <div className="flex items-center gap-3 bg-black/20 rounded-md p-1 border border-white/10">
                                         <button
                                             onClick={() => handlePaxChange(rate.customer_type_id, -1)}
                                             className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition-colors"

@@ -82,12 +82,12 @@ export function ColumnThree({ currentRates, paxCounts }: ColumnThreeProps) {
             )}
 
             {/* Payment Integration Placeholder */}
-            <div className="bg-black border border-zinc-800 rounded-lg p-4 opacity-50 cursor-not-allowed">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 opacity-50 cursor-not-allowed">
                 <h4 className="text-xs font-bold text-zinc-500 uppercase mb-2">Payment Method</h4>
                 <div className="flex gap-2">
-                    <div className="px-3 py-1 bg-zinc-800 rounded text-xs text-zinc-400">Credit Card</div>
-                    <div className="px-3 py-1 bg-zinc-800 rounded text-xs text-zinc-400">Cash</div>
-                    <div className="px-3 py-1 bg-zinc-800 rounded text-xs text-zinc-400">Invoice</div>
+                    <div className="px-3 py-1 bg-black/20 rounded text-xs text-zinc-400">Credit Card</div>
+                    <div className="px-3 py-1 bg-black/20 rounded text-xs text-zinc-400">Cash</div>
+                    <div className="px-3 py-1 bg-black/20 rounded text-xs text-zinc-400">Invoice</div>
                 </div>
             </div>
 

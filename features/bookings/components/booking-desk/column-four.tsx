@@ -41,12 +41,6 @@ export function ColumnFour({ onSave, isSaving, canSave }: ColumnFourProps) {
                 >
                     {isSaving ? "Creating Booking..." : "Create Booking"}
                 </Button>
-
-                {!canSave && (
-                    <p className="text-xs text-center text-red-400">
-                        Please select a customer and at least one passenger.
-                    </p>
-                )}
             </div>
         </div>
     );
