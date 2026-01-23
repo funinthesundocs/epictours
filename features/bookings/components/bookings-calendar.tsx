@@ -109,9 +109,9 @@ export function BookingsCalendar({
     const years = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
     return (
-        <div className="w-full h-full bg-black p-6 font-sans flex flex-col gap-6">
+        <div className="w-full h-[calc(100vh_-_9rem)] font-sans flex flex-col">
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-30">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -217,41 +217,60 @@ function MonthView({
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
     return (
-        <div className="h-full grid grid-cols-7 gap-px bg-zinc-600 overflow-y-auto">
-            {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map(day => (
-                <div key={day} className="bg-zinc-950/80 p-4 text-sm font-bold text-zinc-500 uppercase text-center backdrop-blur-sm sticky top-0 z-10 border-b border-zinc-900">{day}</div>
-            ))}
+        <div className="h-full overflow-auto rounded-xl relative bg-[#0b1115]">
+            <table className="w-full border-separate border-spacing-0">
+                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                    <tr>
+                        {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
+                            <th key={day} className={cn(
+                                "px-6 py-4 text-center",
+                                idx === 0 && "rounded-tl-xl",
+                                idx === 6 && "rounded-tr-xl"
+                            )}>{day}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.from({ length: Math.ceil((firstDayIndex + daysInMonth) / 7) }).map((_, rowIndex) => (
+                        <tr key={rowIndex}>
+                            {Array.from({ length: 7 }).map((_, colIndex) => {
+                                const i = rowIndex * 7 + colIndex;
+                                const dayNumber = i - firstDayIndex + 1;
+                                const isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
+                                const cellDateString = isValidDay ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}` : null;
+                                const isToday = isCurrentMonth && dayNumber === today.getDate();
+                                const daysEvents = isValidDay && cellDateString ? availabilities.filter(a => a.start_date === cellDateString) : [];
 
-            {Array.from({ length: Math.ceil((firstDayIndex + daysInMonth) / 7) * 7 }).map((_, i) => {
-                const dayNumber = i - firstDayIndex + 1;
-                const isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
-                const cellDateString = isValidDay ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}` : null;
-                const isToday = isCurrentMonth && dayNumber === today.getDate();
-                const daysEvents = isValidDay && cellDateString ? availabilities.filter(a => a.start_date === cellDateString) : [];
-
-                return (
-                    <div key={i} className={cn("relative group transition-colors p-2 min-h-[160px] flex flex-col pl-3 pt-3 gap-1", (!isValidDay || isToday) ? "bg-zinc-950/80" : "bg-black hover:bg-zinc-950/80")}>
-                        {isValidDay && (
-                            <>
-                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-cyan-500 text-black shadow-glow" : "text-zinc-500")}>{dayNumber}</span>
-                                {daysEvents.map((event) => (
-                                    <EventChip
-                                        key={event.id}
-                                        abbr={event.experience_short_code || "EXP"}
-                                        time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                        bookings="0 Bookings"
-                                        cap={`0 / ${event.max_capacity} Capacity`}
-                                        onClick={(e) => {
-                                            e?.stopPropagation();
-                                            onEventClick?.(event);
-                                        }}
-                                    />
-                                ))}
-                            </>
-                        )}
-                    </div>
-                )
-            })}
+                                return (
+                                    <td key={colIndex} className={cn(
+                                        "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-white/5",
+                                        (!isValidDay || isToday) ? "bg-white/5" : "hover:bg-white/5"
+                                    )} style={{ minHeight: '160px', height: '160px' }}>
+                                        {isValidDay && (
+                                            <div className="flex flex-col pl-1 pt-1 gap-1">
+                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-cyan-500 text-black shadow-glow" : "text-zinc-500")}>{dayNumber}</span>
+                                                {daysEvents.map((event) => (
+                                                    <EventChip
+                                                        key={event.id}
+                                                        abbr={event.experience_short_code || "EXP"}
+                                                        time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                        bookings="0 Bookings"
+                                                        cap={`0 / ${event.max_capacity} Capacity`}
+                                                        onClick={(e) => {
+                                                            e?.stopPropagation();
+                                                            onEventClick?.(event);
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     )
 }
