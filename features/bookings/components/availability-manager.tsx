@@ -42,16 +42,18 @@ export function AvailabilityManager({
                 const [y, m, d] = availability.start_date.split('-');
                 return `${m}-${d}-${y}`;
             })()}`}
-            size="xl"
+            width="w-[90vw] max-w-[90vw]"
+            contentClassName="p-0"
         >
-            <div className="h-full flex">
-                {/* Column 1: Availability Info */}
-                <div className="w-80 flex-shrink-0 border-r border-white/10 overflow-y-auto">
+            <div className="h-full grid grid-cols-1 lg:grid-cols-[25fr_45fr_30fr] gap-6 p-6 overflow-hidden">
+
+                {/* COLUMN 1: Availability Info */}
+                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
                     <ColumnOne availability={availability} />
                 </div>
 
-                {/* Column 2: Bookings List */}
-                <div className="flex-1 min-w-[320px] border-r border-white/10 overflow-y-auto" key={refreshKey}>
+                {/* COLUMN 2: Bookings List */}
+                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6" key={refreshKey}>
                     <ColumnTwo
                         availability={availability}
                         onBookingClick={onBookingEdit}
@@ -59,8 +61,8 @@ export function AvailabilityManager({
                     />
                 </div>
 
-                {/* Column 3: Quick Settings */}
-                <div className="w-80 flex-shrink-0 overflow-y-auto">
+                {/* COLUMN 3: Quick Settings */}
+                <div className="h-full flex flex-col overflow-y-auto">
                     <ColumnThree
                         availability={availability}
                         onSaved={handleSaved}

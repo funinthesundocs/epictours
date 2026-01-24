@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
-import { FileText, ChevronDown, ChevronRight, UserCircle, Loader2 } from "lucide-react";
+import { FileText, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookingItem {
@@ -37,7 +37,6 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
         const fetchBookings = async () => {
             setIsLoading(true);
 
-            // Fetch customer types for pax labels
             const { data: ctData } = await supabase.from('customer_types').select('id, name');
             if (ctData) {
                 const map: Record<string, string> = {};
@@ -45,7 +44,6 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 setCustomerTypeMap(map);
             }
 
-            // Fetch bookings for this availability
             const { data, error } = await supabase
                 .from('bookings')
                 .select(`
@@ -56,9 +54,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 .eq('availability_id', availability.id)
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error("Error fetching bookings:", error);
-            } else if (data) {
+            if (!error && data) {
                 const flat = data.map((b: any) => ({
                     id: b.id,
                     status: b.status,
@@ -87,7 +83,6 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     const totalBooked = activeBookings.reduce((sum, b) => sum + b.pax_count, 0);
     const remaining = Math.max(0, (availability.max_capacity || 0) - totalBooked);
 
-    // Format pax breakdown summary
     const getPaxSummary = () => {
         const summary: Record<string, number> = {};
         activeBookings.forEach(b => {
@@ -105,84 +100,74 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-cyan-500" size={32} />
+                <Loader2 className="animate-spin text-zinc-500" size={24} />
             </div>
         );
     }
 
     return (
-        <div className="p-6 space-y-4">
-            {/* Header Stats */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full text-sm font-bold">
-                    {totalBooked} booked
-                </span>
-                <span className="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-sm font-bold">
-                    {remaining} available
-                </span>
+        <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500">
+            {/* Section Header - matches booking-desk styling */}
+            <div className="space-y-2">
+                <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                    <FileText size={18} className="text-cyan-500" />
+                    Bookings
+                </label>
             </div>
 
-            {/* Pax Summary */}
-            <div className="text-zinc-400 text-sm">
-                {getPaxSummary()}
+            {/* Stats Row */}
+            <div className="flex items-center gap-3 flex-wrap text-sm">
+                <span className="text-white font-medium">{totalBooked} booked</span>
+                <span className="text-zinc-600">|</span>
+                <span className="text-zinc-400">{remaining} available</span>
+                <span className="text-zinc-600">|</span>
+                <span className="text-zinc-500">{getPaxSummary()}</span>
             </div>
 
             {/* Manifest Link */}
             <button
                 onClick={onManifestClick}
-                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                className="text-cyan-400 hover:text-cyan-300 transition-colors text-sm flex items-center gap-1"
             >
-                <FileText size={16} />
-                <span>View Manifest</span>
+                + View Manifest
             </button>
 
-            {/* Active Bookings Accordion */}
-            <div className="border border-white/10 rounded-lg overflow-hidden">
+            {/* Active Bookings Section */}
+            <div className="space-y-2">
                 <button
                     onClick={() => setActiveExpanded(!activeExpanded)}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-white/5 hover:bg-white/10 transition-colors"
+                    className="w-full text-left flex items-center gap-2 text-zinc-400 text-sm font-medium hover:text-white transition-colors"
                 >
-                    <span className="text-white font-medium flex items-center gap-2">
-                        {activeExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                        {activeBookings.length} active booking{activeBookings.length !== 1 ? 's' : ''}
-                    </span>
+                    <ChevronDown size={16} className={cn("transition-transform", !activeExpanded && "-rotate-90")} />
+                    {activeBookings.length} active booking{activeBookings.length !== 1 ? 's' : ''}
                 </button>
 
                 {activeExpanded && (
-                    <div className="divide-y divide-white/5">
+                    <div className="space-y-2">
                         {activeBookings.length === 0 ? (
-                            <div className="px-4 py-6 text-center text-zinc-500 text-sm">
-                                No active bookings yet
-                            </div>
+                            <div className="text-zinc-600 text-sm py-4">No active bookings</div>
                         ) : (
                             activeBookings.map((booking) => (
                                 <button
                                     key={booking.id}
                                     onClick={() => onBookingClick(booking.id)}
-                                    className="w-full px-4 py-3 text-left hover:bg-cyan-500/5 transition-colors"
+                                    className="w-full p-3 bg-black/20 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-all text-left"
                                 >
                                     <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-start gap-3">
-                                            <UserCircle size={32} className="text-zinc-600 flex-shrink-0" />
-                                            <div>
-                                                <div className="text-white font-bold">{booking.customer_name}</div>
-                                                <div className="text-zinc-500 text-xs">
-                                                    {booking.pax_count} Pax • {booking.customer_phone || 'No phone'}
-                                                </div>
-                                                {booking.voucher_numbers && (
-                                                    <div className="text-zinc-500 text-xs mt-0.5">
-                                                        #{booking.voucher_numbers}
-                                                    </div>
-                                                )}
+                                        <div>
+                                            <div className="text-white font-medium text-sm">{booking.customer_name}</div>
+                                            <div className="text-zinc-500 text-xs mt-0.5">
+                                                {booking.pax_count} Pax
+                                                {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
                                             </div>
                                         </div>
                                         <span className={cn(
-                                            "px-2 py-1 rounded text-xs font-bold flex-shrink-0",
+                                            "px-2 py-0.5 rounded text-xs font-medium",
                                             booking.payment_status === 'paid'
                                                 ? "bg-emerald-500/20 text-emerald-400"
                                                 : booking.payment_status === 'partial'
                                                     ? "bg-amber-500/20 text-amber-400"
-                                                    : "bg-red-500/20 text-red-400"
+                                                    : "bg-zinc-800 text-zinc-400"
                                         )}>
                                             {booking.payment_status === 'paid' ? 'Paid' :
                                                 booking.payment_status === 'partial' ? 'Partial' : 'Unpaid'}
@@ -195,34 +180,27 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 )}
             </div>
 
-            {/* Cancelled Bookings Accordion */}
+            {/* Cancelled Bookings Section */}
             {cancelledBookings.length > 0 && (
-                <div className="border border-white/10 rounded-lg overflow-hidden opacity-60">
+                <div className="space-y-2 opacity-60">
                     <button
                         onClick={() => setCancelledExpanded(!cancelledExpanded)}
-                        className="w-full px-4 py-3 flex items-center justify-between bg-white/5 hover:bg-white/10 transition-colors"
+                        className="w-full text-left flex items-center gap-2 text-zinc-500 text-sm font-medium hover:text-zinc-400 transition-colors"
                     >
-                        <span className="text-zinc-400 font-medium flex items-center gap-2">
-                            {cancelledExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                            {cancelledBookings.length} cancelled or rebooked
-                        </span>
+                        <ChevronDown size={16} className={cn("transition-transform", !cancelledExpanded && "-rotate-90")} />
+                        {cancelledBookings.length} cancelled
                     </button>
 
                     {cancelledExpanded && (
-                        <div className="divide-y divide-white/5">
+                        <div className="space-y-2">
                             {cancelledBookings.map((booking) => (
                                 <button
                                     key={booking.id}
                                     onClick={() => onBookingClick(booking.id)}
-                                    className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors"
+                                    className="w-full p-3 bg-black/10 rounded-lg border border-white/5 text-left"
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <UserCircle size={24} className="text-zinc-700" />
-                                        <div>
-                                            <div className="text-zinc-400 line-through">{booking.customer_name}</div>
-                                            <div className="text-zinc-600 text-xs">{booking.pax_count} Pax</div>
-                                        </div>
-                                    </div>
+                                    <div className="text-zinc-500 text-sm line-through">{booking.customer_name}</div>
+                                    <div className="text-zinc-600 text-xs">{booking.pax_count} Pax</div>
                                 </button>
                             ))}
                         </div>
