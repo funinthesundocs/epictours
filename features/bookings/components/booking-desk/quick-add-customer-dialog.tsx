@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,11 @@ import { Loader2 } from "lucide-react";
 interface QuickAddCustomerDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onCustomerCreated: (customer: Customer) => void;
+    customerToEdit?: Customer | null;
+    onCustomerUpdated?: (customer: Customer) => void;
 }
 
-export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated }: QuickAddCustomerDialogProps) {
+export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated, customerToEdit, onCustomerUpdated }: QuickAddCustomerDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +24,22 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
+
+    // Effect: Reset or Populate form when dialog opens or customer changes
+    useEffect(() => {
+        if (isOpen) {
+            if (customerToEdit) {
+                setName(customerToEdit.name || "");
+                setEmail(customerToEdit.email || "");
+                setPhone(customerToEdit.phone || "");
+            } else {
+                setName("");
+                setEmail("");
+                setPhone("");
+            }
+            setError(null);
+        }
+    }, [isOpen, customerToEdit]);
 
     const handleSave = async () => {
         // Validation
@@ -35,36 +52,62 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
         setError(null);
 
         try {
-            const { data, error: insertError } = await supabase
-                .from('customers')
-                .insert({
-                    name,
-                    email,
-                    phone: phone || null,
-                    status: 'active', // Default to active for new quick adds
-                    created_at: new Date().toISOString()
-                })
-                .select()
-                .single();
+            if (customerToEdit) {
+                // EDIT MODE
+                const { data, error: updateError } = await supabase
+                    .from('customers')
+                    .update({
+                        name,
+                        email,
+                        phone: phone || null,
+                        // Not updating status or created_at
+                    })
+                    .eq('id', customerToEdit.id)
+                    .select()
+                    .single();
 
-            if (insertError) throw insertError;
+                if (updateError) throw updateError;
 
-            if (data) {
-                // Success
-                onCustomerCreated({
-                    id: data.id,
-                    name: data.name,
-                    email: data.email
-                });
-                onOpenChange(false);
-                // Reset form
-                setName("");
-                setEmail("");
-                setPhone("");
+                if (data) {
+                    onCustomerUpdated?.({
+                        id: data.id,
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone,
+                        status: data.status
+                    });
+                    onOpenChange(false);
+                }
+            } else {
+                // CREATE MODE
+                const { data, error: insertError } = await supabase
+                    .from('customers')
+                    .insert({
+                        name,
+                        email,
+                        phone: phone || null,
+                        status: 'active', // Default to active for new quick adds
+                        created_at: new Date().toISOString()
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+
+                if (data) {
+                    onCustomerCreated({
+                        id: data.id,
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone, // Ensure phone is mapped if present in type
+                        status: data.status
+                    });
+                    onOpenChange(false);
+                }
             }
         } catch (err: any) {
-            console.error("Error creating customer:", err);
-            setError(err.message || "Failed to create customer.");
+            console.error("Error saving customer:", err);
+            setError(err.message || "Failed to save customer.");
         } finally {
             setIsLoading(false);
         }
@@ -74,9 +117,9 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add New Customer</DialogTitle>
+                    <DialogTitle>{customerToEdit ? "Edit Customer" : "Add New Customer"}</DialogTitle>
                     <DialogDescription className="text-zinc-400">
-                        Quickly add a new customer to the database.
+                        {customerToEdit ? "Update customer details below." : "Quickly add a new customer to the database."}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -142,7 +185,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                         className="bg-cyan-600 hover:bg-cyan-500 text-white"
                     >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Customer
+                        {customerToEdit ? "Update Customer" : "Save Customer"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -24,6 +24,7 @@ interface Booking {
     customer_phone: string;
     start_date: string;
     start_time: string;
+    transportation_route_id?: string;
     experience_short_code: string;
     option_values: any; // Raw JSON of selected options
     payment_status: string;
@@ -42,10 +43,73 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
     const [isLoading, setIsLoading] = useState(false);
     const [dynamicColumns, setDynamicColumns] = useState<string[]>([]);
 
+    const [customerTypeMap, setCustomerTypeMap] = useState<Record<string, string>>({});
+    const [customFieldMap, setCustomFieldMap] = useState<Record<string, { label: string, type?: string, options?: any[] }>>({});
+
+    // Smart Pickup Resolution Maps
+    const [hotelMap, setHotelMap] = useState<Record<string, { name: string, pickup_point_id: string }>>({});
+    const [pickupPointMap, setPickupPointMap] = useState<Record<string, string>>({}); // id -> name
+    const [scheduleStopMap, setScheduleStopMap] = useState<Record<string, string>>({}); // "scheduleId_pickupPointId" -> time
+
     useEffect(() => {
+        const fetchReferenceData = async () => {
+            // Fetch Customer Types for Pax Labels
+            const { data: ctData } = await supabase.from('customer_types').select('id, name');
+            if (ctData) {
+                const map: Record<string, string> = {};
+                ctData.forEach((ct: any) => map[ct.id] = ct.name);
+                setCustomerTypeMap(map);
+            }
+
+            // Fetch Custom Field Defs for Headers and Option Values (include type for smart_pickup detection)
+            const { data: cfData } = await supabase.from('custom_field_definitions').select('id, label, type, options');
+            if (cfData) {
+                const map: Record<string, { label: string, type?: string, options?: any[] }> = {};
+                cfData.forEach((cf: any) => map[cf.id] = { label: cf.label, type: cf.type, options: cf.options });
+                setCustomFieldMap(map);
+            }
+
+            // Fetch Hotels (for smart_pickup resolution)
+            const { data: hotelData } = await supabase.from('hotels').select('id, name, pickup_point_id');
+            if (hotelData) {
+                const map: Record<string, { name: string, pickup_point_id: string }> = {};
+                hotelData.forEach((h: any) => map[h.id] = { name: h.name, pickup_point_id: h.pickup_point_id });
+                setHotelMap(map);
+            }
+
+            // Fetch Pickup Points
+            const { data: ppData } = await supabase.from('pickup_points').select('id, name');
+            if (ppData) {
+                const map: Record<string, string> = {};
+                ppData.forEach((pp: any) => map[pp.id] = pp.name);
+                setPickupPointMap(map);
+            }
+
+            // Fetch Schedule Stops (links schedule_id + pickup_point_id to pickup_time)
+            const { data: ssData } = await supabase.from('schedule_stops').select('schedule_id, pickup_point_id, pickup_time');
+            if (ssData) {
+                const map: Record<string, string> = {};
+                ssData.forEach((ss: any) => {
+                    const key = `${ss.schedule_id}_${ss.pickup_point_id}`;
+                    // Format time as HH:MM AM/PM
+                    if (ss.pickup_time) {
+                        const [h, m] = ss.pickup_time.split(':');
+                        const hour = parseInt(h, 10);
+                        const ampm = hour >= 12 ? 'PM' : 'AM';
+                        const hour12 = hour % 12 || 12;
+                        map[key] = `${hour12}:${m} ${ampm}`;
+                    }
+                });
+                setScheduleStopMap(map);
+            }
+        };
+
         const fetchBookings = async () => {
             setIsLoading(true);
             try {
+                // Fetch reference data first (or in parallel)
+                await fetchReferenceData();
+
                 // Fetch bookings with joins
                 // Note: deeply nested joins can be tricky in Supabase JS client depending on FK naming
                 // We'll try the direct relation syntax assuming FKs are standard
@@ -55,8 +119,13 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         id, status, pax_count, pax_breakdown, option_values, 
                         payment_status, amount_paid, total_amount,
                         customers!inner(name, email, phone),
-                        availabilities!inner(start_date, start_time, experience_id),
-                        availabilities!inner(experiences!inner(short_code))
+                        availabilities!inner(
+                            start_date, 
+                            start_time, 
+                            experience_id,
+                            transportation_route_id,
+                            experiences!inner(short_code)
+                        )
                     `)
                     .gte('availabilities.start_date', format(startDate, 'yyyy-MM-dd'))
                     .lte('availabilities.start_date', format(endDate, 'yyyy-MM-dd'))
@@ -80,6 +149,7 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         customer_phone: b.customers?.phone || "",
                         start_date: b.availabilities?.start_date,
                         start_time: b.availabilities?.start_time,
+                        transportation_route_id: b.availabilities?.transportation_route_id,
                         experience_short_code: b.availabilities?.experiences?.short_code || "EXP"
                     }));
 
@@ -91,17 +161,19 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                     flatBookings.forEach(booking => {
                         Object.entries(booking.option_values).forEach(([key, val]) => {
                             if (val !== null && val !== undefined && val !== "") {
-                                // Try to make label readable if possible, or just use key
-                                // Ideally we would map ID to Label, but we might not have dynamic fields definitions loaded here.
-                                // Use key for now. User said "Separate Column for Each *Used* Option"
                                 keys.add(key);
                             }
                         });
                     });
                     setDynamicColumns(Array.from(keys));
                 }
-            } catch (err) {
-                console.error("Error fetching booking list:", err);
+            } catch (err: any) {
+                console.error("Error fetching booking list:", {
+                    message: err.message,
+                    code: err.code,
+                    details: err.details,
+                    hint: err.hint
+                });
             } finally {
                 setIsLoading(false);
             }
@@ -134,14 +206,16 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         <tr>
                             <th className="px-6 py-4">Exp</th>
                             <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Time</th>
+                            <th className="px-6 py-4">Pickup Time</th>
                             <th className="px-6 py-4">Customer</th>
                             <th className="px-6 py-4">Pax</th>
                             <th className="px-6 py-4">Phone</th>
                             <th className="px-6 py-4">Email</th>
                             {/* Dynamic Option Columns */}
                             {dynamicColumns.map(col => (
-                                <th key={col} className="px-6 py-4 text-cyan-500/80">{col}</th>
+                                <th key={col} className="px-6 py-4 text-cyan-500/80">
+                                    {customFieldMap[col]?.label || col}
+                                </th>
                             ))}
                             <th className="px-6 py-4 text-right">Total</th>
                             <th className="px-6 py-4 text-right">Paid</th>
@@ -156,7 +230,12 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                                 onClick={() => onBookingClick?.(booking.id)}
                             >
                                 <td className="px-6 py-4 font-mono text-cyan-400 font-bold">{booking.experience_short_code}</td>
-                                <td className="px-6 py-4">{booking.start_date}</td>
+                                <td className="px-6 py-4">
+                                    {(() => {
+                                        const [y, m, d] = booking.start_date.split('-');
+                                        return `${m}-${d}-${y}`;
+                                    })()}
+                                </td>
                                 <td className="px-6 py-4 text-white font-medium">
                                     {booking.start_time ? booking.start_time.slice(0, 5) : "All Day"}
                                 </td>
@@ -165,11 +244,9 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                                     {/* Parse Pax Breakdown */}
                                     {booking.pax_breakdown && Object.keys(booking.pax_breakdown).length > 0 ? (
                                         <div className="flex flex-col gap-0.5 text-xs text-zinc-400">
-                                            {Object.entries(booking.pax_breakdown).map(([type, count]) => (
-                                                <span key={type}>{count} {type}</span> // Note: Type is likely UUID, might need map if we want pretty names
+                                            {Object.entries(booking.pax_breakdown).map(([typeId, count]) => (
+                                                <span key={typeId}>{count} {customerTypeMap[typeId] || "Pax"}</span>
                                             ))}
-                                            {/* Fallback to simple total if breakdown is messy IDs */}
-                                            {/* For now, just showing raw breakdown or total if empty */}
                                         </div>
                                     ) : (
                                         <span className="text-zinc-500">{booking.pax_count} Pax</span>
@@ -181,9 +258,49 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                                 {/* Dynamic Options */}
                                 {dynamicColumns.map(col => {
                                     const val = booking.option_values[col];
+                                    let displayVal = val || "-";
+
+                                    const fieldDef = customFieldMap[col];
+
+                                    // 1. Smart Pickup Logic
+                                    if (fieldDef?.type === 'smart_pickup' && val) {
+                                        // val is Hotel ID
+                                        const hotel = hotelMap[val];
+                                        if (hotel) {
+                                            const pickupName = pickupPointMap[hotel.pickup_point_id] || "Unknown Stop";
+                                            let timeStr = "";
+
+                                            // Attempt to find time if we have a route
+                                            if (booking.transportation_route_id && hotel.pickup_point_id) {
+                                                const key = `${booking.transportation_route_id}_${hotel.pickup_point_id}`;
+                                                if (scheduleStopMap[key]) {
+                                                    timeStr = scheduleStopMap[key];
+                                                }
+                                            }
+
+                                            displayVal = timeStr ? `${pickupName} @ ${timeStr}` : pickupName;
+                                        }
+                                    }
+                                    // 2. Standard Options Logic
+                                    else if (fieldDef?.options && Array.isArray(fieldDef.options)) {
+                                        // Check both 'id' and 'value' properties, and potentially 'name' if it's a legacy structure
+                                        const foundOption = fieldDef.options.find((opt: any) =>
+                                            opt.id === val || opt.value === val
+                                        );
+
+                                        if (foundOption) {
+                                            displayVal = foundOption.label || foundOption.name || displayVal;
+
+                                            // Special handling for transport/time
+                                            if (fieldDef.type === 'transport' && foundOption.time) {
+                                                displayVal = `${displayVal} (${foundOption.time})`;
+                                            }
+                                        }
+                                    }
+
                                     return (
                                         <td key={col} className="px-6 py-4 text-xs text-zinc-400">
-                                            {typeof val === 'object' ? JSON.stringify(val) : (val || "-")}
+                                            {typeof val === 'object' ? JSON.stringify(val) : displayVal}
                                         </td>
                                     );
                                 })}

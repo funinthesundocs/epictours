@@ -36,6 +36,15 @@ async function reload() {
 
         -- Migration: Add settings column
         ALTER TABLE public.custom_field_definitions ADD COLUMN IF NOT EXISTS settings JSONB DEFAULT '{}'::jsonb;
+        
+        -- FIX: Apply missing Booking Columns manually here to ensure they exist
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS option_values JSONB DEFAULT '{}'::jsonb;
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'no_payment';
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'credit_card';
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(10,2) DEFAULT 0.00;
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS total_amount NUMERIC(10,2) DEFAULT 0.00;
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS promo_code TEXT;
+        ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_details JSONB DEFAULT '{}'::jsonb;
         `;
 
         await client.query(createTableSQL);

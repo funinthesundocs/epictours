@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Availability } from "@/features/availability/components/availability-list-table";
-import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users } from "lucide-react";
+import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Customer, PricingSchedule, PricingTier, PricingRate } from "@/features/bookings/types";
 import {
@@ -39,6 +39,7 @@ interface ColumnOneProps {
     setPaxCounts: React.Dispatch<React.SetStateAction<Record<string, number>>>;
     // Note: setPaxCounts type might need to be simpler if I don't want to import React types explicitly or just use (v: ...)
     onCustomerCreated: (c: Customer) => void;
+    onCustomerUpdated: (c: Customer) => void;
 }
 
 export function ColumnOne({
@@ -55,12 +56,14 @@ export function ColumnOne({
     currentRates,
     paxCounts,
     setPaxCounts,
-    onCustomerCreated
+    onCustomerCreated,
+    onCustomerUpdated
 }: ColumnOneProps) {
 
     // UI State (Local)
     const [openCustomerSearch, setOpenCustomerSearch] = useState(false);
-    const [showAddCustomer, setShowAddCustomer] = useState(false); // New state
+    const [showAddCustomer, setShowAddCustomer] = useState(false);
+    const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
     const handlePaxChange = (typeId: string, delta: number) => {
         setPaxCounts(prev => {
@@ -123,15 +126,34 @@ export function ColumnOne({
                         <User size={18} className="text-cyan-500" />
                         Customer
                     </label>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs text-cyan-500 hover:text-cyan-400 hover:bg-cyan-950/30 -mr-2"
-                        onClick={() => setShowAddCustomer(true)}
-                    >
-                        <Plus size={12} className="mr-1" />
-                        New Customer
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        {selectedCustomer && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-950/30"
+                                onClick={() => {
+                                    setCustomerToEdit(selectedCustomer);
+                                    setShowAddCustomer(true);
+                                }}
+                                title="Edit Customer"
+                            >
+                                <Edit2 size={12} />
+                            </Button>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs text-cyan-500 hover:text-cyan-400 hover:bg-cyan-950/30 -mr-2"
+                            onClick={() => {
+                                setCustomerToEdit(null); // Ensure creation mode
+                                setShowAddCustomer(true);
+                            }}
+                        >
+                            <Plus size={12} className="mr-1" />
+                            New Customer
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex gap-2"> {/* Optional wrapper if I want button inline with input, but label header is cleaner */}
@@ -184,6 +206,8 @@ export function ColumnOne({
                 isOpen={showAddCustomer}
                 onOpenChange={setShowAddCustomer}
                 onCustomerCreated={onCustomerCreated}
+                customerToEdit={customerToEdit}
+                onCustomerUpdated={onCustomerUpdated}
             />
 
             {/* Pricing Schedule Selector */}

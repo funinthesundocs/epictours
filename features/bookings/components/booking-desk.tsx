@@ -161,6 +161,15 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
         setSelectedCustomer(newCustomer);
     };
 
+    const handleCustomerUpdated = (updatedCustomer: Customer) => {
+        // Update list
+        setCustomers(prev => prev.map(c => c.id === updatedCustomer.id ? updatedCustomer : c).sort((a, b) => a.name.localeCompare(b.name)));
+        // Update selection if it matches
+        if (selectedCustomer?.id === updatedCustomer.id) {
+            setSelectedCustomer(updatedCustomer);
+        }
+    };
+
     const handleSave = async () => {
         if (!availability || !selectedCustomer) return;
 
@@ -204,14 +213,13 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
 
             console.log("PAYMENT PROCESSED:", paymentState); // Mock log
 
-            if (error) throw error;
-
-            console.log("Booking created successfully!");
-            // Hard refresh for now as requested by user workflow limits
-            window.location.reload();
-        } catch (err) {
+            toast.success("Booking created successfully!");
+            // Hard refresh removed for debugging
+            // window.location.reload();
+            onClose(); // Close the panel instead
+        } catch (err: any) {
             console.error("Error creating booking:", err);
-            alert("Failed to create booking. Please try again.");
+            toast.error(err.message || "Failed to create booking.");
             setIsSaving(false);
         }
     };
@@ -283,6 +291,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                         paxCounts={paxCounts}
                         setPaxCounts={setPaxCounts}
                         onCustomerCreated={handleCustomerCreated}
+                        onCustomerUpdated={handleCustomerUpdated}
                     />
                 </div>
 
