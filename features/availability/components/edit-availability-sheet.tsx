@@ -24,6 +24,9 @@ import {
     Trash2
 } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { CustomSelect } from "@/components/ui/custom-select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 
 // Schema
 const AvailabilitySchema = z.object({
@@ -369,7 +372,7 @@ export function EditAvailabilitySheet({
         <SidePanel
             isOpen={isOpen}
             onClose={onClose}
-            title="Edit Availability"
+            title={isEditMode ? "Edit Availability" : "New Availability"}
             description="Configure availability settings and scheduling."
             width="w-[85vw] max-w-[85vw]"
             contentClassName="p-0"
@@ -391,11 +394,10 @@ export function EditAvailabilitySheet({
                                     <div className="space-y-6">
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Start Date</label>
-                                            <input
-                                                type="date"
-                                                {...register("start_date")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
-                                                style={{ colorScheme: 'dark' }}
+                                            <DatePicker
+                                                value={watch("start_date") ? new Date(watch("start_date") + "T00:00:00") : undefined}
+                                                onChange={(date) => setValue("start_date", date ? format(date, "yyyy-MM-dd") : "", { shouldValidate: true })}
+                                                placeholder="Select start date"
                                             />
                                             {errors.start_date && <p className="text-red-400 text-xs mt-1">{errors.start_date.message}</p>}
                                         </div>
@@ -460,11 +462,10 @@ export function EditAvailabilitySheet({
 
                                                 <div>
                                                     <label className="block text-sm font-medium text-zinc-400 mb-2">End Date</label>
-                                                    <input
-                                                        type="date"
-                                                        {...register("end_date")}
-                                                        className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
-                                                        style={{ colorScheme: 'dark' }}
+                                                    <DatePicker
+                                                        value={watch("end_date") ? new Date(watch("end_date") + "T00:00:00") : undefined}
+                                                        onChange={(date) => setValue("end_date", date ? format(date, "yyyy-MM-dd") : "", { shouldValidate: true })}
+                                                        placeholder="Select end date"
                                                     />
                                                 </div>
                                             </>
@@ -478,13 +479,14 @@ export function EditAvailabilitySheet({
                                     <div className="space-y-6">
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Duration Type</label>
-                                            <select
-                                                {...register("duration_type")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="all_day">All Day</option>
-                                                <option value="time_range">Time Range</option>
-                                            </select>
+                                            <CustomSelect
+                                                value={durationType}
+                                                onChange={(val) => setValue("duration_type", val as any)}
+                                                options={[
+                                                    { value: "all_day", label: "All Day" },
+                                                    { value: "time_range", label: "Time Range" }
+                                                ]}
+                                            />
                                         </div>
 
                                         {durationType === "time_range" && (
@@ -563,65 +565,66 @@ export function EditAvailabilitySheet({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Booking Options Schedule</label>
-                                            <select
-                                                {...register("booking_option_schedule_id")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="">Select Schedule...</option>
-                                                {bookingSchedules.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                ))}
-                                            </select>
+                                            <CustomSelect
+                                                value={watch("booking_option_schedule_id") || undefined}
+                                                onChange={(val) => setValue("booking_option_schedule_id", val, { shouldValidate: true })}
+                                                options={[
+                                                    { value: "", label: "Select Schedule..." },
+                                                    ...bookingSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                ]}
+                                                placeholder="Select Schedule..."
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Price Schedule</label>
-                                            <select
-                                                {...register("pricing_schedule_id")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="">Select Schedule...</option>
-                                                {pricingSchedules.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                ))}
-                                            </select>
+                                            <CustomSelect
+                                                value={watch("pricing_schedule_id") || undefined}
+                                                onChange={(val) => setValue("pricing_schedule_id", val, { shouldValidate: true })}
+                                                options={[
+                                                    { value: "", label: "Select Schedule..." },
+                                                    ...pricingSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                ]}
+                                                placeholder="Select Schedule..."
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Online Booking Status</label>
-                                            <select
-                                                {...register("online_booking_status")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="open">Open</option>
-                                                <option value="closed">Closed</option>
-                                            </select>
+                                            <CustomSelect
+                                                value={watch("online_booking_status")}
+                                                onChange={(val) => setValue("online_booking_status", val as any, { shouldValidate: true })}
+                                                options={[
+                                                    { value: "open", label: "Open" },
+                                                    { value: "closed", label: "Closed" }
+                                                ]}
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Route Schedule</label>
-                                            <select
-                                                {...register("transportation_route_id")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="">Select Route Schedule...</option>
-                                                {transportationSchedules.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                                ))}
-                                            </select>
+                                            <CustomSelect
+                                                value={watch("transportation_route_id") || undefined}
+                                                onChange={(val) => setValue("transportation_route_id", val, { shouldValidate: true })}
+                                                options={[
+                                                    { value: "", label: "Select Route Schedule..." },
+                                                    ...transportationSchedules.map(s => ({ value: s.id, label: s.name }))
+                                                ]}
+                                                placeholder="Select Route Schedule..."
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-zinc-400 mb-2">Vehicle</label>
-                                            <select
-                                                {...register("vehicle_id")}
-                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white [&>option:checked]:bg-cyan-600"
-                                            >
-                                                <option value="">Select Vehicle...</option>
-                                                {vehicles.map(v => (
-                                                    <option key={v.id} value={v.id}>{v.name}</option>
-                                                ))}
-                                            </select>
+                                            <CustomSelect
+                                                value={watch("vehicle_id") || undefined}
+                                                onChange={(val) => setValue("vehicle_id", val, { shouldValidate: true })}
+                                                options={[
+                                                    { value: "", label: "Select Vehicle..." },
+                                                    ...vehicles.map(v => ({ value: v.id, label: v.name }))
+                                                ]}
+                                                placeholder="Select Vehicle..."
+                                            />
                                         </div>
                                     </div>
                                 </div>

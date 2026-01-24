@@ -254,12 +254,13 @@ function MonthView({
                                                         key={event.id}
                                                         abbr={event.experience_short_code || "EXP"}
                                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings="0 Bookings"
+                                                        bookings="0"
                                                         cap={`0 / ${event.max_capacity} Capacity`}
                                                         onClick={(e) => {
                                                             e?.stopPropagation();
                                                             onEventClick?.(event);
                                                         }}
+                                                        note={event.private_announcement}
                                                     />
                                                 ))}
                                             </div>
@@ -275,13 +276,14 @@ function MonthView({
     )
 }
 
-function EventChip({ abbr, time, bookings, cap, onClick }: { abbr: string, time: string, bookings: string, cap: string, onClick?: (e?: React.MouseEvent) => void }) {
+function EventChip({ abbr, time, bookings, cap, note, onClick }: { abbr: string, time: string, bookings: string, cap: string, note?: string, onClick?: (e?: React.MouseEvent) => void }) {
     return (
-        <div className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400" onClick={onClick}>
+        <div className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500" onClick={onClick}>
             <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
             <span className="text-white font-bold text-xs leading-tight">{time}</span>
             <span className="text-white font-bold text-xs leading-tight">{bookings}</span>
             <span className="text-white font-bold text-xs leading-tight">{cap}</span>
+            {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5 max-w-full truncate">{note}</span>}
         </div>
     );
 }

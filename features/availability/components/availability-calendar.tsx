@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
     ChevronLeft,
@@ -183,8 +184,9 @@ export function AvailabilityCalendar({
                 .from('availabilities' as any)
                 .select('*')
                 .eq('experience_id', currentExp.id)
-                .gte('start_date', startOfMonth.toISOString().split('T')[0])
-                .lte('start_date', endOfMonth.toISOString().split('T')[0])
+                .eq('experience_id', currentExp.id)
+                .gte('start_date', format(startOfMonth, 'yyyy-MM-dd'))
+                .lte('start_date', format(endOfMonth, 'yyyy-MM-dd'))
                 .order('start_date', { ascending: true });
 
             if (error) {
@@ -406,7 +408,7 @@ export function AvailabilityCalendar({
                         icon={Plus}
                         label="Create"
                         primary
-                        onClick={() => onEventClick?.(currentDate.toISOString().split('T')[0], currentExp?.id)}
+                        onClick={() => onEventClick?.(format(currentDate, 'yyyy-MM-dd'), currentExp?.id)}
                         disabled={isSelectMode}
                     />
                 </div>
@@ -589,7 +591,7 @@ function MonthView({
                                                         color="cyan"
                                                         abbr={abbr}
                                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings="0 Bookings"
+                                                        bookings="0"
                                                         cap={`0 / ${event.max_capacity} Capacity`}
                                                         note={event.private_announcement}
                                                         onClick={(e) => {
@@ -694,7 +696,7 @@ function EventChip({
 }) {
     const style = selected
         ? "bg-cyan-500 border-2 border-white/80 shadow-[0_0_15px_rgba(6,182,212,0.6)] saturate-150 scale-[1.02] z-10"
-        : "bg-cyan-600/90 hover:bg-cyan-500 border-l-[3px] border-cyan-400";
+        : "bg-cyan-600/90 hover:bg-cyan-500";
 
     return (
         <div

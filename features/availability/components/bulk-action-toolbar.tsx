@@ -198,7 +198,10 @@ export function BulkActionToolbar({
 
             <BulkEditSheet
                 isOpen={isBulkEditOpen}
-                onClose={() => setIsBulkEditOpen(false)}
+                onClose={() => {
+                    setIsBulkEditOpen(false);
+                    onClearSelection();
+                }}
                 onSuccess={() => {
                     onClearSelection();
                     onSuccess();

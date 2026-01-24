@@ -16,6 +16,7 @@ interface ComboboxProps {
 export function Combobox({ value, onChange, options, placeholder }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
+    const [position, setPosition] = useState<'bottom' | 'top'>('bottom');
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Normalize options
@@ -64,6 +65,16 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Calculate position on open
+    useEffect(() => {
+        if (isOpen && containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            // If less than 250px below, open upwards
+            setPosition(spaceBelow < 250 ? 'top' : 'bottom');
+        }
+    }, [isOpen]);
+
     const handleSelect = (option: ComboboxOption) => {
         onChange(option.value);
         setQuery(option.label);
@@ -99,10 +110,12 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
             <AnimatePresence>
                 {isOpen && filteredOptions.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0, y: 5 }}
+                        initial={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 5 }}
-                        className="absolute z-50 w-full mt-1 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+                        exit={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
+                        className={`absolute z-50 w-full left-0 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto
+                            ${position === 'bottom' ? "mt-1 top-full" : "mb-1 bottom-full"}
+                        `}
                     >
                         {filteredOptions.map((option) => {
                             const isSelected = value === option.value;
