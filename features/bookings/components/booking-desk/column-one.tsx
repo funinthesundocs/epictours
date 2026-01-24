@@ -98,8 +98,20 @@ export function ColumnOne({
                         <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>{availability.id}</div>
                     </div>
                     <div className="col-span-2 border-t border-white/5 pt-2">
-                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Capacity</div>
-                        <div className="text-white font-medium">{availability.max_capacity} Pax</div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Capacity</div>
+                                <div className="text-white font-medium">
+                                    {Object.values(paxCounts).reduce((a, b) => a + b, 0)} / {availability.max_capacity} Pax
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Remaining</div>
+                                <div className="text-white font-medium">
+                                    {Math.max(0, availability.max_capacity - Object.values(paxCounts).reduce((a, b) => a + b, 0))} Pax
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

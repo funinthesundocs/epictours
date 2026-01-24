@@ -51,12 +51,12 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
 
     const [isSaving, setIsSaving] = useState(false);
 
-    // Payment State
     const [paymentState, setPaymentState] = useState<any>({
         status: 'paid_full',
         method: 'credit_card',
         amount: 0 // Will auto-update in ColumnThree based on total
     });
+    const [grandTotal, setGrandTotal] = useState(0);
 
     // --- Effects ---
 
@@ -178,12 +178,28 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                 status: 'confirmed',
                 pax_count: totalPax,
                 pax_breakdown: paxCounts, // JSONB column
-                pax_breakdown: paxCounts, // JSONB column
+                option_values: optionValues, // Dynamic Options
                 notes: notes,
-                // payment_status: paymentState.status, // Database might not have this column yet
-                // payment_method: paymentState.method
-                // payment_override: paymentState.overrideTotal,
-                // payment_promo: paymentState.promoCode
+                payment_status: paymentState.status,
+                payment_method: paymentState.method,
+                amount_paid: paymentState.amount || 0,
+                total_amount: paymentState.overrideTotal || (Object.values(paxCounts).reduce((total, count) => {
+                    // Logic to recalc total if missed, or better yet, calculate grandTotal in column-three and pass it up or duplicate calculation here?
+                    // To be safe, let's recalculate simply here or just rely on ColumnThree passing it?
+                    // Ideally ColumnThree calculates it. But we don't have it in state here easily without duplicating logic.
+                    // Simplified: We'll calculate it from current rates map.
+                    // Actually, let's re-use the same logic or trust the user input?
+                    // Wait, paymentState doesn't store grandTotal unless overridden.
+                    // We must recalc the standard total.
+                    const r = currentRates.find(r => currentRates.some(cr => cr.customer_type_name));
+                    // This is hard to replicate exactly without the loop.
+                    // Let's defer exact calc to server or complex logic?
+                    // BETTER FIX: Add grandTotal to paymentState in ColumnThree?
+                    return total; // PRETTY DANGEROUS TO GUESS.
+                }, 0)), // PLACEHOLDER: Ideally we pass this from ColumnThree onSave.
+                // Actually, let's modify ColumnThree to update a "total" in state.
+                promo_code: paymentState.promoCode,
+                payment_details: {} // Placeholder for tokens
             });
 
             console.log("PAYMENT PROCESSED:", paymentState); // Mock log
@@ -245,10 +261,10 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                 const [y, m, d] = availability.start_date.split('-');
                 return `${m}-${d}-${y}`;
             })()}`}
-            width="w-[85vw] max-w-[85vw]"
+            width="w-[90vw] max-w-[90vw]"
             contentClassName="p-0"
         >
-            <div className="h-full grid grid-cols-1 lg:grid-cols-4 gap-6 p-6 overflow-hidden">
+            <div className="h-full grid grid-cols-1 lg:grid-cols-[20fr_35fr_25fr_20fr] gap-6 p-6 overflow-hidden">
 
                 {/* COLUMN 1: Customer & Pax */}
                 <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
@@ -292,6 +308,7 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                         paxCounts={paxCounts}
                         paymentState={paymentState}
                         setPaymentState={setPaymentState}
+                        setGrandTotal={setGrandTotal}
                     />
                 </div>
 

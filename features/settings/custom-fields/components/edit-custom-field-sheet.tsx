@@ -401,10 +401,12 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                     <h4 className="text-xs uppercase text-cyan-500 font-bold mb-6 tracking-widest">Live Preview</h4>
 
                                     <div className="space-y-2">
-                                        <Label className="text-white text-xs uppercase tracking-wider ml-1 mb-2 block">
-                                            {form.watch("label") || "Field Label"}
-                                            {form.watch("is_internal") && <span className="ml-2 text-xs text-amber-500 bg-amber-500/10 px-1 rounded">Internal</span>}
-                                        </Label>
+                                        {currentType !== 'header' && (
+                                            <Label className="text-white text-xs uppercase tracking-wider ml-1 mb-2 block">
+                                                {form.watch("label") || "Field Label"}
+                                                {form.watch("is_internal") && <span className="ml-2 text-xs text-amber-500 bg-amber-500/10 px-1 rounded">Internal</span>}
+                                            </Label>
+                                        )}
 
                                         {currentType === 'text' && (
                                             <input placeholder="User input..." className={inputClasses} />

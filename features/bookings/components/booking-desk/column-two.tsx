@@ -350,6 +350,23 @@ export function ColumnTwo({
 
                 {currentOptions.map(opt => {
                     const optId = opt.id || opt.field_id || String(Math.random());
+
+                    // Special Handling: Section Headers
+                    if (opt.type === 'header') {
+                        return (
+                            <div key={optId} className="pt-4 pb-2">
+                                <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/30 pb-1 mb-1">
+                                    {opt.label}
+                                </h4>
+                                {opt.description && (
+                                    <p className="text-xs text-zinc-500 italic">
+                                        {opt.description}
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <div key={optId} className="p-3 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors">
                             {/* Label and Price */}

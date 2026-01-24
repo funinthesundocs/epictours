@@ -11,7 +11,8 @@ import {
     ChevronDown,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { Availability, AvailabilityListTable } from "@/features/availability/components/availability-list-table";
+import { Availability } from "@/features/availability/components/availability-list-table";
+import { BookingsListTable } from "./bookings-list-table";
 
 export function BookingsCalendar({
     onEventClick
@@ -108,6 +109,10 @@ export function BookingsCalendar({
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
+    // List View State
+    const [listStartDate, setListStartDate] = useState(new Date());
+    const [listEndDate, setListEndDate] = useState(new Date(new Date().setMonth(new Date().getMonth() + 1)));
+
     return (
         <div className="w-full h-[calc(100vh_-_9rem)] font-sans flex flex-col">
             {/* TOP COMPONENT: Control Bar */}
@@ -115,47 +120,72 @@ export function BookingsCalendar({
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        <span className="text-4xl font-black text-white tracking-tighter">
-                            {monthNames[currentDate.getMonth()]}
-                        </span>
-                        <div className="relative" ref={yearPickerRef}>
-                            <button
-                                onClick={() => setIsYearPickerOpen(!isYearPickerOpen)}
-                                className="text-4xl font-black text-cyan-500 tracking-tighter flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                                {currentDate.getFullYear().toString().slice(-2)}
-                                <ChevronDown className="w-5 h-5 stroke-[4] mt-1 text-cyan-500" />
-                            </button>
-                            {isYearPickerOpen && (
-                                <div className="absolute top-full left-0 mt-2 w-[100px] bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                    <div className="max-h-[240px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
-                                        {years.map((year) => (
-                                            <div
-                                                key={year}
-                                                className={cn(
-                                                    "px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors border-b border-zinc-900 last:border-0",
-                                                    currentDate.getFullYear() === year ? "bg-cyan-950/30 text-cyan-400" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                                                )}
-                                                onClick={() => handleYearSelect(year)}
-                                            >
-                                                {year}
+                    {viewMode === 'calendar' ? (
+                        <>
+                            <div className="flex items-center gap-3">
+                                <span className="text-4xl font-black text-white tracking-tighter">
+                                    {monthNames[currentDate.getMonth()]}
+                                </span>
+                                <div className="relative" ref={yearPickerRef}>
+                                    <button
+                                        onClick={() => setIsYearPickerOpen(!isYearPickerOpen)}
+                                        className="text-4xl font-black text-cyan-500 tracking-tighter flex items-center gap-1 cursor-pointer transition-colors"
+                                    >
+                                        {currentDate.getFullYear().toString().slice(-2)}
+                                        <ChevronDown className="w-5 h-5 stroke-[4] mt-1 text-cyan-500" />
+                                    </button>
+                                    {isYearPickerOpen && (
+                                        <div className="absolute top-full left-0 mt-2 w-[100px] bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                            <div className="max-h-[240px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+                                                {years.map((year) => (
+                                                    <div
+                                                        key={year}
+                                                        className={cn(
+                                                            "px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors border-b border-zinc-900 last:border-0",
+                                                            currentDate.getFullYear() === year ? "bg-cyan-950/30 text-cyan-400" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                                        )}
+                                                        onClick={() => handleYearSelect(year)}
+                                                    >
+                                                        {year}
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    </div>
+                            </div>
 
-                    <div className="flex gap-1">
-                        <button onClick={handlePrevMonth} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
-                            <ChevronLeft className="w-4 h-4" />
-                        </button>
-                        <button onClick={handleNextMonth} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
-                            <ChevronRight className="w-4 h-4" />
-                        </button>
-                    </div>
+                            <div className="flex gap-1">
+                                <button onClick={handlePrevMonth} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <button onClick={handleNextMonth} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left-4">
+                            <span className="text-2xl font-black text-white tracking-tighter uppercase">Booking List</span>
+                            <div className="h-8 w-px bg-zinc-800 mx-2" />
+                            {/* Simple Date Inputs for now */}
+                            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 p-1 rounded-lg">
+                                <input
+                                    type="date"
+                                    value={listStartDate.toISOString().split('T')[0]}
+                                    onChange={(e) => e.target.value && setListStartDate(new Date(e.target.value))}
+                                    className="bg-transparent text-sm text-zinc-300 outline-none px-2 font-mono"
+                                />
+                                <span className="text-zinc-600">-</span>
+                                <input
+                                    type="date"
+                                    value={listEndDate.toISOString().split('T')[0]}
+                                    onChange={(e) => e.target.value && setListEndDate(new Date(e.target.value))}
+                                    className="bg-transparent text-sm text-zinc-300 outline-none px-2 font-mono"
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT: Toolbar Actions */}
@@ -184,13 +214,12 @@ export function BookingsCalendar({
                         expMap={expMap}
                     />
                 ) : (
-                    <AvailabilityListTable
-                        data={availabilities}
-                        onEdit={(id, item) => onEventClick?.(item)}
-                        // List view usually deletes too, but for Bookings View, we probably don't want Delete Availability?
-                        // Let's hide Delete for now or implement "Delete Booking" later.
-                        // Pass dummy or null? The component requires it.
-                        onDelete={() => { }}
+                    <BookingsListTable
+                        startDate={listStartDate}
+                        endDate={listEndDate}
+                        // For now clicking a booking does nothing or could open edit. User didn't specify.
+                        // We'll leave empty for now.
+                        onBookingClick={() => { }}
                     />
                 )}
             </div>

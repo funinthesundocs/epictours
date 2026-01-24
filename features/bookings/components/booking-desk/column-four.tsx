@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Mail, Send } from "lucide-react";
+import { CheckCircle, Mail, Send, MessageSquare } from "lucide-react";
 
 interface ColumnFourProps {
     onSave: () => void;
@@ -25,6 +25,20 @@ export function ColumnFour({ onSave, isSaving, canSave }: ColumnFourProps) {
                     <div>
                         <div className="text-sm font-medium text-white">Email Confirmation</div>
                         <div className="text-xs text-zinc-500">Send automatic receipt to customer</div>
+                    </div>
+                    {/* Toggle Placeholder */}
+                    <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
+                        <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-500 rounded-full" />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg">
+                    <div className="bg-zinc-800 p-2 rounded-full">
+                        <MessageSquare size={16} className="text-zinc-400" />
+                    </div>
+                    <div>
+                        <div className="text-sm font-medium text-white">SMS Notifications</div>
+                        <div className="text-xs text-zinc-500">Send text updates to customer</div>
                     </div>
                     {/* Toggle Placeholder */}
                     <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">

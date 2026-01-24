@@ -10,9 +10,10 @@ interface ColumnThreeProps {
     paxCounts: Record<string, number>;
     paymentState: PaymentState;
     setPaymentState: (state: PaymentState) => void;
+    setGrandTotal: (total: number) => void;
 }
 
-export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentState }: ColumnThreeProps) {
+export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentState, setGrandTotal }: ColumnThreeProps) {
     // --- Local UI State ---
     const [isEditingTotal, setIsEditingTotal] = useState(false);
     const [isAddingPromo, setIsAddingPromo] = useState(false);
@@ -49,6 +50,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
         if (paymentState.status === 'paid_full') {
             setPaymentState({ ...paymentState, amount: grandTotal });
         }
+        setGrandTotal(grandTotal);
     }, [grandTotal, paymentState.status]);
 
     // Handle Edit Total Submission
