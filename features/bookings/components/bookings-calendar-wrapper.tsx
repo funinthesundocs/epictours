@@ -103,6 +103,7 @@ export function BookingsCalendarWrapper() {
                     setIsBookingDeskOpen(false);
                     setEditingBookingId(null);
                 }}
+                onSuccess={handleRefresh}
                 availability={selectedAvailability}
                 editingBookingId={editingBookingId}
             />

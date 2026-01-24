@@ -25,6 +25,8 @@ export interface Availability {
     staff_display?: string;
     route_name?: string;
     vehicle_name?: string;
+    driver_name?: string;
+    guide_name?: string;
     experience_name?: string; // New
     experience_short_code?: string; // New attempt to fix EXP label too
 }

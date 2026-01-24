@@ -71,15 +71,24 @@ export function BookingsCalendar({
             if (error) {
                 console.error("Error fetching availabilities:", error);
             } else if (data) {
-                const enriched: Availability[] = data.map((item: any) => ({
-                    ...item,
-                    booked_count: item.booked_count || 0, // Ensure this is always present
-                    staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
-                    route_name: routeMap[item.transportation_route_id] || "",
-                    vehicle_name: vehicleMap[item.vehicle_id] || "",
-                    experience_name: expMap[item.experience_id || ""]?.name || "",
-                    experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP"
-                }));
+                const enriched: Availability[] = data.map((item: any) => {
+                    // Extract driver and guide from staff_ids (first = driver, second = guide by convention)
+                    const staffIds = item.staff_ids || [];
+                    const driverName = staffIds[0] ? staffMap[staffIds[0]] : "";
+                    const guideName = staffIds[1] ? staffMap[staffIds[1]] : "";
+
+                    return {
+                        ...item,
+                        booked_count: item.booked_count || 0,
+                        staff_display: staffIds.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
+                        route_name: routeMap[item.transportation_route_id] || "",
+                        vehicle_name: vehicleMap[item.vehicle_id] || "",
+                        driver_name: driverName,
+                        guide_name: guideName,
+                        experience_name: expMap[item.experience_id || ""]?.name || "",
+                        experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP"
+                    };
+                });
                 setAvailabilities(enriched);
             }
             setIsLoading(false);
