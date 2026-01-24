@@ -2,14 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -26,10 +18,14 @@ interface Booking {
     start_time: string;
     transportation_route_id?: string;
     experience_short_code: string;
-    option_values: any; // Raw JSON of selected options
+    option_values: any;
     payment_status: string;
     amount_paid: number;
     total_amount: number;
+    voucher_numbers?: string;
+    notes?: string;
+    // Resolved pickup details
+    pickup_details?: string;
 }
 
 interface BookingsListTableProps {
@@ -38,18 +34,56 @@ interface BookingsListTableProps {
     onBookingClick?: (bookingId: string) => void;
 }
 
+// Format phone number to +1 (XXX) XXX-XXXX
+function formatPhoneNumber(phone: string | null | undefined): string {
+    if (!phone) return "-";
+
+    // Strip all non-numeric characters
+    const digits = phone.replace(/\D/g, '');
+
+    // Handle different lengths
+    let normalized = digits;
+
+    // If 10 digits, assume US number without country code
+    if (digits.length === 10) {
+        normalized = '1' + digits;
+    }
+    // If 11 digits starting with 1, it's already a US number with country code
+    else if (digits.length === 11 && digits.startsWith('1')) {
+        normalized = digits;
+    }
+    // If we have exactly 11 digits, format it
+    else if (digits.length === 11) {
+        normalized = digits;
+    }
+    // Otherwise, return as-is with minimal formatting
+    else if (digits.length < 10) {
+        return phone; // Return original if too short
+    }
+
+    // Format: +1 (XXX) XXX-XXXX
+    if (normalized.length >= 11) {
+        const countryCode = normalized.slice(0, 1);
+        const areaCode = normalized.slice(1, 4);
+        const prefix = normalized.slice(4, 7);
+        const line = normalized.slice(7, 11);
+        return `+${countryCode} (${areaCode}) ${prefix}-${line}`;
+    }
+
+    return phone; // Fallback to original
+}
+
 export function BookingsListTable({ startDate, endDate, onBookingClick }: BookingsListTableProps) {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [dynamicColumns, setDynamicColumns] = useState<string[]>([]);
 
     const [customerTypeMap, setCustomerTypeMap] = useState<Record<string, string>>({});
     const [customFieldMap, setCustomFieldMap] = useState<Record<string, { label: string, type?: string, options?: any[] }>>({});
 
     // Smart Pickup Resolution Maps
     const [hotelMap, setHotelMap] = useState<Record<string, { name: string, pickup_point_id: string }>>({});
-    const [pickupPointMap, setPickupPointMap] = useState<Record<string, string>>({}); // id -> name
-    const [scheduleStopMap, setScheduleStopMap] = useState<Record<string, string>>({}); // "scheduleId_pickupPointId" -> time
+    const [pickupPointMap, setPickupPointMap] = useState<Record<string, string>>({});
+    const [scheduleStopMap, setScheduleStopMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const fetchReferenceData = async () => {
@@ -61,7 +95,7 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                 setCustomerTypeMap(map);
             }
 
-            // Fetch Custom Field Defs for Headers and Option Values (include type for smart_pickup detection)
+            // Fetch Custom Field Defs (for smart_pickup detection)
             const { data: cfData } = await supabase.from('custom_field_definitions').select('id, label, type, options');
             if (cfData) {
                 const map: Record<string, { label: string, type?: string, options?: any[] }> = {};
@@ -85,13 +119,12 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                 setPickupPointMap(map);
             }
 
-            // Fetch Schedule Stops (links schedule_id + pickup_point_id to pickup_time)
+            // Fetch Schedule Stops
             const { data: ssData } = await supabase.from('schedule_stops').select('schedule_id, pickup_point_id, pickup_time');
             if (ssData) {
                 const map: Record<string, string> = {};
                 ssData.forEach((ss: any) => {
                     const key = `${ss.schedule_id}_${ss.pickup_point_id}`;
-                    // Format time as HH:MM AM/PM
                     if (ss.pickup_time) {
                         const [h, m] = ss.pickup_time.split(':');
                         const hour = parseInt(h, 10);
@@ -107,17 +140,13 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
         const fetchBookings = async () => {
             setIsLoading(true);
             try {
-                // Fetch reference data first (or in parallel)
                 await fetchReferenceData();
 
-                // Fetch bookings with joins
-                // Note: deeply nested joins can be tricky in Supabase JS client depending on FK naming
-                // We'll try the direct relation syntax assuming FKs are standard
                 const { data, error } = await supabase
                     .from('bookings')
                     .select(`
                         id, status, pax_count, pax_breakdown, option_values, 
-                        payment_status, amount_paid, total_amount,
+                        payment_status, amount_paid, total_amount, voucher_numbers, notes,
                         customers!inner(name, email, phone),
                         availabilities!inner(
                             start_date, 
@@ -134,7 +163,6 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                 if (error) throw error;
 
                 if (data) {
-                    // Flatten data structure
                     const flatBookings = data.map((b: any) => ({
                         id: b.id,
                         status: b.status,
@@ -144,6 +172,8 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         payment_status: b.payment_status,
                         amount_paid: b.amount_paid || 0,
                         total_amount: b.total_amount || 0,
+                        voucher_numbers: b.voucher_numbers || "",
+                        notes: b.notes || "",
                         customer_name: b.customers?.name || "Unknown",
                         customer_email: b.customers?.email || "",
                         customer_phone: b.customers?.phone || "",
@@ -154,18 +184,6 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                     }));
 
                     setBookings(flatBookings);
-
-                    // Calculate Dynamic Columns
-                    // Scan all bookings, collect all keys from option_values that have non-null/non-empty values
-                    const keys = new Set<string>();
-                    flatBookings.forEach(booking => {
-                        Object.entries(booking.option_values).forEach(([key, val]) => {
-                            if (val !== null && val !== undefined && val !== "") {
-                                keys.add(key);
-                            }
-                        });
-                    });
-                    setDynamicColumns(Array.from(keys));
                 }
             } catch (err: any) {
                 console.error("Error fetching booking list:", {
@@ -181,6 +199,35 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
 
         fetchBookings();
     }, [startDate, endDate]);
+
+    // Helper function to resolve pickup details from option_values
+    const resolvePickupDetails = (booking: Booking): string => {
+        const optionValues = booking.option_values || {};
+
+        // Find the smart_pickup field in option_values
+        for (const [fieldId, value] of Object.entries(optionValues)) {
+            const fieldDef = customFieldMap[fieldId];
+            if (fieldDef?.type === 'smart_pickup' && value) {
+                const hotel = hotelMap[value as string];
+                if (hotel) {
+                    const pickupName = pickupPointMap[hotel.pickup_point_id] || hotel.name || "Unknown";
+                    let timeStr = "";
+
+                    if (booking.transportation_route_id && hotel.pickup_point_id) {
+                        const key = `${booking.transportation_route_id}_${hotel.pickup_point_id}`;
+                        if (scheduleStopMap[key]) {
+                            timeStr = scheduleStopMap[key];
+                        }
+                    }
+
+                    return timeStr ? `${pickupName} @ ${timeStr}` : pickupName;
+                }
+            }
+        }
+
+        // Fallback to start_time if no smart pickup found
+        return booking.start_time ? booking.start_time.slice(0, 5) : "-";
+    };
 
     if (isLoading) {
         return (
@@ -206,17 +253,13 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         <tr>
                             <th className="px-6 py-4">Exp</th>
                             <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Pickup Time</th>
+                            <th className="px-6 py-4">Pickup Details</th>
                             <th className="px-6 py-4">Customer</th>
                             <th className="px-6 py-4">Pax</th>
                             <th className="px-6 py-4">Phone</th>
                             <th className="px-6 py-4">Email</th>
-                            {/* Dynamic Option Columns */}
-                            {dynamicColumns.map(col => (
-                                <th key={col} className="px-6 py-4 text-cyan-500/80">
-                                    {customFieldMap[col]?.label || col}
-                                </th>
-                            ))}
+                            <th className="px-6 py-4">Voucher Numbers</th>
+                            <th className="px-6 py-4">Booking Notes</th>
                             <th className="px-6 py-4 text-right">Total</th>
                             <th className="px-6 py-4 text-right">Paid</th>
                             <th className="px-6 py-4 text-right">Due</th>
@@ -229,19 +272,31 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                                 className="hover:bg-cyan-500/5 transition-colors cursor-pointer group"
                                 onClick={() => onBookingClick?.(booking.id)}
                             >
-                                <td className="px-6 py-4 font-mono text-cyan-400 font-bold">{booking.experience_short_code}</td>
+                                {/* Exp */}
+                                <td className="px-6 py-4 font-mono text-cyan-400 font-bold">
+                                    {booking.experience_short_code}
+                                </td>
+
+                                {/* Date */}
                                 <td className="px-6 py-4">
                                     {(() => {
                                         const [y, m, d] = booking.start_date.split('-');
                                         return `${m}-${d}-${y}`;
                                     })()}
                                 </td>
+
+                                {/* Pickup Details */}
                                 <td className="px-6 py-4 text-white font-medium">
-                                    {booking.start_time ? booking.start_time.slice(0, 5) : "All Day"}
+                                    {resolvePickupDetails(booking)}
                                 </td>
-                                <td className="px-6 py-4 font-bold text-white">{booking.customer_name}</td>
+
+                                {/* Customer */}
+                                <td className="px-6 py-4 font-bold text-white">
+                                    {booking.customer_name}
+                                </td>
+
+                                {/* Pax */}
                                 <td className="px-6 py-4">
-                                    {/* Parse Pax Breakdown */}
                                     {booking.pax_breakdown && Object.keys(booking.pax_breakdown).length > 0 ? (
                                         <div className="flex flex-col gap-0.5 text-xs text-zinc-400">
                                             {Object.entries(booking.pax_breakdown).map(([typeId, count]) => (
@@ -252,62 +307,38 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                                         <span className="text-zinc-500">{booking.pax_count} Pax</span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4 font-mono text-xs">{booking.customer_phone || "-"}</td>
-                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.customer_email}>{booking.customer_email}</td>
 
-                                {/* Dynamic Options */}
-                                {dynamicColumns.map(col => {
-                                    const val = booking.option_values[col];
-                                    let displayVal = val || "-";
+                                {/* Phone */}
+                                <td className="px-6 py-4 font-mono text-xs">
+                                    {formatPhoneNumber(booking.customer_phone)}
+                                </td>
 
-                                    const fieldDef = customFieldMap[col];
+                                {/* Email */}
+                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.customer_email}>
+                                    {booking.customer_email || "-"}
+                                </td>
 
-                                    // 1. Smart Pickup Logic
-                                    if (fieldDef?.type === 'smart_pickup' && val) {
-                                        // val is Hotel ID
-                                        const hotel = hotelMap[val];
-                                        if (hotel) {
-                                            const pickupName = pickupPointMap[hotel.pickup_point_id] || "Unknown Stop";
-                                            let timeStr = "";
+                                {/* Voucher Numbers */}
+                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[120px] truncate" title={booking.voucher_numbers}>
+                                    {booking.voucher_numbers || "-"}
+                                </td>
 
-                                            // Attempt to find time if we have a route
-                                            if (booking.transportation_route_id && hotel.pickup_point_id) {
-                                                const key = `${booking.transportation_route_id}_${hotel.pickup_point_id}`;
-                                                if (scheduleStopMap[key]) {
-                                                    timeStr = scheduleStopMap[key];
-                                                }
-                                            }
+                                {/* Booking Notes */}
+                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.notes}>
+                                    {booking.notes || "-"}
+                                </td>
 
-                                            displayVal = timeStr ? `${pickupName} @ ${timeStr}` : pickupName;
-                                        }
-                                    }
-                                    // 2. Standard Options Logic
-                                    else if (fieldDef?.options && Array.isArray(fieldDef.options)) {
-                                        // Check both 'id' and 'value' properties, and potentially 'name' if it's a legacy structure
-                                        const foundOption = fieldDef.options.find((opt: any) =>
-                                            opt.id === val || opt.value === val
-                                        );
+                                {/* Total */}
+                                <td className="px-6 py-4 text-right font-mono text-white font-bold">
+                                    ${booking.total_amount.toFixed(2)}
+                                </td>
 
-                                        if (foundOption) {
-                                            displayVal = foundOption.label || foundOption.name || displayVal;
+                                {/* Paid */}
+                                <td className="px-6 py-4 text-right font-mono text-emerald-400">
+                                    ${booking.amount_paid.toFixed(2)}
+                                </td>
 
-                                            // Special handling for transport/time
-                                            if (fieldDef.type === 'transport' && foundOption.time) {
-                                                displayVal = `${displayVal} (${foundOption.time})`;
-                                            }
-                                        }
-                                    }
-
-                                    return (
-                                        <td key={col} className="px-6 py-4 text-xs text-zinc-400">
-                                            {typeof val === 'object' ? JSON.stringify(val) : displayVal}
-                                        </td>
-                                    );
-                                })}
-
-                                {/* Financials */}
-                                <td className="px-6 py-4 text-right font-mono text-white font-bold">${booking.total_amount.toFixed(2)}</td>
-                                <td className="px-6 py-4 text-right font-mono text-emerald-400">${booking.amount_paid.toFixed(2)}</td>
+                                {/* Due */}
                                 <td className={cn(
                                     "px-6 py-4 text-right font-mono font-bold",
                                     (booking.total_amount - booking.amount_paid) > 0 ? "text-red-400" : "text-zinc-500"

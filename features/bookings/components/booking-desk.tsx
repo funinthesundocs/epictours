@@ -19,9 +19,11 @@ interface BookingDeskProps {
     isOpen: boolean;
     onClose: () => void;
     availability: Availability | null;
+    editingBookingId?: string | null; // If set, we're editing an existing booking
 }
 
-export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps) {
+export function BookingDesk({ isOpen, onClose, availability, editingBookingId }: BookingDeskProps) {
+    const isEditMode = !!editingBookingId;
     // --- State ---
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [notes, setNotes] = useState("");
@@ -264,11 +266,13 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
         <SidePanel
             isOpen={isOpen}
             onClose={onClose}
-            title="Booking Desk"
-            description={`Create a new booking for ${(() => {
-                const [y, m, d] = availability.start_date.split('-');
-                return `${m}-${d}-${y}`;
-            })()}`}
+            title={isEditMode ? "Edit Booking" : "Booking Desk"}
+            description={isEditMode
+                ? `Editing booking for ${selectedCustomer?.name || 'Customer'}`
+                : `Create a new booking for ${(() => {
+                    const [y, m, d] = availability.start_date.split('-');
+                    return `${m}-${d}-${y}`;
+                })()}`}
             width="w-[90vw] max-w-[90vw]"
             contentClassName="p-0"
         >

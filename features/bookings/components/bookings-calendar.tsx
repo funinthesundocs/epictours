@@ -17,7 +17,7 @@ import { BookingsListTable } from "./bookings-list-table";
 export function BookingsCalendar({
     onEventClick
 }: {
-    onEventClick?: (availability: Availability) => void
+    onEventClick?: (availability: Availability, event: React.MouseEvent) => void
 }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
@@ -288,7 +288,7 @@ function MonthView({
                                                         cap={`${event.booked_count || 0} / ${event.max_capacity} Capacity`}
                                                         onClick={(e) => {
                                                             e?.stopPropagation();
-                                                            onEventClick?.(event);
+                                                            if (e) onEventClick?.(event, e);
                                                         }}
                                                         note={event.private_announcement}
                                                     />
