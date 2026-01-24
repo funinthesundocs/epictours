@@ -79,7 +79,7 @@ export function ColumnOne({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Date</div>
+                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Date</div>
                         <div className="text-white font-medium">
                             {(() => {
                                 const [y, m, d] = availability.start_date.split('-');
@@ -88,17 +88,17 @@ export function ColumnOne({
                         </div>
                     </div>
                     <div>
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Time</div>
+                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Time</div>
                         <div className="text-white font-medium">
                             {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
                         </div>
                     </div>
                     <div className="col-span-2">
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Availability ID</div>
+                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Availability ID</div>
                         <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>{availability.id}</div>
                     </div>
                     <div className="col-span-2 border-t border-white/5 pt-2">
-                        <div className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Capacity</div>
+                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Capacity</div>
                         <div className="text-white font-medium">{availability.max_capacity} Pax</div>
                     </div>
                 </div>
@@ -107,8 +107,8 @@ export function ColumnOne({
             {/* Customer Search */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                        <User size={16} className="text-cyan-500" />
+                    <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                        <User size={18} className="text-cyan-500" />
                         Customer
                     </label>
                     <Button
@@ -129,7 +129,7 @@ export function ColumnOne({
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openCustomerSearch}
-                                className="w-full justify-between bg-black/20 border-white/10 text-white hover:bg-zinc-900 hover:text-white"
+                                className="w-full justify-between bg-zinc-900/80 border-white/10 text-white hover:bg-zinc-900 hover:text-white"
                             >
                                 {selectedCustomer ? selectedCustomer.name : "Select customer..."}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -176,45 +176,55 @@ export function ColumnOne({
 
             {/* Pricing Schedule Selector */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                    <Calendar size={16} className="text-cyan-500" />
+                <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                    <Calendar size={18} className="text-cyan-500" />
                     Pricing Schedule
                 </label>
                 <select
                     value={selectedScheduleId || ""}
                     onChange={(e) => setSelectedScheduleId(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                 >
-                    <option value="" disabled className="bg-zinc-900">Select a schedule...</option>
-                    {schedules.map(s => (
-                        <option key={s.id} value={s.id} className="bg-zinc-900">{s.name}</option>
-                    ))}
+                    <option value="" disabled className="bg-zinc-950">Select a schedule...</option>
+                    {schedules.map(s => {
+                        const isDefault = s.id === availability.pricing_schedule_id;
+                        return (
+                            <option key={s.id} value={s.id} className="bg-zinc-950">
+                                {s.name}{isDefault ? " (Default)" : ""}
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
 
             {/* Rate Tier Select */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                    <Search size={16} className="text-cyan-500" />
+                <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                    <Search size={18} className="text-cyan-500" />
                     Rate Tier
                 </label>
                 <select
                     value={selectedTier}
                     onChange={(e) => setSelectedTier(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                     disabled={tiers.length === 0}
                 >
-                    {tiers.map(t => (
-                        <option key={t.name} value={t.name} className="bg-zinc-900">{t.name}</option>
-                    ))}
+                    {tiers.map(t => {
+                        const isDefault = t.name === 'Retail';
+                        return (
+                            <option key={t.name} value={t.name} className="bg-zinc-950">
+                                {t.name}{isDefault ? " (Default)" : ""}
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
 
 
             {/* Pax Selector */}
             <div className="space-y-4">
-                <label className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                    <Users size={16} className="text-cyan-500" />
+                <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                    <Users size={18} className="text-cyan-500" />
                     Passengers
                 </label>
 
@@ -223,15 +233,15 @@ export function ColumnOne({
                         {currentRates.map((rate) => {
                             const count = paxCounts[rate.customer_type_id] || 0;
                             return (
-                                <div key={`${selectedTier}-${rate.customer_type_id}`} className="flex items-center justify-between p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+                                <div key={`${selectedTier}-${rate.customer_type_id}`} className="flex items-center justify-between p-3 bg-zinc-900/80 rounded-lg border border-white/10">
                                     <div>
-                                        <div className="text-sm font-bold text-white">{rate.customer_type_name}</div>
-                                        <div className="text-xs text-cyan-400 font-mono">${rate.price.toFixed(2)}</div>
+                                        <div className="text-base font-bold text-white">{rate.customer_type_name}</div>
+                                        <div className="text-base text-cyan-400 font-mono">${rate.price.toFixed(2)}</div>
                                     </div>
                                     <div className="flex items-center gap-3 bg-black/20 rounded-md p-1 border border-white/10">
                                         <button
                                             onClick={() => handlePaxChange(rate.customer_type_id, -1)}
-                                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+                                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 rounded transition-colors"
                                             disabled={count === 0}
                                         >
                                             -
@@ -239,7 +249,7 @@ export function ColumnOne({
                                         <span className="w-6 text-center font-bold text-white tabular-nums">{count}</span>
                                         <button
                                             onClick={() => handlePaxChange(rate.customer_type_id, 1)}
-                                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+                                            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 rounded transition-colors"
                                         >
                                             +
                                         </button>

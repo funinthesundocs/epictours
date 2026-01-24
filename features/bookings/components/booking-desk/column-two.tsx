@@ -94,7 +94,7 @@ export function ColumnTwo({
         const optId = opt.id || opt.field_id || String(Math.random());
         const currentValue = optionValues[optId];
 
-        const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
+        const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
         const selectClasses = cn(inputClasses, "appearance-none cursor-pointer");
 
         if (opt.type === 'smart_pickup') {
@@ -198,7 +198,7 @@ export function ColumnTwo({
                                         "flex items-center gap-3 px-3 py-2 rounded-lg border text-left text-sm transition-colors",
                                         isSelected
                                             ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
-                                            : "bg-black/20 border-white/10 text-zinc-300 hover:border-white/20"
+                                            : "bg-zinc-900/80 border-white/10 text-zinc-300 hover:border-white/20"
                                     )}
                                 >
                                     <div className={cn(
@@ -228,7 +228,7 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, Math.max(0, numValue - 1))}
-                            className="p-2 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
+                            className="p-2 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
                         >
                             <Minus size={14} className="text-zinc-400" />
                         </button>
@@ -242,7 +242,7 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, numValue + 1)}
-                            className="p-2 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
+                            className="p-2 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
                         >
                             <Plus size={14} className="text-zinc-400" />
                         </button>
@@ -289,8 +289,8 @@ export function ColumnTwo({
         <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500 delay-100 flex flex-col h-full">
 
             {/* Header */}
-            <h3 className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                <Settings size={16} className="text-cyan-500" />
+            <h3 className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                <Settings size={18} className="text-cyan-500" />
                 Booking Options
             </h3>
 
@@ -303,12 +303,17 @@ export function ColumnTwo({
                         <select
                             value={selectedOptionScheduleId || ""}
                             onChange={(e) => setSelectedOptionScheduleId(e.target.value || null)}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
+                            className="w-full bg-zinc-900/80 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
                         >
                             <option value="">-- No Options --</option>
-                            {optionSchedules.map(sch => (
-                                <option key={sch.id} value={sch.id}>{sch.name}</option>
-                            ))}
+                            {optionSchedules.map(sch => {
+                                const isDefault = sch.id === availability.booking_option_schedule_id;
+                                return (
+                                    <option key={sch.id} value={sch.id} className="bg-zinc-950">
+                                        {sch.name}{isDefault ? " (Default)" : ""}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                     </div>
@@ -322,12 +327,12 @@ export function ColumnTwo({
                             <select
                                 value={selectedVariation}
                                 onChange={(e) => setSelectedVariation(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
+                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
                             >
-                                <option value="retail">Retail</option>
-                                <option value="online">Online</option>
-                                <option value="special">Special</option>
-                                <option value="custom">Custom</option>
+                                <option value="retail" className="bg-zinc-950">Retail (Default)</option>
+                                <option value="online" className="bg-zinc-950">Online</option>
+                                <option value="special" className="bg-zinc-950">Special</option>
+                                <option value="custom" className="bg-zinc-950">Custom</option>
                             </select>
                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                         </div>
@@ -346,7 +351,7 @@ export function ColumnTwo({
                 {currentOptions.map(opt => {
                     const optId = opt.id || opt.field_id || String(Math.random());
                     return (
-                        <div key={optId} className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors">
+                        <div key={optId} className="p-3 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors">
                             {/* Label and Price */}
                             <div className="flex justify-between items-start mb-3">
                                 <div>

@@ -51,6 +51,13 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
 
     const [isSaving, setIsSaving] = useState(false);
 
+    // Payment State
+    const [paymentState, setPaymentState] = useState<any>({
+        status: 'paid_full',
+        method: 'credit_card',
+        amount: 0 // Will auto-update in ColumnThree based on total
+    });
+
     // --- Effects ---
 
     // 1. Init from Availability & Fetch Lists
@@ -171,8 +178,15 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
                 status: 'confirmed',
                 pax_count: totalPax,
                 pax_breakdown: paxCounts, // JSONB column
-                notes: notes
+                pax_breakdown: paxCounts, // JSONB column
+                notes: notes,
+                // payment_status: paymentState.status, // Database might not have this column yet
+                // payment_method: paymentState.method
+                // payment_override: paymentState.overrideTotal,
+                // payment_promo: paymentState.promoCode
             });
+
+            console.log("PAYMENT PROCESSED:", paymentState); // Mock log
 
             if (error) throw error;
 
@@ -227,7 +241,10 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
             isOpen={isOpen}
             onClose={onClose}
             title="Booking Desk"
-            description={`Create a new booking for ${availability.start_date}`}
+            description={`Create a new booking for ${(() => {
+                const [y, m, d] = availability.start_date.split('-');
+                return `${m}-${d}-${y}`;
+            })()}`}
             width="w-[85vw] max-w-[85vw]"
             contentClassName="p-0"
         >
@@ -270,12 +287,17 @@ export function BookingDesk({ isOpen, onClose, availability }: BookingDeskProps)
 
                 {/* COLUMN 3: Payment */}
                 <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
-                    <ColumnThree currentRates={currentRates} paxCounts={paxCounts} />
+                    <ColumnThree
+                        currentRates={currentRates}
+                        paxCounts={paxCounts}
+                        paymentState={paymentState}
+                        setPaymentState={setPaymentState}
+                    />
                 </div>
 
                 {/* COLUMN 4: Submit */}
                 <div className="h-full flex flex-col overflow-y-auto">
-                    <ColumnFour onSave={handleSave} isSaving={isSaving} canSave={canSave} />
+                    <ColumnFour onSave={handleSave} isSaving={isSaving} canSave={canSave} paymentState={paymentState} />
                 </div>
 
             </div>

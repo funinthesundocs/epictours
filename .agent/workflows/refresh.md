@@ -1,10 +1,10 @@
 ---
-description: Restarts the production server with the "Smart Refresh" strategy (Fast Incremental Build).
+description: Restarts the development server (Useful for config changes).
 ---
 
-1. Kill Port + Incremental Build (Fault Tolerant) + Start
+1. Kill Port + Restart Dev Server
 // turbo-all
-2. Refresh Local Server
+2. Restart Dev Server
 ```bash
-cmd /c "npx kill-port 3000 && (npm run build || echo Build completed with warnings) && npm run start -- -p 3000"
+cmd /c "npx kill-port 3000 && npm run dev"
 ```

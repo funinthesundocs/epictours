@@ -46,3 +46,15 @@ export interface BookingOptionSchedule {
     config_special?: BookingOption[];
     config_custom?: BookingOption[];
 }
+
+export type PaymentStatus = 'paid_full' | 'paid_partial' | 'pay_later' | 'no_payment';
+export type PaymentMethod = 'credit_card' | 'cash' | 'crypto';
+
+export interface PaymentState {
+    status: PaymentStatus;
+    method: PaymentMethod;
+    amount: number; // The amount currently being paid (e.g. deposit or full)
+    details?: any; // Card token, or generic object
+    overrideTotal?: number; // Manual price override
+    promoCode?: string; // Applied promo code
+}
