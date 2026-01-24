@@ -13,6 +13,7 @@ export interface Availability {
     start_time?: string;
     hours_long?: number;
     max_capacity: number;
+    booked_count?: number; // Tracks how many pax are booked (updated by DB trigger)
     online_booking_status: 'open' | 'closed';
     private_announcement?: string;
     transportation_route_id?: string;
@@ -186,7 +187,11 @@ export function AvailabilityListTable({
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
                                         <Users size={14} className="text-zinc-500" />
-                                        <span>{item.max_capacity} pax</span>
+                                        <span className={cn(
+                                            (item.booked_count || 0) > 0 && "text-cyan-400 font-medium"
+                                        )}>
+                                            {item.booked_count || 0} / {item.max_capacity} pax
+                                        </span>
                                     </div>
                                 </td>
 
@@ -250,13 +255,17 @@ export function AvailabilityListTable({
                 isOpen={!!deletingItem}
                 onClose={() => setDeletingItem(null)}
                 onConfirm={() => {
-                    if (deletingItem?.id) onDelete(deletingItem.id);
+                    if (deletingItem?.id && (deletingItem.booked_count || 0) === 0) {
+                        onDelete(deletingItem.id);
+                    }
                     setDeletingItem(null);
                 }}
-                title="Delete Availability?"
-                description={`Are you sure you want to delete this availability for ${deletingItem?.start_date}? This cannot be undone.`}
-                confirmLabel="Delete"
-                isDestructive={true}
+                title={(deletingItem?.booked_count || 0) > 0 ? "Cannot Delete Availability" : "Delete Availability?"}
+                description={(deletingItem?.booked_count || 0) > 0
+                    ? `This availability has ${deletingItem?.booked_count} active booking(s). To remove this slot, cancel it instead. Bookings must be cancelled or refunded first.`
+                    : `Are you sure you want to delete this availability for ${deletingItem?.start_date}? This cannot be undone.`}
+                confirmLabel={(deletingItem?.booked_count || 0) > 0 ? "OK" : "Delete"}
+                isDestructive={(deletingItem?.booked_count || 0) === 0}
             />
         </>
     );

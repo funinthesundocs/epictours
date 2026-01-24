@@ -105,13 +105,13 @@ export function ColumnOne({
                             <div>
                                 <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Capacity</div>
                                 <div className="text-white font-medium">
-                                    {Object.values(paxCounts).reduce((a, b) => a + b, 0)} / {availability.max_capacity} Pax
+                                    {(availability.booked_count || 0) + Object.values(paxCounts).reduce((a, b) => a + b, 0)} / {availability.max_capacity} Pax
                                 </div>
                             </div>
                             <div>
                                 <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Remaining</div>
-                                <div className="text-white font-medium">
-                                    {Math.max(0, availability.max_capacity - Object.values(paxCounts).reduce((a, b) => a + b, 0))} Pax
+                                <div className={`font-medium ${Math.max(0, availability.max_capacity - (availability.booked_count || 0) - Object.values(paxCounts).reduce((a, b) => a + b, 0)) <= 5 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                    {Math.max(0, availability.max_capacity - (availability.booked_count || 0) - Object.values(paxCounts).reduce((a, b) => a + b, 0))} Pax
                                 </div>
                             </div>
                         </div>
