@@ -22,6 +22,7 @@ const emptyToNull = (val: unknown): number | null => {
 const VehicleSchema = z.object({
     name: z.string().min(2, "Name is required"),
     status: z.string().min(1, "Status is required"),
+    vendor_id: z.string().optional().nullable(), // Link to vendor
     // Preprocess to handle string inputs from forms safely
     capacity: z.preprocess(
         (val) => (val === "" ? undefined : Number(val)),
@@ -66,6 +67,7 @@ const statusOptions = [
 
 export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: AddVehicleSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [vendors, setVendors] = useState<{ value: string; label: string }[]>([]);
 
     const {
         register,
@@ -79,7 +81,8 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
         defaultValues: {
             name: "",
             status: "",
-            capacity: undefined, // undefined is fine for number input initially
+            vendor_id: null,
+            capacity: undefined,
             license_requirement: "",
             miles_per_gallon: undefined,
             plate_number: "",
@@ -91,6 +94,17 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
         }
     });
 
+    // Fetch vendors on mount
+    useEffect(() => {
+        const fetchVendors = async () => {
+            const { data } = await supabase.from('vendors').select('id, name').order('name');
+            if (data) {
+                setVendors(data.map(v => ({ value: v.id, label: v.name })));
+            }
+        };
+        fetchVendors();
+    }, []);
+
     // Reset when opening/changing mode
     useEffect(() => {
         if (isOpen) {
@@ -99,6 +113,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                 reset({
                     name: initialData.name,
                     status: initialData.status,
+                    vendor_id: initialData.vendor_id || null, // Load existing
                     capacity: initialData.capacity,
                     license_requirement: initialData.license_requirement || "",
                     miles_per_gallon: initialData.miles_per_gallon,
@@ -114,6 +129,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                 reset({
                     name: "",
                     status: "",
+                    vendor_id: null,
                     capacity: undefined,
                     license_requirement: "",
                     miles_per_gallon: undefined,
@@ -182,6 +198,21 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                                 <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Mercedes Sprinter" />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
+
+                            {/* Vendor Selection */}
+                            <div className="space-y-2">
+                                <Label>Vendor (Optical)</Label>
+                                <Combobox
+                                    options={vendors}
+                                    value={watch('vendor_id') || ""}
+                                    onChange={(val) => setValue('vendor_id', val || null)}
+                                    placeholder="Select Vendor..."
+                                    searchPlaceholder="Search vendors..."
+                                    emptyMessage="No vendors found."
+                                />
+                                <p className="text-[10px] text-zinc-500">Leave empty for internal fleet.</p>
+                            </div>
+
                             <div className="space-y-2">
                                 <Label>Status</Label>
                                 <Combobox
