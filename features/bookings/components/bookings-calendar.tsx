@@ -62,7 +62,7 @@ export function BookingsCalendar({
 
             const { data, error } = await supabase
                 .from('availabilities' as any)
-                .select('*')
+                .select('*, bookings:bookings(pax_count, status)')
                 // No experience filter = Universal View
                 .gte('start_date', startOfMonth.toISOString().split('T')[0])
                 .lte('start_date', endOfMonth.toISOString().split('T')[0])
@@ -77,9 +77,15 @@ export function BookingsCalendar({
                     const driverName = staffIds[0] ? staffMap[staffIds[0]] : "";
                     const guideName = staffIds[1] ? staffMap[staffIds[1]] : "";
 
+                    // Calculate bookings
+                    const validBookings = (item.bookings || []).filter((b: any) => b.status?.toLowerCase() !== 'cancelled');
+                    const totalPax = validBookings.reduce((sum: number, b: any) => sum + Number(b.pax_count || 0), 0);
+                    const bookingRecords = validBookings.length;
+
                     return {
                         ...item,
-                        booked_count: item.booked_count || 0,
+                        booked_count: totalPax,
+                        booking_records_count: bookingRecords,
                         staff_display: staffIds.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
                         route_name: routeMap[item.transportation_route_id] || "",
                         vehicle_name: vehicleMap[item.vehicle_id] || "",
@@ -245,7 +251,7 @@ function MonthView({
 }: {
     currentDate: Date,
     availabilities: Availability[],
-    onEventClick?: (availability: Availability) => void,
+    onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
     expMap: Record<string, { name: string, short_code: string }>
 }) {
     const year = currentDate.getFullYear();
@@ -293,11 +299,11 @@ function MonthView({
                                                         key={event.id}
                                                         abbr={event.experience_short_code || "EXP"}
                                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings={`${event.booked_count || 0} Bookings`}
-                                                        cap={`${event.booked_count || 0} / ${event.max_capacity} Capacity`}
+                                                        bookings={`${event.booking_records_count || 0} Bookings`}
+                                                        cap={`${(event.max_capacity - (event.booked_count || 0))} / ${event.max_capacity} Capacity`}
                                                         onClick={(e) => {
                                                             e?.stopPropagation();
-                                                            if (e) onEventClick?.(event, e);
+                                                            if (onEventClick && e) onEventClick(event, e);
                                                         }}
                                                         note={event.private_announcement}
                                                     />
@@ -319,7 +325,7 @@ function EventChip({ abbr, time, bookings, cap, note, onClick }: { abbr: string,
     return (
         <div className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500" onClick={onClick}>
             <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
-            <span className="text-white font-bold text-xs leading-tight">{time}</span>
+            <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
             <span className="text-white font-bold text-xs leading-tight">{bookings}</span>
             <span className="text-white font-bold text-xs leading-tight">{cap}</span>
             {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5 max-w-full truncate">{note}</span>}

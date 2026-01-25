@@ -48,6 +48,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
     // Pax: { [customer_type_id]: count }
     const [paxCounts, setPaxCounts] = useState<Record<string, number>>({});
+    const [pendingPaxCount, setPendingPaxCount] = useState<number | null>(null); // For edit mode when no pax_breakdown
 
     // Custom Fields Cache
     const [customFieldsCache, setCustomFieldsCache] = useState<Record<string, any>>({});
@@ -67,13 +68,14 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
     useEffect(() => {
         if (!isOpen || !availability) return;
 
-        // Reset State
-        // Keep lists if already fetched? For simplicity, we can fetch again or cache.
-        // Important: Reset inputs
-        setSelectedCustomer(null);
-        setNotes("");
-        setPaxCounts({});
-        setOptionValues({});
+        // Reset State only for NEW bookings (not edit mode)
+        // In edit mode, we'll populate from the fetched booking data
+        if (!editingBookingId) {
+            setSelectedCustomer(null);
+            setNotes("");
+            setPaxCounts({});
+            setOptionValues({});
+        }
         setIsSaving(false);
         // Default Schedule
         if (availability.pricing_schedule_id) {
@@ -106,7 +108,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             const { data: optSchedData } = await supabase.from('booking_option_schedules' as any).select('*').order('name');
             if (optSchedData) setOptionSchedules(optSchedData as unknown as BookingOptionSchedule[]);
 
-            // Fetch Custom Fields for Options
+            // Custom Fields for Options
             console.log("DEBUG: Fetching custom_field_definitions...");
             const { data: cfData, error: cfError } = await supabase.from('custom_field_definitions' as any).select('*');
 
@@ -123,9 +125,60 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     setCustomFieldsCache(map);
                 }
             }
+
+            // EDIT MODE: Fetch existing booking data
+            if (editingBookingId) {
+                console.log("DEBUG: Edit mode - fetching booking:", editingBookingId);
+                const { data: bookingData, error: bookingError } = await supabase
+                    .from('bookings' as any)
+                    .select('*, customers(id, name, email)')
+                    .eq('id', editingBookingId)
+                    .single();
+
+                if (bookingError) {
+                    console.error("DEBUG: Error fetching booking:", bookingError);
+                } else if (bookingData) {
+                    const booking = bookingData as any; // Type cast for flexibility
+                    console.log("DEBUG: Loaded booking data:", booking);
+
+                    // Populate customer
+                    if (booking.customers) {
+                        setSelectedCustomer(booking.customers as Customer);
+                    }
+
+                    // Populate pax breakdown (or fallback to simple pax_count)
+                    if (booking.pax_breakdown && Object.keys(booking.pax_breakdown).length > 0) {
+                        console.log("DEBUG: Using pax_breakdown:", booking.pax_breakdown);
+                        setPaxCounts(booking.pax_breakdown);
+                    } else if (booking.pax_count && booking.pax_count > 0) {
+                        // Store pending pax count - will be mapped when rates load
+                        console.log("DEBUG: Setting pending pax_count:", booking.pax_count);
+                        setPendingPaxCount(booking.pax_count);
+                    }
+
+                    // Populate notes
+                    if (booking.notes) {
+                        setNotes(booking.notes);
+                    }
+
+                    // Populate option values
+                    if (booking.option_values) {
+                        setOptionValues(booking.option_values);
+                    }
+
+                    // Populate payment state
+                    setPaymentState({
+                        status: booking.payment_status || 'paid_full',
+                        method: booking.payment_method || 'credit_card',
+                        amount: booking.amount_paid || 0,
+                        overrideTotal: booking.total_amount,
+                        promoCode: booking.promo_code
+                    });
+                }
+            }
         };
         fetchData();
-    }, [isOpen, availability]);
+    }, [isOpen, availability, editingBookingId]);
 
     // 2. Fetch Rates when Schedule Changes
     useEffect(() => {
@@ -158,6 +211,20 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         fetchRates();
     }, [selectedScheduleId]);
 
+    // 3. Map pendingPaxCount to first customer type when rates become available
+    useEffect(() => {
+        if (pendingPaxCount !== null && pendingPaxCount > 0 && rates.length > 0) {
+            // Find rates for the selected tier
+            const tieredRates = rates.filter(r => r.tier === selectedTier);
+            if (tieredRates.length > 0) {
+                const firstTypeId = tieredRates[0].customer_type_id;
+                console.log("DEBUG: Mapping pendingPaxCount to type:", firstTypeId, "count:", pendingPaxCount);
+                setPaxCounts({ [firstTypeId]: pendingPaxCount });
+                setPendingPaxCount(null); // Clear pending once mapped
+            }
+        }
+    }, [pendingPaxCount, rates, selectedTier]);
+
     // Handle New Customer Quick Add
     const handleCustomerCreated = (newCustomer: Customer) => {
         setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
@@ -184,7 +251,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
         setIsSaving(true);
         try {
-            const { error } = await supabase.from('bookings' as any).insert({
+            const bookingData = {
                 availability_id: availability.id,
                 customer_id: selectedCustomer.id,
                 status: 'confirmed',
@@ -195,35 +262,66 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                 payment_status: paymentState.status,
                 payment_method: paymentState.method,
                 amount_paid: paymentState.amount || 0,
-                total_amount: paymentState.overrideTotal || (Object.values(paxCounts).reduce((total, count) => {
-                    // Logic to recalc total if missed, or better yet, calculate grandTotal in column-three and pass it up or duplicate calculation here?
-                    // To be safe, let's recalculate simply here or just rely on ColumnThree passing it?
-                    // Ideally ColumnThree calculates it. But we don't have it in state here easily without duplicating logic.
-                    // Simplified: We'll calculate it from current rates map.
-                    // Actually, let's re-use the same logic or trust the user input?
-                    // Wait, paymentState doesn't store grandTotal unless overridden.
-                    // We must recalc the standard total.
-                    const r = currentRates.find(r => currentRates.some(cr => cr.customer_type_name));
-                    // This is hard to replicate exactly without the loop.
-                    // Let's defer exact calc to server or complex logic?
-                    // BETTER FIX: Add grandTotal to paymentState in ColumnThree?
-                    return total; // PRETTY DANGEROUS TO GUESS.
-                }, 0)), // PLACEHOLDER: Ideally we pass this from ColumnThree onSave.
-                // Actually, let's modify ColumnThree to update a "total" in state.
+                total_amount: grandTotal || paymentState.overrideTotal || 0,
                 promo_code: paymentState.promoCode,
                 payment_details: {} // Placeholder for tokens
-            });
+            };
+
+            let error;
+            if (editingBookingId) {
+                // UPDATE existing booking
+                console.log("DEBUG: Updating booking:", editingBookingId);
+                const result = await supabase
+                    .from('bookings' as any)
+                    .update(bookingData)
+                    .eq('id', editingBookingId);
+                error = result.error;
+            } else {
+                // INSERT new booking
+                console.log("DEBUG: Creating new booking");
+                const result = await supabase.from('bookings' as any).insert(bookingData);
+                error = result.error;
+            }
+
+            if (error) throw error;
 
             console.log("PAYMENT PROCESSED:", paymentState); // Mock log
 
-            toast.success("Booking created successfully!");
+            toast.success(editingBookingId ? "Booking updated successfully!" : "Booking created successfully!");
             // Close panel and trigger calendar refresh
             onClose();
             if (onSuccess) onSuccess();
         } catch (err: any) {
-            console.error("Error creating booking:", err);
-            toast.error(err.message || "Failed to create booking.");
+            console.error(editingBookingId ? "Error updating booking:" : "Error creating booking:", err);
+            toast.error(err.message || (editingBookingId ? "Failed to update booking." : "Failed to create booking."));
             setIsSaving(false);
+        }
+    };
+
+    // Delete booking handler
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        if (!editingBookingId) return;
+
+        setIsDeleting(true);
+        try {
+            const { error } = await supabase
+                .from('bookings' as any)
+                .delete()
+                .eq('id', editingBookingId);
+
+            if (error) throw error;
+
+            toast.success("Booking deleted successfully!");
+            setShowDeleteConfirm(false);
+            onClose();
+            if (onSuccess) onSuccess();
+        } catch (err: any) {
+            console.error("Error deleting booking:", err);
+            toast.error(err.message || "Failed to delete booking.");
+            setIsDeleting(false);
         }
     };
 
@@ -328,7 +426,14 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
                 {/* COLUMN 4: Submit */}
                 <div className="h-full flex flex-col overflow-y-auto">
-                    <ColumnFour onSave={handleSave} isSaving={isSaving} canSave={canSave} paymentState={paymentState} />
+                    <ColumnFour
+                        onSave={handleSave}
+                        isSaving={isSaving}
+                        canSave={canSave}
+                        isEditMode={isEditMode}
+                        onDelete={handleDelete}
+                        isDeleting={isDeleting}
+                    />
                 </div>
 
             </div>

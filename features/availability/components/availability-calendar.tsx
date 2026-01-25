@@ -182,8 +182,7 @@ export function AvailabilityCalendar({
 
             const { data, error } = await supabase
                 .from('availabilities' as any)
-                .select('*')
-                .eq('experience_id', currentExp.id)
+                .select('*, bookings:bookings(pax_count, status)')
                 .eq('experience_id', currentExp.id)
                 .gte('start_date', format(startOfMonth, 'yyyy-MM-dd'))
                 .lte('start_date', format(endOfMonth, 'yyyy-MM-dd'))
@@ -192,12 +191,27 @@ export function AvailabilityCalendar({
             if (error) {
                 console.error("Error fetching availabilities:", error);
             } else if (data) {
-                const enriched: Availability[] = data.map((item: any) => ({
-                    ...item,
-                    staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
-                    route_name: routeMap[item.transportation_route_id] || "",
-                    vehicle_name: vehicleMap[item.vehicle_id] || ""
-                }));
+                console.log("Raw Availabilities Data:", data); // Debug Log
+                const enriched: Availability[] = data.map((item: any) => {
+                    // Calculate bookings
+                    const validBookings = (item.bookings || []).filter((b: any) => b.status?.toLowerCase() !== 'cancelled');
+                    const totalPax = validBookings.reduce((sum: number, b: any) => sum + Number(b.pax_count || 0), 0);
+                    const bookingRecords = validBookings.length;
+
+                    if (bookingRecords > 0) {
+                        console.log(`Availability ${item.id} has ${bookingRecords} bookings, total pax: ${totalPax}`);
+                    }
+
+                    return {
+                        ...item,
+                        cooked_booked_count: totalPax, // Debug field
+                        booked_count: totalPax, // Override strict DB count with real calculation
+                        booking_records_count: bookingRecords,
+                        staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
+                        route_name: routeMap[item.transportation_route_id] || "",
+                        vehicle_name: vehicleMap[item.vehicle_id] || ""
+                    };
+                });
                 setAvailabilities(enriched);
             }
             setIsLoading(false);
@@ -591,8 +605,8 @@ function MonthView({
                                                         color="cyan"
                                                         abbr={abbr}
                                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings="0"
-                                                        cap={`0 / ${event.max_capacity} Capacity`}
+                                                        bookings={`${event.booking_records_count || 0} Bookings`}
+                                                        cap={`${(event.max_capacity - (event.booked_count || 0))} / ${event.max_capacity} Capacity`}
                                                         note={event.private_announcement}
                                                         onClick={(e) => {
                                                             e?.stopPropagation();
@@ -707,7 +721,7 @@ function EventChip({
         >
             <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
             <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
-            <span className="text-white font-bold text-xs leading-tight">{bookings} Bookings</span>
+            <span className="text-white font-bold text-xs leading-tight">{bookings}</span>
             <span className="text-white font-bold text-xs leading-tight">{cap}</span>
             {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
         </div>

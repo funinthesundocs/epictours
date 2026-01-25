@@ -21,6 +21,8 @@ export interface Availability {
     pricing_schedule_id?: string;
     booking_option_schedule_id?: string;
     staff_ids?: string[];
+    bookings?: { pax_count: number, status: string }[]; // Nested relation
+    booking_records_count?: number; // Calculated count of active bookings
     // Enriched fields for UI
     staff_display?: string;
     route_name?: string;

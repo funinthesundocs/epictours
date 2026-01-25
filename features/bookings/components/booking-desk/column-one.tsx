@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
