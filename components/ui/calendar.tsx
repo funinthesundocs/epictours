@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, ChevronRight, Check, ChevronDown } from "lucide-react"
+import { ChevronLeft, ChevronRight, Check, ChevronDown, X } from "lucide-react"
 import { DayPicker, useDayPicker } from "react-day-picker"
 import { format, setMonth, setYear, startOfMonth } from "date-fns"
 
@@ -12,7 +12,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+    onClose?: () => void
+}
 
 function CalendarSelect({
     value,
@@ -62,6 +64,7 @@ function CalendarSelect({
 function CustomCaption(props: any) {
     const { goToMonth } = useDayPicker()
     const displayMonth = props.calendarMonth.date
+    const onClose = (props as any).onClose
 
     const months = [
         "January", "February", "March", "April", "May", "June",
@@ -84,7 +87,7 @@ function CustomCaption(props: any) {
     }
 
     return (
-        <div className="flex items-center justify-start pt-1 px-1 relative">
+        <div className="flex items-center justify-between pt-1 px-1 relative">
             <div className="flex items-center gap-1">
                 <CalendarSelect
                     value={displayMonth.getMonth().toString()}
@@ -97,6 +100,15 @@ function CustomCaption(props: any) {
                     options={years}
                 />
             </div>
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    className="p-1.5 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                    type="button"
+                >
+                    <X size={16} />
+                </button>
+            )}
         </div>
     )
 }
@@ -105,6 +117,7 @@ function Calendar({
     className,
     classNames,
     showOutsideDays = true,
+    onClose,
     ...props
 }: CalendarProps) {
     return (
@@ -134,7 +147,7 @@ function Calendar({
                 ...classNames,
             }}
             components={{
-                MonthCaption: CustomCaption
+                MonthCaption: (captionProps) => <CustomCaption {...captionProps} onClose={onClose} />
             }}
             {...props}
         />

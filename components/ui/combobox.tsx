@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Ban } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export type ComboboxOption = { value: string; label: string };
@@ -11,13 +11,21 @@ interface ComboboxProps {
     onChange: (value: string) => void;
     options: (string | ComboboxOption)[];
     placeholder?: string;
+    forceOpen?: boolean;
 }
 
-export function Combobox({ value, onChange, options, placeholder }: ComboboxProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export function Combobox({ value, onChange, options, placeholder, forceOpen }: ComboboxProps) {
+    const [isOpen, setIsOpen] = useState(forceOpen || false);
     const [query, setQuery] = useState("");
     const [position, setPosition] = useState<'bottom' | 'top'>('bottom');
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Sync forceOpen
+    useEffect(() => {
+        if (forceOpen !== undefined) {
+            setIsOpen(forceOpen);
+        }
+    }, [forceOpen]);
 
     // Normalize options
     const normalizedOptions: ComboboxOption[] = options.map(opt =>
@@ -57,13 +65,14 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            if (forceOpen) return; // Ignore clicks outside if forced open
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [forceOpen]);
 
     // Calculate position on open
     useEffect(() => {
@@ -78,7 +87,7 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
     const handleSelect = (option: ComboboxOption) => {
         onChange(option.value);
         setQuery(option.label);
-        setIsOpen(false);
+        if (!forceOpen) setIsOpen(false);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +117,7 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
             </div>
 
             <AnimatePresence>
-                {isOpen && filteredOptions.length > 0 && (
+                {isOpen && (filteredOptions.length > 0) && (
                     <motion.div
                         initial={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -129,7 +138,11 @@ export function Combobox({ value, onChange, options, placeholder }: ComboboxProp
                                     `}
                                 >
                                     <span>{option.label}</span>
-                                    {isSelected && <Check size={14} className="text-cyan-400" />}
+                                    {isSelected && (
+                                        option.value === ''
+                                            ? <Ban size={14} className="text-cyan-400" />
+                                            : <Check size={14} className="text-cyan-400" />
+                                    )}
                                 </button>
                             );
                         })}

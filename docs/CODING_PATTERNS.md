@@ -77,30 +77,31 @@
 *   **Dynamic Grid**: Always calculate precise row counts (`Math.ceil((first + days) / 7) * 7`) to prevent extra empty rows at the bottom.
 *   **Strict Colors**: Calendar inactive days/headers must strictly match the design token (e.g. `zinc-950/80`), even if it requires `!important` or specific class overrides.
 
-## 10. Custom Select Pattern (Form Dropdowns)
-*   **Standard**: Use the custom component instead of native `<select>`.
-*   **Component**: `@/components/ui/custom-select`
-*   **Features**:
-    *   **Styling**: Matches the Dark Mode / Cyan theme (Background `bg-[#1a1f24]`, Focus `cyan-500`).
-    *   **Flexibility**: Accepts simple strings OR objects (`{ value: string, label: string }`).
-    *   **Animations**: Uses framer-motion for smooth open/close.
-*   **Usage with React Hook Form**:
-    *   Do NOT use `{...register('field')}` directly.
-    *   Use `watch` for value and `setValue` for updates.
+## 10. Custom Select Pattern (Combobox Standard)
+*   **Standard**: Use the Combobox pattern for all "Select" inputs.
+*   **Component**: `@/components/ui/combobox`
+*   **Core Requirements**:
+    1.  **Always Searchable**: The trigger must be an input field that filters the dropdown options. Do NOT use static triggers.
+    2.  **Dropdown Style**:
+        *   Background: `bg-[#1a1f24]`
+        *   Border: `border-white/10`
+        *   Behavior: Popover / Floating
+    3.  **Required Logic**:
+        *   **Toggle**: Use "Required" (Default: False).
+        *   **None Option**: If `required` is FALSE, a "None / Empty" option must be available at the top of the list (even if default is set).
+        *   **None Icon**: Select "None" displays a `Ban` icon (`Ø`).
+        *   **Indicator**: Required fields show a red dot (`•`) to the right of the label.
+*   **Usage Pattern**:
     ```tsx
-    import { CustomSelect } from "@/components/ui/custom-select";
-
+    import { Combobox } from "@/components/ui/combobox";
+    
     // ... inside component
-    const { watch, setValue } = useForm();
-
-    <CustomSelect
-        value={watch("field_name")}
-        onChange={(val) => setValue("field_name", val, { shouldValidate: true })}
-        options={[
-            { value: "opt1", label: "Option 1" },
-            { value: "opt2", label: "Option 2" }
-        ]}
-        placeholder="Select Option..."
+    <Combobox
+        value={watch("field_id")}
+        onChange={(val) => setValue("field_id", val)}
+        options={options}
+        placeholder="Search or select..."
+        // Ensure parent handles the "None" logic if manually implemented
     />
     ```
 

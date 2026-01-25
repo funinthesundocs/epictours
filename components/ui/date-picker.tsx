@@ -17,6 +17,7 @@ interface DatePickerProps {
     onChange?: (date: Date | undefined) => void
     placeholder?: string
     className?: string
+    defaultOpen?: boolean
 }
 
 export function DatePicker({
@@ -24,8 +25,9 @@ export function DatePicker({
     onChange,
     placeholder = "Pick a date",
     className,
+    defaultOpen = false,
 }: DatePickerProps) {
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(defaultOpen)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -46,25 +48,17 @@ export function DatePicker({
                 className="w-auto p-0 bg-zinc-900 border-white/10"
                 align="start"
             >
-                <div className="relative">
-                    {/* Close button */}
-                    <button
-                        onClick={() => setOpen(false)}
-                        className="absolute top-4 right-3 h-6 w-6 flex items-center justify-center rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors z-10"
-                    >
-                        <X size={14} />
-                    </button>
-                    <Calendar
-                        mode="single"
-                        selected={value}
-                        onSelect={(date) => {
-                            onChange?.(date)
-                            setOpen(false)
-                        }}
-                        disabled={{ before: new Date() }}
-                        initialFocus
-                    />
-                </div>
+                <Calendar
+                    mode="single"
+                    selected={value}
+                    onSelect={(date) => {
+                        onChange?.(date)
+                        setOpen(false)
+                    }}
+                    onClose={() => setOpen(false)}
+                    disabled={false}
+                    initialFocus
+                />
             </PopoverContent>
         </Popover>
     )
