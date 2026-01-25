@@ -18,11 +18,12 @@ import {
 interface BookingDeskProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void; // Called after successful save to refresh calendar
     availability: Availability | null;
     editingBookingId?: string | null; // If set, we're editing an existing booking
 }
 
-export function BookingDesk({ isOpen, onClose, availability, editingBookingId }: BookingDeskProps) {
+export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingBookingId }: BookingDeskProps) {
     const isEditMode = !!editingBookingId;
     // --- State ---
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -216,9 +217,9 @@ export function BookingDesk({ isOpen, onClose, availability, editingBookingId }:
             console.log("PAYMENT PROCESSED:", paymentState); // Mock log
 
             toast.success("Booking created successfully!");
-            // Hard refresh removed for debugging
-            // window.location.reload();
-            onClose(); // Close the panel instead
+            // Close panel and trigger calendar refresh
+            onClose();
+            if (onSuccess) onSuccess();
         } catch (err: any) {
             console.error("Error creating booking:", err);
             toast.error(err.message || "Failed to create booking.");

@@ -96,10 +96,6 @@ export function ColumnOne({
                             {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
                         </div>
                     </div>
-                    <div className="col-span-2">
-                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Availability ID</div>
-                        <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>{availability.id}</div>
-                    </div>
                     <div className="col-span-2 border-t border-white/5 pt-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -115,6 +111,10 @@ export function ColumnOne({
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div className="col-span-2 border-t border-white/5 pt-2">
+                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Availability ID</div>
+                        <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>{availability.id}</div>
                     </div>
                 </div>
             </div>
