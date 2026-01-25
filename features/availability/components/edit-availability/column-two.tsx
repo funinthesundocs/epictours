@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Users, Truck, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { ResourceClusterList, Assignment } from "./resource-cluster-list";
 
 const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
     <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4 mt-2">
@@ -16,8 +17,10 @@ interface ColumnTwoProps {
     pricingSchedules: { id: string; name: string }[];
     pricingVariations: { id: string; name: string }[];
     transportationSchedules: { id: string; name: string }[];
-    vehicles: { id: string; name: string }[];
+    vehicles: { id: string; name: string; capacity?: number }[];
     staff: { id: string; name: string; role: { name: string } | null }[];
+    assignments: Assignment[];
+    onAssignmentsChange: (assignments: Assignment[]) => void;
 }
 
 export function ColumnTwo({
@@ -25,21 +28,13 @@ export function ColumnTwo({
     pricingVariations,
     transportationSchedules,
     vehicles,
-    staff
+    staff,
+    assignments,
+    onAssignmentsChange
 }: ColumnTwoProps) {
     const { register, watch, setValue } = useFormContext();
 
-    const staffIds = watch("staff_ids");
-
-    // Toggle staff
-    const toggleStaff = (id: string) => {
-        const current = staffIds || [];
-        if (current.includes(id)) {
-            setValue("staff_ids", current.filter((s: string) => s !== id));
-        } else {
-            setValue("staff_ids", [...current, id]);
-        }
-    };
+    const maxCapacity = watch("max_capacity") || 0;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-300 delay-200">
@@ -85,65 +80,17 @@ export function ColumnTwo({
                 </div>
             </div>
 
-            {/* Resources Section */}
+            {/* Resources Section (Clustered) */}
             <div>
-                <SectionHeader icon={Truck} title="Resources" />
-                <div className="space-y-5">
-
-                    {/* Route */}
-                    <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Route Schedule</label>
-                        <CustomSelect
-                            value={watch("transportation_route_id") || undefined}
-                            onChange={(val) => setValue("transportation_route_id", val || null, { shouldValidate: true })}
-                            options={[
-                                { value: "", label: "No Route" },
-                                ...transportationSchedules.map(s => ({ value: s.id, label: s.name }))
-                            ]}
-                            placeholder="Select Route Schedule..."
-                        />
-                    </div>
-
-                    {/* Vehicle */}
-                    <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Vehicle</label>
-                        <CustomSelect
-                            value={watch("vehicle_id") || undefined}
-                            onChange={(val) => setValue("vehicle_id", val || null, { shouldValidate: true })}
-                            options={[
-                                { value: "", label: "No Vehicle" },
-                                ...vehicles.map(v => ({ value: v.id, label: v.name }))
-                            ]}
-                            placeholder="Select Vehicle..."
-                        />
-                    </div>
-
-                    {/* Staff Section */}
-                    <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Assigned Staff</label>
-                        <div className="flex flex-wrap gap-2">
-                            {staff.map(member => (
-                                <button
-                                    key={member.id}
-                                    type="button"
-                                    onClick={() => toggleStaff(member.id)}
-                                    className={cn(
-                                        "px-3 py-2.5 rounded-lg border text-sm font-medium transition-all",
-                                        staffIds?.includes(member.id)
-                                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-                                            : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
-                                    )}
-                                >
-                                    {member.name} ({member.role?.name || 'Staff'})
-                                </button>
-                            ))}
-                            {staff.length === 0 && (
-                                <span className="text-zinc-500 text-sm">No staff configured</span>
-                            )}
-                        </div>
-                    </div>
-
-                </div>
+                <SectionHeader icon={Truck} title="Vehicle Resources" />
+                <ResourceClusterList
+                    assignments={assignments}
+                    onChange={onAssignmentsChange}
+                    vehicles={vehicles}
+                    routes={transportationSchedules}
+                    staff={staff}
+                    maxCapacity={Number(maxCapacity)}
+                />
             </div>
         </div>
     );
