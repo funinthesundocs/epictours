@@ -82,6 +82,7 @@ export const navigation: NavSection[] = [
                 icon: Bus,
                 children: [
                     { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
+                    { title: "Vendors", href: "/operations/transportation/vendors", icon: Handshake },
                     { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
                     { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
                     { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }

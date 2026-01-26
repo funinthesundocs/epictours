@@ -1,74 +1,76 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Bus, Plus, Loader2, Search } from "lucide-react";
+import { Building2, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { VehiclesTable } from "@/features/transportation/components/vehicles-table";
-import { AddVehicleSheet } from "@/features/transportation/components/add-vehicle-sheet";
+import { VendorsTable } from "@/features/transportation/components/vendors-table";
+import { AddVendorSheet } from "@/features/transportation/components/add-vendor-sheet";
 
-export default function VehiclesPage() {
-    const [vehicles, setVehicles] = useState<any[]>([]);
-    const [filteredVehicles, setFilteredVehicles] = useState<any[]>([]);
+export default function VendorsPage() {
+    const [vendors, setVendors] = useState<any[]>([]);
+    const [filteredVendors, setFilteredVendors] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
 
-    const fetchVehicles = useCallback(async () => {
+    const fetchVendors = useCallback(async () => {
         setIsLoading(true);
         try {
             const { data, error } = await supabase
-                .from("vehicles")
-                .select("*, vendor:vendors(name)")
+                .from("vendors")
+                .select("*")
                 .order("name");
 
             if (error) throw error;
-            setVehicles(data || []);
-            setFilteredVehicles(data || []);
+            setVendors(data || []);
+            setFilteredVendors(data || []);
         } catch (err) {
-            console.error("Error loading vehicles:", err);
+            console.error("Error loading vendors:", err);
+            // Don't alert here to avoid spamming if table doesn't exist yet
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchVehicles();
-    }, [fetchVehicles]);
+        fetchVendors();
+    }, [fetchVendors]);
 
     // Client-side search
     useEffect(() => {
         if (!searchQuery.trim()) {
-            setFilteredVehicles(vehicles);
+            setFilteredVendors(vendors);
             return;
         }
         const lowerQ = searchQuery.toLowerCase();
-        const filtered = vehicles.filter(v =>
+        const filtered = vendors.filter(v =>
             v.name.toLowerCase().includes(lowerQ) ||
-            v.plate_number?.toLowerCase().includes(lowerQ) ||
-            v.vin_number?.toLowerCase().includes(lowerQ)
+            v.email?.toLowerCase().includes(lowerQ) ||
+            v.phone?.toLowerCase().includes(lowerQ) ||
+            v.ein_number?.toLowerCase().includes(lowerQ)
         );
-        setFilteredVehicles(filtered);
-    }, [searchQuery, vehicles]);
+        setFilteredVendors(filtered);
+    }, [searchQuery, vendors]);
 
     const handleDelete = async (id: string) => {
         try {
             const { error } = await supabase
-                .from("vehicles")
+                .from("vendors")
                 .delete()
                 .eq("id", id);
 
             if (error) throw error;
-            fetchVehicles();
+            fetchVendors();
         } catch (err) {
-            console.error("Error deleting vehicle:", err);
-            alert("Failed to delete vehicle.");
+            console.error("Error deleting vendor:", err);
+            alert("Failed to delete vendor.");
         }
     };
 
-    const handleEdit = (vehicle: any) => {
-        setEditingItem(vehicle);
+    const handleEdit = (vendor: any) => {
+        setEditingItem(vendor);
         setIsSheetOpen(true);
     };
 
@@ -79,16 +81,16 @@ export default function VehiclesPage() {
 
     return (
         <PageShell
-            title="Fleet Vehicles"
-            description="Manage your fleet, compliance, and vehicle specifications."
-            icon={Bus}
+            title="Transportation Vendors"
+            description="Manage external transportation providers and partners."
+            icon={Building2}
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
-                    Add Vehicle
+                    Add Vendor
                 </button>
             }
             className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
@@ -100,7 +102,7 @@ export default function VehiclesPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                     <input
                         type="text"
-                        placeholder="Search by name, plate, or VIN..."
+                        placeholder="Search by name, email, or phone..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
@@ -113,8 +115,8 @@ export default function VehiclesPage() {
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
-                        <VehiclesTable
-                            data={filteredVehicles}
+                        <VendorsTable
+                            data={filteredVendors}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                         />
@@ -122,10 +124,10 @@ export default function VehiclesPage() {
                 )}
             </div>
 
-            <AddVehicleSheet
+            <AddVendorSheet
                 isOpen={isSheetOpen}
                 onClose={() => setIsSheetOpen(false)}
-                onSuccess={fetchVehicles}
+                onSuccess={fetchVendors}
                 initialData={editingItem}
             />
         </PageShell>

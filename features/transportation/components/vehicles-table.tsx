@@ -16,7 +16,9 @@ interface Vehicle {
     rate_per_hour: number;
     fixed_rate: number;
     per_pax_rate: number;
+    per_pax_rate: number;
     status: string;
+    vendor?: { name: string } | null; // Joined vendor data
 }
 
 interface VehiclesTableProps {
@@ -26,7 +28,7 @@ interface VehiclesTableProps {
 }
 
 type SortConfig = {
-    key: keyof Vehicle;
+    key: keyof Vehicle | 'vendor'; // Allow sorting by flattened vendor name
     direction: 'asc' | 'desc';
 } | null;
 
@@ -44,15 +46,22 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
     const sortedData = [...data].sort((a, b) => {
         if (!sortConfig) return 0;
-        const valA = a[sortConfig.key];
-        const valB = b[sortConfig.key];
+
+        // Handle nested vendor sort
+        let valA: any = a[sortConfig.key as keyof Vehicle];
+        let valB: any = b[sortConfig.key as keyof Vehicle];
+
+        if (sortConfig.key === 'vendor') {
+            valA = a.vendor?.name || '';
+            valB = b.vendor?.name || '';
+        }
 
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
     });
 
-    const SortIcon = ({ column }: { column: keyof Vehicle }) => {
+    const SortIcon = ({ column }: { column: string }) => {
         if (sortConfig?.key !== column) return <ArrowUpDown size={12} className="opacity-30" />;
         return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-cyan-400" /> : <ArrowDown size={12} className="text-cyan-400" />;
     };
@@ -86,6 +95,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                         <tr>
                             {[
                                 { key: 'name', label: 'Vehicle Name' },
+                                { key: 'vendor', label: 'Vendor' },
                                 { key: 'capacity', label: 'Cap' },
                                 { key: 'license_requirement', label: 'License' },
                                 { key: 'plate_number', label: 'Plate' },
@@ -123,6 +133,9 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                         <Bus size={16} />
                                     </div>
                                     {v.name}
+                                </td>
+                                <td className="px-6 py-4 text-zinc-400">
+                                    {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
                                 </td>
                                 <td className="px-6 py-4">{v.capacity}</td>
                                 <td className="px-6 py-4 text-xs text-zinc-400">{v.license_requirement}</td>
@@ -226,6 +239,11 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                     <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
                                         {v.status}
                                     </span>
+                                </div>
+
+                                <div className="text-zinc-500">Vendor</div>
+                                <div className="text-white">
+                                    {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
                                 </div>
 
                                 <div className="text-zinc-500">Capacity</div>

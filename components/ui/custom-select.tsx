@@ -46,7 +46,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full bg-black/20 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group ${className || "py-2.5"}`}
+                className={`w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group ${className || "py-2.5"}`}
             >
                 <span className={value ? "text-white" : "text-zinc-500"}>
                     {selectedLabel || placeholder}
@@ -61,7 +61,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 5 }}
-                        className="absolute z-50 w-full mt-1 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden"
+                        className="absolute z-50 w-full mt-1 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden"
                     >
                         {normalizedOptions.map((option) => {
                             const isSelected = value === option.value;
