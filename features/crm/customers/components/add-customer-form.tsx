@@ -101,6 +101,21 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
         setSubmitError(null);
 
         try {
+            // Check for duplicate email on Create
+            if (!initialData?.id) {
+                const { data: existing } = await supabase
+                    .from("customers")
+                    .select("id")
+                    .eq("email", data.email)
+                    .maybeSingle();
+
+                if (existing) {
+                    setSubmitError("A customer with this email already exists.");
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
             if (initialData?.id) {
                 // UPDATE Mode
                 const { error } = await supabase
