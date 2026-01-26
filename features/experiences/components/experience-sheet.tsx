@@ -241,7 +241,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             title={initialData ? "Edit Experience" : "New Experience"}
             description="Manage your inventory details."
             width="full-content"
-            contentClassName="p-0"
+            contentClassName="p-0 h-full flex flex-col"
         >
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                 {/* Tabs Header */}
@@ -485,7 +485,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !formState.isDirty}

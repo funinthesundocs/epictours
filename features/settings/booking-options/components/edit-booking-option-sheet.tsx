@@ -668,7 +668,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="shrink-0 flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
 
                     {/* Save to All Option */}
                     <div className="flex items-center gap-2">

@@ -88,8 +88,8 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
             width="full-content"
             contentClassName="p-0"
         >
-            <div className="p-6 h-full flex flex-col">
-                <div className="text-sm text-zinc-400 mb-6 p-4 bg-zinc-900 rounded border border-zinc-800">
+            <div className="p-6 h-full flex flex-col bg-transparent">
+                <div className="text-sm text-zinc-400 mb-6 p-4 bg-white/5 rounded border border-zinc-800">
                     <div className="font-bold text-white mb-2 text-base flex items-center gap-2">
                         <CalendarIcon className="w-4 h-4 text-cyan-500" />
                         {availability.start_date} @ {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
@@ -101,40 +101,48 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1">
-                    {/* Customer Select */}
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">Customer</label>
+                <form className="space-y-6 flex-1 overflow-y-auto">
+                    {/* Customer Selection */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-white flex items-center gap-2">
+                            <User size={16} className="text-cyan-500" />
+                            Customer
+                        </label>
                         <select
                             {...register("customer_id")}
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none [&>option]:bg-black [&>option]:text-white"
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none appearance-none"
                         >
-                            <option value="">Select Customer...</option>
+                            <option value="">Select customer...</option>
                             {customers.map(c => (
                                 <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
                             ))}
                         </select>
-                        {errors.customer_id && <p className="text-red-500 text-xs mt-1">{errors.customer_id.message}</p>}
+                        {errors.customer_id && <p className="text-red-400 text-xs">{errors.customer_id.message}</p>}
                     </div>
 
                     {/* Pax Count */}
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">Passengers</label>
-                        <div className="relative">
-                            <Users className="absolute left-3 top-3 w-5 h-5 text-zinc-500" />
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-white flex items-center gap-2">
+                            <Users size={16} className="text-cyan-500" />
+                            Passengers
+                        </label>
+                        <div className="flex items-center gap-4">
                             <input
                                 type="number"
                                 {...register("pax_count", { valueAsNumber: true })}
-                                className="w-full bg-black border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+                                className="w-24 bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
                                 min={1}
                             />
+                            <div className="text-xs text-zinc-500">
+                                Total capacity: {availability.max_capacity}
+                            </div>
                         </div>
-                        {errors.pax_count && <p className="text-red-500 text-xs mt-1">{errors.pax_count.message}</p>}
+                        {errors.pax_count && <p className="text-red-400 text-xs">{errors.pax_count.message}</p>}
                     </div>
 
                     {/* Notes */}
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">Notes</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-white">Internal Notes</label>
                         <textarea
                             {...register("notes")}
                             className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none h-[100px]"
@@ -145,7 +153,7 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                 </form>
 
                 {/* Footer pinned to bottom */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     <Button
                         onClick={handleSubmit(onSubmit)}
                         disabled={isLoading || !isDirty}

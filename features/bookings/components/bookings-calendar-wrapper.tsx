@@ -7,6 +7,9 @@ import { AvailabilityActionMenu } from "./availability-action-menu";
 import { AvailabilityManager } from "./availability-manager";
 import { ManifestPanel } from "./manifest-panel";
 import { Availability } from "@/features/availability/components/availability-list-table";
+import { NewBookingMenu } from "./new-booking-menu";
+import { PageShell } from "@/components/shell/page-shell";
+import { Plus } from "lucide-react";
 
 export function BookingsCalendarWrapper() {
     // Calendar refresh
@@ -45,8 +48,11 @@ export function BookingsCalendarWrapper() {
     }, []);
 
     // Action handlers
-    const handleNewBooking = useCallback(() => {
+    const handleNewBooking = useCallback((availability?: Availability) => {
         setEditingBookingId(null); // Ensure we're in create mode
+        if (availability) {
+            setSelectedAvailability(availability);
+        }
         setIsBookingDeskOpen(true);
     }, []);
 
@@ -78,7 +84,20 @@ export function BookingsCalendarWrapper() {
     }, []);
 
     return (
-        <>
+        <PageShell
+            title="Bookings Calendar"
+            description="View availability and create new bookings"
+            action={
+                <NewBookingMenu onSelectAvailability={handleNewBooking}>
+                    <button
+                        className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    >
+                        <Plus size={16} />
+                        New Booking
+                    </button>
+                </NewBookingMenu>
+            }
+        >
             <BookingsCalendar
                 onEventClick={handleEventClick}
                 key={refreshTrigger}
@@ -90,7 +109,7 @@ export function BookingsCalendarWrapper() {
                     availability={selectedAvailability}
                     position={actionMenuPosition}
                     onClose={closeActionMenu}
-                    onNewBooking={handleNewBooking}
+                    onNewBooking={() => handleNewBooking(selectedAvailability)}
                     onActionsSettings={handleActionsSettings}
                     onManifest={handleManifest}
                 />
@@ -124,6 +143,6 @@ export function BookingsCalendarWrapper() {
                 onClose={() => setIsManifestOpen(false)}
                 availability={selectedAvailability}
             />
-        </>
+        </PageShell>
     );
 }

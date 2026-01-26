@@ -215,7 +215,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     <Button
                         type="submit"
                         disabled={isSubmitting}

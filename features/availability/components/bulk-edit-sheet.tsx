@@ -8,6 +8,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
     Power,
     Users,
@@ -529,6 +531,46 @@ export function BulkEditSheet({
     const addUpdateType = (type: UpdateType) => {
         if (!selectedUpdateTypes.includes(type)) {
             setSelectedUpdateTypes([...selectedUpdateTypes, type]);
+
+            // Attempt to pre-fill value if consistent across selected items
+            if (selectedData.length > 0 && type !== 'delete') {
+                let isConsistent = true;
+
+                // Helper to extract comparable value
+                const getVal = (d: any) => {
+                    if (type === 'staff_ids') {
+                        return JSON.stringify((d.crew_assignments || []).map((c: any) => c.staff_id).sort());
+                    }
+                    return d[type];
+                };
+
+                const firstVal = getVal(selectedData[0]);
+
+                for (let i = 1; i < selectedData.length; i++) {
+                    if (getVal(selectedData[i]) !== firstVal) {
+                        isConsistent = false;
+                        break;
+                    }
+                }
+
+                if (isConsistent) {
+                    let valueToSet = selectedData[0][type];
+
+                    // Transform for form state
+                    if (type === 'staff_ids') {
+                        valueToSet = (selectedData[0].crew_assignments || []).map((c: any) => c.staff_id);
+                    }
+
+                    // Handle nulls
+                    if (valueToSet === null || valueToSet === undefined) {
+                        if (type === 'max_capacity') valueToSet = 0;
+                        else if (type === 'online_booking_status') valueToSet = 'open';
+                        else valueToSet = "";
+                    }
+
+                    setValues(prev => ({ ...prev, [type]: valueToSet }));
+                }
+            }
 
             // Scroll to bottom after adding field so Add Button and new input stay visible
             setTimeout(() => {
@@ -1118,8 +1160,8 @@ export function BulkEditSheet({
                         <div className="flex-1 overflow-hidden grid grid-cols-3 divide-x divide-white/10">
 
                             {/* Column 2: Change (What to update) */}
-                            <div className="flex flex-col bg-zinc-900/50 order-2 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
+                            <div className="flex flex-col bg-transparent order-2 min-h-0">
+                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">2</span>
                                         Change
@@ -1207,8 +1249,8 @@ export function BulkEditSheet({
                             </div>
 
                             {/* Column 1: For these availabilities (Selection Info) */}
-                            <div className="flex flex-col bg-zinc-900/30 order-1 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
+                            <div className="flex flex-col bg-transparent order-1 min-h-0">
+                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">1</span>
                                         For These <span className="text-cyan-400">{showDateRangeSelector ? filteredIds.size : effectiveIds.size}</span> Availabilities
@@ -1453,8 +1495,8 @@ export function BulkEditSheet({
                             </div>
 
                             {/* Column 3: To (New Value) */}
-                            <div className="flex flex-col bg-zinc-900/20 order-3 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-zinc-900">
+                            <div className="flex flex-col bg-transparent order-3 min-h-0">
+                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
                                         <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">3</span>
                                         To
@@ -1478,39 +1520,36 @@ export function BulkEditSheet({
 
                                                 return (
                                                     <div key={type} className="bg-white/5 rounded-lg p-4">
-                                                        <div className="flex items-center gap-2 mb-3">
-                                                            <option.icon size={16} className="text-cyan-400" />
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-medium text-white">{option.label}</span>
-                                                                <span className="text-xs text-zinc-500">Currently: {getCurrentValueDisplay(type)}</span>
+                                                        {/* Header - hide for online_booking_status */}
+                                                        {type !== 'online_booking_status' && (
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <option.icon size={16} className="text-cyan-400" />
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm font-medium text-white">{option.label}</span>
+                                                                    <span className="text-xs text-zinc-500">Currently: {getCurrentValueDisplay(type)}</span>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        )}
 
                                                         {/* Status */}
                                                         {type === 'online_booking_status' && (
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => setValues(prev => ({ ...prev, online_booking_status: 'open' }))}
-                                                                    className={cn(
-                                                                        "flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-all",
-                                                                        values.online_booking_status === 'open'
-                                                                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                                                                            : "bg-black/30 border-white/10 text-zinc-400"
-                                                                    )}
-                                                                >
-                                                                    Open
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setValues(prev => ({ ...prev, online_booking_status: 'closed' }))}
-                                                                    className={cn(
-                                                                        "flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-all",
-                                                                        values.online_booking_status === 'closed'
-                                                                            ? "bg-red-500/20 border-red-500 text-red-400"
-                                                                            : "bg-black/30 border-white/10 text-zinc-400"
-                                                                    )}
-                                                                >
-                                                                    Closed
-                                                                </button>
+                                                            <div className="flex items-center justify-between p-3 bg-black/20 border border-white/5 rounded-lg">
+                                                                <div className="space-y-0.5">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Power size={16} className="text-cyan-400" />
+                                                                        <Label className="text-sm text-zinc-400">
+                                                                            Online Booking
+                                                                        </Label>
+                                                                    </div>
+                                                                    <div className="text-sm text-zinc-500">
+                                                                        {values.online_booking_status === "open" ? "Available for online booking" : "Not available online"}
+                                                                    </div>
+                                                                </div>
+                                                                <Switch
+                                                                    checked={values.online_booking_status === "open"}
+                                                                    onCheckedChange={(checked) => setValues(prev => ({ ...prev, online_booking_status: checked ? "open" : "closed" }))}
+                                                                    className="data-[state=checked]:bg-cyan-500"
+                                                                />
                                                             </div>
                                                         )}
 
@@ -1670,30 +1709,30 @@ export function BulkEditSheet({
                         </div>
 
                         {/* Footer */}
-                        <div className="flex justify-between items-center gap-4 px-6 py-4 border-t border-white/10 bg-[#0b1115]">
+                        <div className="flex justify-between items-center gap-4 px-6 py-4 border-t border-white/10 bg-zinc-950/40 backdrop-blur-md">
                             <div className="text-sm text-zinc-400">
                                 {getPreviewText()}
                             </div>
                             <div className="flex gap-3">
                                 <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="px-4 py-2 text-zinc-400 hover:text-white transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
                                     onClick={onSubmit}
                                     disabled={isSubmitting || !canApply}
                                     className={cn(
-                                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-                                        selectedUpdateTypes.includes('delete')
-                                            ? "bg-red-500 hover:bg-red-400 text-white"
-                                            : "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                                        (isSubmitting) ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                            (!canApply) ? "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5" :
+                                                selectedUpdateTypes.includes('delete')
+                                                    ? "bg-red-500 hover:bg-red-400 text-white"
+                                                    : "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                                     )}
                                 >
-                                    {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                                    {selectedUpdateTypes.includes('delete') ? `Delete ${effectiveIds.size} Slots` : `Apply to ${effectiveIds.size} Slots`}
+                                    {isSubmitting ? <Loader2 className="animate-spin" size={16} /> :
+                                        selectedUpdateTypes.includes('delete') ? <Trash2 size={16} /> :
+                                            <Save size={16} />}
+
+                                    {isSubmitting ? "Updating..." :
+                                        selectedUpdateTypes.includes('delete') ? `Delete ${effectiveIds.size} Slots` :
+                                            `Update ${effectiveIds.size} Slots`}
                                 </button>
                             </div>
                         </div>

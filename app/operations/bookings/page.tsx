@@ -5,12 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function BookingsPage() {
     return (
-        <PageShell
-            title="Bookings Calendar"
-            description="View availability and create new bookings"
-        >
-            <BookingsCalendarWrapper />
-        </PageShell>
+        <BookingsCalendarWrapper />
     );
 }
 

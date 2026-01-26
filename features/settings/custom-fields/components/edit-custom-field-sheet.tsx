@@ -327,6 +327,15 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
     // const quantityMode = form.watch("settings.quantity_mode"); // Removed
     const showOptionsSection = ['select', 'checkbox'].includes(currentType) || (currentType === 'quantity' && form.watch("settings.display_style") === 'text' && fields.length > 0);
     const prevTypeRef = useRef(currentType);
+    const preservedOptionsRef = useRef<any[]>([]);
+
+    // Track last known valid options
+    const watchedOptions = form.watch("options");
+    useEffect(() => {
+        if (watchedOptions && watchedOptions.length > 0) {
+            preservedOptionsRef.current = watchedOptions;
+        }
+    }, [watchedOptions]);
 
     useEffect(() => {
         if (showOptionsSection) {
@@ -334,11 +343,17 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
             // Check if options are empty
             const currentOptions = form.getValues("options");
             if (currentOptions.length === 0) {
-                replace([
-                    { label: "Option 1", value: "option_1" },
-                    { label: "Option 2", value: "option_2" },
-                    { label: "Option 3", value: "option_3" },
-                ]);
+                if (preservedOptionsRef.current.length > 0) {
+                    // Restore previous options
+                    replace(preservedOptionsRef.current);
+                } else {
+                    // Default fallback
+                    replace([
+                        { label: "Option 1", value: "option_1" },
+                        { label: "Option 2", value: "option_2" },
+                        { label: "Option 3", value: "option_3" },
+                    ]);
+                }
             }
         }
         prevTypeRef.current = currentType;
@@ -424,10 +439,11 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
 
             {/* Side Panel */}
-            <div className="fixed inset-y-0 right-0 w-[85vw] max-w-5xl bg-[#0b1115] border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
+            {/* Side Panel */}
+            <div className="fixed inset-y-0 right-0 w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-10 py-4 border-b border-white/5 bg-[#0b1115]">
+                <div className="flex items-center justify-between px-10 py-4 border-b border-white/5 bg-transparent">
                     <div>
                         <h2 className="text-xl font-semibold text-white">
                             {fieldToEdit ? "Edit Custom Field" : "Create Custom Field"}
@@ -441,7 +457,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                 </div>
 
                 {/* Content Area - Fixed Flex Layout for Column Scrolling */}
-                <div className="flex-1 w-full flex flex-col min-h-0 bg-[#0b1115]">
+                <div className="flex-1 w-full flex flex-col min-h-0 bg-transparent">
                     <form id="custom-field-form" onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col w-full">
 
                         {/* Top Section: Label, Internal, and Field Type - Fixed Header */}
@@ -528,148 +544,244 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                             </div>
                         </div>
 
+
                         {/* Split Layout: Config vs Preview - Independent Scrolling Columns */}
                         <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 divide-x divide-white/10 min-h-0">
 
                             {/* LEFT COLUMN: Configuration & Options */}
-                            <div className="overflow-y-auto p-8 h-full space-y-8">
-                                <div className="space-y-6">
+                            <div className="flex flex-col h-full overflow-hidden">
+                                {/* Configuration Header */}
+                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Configuration</h3>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                    <div className="space-y-6">
 
-                                    {/* Text Field Specific Options (Text/Textarea/Quantity) */}
-                                    {['text', 'textarea', 'quantity'].includes(currentType) && (
-                                        <div className="pt-0 space-y-4">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest">Text Field Options</h4>
-                                            </div>
-                                            <div className="p-1 bg-black/20 rounded-lg border border-white/10 flex">
-                                                {[
-                                                    { id: 'text', label: 'Single Line' },
-                                                    { id: 'textarea', label: 'Multi-Line' },
-                                                    { id: 'quantity', label: 'Number' }
-                                                ].map((sub) => (
-                                                    <button
-                                                        key={sub.id}
-                                                        type="button"
-                                                        onClick={() => form.setValue("type", sub.id as any)}
-                                                        className={cn(
-                                                            "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
-                                                            currentType === sub.id
-                                                                ? "bg-cyan-500/20 text-cyan-400 shadow-sm"
-                                                                : "text-zinc-500 hover:text-zinc-300"
-                                                        )}
-                                                    >
-                                                        {sub.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-
-
-                                    {/* Quantity Specific Configuration */}
-                                    {currentType === 'quantity' && (
-                                        <div className="space-y-6">
-                                            {/* Display Style Selector */}
-                                            <div className="space-y-4">
-                                                <Label className="text-sm text-zinc-300">Display Style</Label>
-                                                <div className="flex bg-black/20 rounded-lg border border-white/10 p-1">
-                                                    {[{ id: 'text', label: 'Text Input' }, { id: 'currency', label: 'Currency' }, { id: 'counter', label: 'Counter' }].map((style) => (
+                                        {/* Text Field Specific Options (Text/Textarea/Quantity) */}
+                                        {['text', 'textarea', 'quantity'].includes(currentType) && (
+                                            <div className="pt-0 space-y-4">
+                                                <div className="flex justify-between items-center mb-6">
+                                                    <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest">Text Field Options</h4>
+                                                </div>
+                                                <div className="p-1 bg-black/20 rounded-lg border border-white/10 flex">
+                                                    {[
+                                                        { id: 'text', label: 'Single Line' },
+                                                        { id: 'textarea', label: 'Multi-Line' },
+                                                        { id: 'quantity', label: 'Number' }
+                                                    ].map((sub) => (
                                                         <button
-                                                            key={style.id}
+                                                            key={sub.id}
                                                             type="button"
-                                                            onClick={() => form.setValue("settings.display_style", style.id as any)}
+                                                            onClick={() => form.setValue("type", sub.id as any)}
                                                             className={cn(
                                                                 "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
-                                                                (form.watch("settings.display_style") || 'text') === style.id
+                                                                currentType === sub.id
                                                                     ? "bg-cyan-500/20 text-cyan-400 shadow-sm"
                                                                     : "text-zinc-500 hover:text-zinc-300"
                                                             )}
                                                         >
-                                                            {style.label}
+                                                            {sub.label}
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
+                                        )}
 
-                                            {/* Mode Selector */}
-                                            <div className="space-y-4">
-                                                {/* Unified Range Config (Always Visible for Quantity) */}
 
-                                                {/* Section 1: Range Limits (Hidden for Currency) */}
-                                                {form.watch("settings.display_style") !== 'currency' && (
-                                                    <div className="p-4 bg-black/20 rounded-lg border border-white/10 space-y-4">
-                                                        <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest mb-2">Range Limits</h4>
-                                                        <div className="grid grid-cols-3 gap-3">
-                                                            <div className="space-y-2">
-                                                                <Label className="text-sm text-zinc-400">Start (Min)</Label>
-                                                                <input
-                                                                    type="number"
-                                                                    {...form.register("settings.min")}
-                                                                    className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
-                                                                />
-                                                            </div>
 
-                                                            <div className="space-y-2">
-                                                                <Label className="text-sm text-zinc-400">End (Max)</Label>
-                                                                <input
-                                                                    type="number"
-                                                                    {...form.register("settings.max")}
-                                                                    className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
-                                                                />
-                                                            </div>
+                                        {/* Quantity Specific Configuration */}
+                                        {currentType === 'quantity' && (
+                                            <div className="space-y-6">
+                                                {/* Display Style Selector */}
+                                                <div className="space-y-4">
+                                                    <Label className="text-sm text-zinc-300">Display Style</Label>
+                                                    <div className="flex bg-black/20 rounded-lg border border-white/10 p-1">
+                                                        {[{ id: 'text', label: 'Text Input' }, { id: 'currency', label: 'Currency' }, { id: 'counter', label: 'Counter' }].map((style) => (
+                                                            <button
+                                                                key={style.id}
+                                                                type="button"
+                                                                onClick={() => form.setValue("settings.display_style", style.id as any)}
+                                                                className={cn(
+                                                                    "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
+                                                                    (form.watch("settings.display_style") || 'text') === style.id
+                                                                        ? "bg-cyan-500/20 text-cyan-400 shadow-sm"
+                                                                        : "text-zinc-500 hover:text-zinc-300"
+                                                                )}
+                                                            >
+                                                                {style.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
 
-                                                            <div className="space-y-2">
-                                                                <Label className="text-sm text-zinc-400">Step (Increment)</Label>
-                                                                <input
-                                                                    type="number"
-                                                                    defaultValue={1}
-                                                                    placeholder="1"
-                                                                    {...form.register("settings.step")}
-                                                                    className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
-                                                                />
+                                                {/* Mode Selector */}
+                                                <div className="space-y-4">
+                                                    {/* Unified Range Config (Always Visible for Quantity) */}
+
+                                                    {/* Section 1: Range Limits (Hidden for Currency) */}
+                                                    {form.watch("settings.display_style") !== 'currency' && (
+                                                        <div className="p-4 bg-black/20 rounded-lg border border-white/10 space-y-4">
+                                                            <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest mb-2">Range Limits</h4>
+                                                            <div className="grid grid-cols-3 gap-3">
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm text-zinc-400">Start (Min)</Label>
+                                                                    <input
+                                                                        type="number"
+                                                                        {...form.register("settings.min")}
+                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm text-zinc-400">End (Max)</Label>
+                                                                    <input
+                                                                        type="number"
+                                                                        {...form.register("settings.max")}
+                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm text-zinc-400">Step (Increment)</Label>
+                                                                    <input
+                                                                        type="number"
+                                                                        defaultValue={1}
+                                                                        placeholder="1"
+                                                                        {...form.register("settings.step")}
+                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    )}
 
 
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
 
-                                    {/* Dynamic Options Section (Sorted + Reordered) */}
-                                    {showOptionsSection && (
-                                        <div className="pt-0 border-t-0 space-y-4">
-                                            {/* Layout Style Toolbar (Checkbox Only) */}
-                                            {/* Layout Style Toolbar (Checkbox Only) */}
-                                            {currentType === 'checkbox' && (
-                                                <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                    {/* Layout Style Toolbar */}
-                                                    <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-2 duration-300">
-                                                        {[
-                                                            { value: 'vertical', icon: AlignJustify, label: 'Vertical' },
-                                                            { value: 'horizontal', icon: Columns, label: 'Horizontal' },
-                                                            { value: 'columns', icon: LayoutGrid, label: 'Columns' }
-                                                        ].map((layout) => {
-                                                            const Icon = layout.icon;
-                                                            // Logic: If binary mode is ON, layout styles are inactive.
-                                                            const isBinary = form.watch("settings.binary_mode");
-                                                            const currentStyle = form.watch("settings.multi_select_style") || 'vertical';
-                                                            const isActive = !isBinary && currentStyle === layout.value;
-                                                            return (
-                                                                <div key={layout.value} className="flex items-center">
-                                                                    <TooltipProvider>
+                                        {/* Dynamic Options Section (Sorted + Reordered) */}
+                                        {showOptionsSection && (
+                                            <div className="pt-0 border-t-0 space-y-4">
+                                                {/* Layout Style Toolbar (Checkbox Only) */}
+                                                {/* Layout Style Toolbar (Checkbox Only) */}
+                                                {currentType === 'checkbox' && (
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                        {/* Layout Style Toolbar */}
+                                                        <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-2 duration-300">
+                                                            {[
+                                                                { value: 'vertical', icon: AlignJustify, label: 'Vertical' },
+                                                                { value: 'horizontal', icon: Columns, label: 'Horizontal' },
+                                                                { value: 'columns', icon: LayoutGrid, label: 'Columns' }
+                                                            ].map((layout) => {
+                                                                const Icon = layout.icon;
+                                                                // Logic: If binary mode is ON, layout styles are inactive.
+                                                                const isBinary = form.watch("settings.binary_mode");
+                                                                const currentStyle = form.watch("settings.multi_select_style") || 'vertical';
+                                                                const isActive = !isBinary && currentStyle === layout.value;
+                                                                return (
+                                                                    <div key={layout.value} className="flex items-center">
+                                                                        <TooltipProvider>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => {
+                                                                                            // Selecting a layout style turns OFF binary mode
+                                                                                            form.setValue("settings.binary_mode", false);
+                                                                                            form.setValue("settings.multi_select_style", layout.value as any);
+                                                                                        }}
+                                                                                        className={cn(
+                                                                                            "p-1.5 rounded-md transition-all",
+                                                                                            isActive
+                                                                                                ? "bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10"
+                                                                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                                        )}
+                                                                                    >
+                                                                                        <Icon size={16} />
+                                                                                    </button>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent>
+                                                                                    <p>{layout.label}</p>
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                        </TooltipProvider>
+
+                                                                        {/* Form integrated Column Selector */}
+                                                                        {layout.value === 'columns' && currentStyle === 'columns' && (
+                                                                            <div className="flex items-center gap-0.5 ml-1 pl-1 border-l border-white/10 animate-in fade-in zoom-in-50 duration-200">
+                                                                                {[2, 3, 4].map((cols) => {
+                                                                                    const currentCols = Number(form.watch("settings.multi_select_columns")) || 2;
+                                                                                    return (
+                                                                                        <button
+                                                                                            key={cols}
+                                                                                            type="button"
+                                                                                            onClick={() => form.setValue("settings.multi_select_columns", cols)}
+                                                                                            className={cn(
+                                                                                                "w-5 h-5 flex items-center justify-center rounded text-[9px] font-bold transition-all",
+                                                                                                currentCols === cols
+                                                                                                    ? "bg-cyan-500 text-black shadow-sm"
+                                                                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                                            )}
+                                                                                        >
+                                                                                            {cols}
+                                                                                        </button>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+
+                                                            {/* Binary Mode Toggle */}
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const current = form.getValues("settings.binary_mode");
+                                                                                const next = !current;
+                                                                                form.setValue("settings.binary_mode", next);
+                                                                                if (next) {
+                                                                                    form.setValue("settings.multi_select_style", null as any);
+                                                                                }
+                                                                            }}
+                                                                            className={cn(
+                                                                                "p-1.5 rounded-md transition-all",
+                                                                                form.watch("settings.binary_mode")
+                                                                                    ? "bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10"
+                                                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                            )}
+                                                                        >
+                                                                            <ToggleRight size={16} />
+                                                                        </button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Binary Mode (Yes/No only)</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </div>
+
+                                                        {/* Visual Style + Binary Toggle Toolbar */}
+                                                        <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-3 duration-300">
+                                                            {[
+                                                                { value: 'button', icon: Square, label: 'Button Style (Default)' },
+                                                                { value: 'list', icon: LayoutList, label: 'List Style (Compact)' }
+                                                            ].map((style) => {
+                                                                const Icon = style.icon;
+                                                                const currentVisual = form.watch("settings.multi_select_visual") || 'button';
+                                                                const isActive = currentVisual === style.value;
+                                                                return (
+                                                                    <TooltipProvider key={style.value}>
                                                                         <Tooltip>
                                                                             <TooltipTrigger asChild>
                                                                                 <button
                                                                                     type="button"
-                                                                                    onClick={() => {
-                                                                                        // Selecting a layout style turns OFF binary mode
-                                                                                        form.setValue("settings.binary_mode", false);
-                                                                                        form.setValue("settings.multi_select_style", layout.value as any);
-                                                                                    }}
+                                                                                    onClick={() => form.setValue("settings.multi_select_visual", style.value as any)}
                                                                                     className={cn(
                                                                                         "p-1.5 rounded-md transition-all",
                                                                                         isActive
@@ -681,549 +793,467 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                                 </button>
                                                                             </TooltipTrigger>
                                                                             <TooltipContent>
-                                                                                <p>{layout.label}</p>
+                                                                                <p>{style.label}</p>
                                                                             </TooltipContent>
                                                                         </Tooltip>
                                                                     </TooltipProvider>
-
-                                                                    {/* Form integrated Column Selector */}
-                                                                    {layout.value === 'columns' && currentStyle === 'columns' && (
-                                                                        <div className="flex items-center gap-0.5 ml-1 pl-1 border-l border-white/10 animate-in fade-in zoom-in-50 duration-200">
-                                                                            {[2, 3, 4].map((cols) => {
-                                                                                const currentCols = Number(form.watch("settings.multi_select_columns")) || 2;
-                                                                                return (
-                                                                                    <button
-                                                                                        key={cols}
-                                                                                        type="button"
-                                                                                        onClick={() => form.setValue("settings.multi_select_columns", cols)}
-                                                                                        className={cn(
-                                                                                            "w-5 h-5 flex items-center justify-center rounded text-[9px] font-bold transition-all",
-                                                                                            currentCols === cols
-                                                                                                ? "bg-cyan-500 text-black shadow-sm"
-                                                                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                                                                        )}
-                                                                                    >
-                                                                                        {cols}
-                                                                                    </button>
-                                                                                );
-                                                                            })}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })}
-
-                                                        {/* Binary Mode Toggle */}
-                                                        <TooltipProvider>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            const current = form.getValues("settings.binary_mode");
-                                                                            const next = !current;
-                                                                            form.setValue("settings.binary_mode", next);
-                                                                            if (next) {
-                                                                                form.setValue("settings.multi_select_style", null as any);
-                                                                            }
-                                                                        }}
-                                                                        className={cn(
-                                                                            "p-1.5 rounded-md transition-all",
-                                                                            form.watch("settings.binary_mode")
-                                                                                ? "bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10"
-                                                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                                                        )}
-                                                                    >
-                                                                        <ToggleRight size={16} />
-                                                                    </button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <p>Binary Mode (Yes/No only)</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </TooltipProvider>
-                                                    </div>
-
-                                                    {/* Visual Style + Binary Toggle Toolbar */}
-                                                    <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-3 duration-300">
-                                                        {[
-                                                            { value: 'button', icon: Square, label: 'Button Style (Default)' },
-                                                            { value: 'list', icon: LayoutList, label: 'List Style (Compact)' }
-                                                        ].map((style) => {
-                                                            const Icon = style.icon;
-                                                            const currentVisual = form.watch("settings.multi_select_visual") || 'button';
-                                                            const isActive = currentVisual === style.value;
-                                                            return (
-                                                                <TooltipProvider key={style.value}>
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger asChild>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => form.setValue("settings.multi_select_visual", style.value as any)}
-                                                                                className={cn(
-                                                                                    "p-1.5 rounded-md transition-all",
-                                                                                    isActive
-                                                                                        ? "bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10"
-                                                                                        : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                                                                )}
-                                                                            >
-                                                                                <Icon size={16} />
-                                                                            </button>
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent>
-                                                                            <p>{style.label}</p>
-                                                                        </TooltipContent>
-                                                                    </Tooltip>
-                                                                </TooltipProvider>
-                                                            );
-                                                        })}
-
-                                                    </div>
-                                                    {form.watch("settings.binary_mode") && (
-                                                        <p className="text-xs text-zinc-500 italic mt-2 animate-in fade-in duration-300">
-                                                            No editing available for this layout, it provided a simple yes/no output
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {!form.watch("settings.binary_mode") && (
-                                                <div className="flex justify-between items-center mb-6">
-                                                    <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest">Options List</h4>
-                                                </div>
-                                            )}
-
-                                            {/* DnD List (Hidden in Binary Mode) */}
-                                            {!form.watch("settings.binary_mode") && (
-                                                <DndContext
-                                                    sensors={sensors}
-                                                    collisionDetection={closestCenter}
-                                                    onDragEnd={handleDragEnd}
-                                                    onDragStart={({ active }) => setActiveId(active.id as string)}
-                                                >
-                                                    <SortableContext
-                                                        items={fields.map(f => f.id)}
-                                                        strategy={verticalListSortingStrategy}
-                                                    >
-                                                        <div className="space-y-2">
-                                                            {/* Allow Multiple Selections Toggle - First item */}
-                                                            {currentType === 'checkbox' && (
-                                                                <div className="flex items-center justify-between pr-2 rounded-lg border border-white/10 bg-white/5">
-                                                                    <div className="flex items-center gap-2 px-4 py-2">
-                                                                        <Label className="text-sm text-zinc-200 cursor-help translate-y-[1px] mb-0">
-                                                                            Allow Multiple Selections
-                                                                        </Label>
-                                                                        <TooltipProvider>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger asChild>
-                                                                                    <Info size={14} className="text-zinc-500 hover:text-cyan-400 transition-colors" />
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent>
-                                                                                    <p>Enable to use checkboxes (select multiple). Disable for radio buttons (select one).</p>
-                                                                                </TooltipContent>
-                                                                            </Tooltip>
-                                                                        </TooltipProvider>
-                                                                    </div>
-                                                                    <Switch
-                                                                        checked={form.watch("settings.allow_multiselect") || false}
-                                                                        onCheckedChange={(c) => form.setValue("settings.allow_multiselect", c)}
-                                                                    />
-                                                                </div>
-                                                            )}
-
-                                                            {/* Regular Options */}
-                                                            {fields.map((field, index) => {
-                                                                const optValue = form.watch(`options.${index}.value`);
-                                                                const allowEmpty = form.watch("settings.allow_empty") || false;
-                                                                const isDefault = form.watch("default_value") === optValue && optValue !== "";
-                                                                return (
-                                                                    <SortableOptionItem
-                                                                        key={field.id}
-                                                                        id={field.id}
-                                                                        index={index}
-                                                                        register={form.register}
-                                                                        remove={remove}
-                                                                        insert={insert}
-                                                                        setValue={form.setValue}
-                                                                        activeId={activeId}
-                                                                        isDefault={isDefault}
-                                                                        onSetDefault={() => toggleDefault(optValue)}
-                                                                        fieldValue={optValue}
-                                                                        allowEmpty={allowEmpty}
-                                                                    />
                                                                 );
                                                             })}
+
                                                         </div>
-                                                    </SortableContext>
-                                                </DndContext>
-                                            )}
+                                                        {form.watch("settings.binary_mode") && (
+                                                            <p className="text-xs text-zinc-500 italic mt-2 animate-in fade-in duration-300">
+                                                                No editing available for this layout, it provided a simple yes/no output
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {!form.watch("settings.binary_mode") && (
+                                                    <div className="flex justify-between items-center mb-6">
+                                                        <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest">Options List</h4>
+                                                    </div>
+                                                )}
+
+                                                {/* DnD List (Hidden in Binary Mode) */}
+                                                {!form.watch("settings.binary_mode") && (
+                                                    <DndContext
+                                                        sensors={sensors}
+                                                        collisionDetection={closestCenter}
+                                                        onDragEnd={handleDragEnd}
+                                                        onDragStart={({ active }) => setActiveId(active.id as string)}
+                                                    >
+                                                        <SortableContext
+                                                            items={fields.map(f => f.id)}
+                                                            strategy={verticalListSortingStrategy}
+                                                        >
+                                                            <div className="space-y-2">
+                                                                {/* Allow Multiple Selections Toggle - First item */}
+                                                                {currentType === 'checkbox' && (
+                                                                    <div className="flex items-center justify-between pr-2 rounded-lg border border-white/10 bg-white/5">
+                                                                        <div className="flex items-center gap-2 px-4 py-2">
+                                                                            <Label className="text-sm text-zinc-200 cursor-help translate-y-[1px] mb-0">
+                                                                                Allow Multiple Selections
+                                                                            </Label>
+                                                                            <TooltipProvider>
+                                                                                <Tooltip>
+                                                                                    <TooltipTrigger asChild>
+                                                                                        <Info size={14} className="text-zinc-500 hover:text-cyan-400 transition-colors" />
+                                                                                    </TooltipTrigger>
+                                                                                    <TooltipContent>
+                                                                                        <p>Enable to use checkboxes (select multiple). Disable for radio buttons (select one).</p>
+                                                                                    </TooltipContent>
+                                                                                </Tooltip>
+                                                                            </TooltipProvider>
+                                                                        </div>
+                                                                        <Switch
+                                                                            checked={form.watch("settings.allow_multiselect") || false}
+                                                                            onCheckedChange={(c) => form.setValue("settings.allow_multiselect", c)}
+                                                                        />
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Regular Options */}
+                                                                {fields.map((field, index) => {
+                                                                    const optValue = form.watch(`options.${index}.value`);
+                                                                    const allowEmpty = form.watch("settings.allow_empty") || false;
+                                                                    const isDefault = form.watch("default_value") === optValue && optValue !== "";
+                                                                    return (
+                                                                        <SortableOptionItem
+                                                                            key={field.id}
+                                                                            id={field.id}
+                                                                            index={index}
+                                                                            register={form.register}
+                                                                            remove={remove}
+                                                                            insert={insert}
+                                                                            setValue={form.setValue}
+                                                                            activeId={activeId}
+                                                                            isDefault={isDefault}
+                                                                            onSetDefault={() => toggleDefault(optValue)}
+                                                                            fieldValue={optValue}
+                                                                            allowEmpty={allowEmpty}
+                                                                        />
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </SortableContext>
+                                                    </DndContext>
+                                                )}
 
 
+                                            </div>
+                                        )}
+
+                                        {/* Description (Formerly Above Options) */}
+                                        <div className="space-y-2 pt-6 border-t border-white/5">
+                                            <Label className="text-sm text-zinc-300">Helper / Description</Label>
+                                            <textarea
+                                                {...form.register("description")}
+                                                className={cn(inputClasses, "min-h-[100px]")}
+                                                placeholder="Instructions shown to the user filling out this field..."
+                                            />
                                         </div>
-                                    )}
 
-                                    {/* Description (Formerly Above Options) */}
-                                    <div className="space-y-2 pt-6 border-t border-white/5">
-                                        <Label className="text-sm text-zinc-300">Helper / Description</Label>
-                                        <textarea
-                                            {...form.register("description")}
-                                            className={cn(inputClasses, "min-h-[100px]")}
-                                            placeholder="Instructions shown to the user filling out this field..."
-                                        />
                                     </div>
-
                                 </div>
+
                             </div>
 
                             {/* RIGHT COLUMN: Live Preview */}
-                            <div className="overflow-y-auto p-8 h-full bg-black/20 space-y-8">
-                                <div className="h-full relative">
-                                    <div className="w-full relative">
-                                        <h4 className="text-xs uppercase text-cyan-500 font-bold mb-6 tracking-widest">Live Preview</h4>
+                            <div className="flex flex-col h-full overflow-hidden bg-black/20">
+                                {/* Preview Header */}
+                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 flex items-center gap-2">
+                                    <Eye size={16} className="text-cyan-500" />
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Preview</h3>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                    <div className="h-full relative">
+                                        <div className="w-full relative">
+                                            {/* Header Removed - replaced by sticky header */}
 
-                                        <div className="space-y-2">
-                                            {currentType !== 'header' && !(currentType === 'checkbox' && form.watch("settings.binary_mode")) && (
-                                                <Label className="text-white text-sm uppercase tracking-wider ml-1 mb-2 block flex items-center gap-1">
-                                                    {form.watch("label") || "Field Label"}
-                                                    {form.watch("settings.required") && <span className="text-red-500 text-lg leading-none">•</span>}
-                                                    {form.watch("is_internal") && <span className="ml-2 text-xs text-zinc-500 bg-white/10 px-1 rounded">Internal</span>}
-                                                </Label>
-                                            )}
+                                            <div className="space-y-2">
+                                                {currentType !== 'header' && !(currentType === 'checkbox' && form.watch("settings.binary_mode")) && (
+                                                    <Label className="text-white text-sm uppercase tracking-wider ml-1 mb-2 block flex items-center gap-1">
+                                                        {form.watch("label") || "Field Label"}
+                                                        {form.watch("settings.required") && <span className="text-red-500 text-lg leading-none">•</span>}
+                                                        {form.watch("is_internal") && <span className="ml-2 text-xs text-zinc-500 bg-white/10 px-1 rounded">Internal</span>}
+                                                    </Label>
+                                                )}
 
-                                            {currentType === 'text' && (
-                                                <input placeholder="User input..." className={inputClasses} />
-                                            )}
+                                                {currentType === 'text' && (
+                                                    <input placeholder="User input..." className={inputClasses} />
+                                                )}
 
-                                            {currentType === 'textarea' && (
-                                                <textarea placeholder="User input..." className={inputClasses} rows={4} />
-                                            )}
+                                                {currentType === 'textarea' && (
+                                                    <textarea placeholder="User input..." className={inputClasses} rows={4} />
+                                                )}
 
-                                            {currentType === 'quantity' && form.watch("settings.display_style") === 'currency' && (
-                                                <div className="relative">
-                                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium select-none">
-                                                        $
-                                                    </div>
-                                                    <input
-                                                        type="number"
-                                                        step="0.01"
-                                                        placeholder="0.00"
-                                                        className={cn(inputClasses, "pl-7")}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {currentType === 'quantity' && form.watch("settings.display_style") === 'counter' && (
-                                                <div className="flex items-center w-full bg-black/20 border border-white/10 rounded-lg overflow-hidden transition-colors focus-within:border-cyan-500/50">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            const min = Number(form.watch("settings.min")) || 0;
-                                                            const step = Number(form.watch("settings.step")) || 1;
-                                                            const current = typeof previewValue === 'number' ? previewValue : min;
-                                                            // Logic: If infinite (no Min defined), allow going below 0? Usually "Quantity" implies >= 0 or >= Min. 
-                                                            // Adhering to Min limit.
-                                                            const newValue = Math.max(min, current - step);
-                                                            setPreviewValue(newValue);
-                                                        }}
-                                                        className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-r border-white/5 active:bg-cyan-500/10 active:text-cyan-400"
-                                                    >
-                                                        <Minus size={16} />
-                                                    </button>
-                                                    <input
-                                                        type="number"
-                                                        placeholder={String(Number(form.watch("settings.min")) || 0)}
-                                                        value={typeof previewValue === 'number' ? previewValue : (Number(form.watch("settings.min")) || 0)}
-                                                        onChange={(e) => setPreviewValue(e.target.value === "" ? (Number(form.watch("settings.min")) || 0) : parseInt(e.target.value))}
-                                                        className="flex-1 bg-transparent border-none text-center text-white h-10 focus:outline-none placeholder:text-zinc-600 appearance-none"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            const max = form.watch("settings.max") ? Number(form.watch("settings.max")) : Infinity;
-                                                            const min = Number(form.watch("settings.min")) || 0;
-                                                            const step = Number(form.watch("settings.step")) || 1;
-                                                            const current = typeof previewValue === 'number' ? previewValue : min;
-                                                            if (current + step <= max) {
-                                                                setPreviewValue(current + step);
-                                                            }
-                                                        }}
-                                                        className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-l border-white/5 active:bg-cyan-500/10 active:text-cyan-400"
-                                                    >
-                                                        <Plus size={16} />
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                            {/* Logic for Quantity Text/Select Hybrid */}
-                                            {currentType === 'quantity' && (form.watch("settings.display_style") === 'text' || !form.watch("settings.display_style")) && (
-                                                <>
-                                                    {form.watch("settings.max") ? (
-                                                        // MAX IS SET -> RENDER CUSTOM SELECT (Dropdown)
-                                                        <CustomSelect
-                                                            value={String(previewValue || "")}
-                                                            onChange={(val) => setPreviewValue(val)}
-                                                            options={(() => {
-                                                                const min = Number(form.watch("settings.min")) || 0;
-                                                                const max = Number(form.watch("settings.max"));
-                                                                const step = Number(form.watch("settings.step")) || 1;
-                                                                const opts = [];
-                                                                for (let i = min; i <= max; i += step) {
-                                                                    opts.push(String(i));
-                                                                }
-                                                                return opts;
-                                                            })()}
-                                                            placeholder="Select quantity..."
-                                                            className="py-2.5"
+                                                {currentType === 'quantity' && form.watch("settings.display_style") === 'currency' && (
+                                                    <div className="relative">
+                                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium select-none">
+                                                            $
+                                                        </div>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            placeholder="0.00"
+                                                            className={cn(inputClasses, "pl-7")}
                                                         />
-                                                    ) : (
-                                                        // MAX IS NOT SET -> RENDER TEXT INPUT (Infinite)
+                                                    </div>
+                                                )}
+
+                                                {currentType === 'quantity' && form.watch("settings.display_style") === 'counter' && (
+                                                    <div className="flex items-center w-full bg-black/20 border border-white/10 rounded-lg overflow-hidden transition-colors focus-within:border-cyan-500/50">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                const min = Number(form.watch("settings.min")) || 0;
+                                                                const step = Number(form.watch("settings.step")) || 1;
+                                                                const current = typeof previewValue === 'number' ? previewValue : min;
+                                                                // Logic: If infinite (no Min defined), allow going below 0? Usually "Quantity" implies >= 0 or >= Min. 
+                                                                // Adhering to Min limit.
+                                                                const newValue = Math.max(min, current - step);
+                                                                setPreviewValue(newValue);
+                                                            }}
+                                                            className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-r border-white/5 active:bg-cyan-500/10 active:text-cyan-400"
+                                                        >
+                                                            <Minus size={16} />
+                                                        </button>
                                                         <input
                                                             type="number"
                                                             placeholder={String(Number(form.watch("settings.min")) || 0)}
-                                                            className={inputClasses}
+                                                            value={typeof previewValue === 'number' ? previewValue : (Number(form.watch("settings.min")) || 0)}
+                                                            onChange={(e) => setPreviewValue(e.target.value === "" ? (Number(form.watch("settings.min")) || 0) : parseInt(e.target.value))}
+                                                            className="flex-1 bg-transparent border-none text-center text-white h-10 focus:outline-none placeholder:text-zinc-600 appearance-none"
                                                         />
-                                                    )}
-                                                </>
-                                            )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                const max = form.watch("settings.max") ? Number(form.watch("settings.max")) : Infinity;
+                                                                const min = Number(form.watch("settings.min")) || 0;
+                                                                const step = Number(form.watch("settings.step")) || 1;
+                                                                const current = typeof previewValue === 'number' ? previewValue : min;
+                                                                if (current + step <= max) {
+                                                                    setPreviewValue(current + step);
+                                                                }
+                                                            }}
+                                                            className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-l border-white/5 active:bg-cyan-500/10 active:text-cyan-400"
+                                                        >
+                                                            <Plus size={16} />
+                                                        </button>
+                                                    </div>
+                                                )}
 
-                                            {/* Preview for Standard Dropdown (Select) */}
-                                            {/* Preview for Standard Dropdown (Select) */}
-                                            {(currentType === 'select') && (
-                                                <div className="space-y-1">
-                                                    {(() => {
-                                                        const options = form.watch("options") || [];
-                                                        const allowEmpty = form.watch("settings.allow_empty");
-                                                        // Filter out any options with empty values to prevent duplicate keys
-                                                        // Show placeholder for empty options to allow previewing layout, ensuring unique keys
-                                                        const validOptions = options.map((opt, idx) => {
-                                                            if (!opt.value || opt.value.trim() === '') {
-                                                                return { label: '...', value: `__placeholder_${idx}` };
-                                                            }
-                                                            return opt;
-                                                        });
-                                                        // Prepend None option if allow_empty is true
-                                                        const effectiveOptions = allowEmpty
-                                                            ? [{ label: 'None / Empty', value: '' }, ...validOptions]
-                                                            : validOptions;
-
-                                                        const defaultValue = form.watch("default_value");
-                                                        // If allow_empty and no explicit default, use "" (None)
-                                                        // Otherwise use the defaultValue or empty string
-                                                        const current = (previewValue !== undefined && previewValue !== null)
-                                                            ? previewValue
-                                                            : (defaultValue !== undefined ? defaultValue : (allowEmpty ? "" : ""));
-
-                                                        return (
-                                                            <Combobox
-                                                                value={String(current)}
+                                                {/* Logic for Quantity Text/Select Hybrid */}
+                                                {currentType === 'quantity' && (form.watch("settings.display_style") === 'text' || !form.watch("settings.display_style")) && (
+                                                    <>
+                                                        {form.watch("settings.max") ? (
+                                                            // MAX IS SET -> RENDER CUSTOM SELECT (Dropdown)
+                                                            <CustomSelect
+                                                                value={String(previewValue || "")}
                                                                 onChange={(val) => setPreviewValue(val)}
-                                                                options={effectiveOptions}
-                                                                placeholder="Search or select..."
-                                                                forceOpen={true}
+                                                                options={(() => {
+                                                                    const min = Number(form.watch("settings.min")) || 0;
+                                                                    const max = Number(form.watch("settings.max"));
+                                                                    const step = Number(form.watch("settings.step")) || 1;
+                                                                    const opts = [];
+                                                                    for (let i = min; i <= max; i += step) {
+                                                                        opts.push(String(i));
+                                                                    }
+                                                                    return opts;
+                                                                })()}
+                                                                placeholder="Select quantity..."
+                                                                className="py-2.5"
                                                             />
-                                                        );
-                                                    })()}
-                                                </div>
-                                            )}
-
-                                            {currentType === 'checkbox' && (
-                                                <div className={cn(
-                                                    "pt-2",
-                                                    (form.watch("settings.multi_select_visual") === 'list' && !form.watch("settings.binary_mode")) ? "border border-white/10 rounded-lg p-3 bg-black/10" : "", // Outer border for List style, excluded for Binary Mode
-                                                    (form.watch("settings.multi_select_style") === 'horizontal') ? "flex flex-wrap gap-3" :
-                                                        (form.watch("settings.multi_select_style") === 'columns') ?
-                                                            ((Number(form.watch("settings.multi_select_columns") || 2) === 3) ? "grid grid-cols-3 gap-3" :
-                                                                (Number(form.watch("settings.multi_select_columns") || 2) === 4) ? "grid grid-cols-4 gap-3" :
-                                                                    "grid grid-cols-2 gap-3") :
-                                                            "space-y-3" // Default Vertical
-                                                )}>
-                                                    {/* Binary Mode Handling */}
-                                                    {form.watch("settings.binary_mode") ? (
-                                                        // Binary Mode: Always a Switch, styling depends on 'Visual Style'
-                                                        (form.watch("settings.multi_select_visual") || 'button') === 'button' ? (
-                                                            // Button Style -> Boxed Switch (Duplicate of old List style)
-                                                            <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-black/20 hover:border-white/20 transition-colors">
-                                                                <span className="text-sm text-zinc-300 font-medium">
-                                                                    {form.watch("label") || "Field Label"}
-                                                                </span>
-                                                                <Switch
-                                                                    checked={previewValue === 'yes'}
-                                                                    onCheckedChange={(c) => setPreviewValue(c ? 'yes' : 'no')}
-                                                                />
-                                                            </div>
                                                         ) : (
-                                                            // List Style -> derived from Button Style but stripped of box styling
-                                                            <div className="flex items-center justify-between p-0 rounded-lg hover:bg-white/5 transition-colors">
-                                                                <span className="text-sm text-zinc-300 font-medium">
-                                                                    {form.watch("label") || "Field Label"}
-                                                                </span>
-                                                                <Switch
-                                                                    checked={previewValue === 'yes'}
-                                                                    onCheckedChange={(c) => setPreviewValue(c ? 'yes' : 'no')}
-                                                                />
-                                                            </div>
-                                                        )
-                                                    ) : (
-                                                        // Standard Options List Logic (Non-Binary)
-                                                        (form.watch("settings.binary_mode")
-                                                            ? [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }]
-                                                            : (fields.length > 0 ? fields.map(f => ({ label: f.label, value: f.value })) : [{ label: 'Option 1', value: '1' }, { label: 'Option 2', value: '2' }])
-                                                        ).map((opt, idx) => {
-                                                            const isMulti = form.watch("settings.binary_mode") ? false : (form.getValues().settings?.allow_multiselect);
-                                                            const safeOpt = (!opt.value || opt.value.trim() === '')
-                                                                ? { ...opt, value: `__placeholder_${idx}`, label: opt.label || '...' }
-                                                                : opt;
+                                                            // MAX IS NOT SET -> RENDER TEXT INPUT (Infinite)
+                                                            <input
+                                                                type="number"
+                                                                placeholder={String(Number(form.watch("settings.min")) || 0)}
+                                                                className={inputClasses}
+                                                            />
+                                                        )}
+                                                    </>
+                                                )}
 
-                                                            const isSelected = isMulti
-                                                                ? (Array.isArray(previewValue) && previewValue.includes(safeOpt.value)) || (form.watch("default_value") === safeOpt.value)
-                                                                : (previewValue === safeOpt.value) || (form.watch("default_value") === safeOpt.value);
+                                                {/* Preview for Standard Dropdown (Select) */}
+                                                {/* Preview for Standard Dropdown (Select) */}
+                                                {(currentType === 'select') && (
+                                                    <div className="space-y-1">
+                                                        {(() => {
+                                                            const options = form.watch("options") || [];
+                                                            const allowEmpty = form.watch("settings.allow_empty");
+                                                            // Filter out any options with empty values to prevent duplicate keys
+                                                            // Show placeholder for empty options to allow previewing layout, ensuring unique keys
+                                                            const validOptions = options.map((opt, idx) => {
+                                                                if (!opt.value || opt.value.trim() === '') {
+                                                                    return { label: '...', value: `__placeholder_${idx}` };
+                                                                }
+                                                                return opt;
+                                                            });
+                                                            // Prepend None option if allow_empty is true
+                                                            const effectiveOptions = allowEmpty
+                                                                ? [{ label: 'None / Empty', value: '' }, ...validOptions]
+                                                                : validOptions;
 
-                                                            const isVisualList = form.watch("settings.multi_select_visual") === 'list';
+                                                            const defaultValue = form.watch("default_value");
+                                                            // If allow_empty and no explicit default, use "" (None)
+                                                            // Otherwise use the defaultValue or empty string
+                                                            const current = (previewValue !== undefined && previewValue !== null)
+                                                                ? previewValue
+                                                                : (defaultValue !== undefined ? defaultValue : (allowEmpty ? "" : ""));
 
                                                             return (
-                                                                <div
-                                                                    key={safeOpt.value}
-                                                                    className={cn(
-                                                                        "flex items-center space-x-3 transition-all cursor-pointer group",
-                                                                        isVisualList
-                                                                            ? "px-1 py-1 border-none hover:bg-white/5 rounded"
-                                                                            : "px-3 py-3 rounded-lg border",
-                                                                        !isVisualList && isSelected
-                                                                            ? "bg-cyan-500/10 border-cyan-500/50"
-                                                                            : !isVisualList
-                                                                                ? "bg-black/20 border-white/10 hover:border-white/20"
-                                                                                : ""
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        if (isMulti) {
-                                                                            const current = Array.isArray(previewValue) ? previewValue : (previewValue ? [previewValue] : []);
-                                                                            if (current.includes(safeOpt.value)) {
-                                                                                setPreviewValue(current.filter((v: any) => v !== safeOpt.value));
-                                                                            } else {
-                                                                                setPreviewValue([...current, safeOpt.value]);
-                                                                            }
-                                                                        } else {
-                                                                            setPreviewValue(safeOpt.value === previewValue ? '' : safeOpt.value);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <div className={cn(
-                                                                        "w-5 h-5 flex items-center justify-center border transition-colors",
-                                                                        isMulti ? "rounded" : "rounded-full",
-                                                                        isSelected ? "bg-cyan-500 border-cyan-500 text-black" : "bg-white/5 border-white/20 group-hover:border-cyan-500/50"
-                                                                    )}>
-                                                                        {isSelected && <Check size={14} className="stroke-[3]" />}
-                                                                    </div>
-                                                                    <span className={cn("text-sm", isSelected ? "text-white" : "text-zinc-400")}>
-                                                                        {safeOpt.label}
-                                                                    </span>
-                                                                </div>
+                                                                <Combobox
+                                                                    value={String(current)}
+                                                                    onChange={(val) => setPreviewValue(val)}
+                                                                    options={effectiveOptions}
+                                                                    placeholder="Search or select..."
+                                                                    forceOpen={true}
+                                                                />
                                                             );
-                                                        })
-                                                    )}
-                                                </div>
-                                            )}
+                                                        })()}
+                                                    </div>
+                                                )}
 
-                                            {currentType === 'header' && (
-                                                <div className="py-3 border-b border-white/10 mt-4">
-                                                    <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
-                                                        {form.watch("label") || "Section Header"}
-                                                    </h3>
-                                                </div>
-                                            )}
+                                                {currentType === 'checkbox' && (
+                                                    <div className={cn(
+                                                        "pt-2",
+                                                        (form.watch("settings.multi_select_visual") === 'list' && !form.watch("settings.binary_mode")) ? "border border-white/10 rounded-lg p-3 bg-black/10" : "", // Outer border for List style, excluded for Binary Mode
+                                                        (form.watch("settings.multi_select_style") === 'horizontal') ? "flex flex-wrap gap-3" :
+                                                            (form.watch("settings.multi_select_style") === 'columns') ?
+                                                                ((Number(form.watch("settings.multi_select_columns") || 2) === 3) ? "grid grid-cols-3 gap-3" :
+                                                                    (Number(form.watch("settings.multi_select_columns") || 2) === 4) ? "grid grid-cols-4 gap-3" :
+                                                                        "grid grid-cols-2 gap-3") :
+                                                                "space-y-3" // Default Vertical
+                                                    )}>
+                                                        {/* Binary Mode Handling */}
+                                                        {form.watch("settings.binary_mode") ? (
+                                                            // Binary Mode: Always a Switch, styling depends on 'Visual Style'
+                                                            (form.watch("settings.multi_select_visual") || 'button') === 'button' ? (
+                                                                // Button Style -> Boxed Switch (Duplicate of old List style)
+                                                                <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-black/20 hover:border-white/20 transition-colors">
+                                                                    <span className="text-sm text-zinc-300 font-medium">
+                                                                        {form.watch("label") || "Field Label"}
+                                                                    </span>
+                                                                    <Switch
+                                                                        checked={previewValue === 'yes'}
+                                                                        onCheckedChange={(c) => setPreviewValue(c ? 'yes' : 'no')}
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                // List Style -> derived from Button Style but stripped of box styling
+                                                                <div className="flex items-center justify-between p-0 rounded-lg hover:bg-white/5 transition-colors">
+                                                                    <span className="text-sm text-zinc-300 font-medium">
+                                                                        {form.watch("label") || "Field Label"}
+                                                                    </span>
+                                                                    <Switch
+                                                                        checked={previewValue === 'yes'}
+                                                                        onCheckedChange={(c) => setPreviewValue(c ? 'yes' : 'no')}
+                                                                    />
+                                                                </div>
+                                                            )
+                                                        ) : (
+                                                            // Standard Options List Logic (Non-Binary)
+                                                            (form.watch("settings.binary_mode")
+                                                                ? [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }]
+                                                                : (fields.length > 0 ? fields.map(f => ({ label: f.label, value: f.value })) : [{ label: 'Option 1', value: '1' }, { label: 'Option 2', value: '2' }])
+                                                            ).map((opt, idx) => {
+                                                                const isMulti = form.watch("settings.binary_mode") ? false : (form.getValues().settings?.allow_multiselect);
+                                                                const safeOpt = (!opt.value || opt.value.trim() === '')
+                                                                    ? { ...opt, value: `__placeholder_${idx}`, label: opt.label || '...' }
+                                                                    : opt;
 
-                                            {currentType === 'date' && (
-                                                <div className="pt-1">
-                                                    <DatePicker
-                                                        value={previewValue as Date || undefined}
-                                                        onChange={(date) => setPreviewValue(date)}
-                                                        className="bg-black/20 border-white/10 text-zinc-400 hover:text-white"
-                                                        defaultOpen={true}
-                                                    />
-                                                </div>
-                                            )}
+                                                                const isSelected = isMulti
+                                                                    ? (Array.isArray(previewValue) && previewValue.includes(safeOpt.value)) || (form.watch("default_value") === safeOpt.value)
+                                                                    : (previewValue === safeOpt.value) || (form.watch("default_value") === safeOpt.value);
 
-                                            {currentType === 'transport' && (
-                                                <div className="space-y-3">
-                                                    {/* Hotel Selection */}
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Hotel</label>
+                                                                const isVisualList = form.watch("settings.multi_select_visual") === 'list';
+
+                                                                return (
+                                                                    <div
+                                                                        key={safeOpt.value}
+                                                                        className={cn(
+                                                                            "flex items-center space-x-3 transition-all cursor-pointer group",
+                                                                            isVisualList
+                                                                                ? "px-1 py-1 border-none hover:bg-white/5 rounded"
+                                                                                : "px-3 py-3 rounded-lg border",
+                                                                            !isVisualList && isSelected
+                                                                                ? "bg-cyan-500/10 border-cyan-500/50"
+                                                                                : !isVisualList
+                                                                                    ? "bg-black/20 border-white/10 hover:border-white/20"
+                                                                                    : ""
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            if (isMulti) {
+                                                                                const current = Array.isArray(previewValue) ? previewValue : (previewValue ? [previewValue] : []);
+                                                                                if (current.includes(safeOpt.value)) {
+                                                                                    setPreviewValue(current.filter((v: any) => v !== safeOpt.value));
+                                                                                } else {
+                                                                                    setPreviewValue([...current, safeOpt.value]);
+                                                                                }
+                                                                            } else {
+                                                                                setPreviewValue(safeOpt.value === previewValue ? '' : safeOpt.value);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <div className={cn(
+                                                                            "w-5 h-5 flex items-center justify-center border transition-colors",
+                                                                            isMulti ? "rounded" : "rounded-full",
+                                                                            isSelected ? "bg-cyan-500 border-cyan-500 text-black" : "bg-white/5 border-white/20 group-hover:border-cyan-500/50"
+                                                                        )}>
+                                                                            {isSelected && <Check size={14} className="stroke-[3]" />}
+                                                                        </div>
+                                                                        <span className={cn("text-sm", isSelected ? "text-white" : "text-zinc-400")}>
+                                                                            {safeOpt.label}
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            })
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {currentType === 'header' && (
+                                                    <div className="py-3 border-b border-white/10 mt-4">
+                                                        <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+                                                            {form.watch("label") || "Section Header"}
+                                                        </h3>
+                                                    </div>
+                                                )}
+
+                                                {currentType === 'date' && (
+                                                    <div className="pt-1">
+                                                        <DatePicker
+                                                            value={previewValue as Date || undefined}
+                                                            onChange={(date) => setPreviewValue(date)}
+                                                            className="bg-black/20 border-white/10 text-zinc-400 hover:text-white"
+                                                            defaultOpen={true}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {currentType === 'transport' && (
+                                                    <div className="space-y-3">
+                                                        {/* Hotel Selection */}
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Hotel</label>
+                                                            <div className="relative">
+                                                                <select className={cn(inputClasses, "appearance-none w-full cursor-not-allowed opacity-100")} disabled defaultValue="">
+                                                                    <option value="" disabled>-- Select Hotel --</option>
+                                                                    <option>Sheraton Waikiki</option>
+                                                                    <option>Hilton Hawaiian Village</option>
+                                                                    <option>Hyatt Regency</option>
+                                                                    <option>Royal Hawaiian</option>
+                                                                </select>
+                                                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Transport Options */}
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Transportation</label>
+                                                            <div className="space-y-2">
+                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-cyan-500/10 border-cyan-500/50">
+                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-cyan-500 border-cyan-500 text-black">
+                                                                        <Check size={14} className="stroke-[3]" />
+                                                                    </div>
+                                                                    <span className="text-sm text-white">Pick-up / Drop-off</span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-black/20 border-white/10">
+                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-white/5 border-white/20"></div>
+                                                                    <span className="text-sm text-zinc-400">Self Drive</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {currentType === 'smart_pickup' && (
+                                                    <div className="space-y-3">
                                                         <div className="relative">
                                                             <select className={cn(inputClasses, "appearance-none w-full cursor-not-allowed opacity-100")} disabled defaultValue="">
-                                                                <option value="" disabled>-- Select Hotel --</option>
+                                                                <option value="" disabled>-- Select Pickup Hotel --</option>
                                                                 <option>Sheraton Waikiki</option>
                                                                 <option>Hilton Hawaiian Village</option>
                                                                 <option>Hyatt Regency</option>
-                                                                <option>Royal Hawaiian</option>
                                                             </select>
                                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                                                         </div>
-                                                    </div>
-
-                                                    {/* Transport Options */}
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Transportation</label>
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-cyan-500/10 border-cyan-500/50">
-                                                                <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-cyan-500 border-cyan-500 text-black">
-                                                                    <Check size={14} className="stroke-[3]" />
-                                                                </div>
-                                                                <span className="text-sm text-white">Pick-up / Drop-off</span>
+                                                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3">
+                                                            <div className="mt-0.5 text-cyan-500">
+                                                                <MapPin size={16} />
                                                             </div>
-                                                            <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-black/20 border-white/10">
-                                                                <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-white/5 border-white/20"></div>
-                                                                <span className="text-sm text-zinc-400">Self Drive</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {currentType === 'smart_pickup' && (
-                                                <div className="space-y-3">
-                                                    <div className="relative">
-                                                        <select className={cn(inputClasses, "appearance-none w-full cursor-not-allowed opacity-100")} disabled defaultValue="">
-                                                            <option value="" disabled>-- Select Pickup Hotel --</option>
-                                                            <option>Sheraton Waikiki</option>
-                                                            <option>Hilton Hawaiian Village</option>
-                                                            <option>Hyatt Regency</option>
-                                                        </select>
-                                                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-                                                    </div>
-                                                    <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3">
-                                                        <div className="mt-0.5 text-cyan-500">
-                                                            <MapPin size={16} />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
-                                                            <div className="text-sm text-zinc-200 font-medium">Sheraton Waikiki (Aloha Landing)</div>
-                                                            <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                                                <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">7:15 AM</span>
-                                                                <div className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
-                                                                    Map <ExternalLink size={10} />
+                                                            <div className="space-y-1">
+                                                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
+                                                                <div className="text-sm text-zinc-200 font-medium">Sheraton Waikiki (Aloha Landing)</div>
+                                                                <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">7:15 AM</span>
+                                                                    <div className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
+                                                                        Map <ExternalLink size={10} />
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
 
-                                            {form.watch("description") && (
-                                                <p className="text-sm text-zinc-500 mt-1 ml-1">{form.watch("description")}</p>
-                                            )}
+                                                {form.watch("description") && (
+                                                    <p className="text-sm text-zinc-500 mt-1 ml-1">{form.watch("description")}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </form>
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     <Button
                         type="submit"
                         form="custom-field-form"

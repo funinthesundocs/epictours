@@ -73,7 +73,7 @@ export function AvailabilityManager({
             width="full-content"
             contentClassName="p-0 h-full flex flex-col"
         >
-            <div className="flex-1 grid grid-cols-[25fr_55fr_20fr] min-h-0 divide-x divide-zinc-800 bg-[#0b1115]">
+            <div className="flex-1 grid grid-cols-[25fr_55fr_20fr] min-h-0 divide-x divide-zinc-800 bg-transparent">
                 {/* COLUMN 1: Availability Info + Transportation & Staff + Quick Settings */}
                 <div className="flex flex-col h-full overflow-hidden">
                     <ColumnOne
@@ -108,7 +108,7 @@ export function AvailabilityManager({
             </div>
 
             {/* Footer */}
-            <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-white/10 bg-[#0b1115]">
+            <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-white/10 bg-zinc-950/40 backdrop-blur-md">
                 <div className="flex gap-3">
                     <button
                         onClick={handleSave}

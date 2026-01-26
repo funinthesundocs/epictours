@@ -7,6 +7,7 @@ import { z } from "zod";
 import { SidePanel } from "@/components/ui/side-panel";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { ColumnOne } from "./edit-availability/column-one";
@@ -96,7 +97,11 @@ export function EditAvailabilitySheet({
         }
     });
 
-    const { reset, handleSubmit } = methods;
+    const { reset, handleSubmit, formState: { isDirty } } = methods;
+
+    // Track initial assignments to detect changes
+    const [initialAssignments, setInitialAssignments] = useState<Assignment[]>([]);
+    const isAssignmentsDirty = JSON.stringify(assignments) !== JSON.stringify(initialAssignments);
 
     // Fetch reference data & assignments
     useEffect(() => {
@@ -105,7 +110,7 @@ export function EditAvailabilitySheet({
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                // Fetch basic ref data
+                // ... (existing fetches)
                 const [
                     { data: bookings },
                     { data: pricing },
@@ -142,8 +147,10 @@ export function EditAvailabilitySheet({
                         .eq("availability_id", initialData.id)
                         .order("sort_order");
                     setAssignments((assignData as any) || []);
+                    setInitialAssignments((assignData as any) || []);
                 } else {
                     setAssignments([]);
+                    setInitialAssignments([]);
                 }
 
             } catch (err) {
@@ -160,25 +167,32 @@ export function EditAvailabilitySheet({
     useEffect(() => {
         if (!isOpen) return;
 
+        const defaultState = {
+            start_date: selectedDate || "",
+            is_repeating: false,
+            duration_type: "all_day" as "all_day" | "time_range",
+            max_capacity: 0,
+            online_booking_status: "open" as "open" | "closed",
+            repeat_days: [],
+            booking_option_variation: "retail" as "retail" | "online" | "special" | "custom",
+            staff_ids: [],
+        };
+
         if (initialData) {
             const safeData = { ...initialData };
             Object.keys(safeData).forEach(key => {
                 if (safeData[key] === null) safeData[key] = "";
             });
             reset({
-                ...safeData,
+                ...defaultState, // Apply defaults first
+                ...safeData,     // Override with initialData (if present)
                 start_date: safeData.start_date || selectedDate || "",
+                // Coerce numbers to strings for 'isDirty' compatibility with HTML inputs
+                max_capacity: safeData.max_capacity !== undefined && safeData.max_capacity !== null ? String(safeData.max_capacity) : "0",
+                hours_long: safeData.hours_long !== undefined && safeData.hours_long !== null ? String(safeData.hours_long) : "",
             });
         } else {
-            reset({
-                start_date: selectedDate || "",
-                is_repeating: false,
-                duration_type: "all_day",
-                max_capacity: 0,
-                online_booking_status: "open",
-                repeat_days: [],
-                booking_option_variation: "retail",
-            });
+            reset(defaultState);
         }
     }, [isOpen, initialData, selectedDate, reset]);
 
@@ -307,20 +321,20 @@ export function EditAvailabilitySheet({
         >
             <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit, (err) => console.error(err))} className="h-full flex flex-col">
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-64">
                                 <Loader2 className="animate-spin text-cyan-400" size={32} />
                             </div>
                         ) : (
-                            <div className="h-full grid grid-cols-3 divide-x divide-white/5">
+                            <div className="flex-1 grid grid-cols-[25fr_37.5fr_37.5fr] min-h-0 divide-x divide-white/10 bg-transparent">
                                 {/* COLUMN 1: Schedule */}
-                                <div className="p-8">
+                                <div className="h-full overflow-hidden">
                                     <ColumnOne />
                                 </div>
 
                                 {/* COLUMN 2: Pricing & Resources */}
-                                <div className="p-8">
+                                <div className="h-full overflow-hidden">
                                     <ColumnTwo
                                         pricingSchedules={pricingSchedules}
                                         pricingVariations={pricingVariations}
@@ -333,7 +347,7 @@ export function EditAvailabilitySheet({
                                 </div>
 
                                 {/* COLUMN 3: Options & Settings */}
-                                <div className="p-8">
+                                <div className="h-full overflow-hidden">
                                     <ColumnThree
                                         bookingSchedules={bookingSchedules}
                                     />
@@ -343,7 +357,7 @@ export function EditAvailabilitySheet({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex justify-end items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115] py-4">
+                    <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-white/10 bg-zinc-950/40 backdrop-blur-md">
                         {isEditMode && onDelete && (
                             <button
                                 type="button"
@@ -355,21 +369,26 @@ export function EditAvailabilitySheet({
                             </button>
                         )}
 
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-zinc-400 hover:text-white transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || isLoading}
-                            className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                        >
-                            {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                            Save Availability
-                        </button>
+                        {/* Define hasChanges for button logic */}
+                        {(() => {
+                            const hasChanges = isDirty || isAssignmentsDirty;
+                            return (
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting || isLoading || !hasChanges}
+                                    className={cn(
+                                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                                        (isSubmitting || isLoading) ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                            hasChanges ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                                    )}
+                                >
+                                    {(isSubmitting || isLoading) ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                                        hasChanges ? <><Save size={16} /> Save Availability</> :
+                                            "No Changes"}
+                                </button>
+                            );
+                        })()}
                     </div>
                 </form>
             </FormProvider>

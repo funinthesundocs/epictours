@@ -280,7 +280,7 @@ export function ColumnTwo({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#0b1115] animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
+        <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
             {/* Header */}
             <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
                 <Settings size={16} className="text-cyan-500" />

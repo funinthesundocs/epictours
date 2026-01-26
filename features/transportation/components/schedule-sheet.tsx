@@ -193,9 +193,9 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             width="max-w-2xl"
             contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-10">
+            <div className="h-full flex flex-col bg-transparent">
                 {/* Section 1: Master Details */}
-                <form id="schedule-form" onSubmit={handleSubmit(handleMasterSubmit)} className="space-y-6">
+                <form id="schedule-form" onSubmit={handleSubmit(handleMasterSubmit)} className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-10">
                     <div>
                         <SectionHeader icon={Calendar} title="Schedule Details" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -302,7 +302,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                 </div>
             </div>
 
-            <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+            <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                 <Button
                     type="submit"
                     form="schedule-form"

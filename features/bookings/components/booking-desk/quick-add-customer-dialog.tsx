@@ -14,6 +14,7 @@ interface QuickAddCustomerDialogProps {
     onOpenChange: (open: boolean) => void;
     customerToEdit?: Customer | null;
     onCustomerUpdated?: (customer: Customer) => void;
+    onCustomerCreated: (customer: Customer) => void;
 }
 
 export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated, customerToEdit, onCustomerUpdated }: QuickAddCustomerDialogProps) {
@@ -59,7 +60,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                     .update({
                         name,
                         email,
-                        phone: phone || null,
+                        phone: phone || undefined,
                         // Not updating status or created_at
                     })
                     .eq('id', customerToEdit.id)
@@ -73,8 +74,8 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                         id: data.id,
                         name: data.name,
                         email: data.email,
-                        phone: data.phone,
-                        status: data.status
+                        phone: data.phone || undefined,
+                        status: data.status as any // casting to satisfy strict check if needed, or just status if types align
                     });
                     onOpenChange(false);
                 }
@@ -85,7 +86,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                     .insert({
                         name,
                         email,
-                        phone: phone || null,
+                        phone: phone || undefined,
                         status: 'active', // Default to active for new quick adds
                         created_at: new Date().toISOString()
                     })
@@ -99,8 +100,8 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                         id: data.id,
                         name: data.name,
                         email: data.email,
-                        phone: data.phone, // Ensure phone is mapped if present in type
-                        status: data.status
+                        phone: data.phone || undefined, // Ensure phone is mapped if present in type
+                        status: data.status as any
                     });
                     onOpenChange(false);
                 }

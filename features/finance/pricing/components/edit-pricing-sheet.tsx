@@ -408,7 +408,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                     )}
                 </div>
 
-                <div className="flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     {/* Copy to All Checkbox */}
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <input
