@@ -163,6 +163,8 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     const booking = bookingData as any; // Type cast for flexibility
                     console.log("DEBUG: Loaded booking data:", booking);
 
+                    let waitingForPaxMap = false;
+
                     // Populate customer
                     if (booking.customers) {
                         setSelectedCustomer(booking.customers as Customer);
@@ -176,6 +178,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                         // Store pending pax count - will be mapped when rates load
                         console.log("DEBUG: Setting pending pax_count:", booking.pax_count);
                         setPendingPaxCount(booking.pax_count);
+                        waitingForPaxMap = true;
                     }
 
                     // Populate notes
@@ -196,10 +199,12 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                         overrideTotal: booking.total_amount,
                         promoCode: booking.promo_code
                     });
-                }
 
-                // Set initial snapshot after loading data
-                setTimeout(() => setInitialSnapshot(getSnapshot()), 100);
+                    // Only set snapshot if we are NOT waiting for pax map
+                    if (!waitingForPaxMap) {
+                        setTimeout(() => setInitialSnapshot(getSnapshot()), 100);
+                    }
+                }
             } else {
                 // CREATE MODE
                 setTimeout(() => setInitialSnapshot(getSnapshot()), 500);
@@ -247,11 +252,37 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             if (tieredRates.length > 0) {
                 const firstTypeId = tieredRates[0].customer_type_id;
                 console.log("DEBUG: Mapping pendingPaxCount to type:", firstTypeId, "count:", pendingPaxCount);
-                setPaxCounts({ [firstTypeId]: pendingPaxCount });
+
+                const newPaxCounts = { [firstTypeId]: pendingPaxCount };
+                setPaxCounts(newPaxCounts);
                 setPendingPaxCount(null); // Clear pending once mapped
+
+                // Also update snapshot NOW because we skipped it earlier
+                // We must construct it manually because state update is async
+                if (!initialSnapshot) {
+                    const snap = JSON.stringify({
+                        customer: selectedCustomer?.id,
+                        pax: newPaxCounts, // USE NEW VALUE
+                        notes,
+                        options: optionValues,
+                        payment: {
+                            status: paymentState.status,
+                            method: paymentState.method,
+                            amount: paymentState.amount,
+                            override: paymentState.overrideTotal,
+                            promo: paymentState.promoCode
+                        },
+                        schedule: selectedScheduleId,
+                        tier: selectedTier,
+                        optSchedule: selectedOptionScheduleId,
+                        optVariation: selectedOptionVariation
+                    });
+                    console.log("DEBUG: Setting Delayed Initial Snapshot:", snap);
+                    setInitialSnapshot(snap);
+                }
             }
         }
-    }, [pendingPaxCount, rates, selectedTier]);
+    }, [pendingPaxCount, rates, selectedTier, selectedCustomer, notes, optionValues, paymentState, selectedScheduleId, selectedOptionScheduleId, selectedOptionVariation, initialSnapshot]); // Added deps for snapshot construction
 
     // Handle New Customer Quick Add
     const handleCustomerCreated = (newCustomer: Customer) => {
