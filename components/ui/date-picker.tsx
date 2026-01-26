@@ -58,6 +58,11 @@ export function DatePicker({
                     onClose={() => setOpen(false)}
                     disabled={false}
                     initialFocus
+                    className="rounded-md border-zinc-800"
+                    classNames={{
+                        selected: "border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
+                        today: "bg-zinc-800 text-white rounded-md",
+                    }}
                 />
             </PopoverContent>
         </Popover>

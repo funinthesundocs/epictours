@@ -210,7 +210,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                     !selectedExperienceId && "opacity-20 pointer-events-none filter blur-[1px]"
                                 )}
                                 classNames={{
-                                    selected: "border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold",
+                                    selected: "border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
                                     today: "bg-zinc-800 text-white rounded-md",
                                 }}
                             />
