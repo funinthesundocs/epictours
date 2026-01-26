@@ -135,7 +135,7 @@ export default function CustomFieldsPage() {
             action={
                 <Button
                     onClick={handleCreate}
-                    className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
+                    className="bg-cyan-500 hover:bg-cyan-400 text-white font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
                 >
                     <Plus className="mr-2 h-4 w-4" /> New Custom Field
                 </Button>

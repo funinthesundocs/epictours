@@ -10,6 +10,8 @@ import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Zod Schema
 const RoleSchema = z.object({
@@ -33,7 +35,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
         register,
         handleSubmit,
         reset,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<RoleFormData>({
         resolver: zodResolver(RoleSchema),
         defaultValues: {
@@ -108,41 +110,48 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
             title={initialData ? "Edit Role" : "Add Role"}
             description="Manage user role definitions and permissions."
             width="max-w-lg"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
-
-                <div className="space-y-8">
-                    <div>
-                        <SectionHeader icon={UserCog} title="Role Details" />
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Label>Role Name</Label>
-                                <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Flight Manager" />
-                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Notes / Description</Label>
-                                <Textarea
-                                    {...register("description")}
-                                    placeholder="Enter details about this role's responsibilities..."
-                                    className="min-h-[120px] bg-[#0b1115] border-white/10 focus:border-cyan-500/50"
-                                />
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24">
+                    <div className="space-y-8">
+                        <div>
+                            <SectionHeader icon={UserCog} title="Role Details" />
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label>Role Name</Label>
+                                    <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Flight Manager" />
+                                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Notes / Description</Label>
+                                    <Textarea
+                                        {...register("description")}
+                                        placeholder="Enter details about this role's responsibilities..."
+                                        className="min-h-[120px] bg-[#0b1115] border-white/10 focus:border-cyan-500/50"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
-                    <button
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || !isDirty}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        {initialData ? "Update" : "Create"}
-                    </button>
+                        {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                            isDirty ? <><Save size={16} /> {initialData ? "Update" : "Create"}</> :
+                                "No Changes"}
+                    </Button>
                 </div>
-
             </form>
         </SidePanel>
     );

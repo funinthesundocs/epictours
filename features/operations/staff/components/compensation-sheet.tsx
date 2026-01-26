@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface CompensationSheetProps {
     isOpen: boolean;
@@ -151,15 +152,16 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
             title="Compensation Rates"
             description={`Manage payment structure for ${staffName}.`}
             width="max-w-lg"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
                     <Loader2 className="animate-spin text-cyan-400" size={32} />
                 </div>
             ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
 
-                    <div className="space-y-8">
+                    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
                         <div>
                             <SectionHeader icon={Wallet} title="Standard Rates" />
                             <div className="grid grid-cols-2 gap-6">
@@ -182,15 +184,15 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
                         </div>
                     </div>
 
-                    <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
-                        <button
+                    <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                        <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                             Save Rates
-                        </button>
+                        </Button>
                     </div>
 
                 </form>

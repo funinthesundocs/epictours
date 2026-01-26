@@ -53,7 +53,7 @@ export function Sidebar() {
 
             {/* Sidebar Container */}
             <aside className={cn(
-                "fixed top-0 left-0 z-50 h-screen transition-all duration-300 ease-in-out border-r border-white/5 bg-zinc-950",
+                "fixed top-0 left-0 z-50 h-screen transition-all duration-300 ease-in-out border-r border-white/10 bg-zinc-950",
                 isMobileOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0",
                 isCollapsed ? "lg:w-[80px]" : "lg:w-[240px]"
             )}>
@@ -61,7 +61,7 @@ export function Sidebar() {
                 <div className="h-full w-full flex flex-col overflow-hidden">
 
                     {/* Header / Logo Area */}
-                    <div className="relative h-[73px] flex items-center justify-between px-4 border-b border-white/5 shrink-0">
+                    <div className="relative h-[73px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
                         {!isCollapsed && (
                             <div className="overflow-hidden whitespace-nowrap">
                                 <h1 className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
@@ -120,7 +120,7 @@ export function Sidebar() {
                     </div>
 
                     {/* User Profile Footer */}
-                    <div className={cn("p-4 border-t border-white/5 bg-zinc-900/50 shrink-0", isCollapsed && "flex justify-center p-2")}>
+                    <div className={cn("p-4 border-t border-white/10 bg-zinc-900/50 shrink-0", isCollapsed && "flex justify-center p-2")}>
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
                             {!isCollapsed && (

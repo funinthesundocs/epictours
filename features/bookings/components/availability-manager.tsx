@@ -7,6 +7,8 @@ import { ColumnOne } from "./availability-manager/column-one";
 import { ColumnTwo } from "./availability-manager/column-two";
 import { ColumnThree } from "./availability-manager/column-three";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Loader2, Save } from "lucide-react";
 
 interface AvailabilityManagerProps {
     isOpen: boolean;
@@ -32,8 +34,8 @@ export function AvailabilityManager({
     // Ref to call save from column-three
     const saveRef = useRef<(() => Promise<void>) | null>(null);
 
-    const handleStateChange = useCallback((state: { hasChanges: boolean; isSaving: boolean; formData: any }) => {
-        setFormState(state);
+    const handleStateChange = useCallback((state: { hasChanges: boolean; isSaving: boolean }) => {
+        setFormState(prev => ({ ...prev, ...state }));
     }, []);
 
     const handleSave = useCallback(async () => {
@@ -67,17 +69,13 @@ export function AvailabilityManager({
             isOpen={isOpen}
             onClose={onClose}
             title="Manage Availability"
-            description={`${availability.experience_name || 'Experience'} on ${(() => {
-                const [y, m, d] = availability.start_date.split('-');
-                return `${m}-${d}-${y}`;
-            })()}`}
-            width="w-[90vw] max-w-[90vw]"
-            contentClassName="p-0"
+            description=""
+            width="full-content"
+            contentClassName="p-0 h-full flex flex-col"
         >
-            <div className="h-full grid grid-cols-1 lg:grid-cols-[25fr_55fr_20fr] gap-6 p-6 overflow-hidden">
-
+            <div className="flex-1 grid grid-cols-[25fr_55fr_20fr] min-h-0 divide-x divide-zinc-800 bg-[#0b1115]">
                 {/* COLUMN 1: Availability Info + Transportation & Staff + Quick Settings */}
-                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
+                <div className="flex flex-col h-full overflow-hidden">
                     <ColumnOne
                         availability={availability}
                         onStateChange={handleStateChange}
@@ -86,7 +84,7 @@ export function AvailabilityManager({
                 </div>
 
                 {/* COLUMN 2: Bookings List */}
-                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6" key={refreshKey}>
+                <div className="flex flex-col h-full overflow-hidden" key={refreshKey}>
                     <ColumnTwo
                         availability={availability}
                         onBookingClick={onBookingEdit}
@@ -95,7 +93,7 @@ export function AvailabilityManager({
                 </div>
 
                 {/* COLUMN 3: Actions */}
-                <div className="h-full flex flex-col overflow-y-auto">
+                <div className="flex flex-col h-full overflow-hidden">
                     <ColumnThree
                         onSave={handleSave}
                         isSaving={formState.isSaving}
@@ -106,6 +104,38 @@ export function AvailabilityManager({
                         onEmailTour={handleEmailTour}
                         onSmsTour={handleSmsTour}
                     />
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-white/10 bg-[#0b1115]">
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleSave}
+                        disabled={formState.isSaving || !formState.hasChanges}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            formState.isSaving
+                                ? "bg-cyan-500/50 text-white cursor-not-allowed" // Saving state
+                                : formState.hasChanges
+                                    ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" // Active save state
+                                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5" // No changes state
+                        )}
+                    >
+                        {formState.isSaving ? (
+                            <>
+                                <Loader2 className="animate-spin" size={16} />
+                                Saving...
+                            </>
+                        ) : formState.hasChanges ? (
+                            <>
+                                <Save size={16} />
+                                Save Changes
+                            </>
+                        ) : (
+                            "No Changes"
+                        )}
+                    </button>
                 </div>
             </div>
         </SidePanel>

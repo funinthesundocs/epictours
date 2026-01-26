@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
+import { Button } from "@/components/ui/button";
 
 // Zod Schema
 const StaffSchema = z.object({
@@ -151,10 +152,11 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             title={initialData ? "Edit Staff" : "Add Staff"}
             description="Manage staff details and role assignment."
             width="max-w-lg"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
 
-                <div className="space-y-8">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
                     {/* Basic Info */}
                     <div>
                         <SectionHeader icon={Info} title="Basic Information" />
@@ -213,15 +215,15 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
-                    <button
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {initialData ? "Update" : "Create"}
-                    </button>
+                    </Button>
                 </div>
 
             </form>

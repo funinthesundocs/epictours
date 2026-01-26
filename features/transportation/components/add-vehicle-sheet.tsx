@@ -10,6 +10,8 @@ import { SidePanel } from "@/components/ui/side-panel";
 import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Helper to handle empty inputs -> null
 const emptyToNull = (val: unknown): number | null => {
@@ -73,7 +75,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
         reset,
         setValue,
         watch,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<VehicleFormData>({
         resolver: zodResolver(VehicleSchema),
         defaultValues: {
@@ -169,11 +171,11 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
             title={initialData ? "Edit Vehicle" : "Add Vehicle"}
             description="Manage vehicle details, rates, and compliance."
             width="max-w-2xl"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
-
-                {/* 1. Basic Info */}
-                <div className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
+                    {/* 1. Basic Info */}
                     <div>
                         <SectionHeader icon={Info} title="Vehicle Information" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -248,18 +250,22 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
-                    <button
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || !isDirty}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        {initialData ? "Update" : "Create"}
-                    </button>
-                    {/* Cancel button removed per user request */}
+                        {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                            isDirty ? <><Save size={16} /> {initialData ? "Update" : "Create"}</> :
+                                "No Changes"}
+                    </Button>
                 </div>
-
             </form>
         </SidePanel>
     );

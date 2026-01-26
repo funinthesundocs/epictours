@@ -5,6 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Settings } from "lucide-react";
 import { GlassCombobox } from "@/components/ui/glass-combobox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { TimePicker } from "@/components/ui/time-picker";
 
 interface ColumnOneProps {
     availability: Availability;
@@ -184,56 +188,40 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
     }, [headline, startTime, maxCapacity, routeId, vehicleId, pricingScheduleId, bookingOptionScheduleId, driverId, guideId, availability.id, saveRef]);
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
-            {/* Header Info Card */}
-            <div className="p-4 bg-black/20 rounded-xl border border-white/10 space-y-3">
-                <div className="flex items-center gap-2 text-cyan-400 font-bold uppercase text-xs tracking-wider border-b border-white/5 pb-2">
-                    {availability.experience_name || "Unknown Experience"}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Date</div>
-                        <div className="text-white font-medium">
-                            {formatDate(availability.start_date)}
-                        </div>
+        <div className="flex flex-col h-full bg-[#0b1115]">
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 space-y-4">
+                <div className="flex flex-col gap-0.5">
+                    <div className="text-sm font-bold text-white uppercase tracking-wider truncate" title={availability.experience_name || ""}>
+                        {availability.experience_name || "Unknown Experience"}
                     </div>
-                    <div>
-                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Time</div>
-                        <div className="text-white font-medium">
-                            {formatTime(availability.start_time)}
-                        </div>
-                    </div>
-                    <div className="col-span-2 border-t border-white/5 pt-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Capacity</div>
-                                <div className="text-white font-medium">
-                                    {bookedCount} / {maxCap} Pax
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Remaining</div>
-                                <div className={`font-medium ${remaining <= 5 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                    {remaining} Pax
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-span-2 border-t border-white/5 pt-2">
-                        <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Availability ID</div>
-                        <div className="text-zinc-400 font-mono text-[10px] truncate" title={availability.id}>
-                            {availability.id}
-                        </div>
+                    <div className="text-[10px] text-zinc-500 font-mono">
+                        {availability.id}
                     </div>
                 </div>
-            </div>
 
-            {/* Transportation and Staff (Live display from current form state) */}
-            <div className="space-y-2">
-                <label className="text-base font-medium text-zinc-400">
-                    Transportation and Staff
-                </label>
-                <div className="p-4 bg-black/20 rounded-xl border border-white/10 space-y-3">
+                {/* Session Details Card (Time/Capacity) */}
+                <div className="space-y-3">
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Session Details</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Time</div>
+                            <div className="text-white font-medium">
+                                {formatTime(availability.start_time)}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Date</div>
+                            <div className="text-white font-medium">
+                                {formatDate(availability.start_date)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Transportation and Staff */}
+                <div className="space-y-3 border-t border-white/5 pt-4">
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Transportation & Staff</div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Route</div>
@@ -248,7 +236,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                             </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-3">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Driver</div>
                             <div className="text-white text-sm">
@@ -265,179 +253,185 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                 </div>
             </div>
 
-            {/* Quick Settings */}
-            <div className="space-y-4">
-                <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                    <Settings size={18} className="text-cyan-500" />
-                    Quick Settings
-                </label>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-0 space-y-0 custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-500">
 
-                {/* Time & Capacity Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Start Time
-                        </label>
-                        <input
-                            type="time"
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500/50"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Max Capacity
-                        </label>
-                        <input
-                            type="number"
-                            value={maxCapacity}
-                            onChange={(e) => setMaxCapacity(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-500/50"
-                            min="0"
-                        />
+
+
+                {/* Quick Settings Header - Sticky */}
+                <div className="px-6 py-3 border-b border-white/5 bg-black/40 backdrop-blur-sm sticky top-0 z-10 w-full mb-6 relative">
+                    <div className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                        <Settings size={18} className="text-cyan-500" />
+                        Quick Settings
                     </div>
                 </div>
 
-                {/* Pickup Route & Vehicle Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Pickup Route
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No route" },
-                                ...routes.map(r => ({ value: r.id, label: r.name }))
-                            ]}
-                            value={routeId}
-                            onChange={setRouteId}
-                            placeholder="Select route..."
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Vehicle
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No vehicle" },
-                                ...vehicles.map(v => ({ value: v.id, label: v.name }))
-                            ]}
-                            value={vehicleId}
-                            onChange={setVehicleId}
-                            placeholder="Select vehicle..."
-                        />
-                    </div>
-                </div>
+                <div className="px-6 pb-6 space-y-4">
 
-                {/* Driver & Guide Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Driver
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No driver" },
-                                ...drivers.map(s => ({ value: s.id, label: s.name }))
-                            ]}
-                            value={driverId}
-                            onChange={setDriverId}
-                            placeholder="Select driver..."
-                        />
+                    {/* Time & Capacity Row */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Start Time
+                            </Label>
+                            <TimePicker
+                                value={startTime}
+                                onChange={(val) => setStartTime(val)}
+                                placeholder="Select time"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Max Capacity
+                            </Label>
+                            <Input
+                                type="number"
+                                value={maxCapacity}
+                                onChange={(e) => setMaxCapacity(e.target.value)}
+                                min="0"
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Guide
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No guide" },
-                                ...guides.map(s => ({ value: s.id, label: s.name }))
-                            ]}
-                            value={guideId}
-                            onChange={setGuideId}
-                            placeholder="Select guide..."
-                        />
-                    </div>
-                </div>
 
-                {/* Pricing Schedule & Rate Tier Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Pricing Schedule
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No schedule" },
-                                ...pricingSchedules.map(p => ({ value: p.id, label: p.name }))
-                            ]}
-                            value={pricingScheduleId}
-                            onChange={setPricingScheduleId}
-                            placeholder="Select pricing..."
-                        />
+                    {/* Pickup Route & Vehicle Row */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Pickup Route
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No route" },
+                                    ...routes.map(r => ({ value: r.id, label: r.name }))
+                                ]}
+                                value={routeId}
+                                onChange={setRouteId}
+                                placeholder="Select route..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Vehicle
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No vehicle" },
+                                    ...vehicles.map(v => ({ value: v.id, label: v.name }))
+                                ]}
+                                value={vehicleId}
+                                onChange={setVehicleId}
+                                placeholder="Select vehicle..."
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Rate Tier
-                        </label>
-                        <GlassCombobox
-                            options={tiers.map(t => ({ value: t, label: t }))}
-                            value={rateTier}
-                            onChange={setRateTier}
-                            placeholder="Select tier..."
-                        />
-                    </div>
-                </div>
 
-                {/* Booking Options Schedule & Variation Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Booking Options
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "", label: "No options" },
-                                ...bookingOptionSchedules.map(b => ({ value: b.id, label: b.name }))
-                            ]}
-                            value={bookingOptionScheduleId}
-                            onChange={setBookingOptionScheduleId}
-                            placeholder="Select options..."
-                        />
+                    {/* Driver & Guide Row */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Driver
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No driver" },
+                                    ...drivers.map(s => ({ value: s.id, label: s.name }))
+                                ]}
+                                value={driverId}
+                                onChange={setDriverId}
+                                placeholder="Select driver..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Guide
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No guide" },
+                                    ...guides.map(s => ({ value: s.id, label: s.name }))
+                                ]}
+                                value={guideId}
+                                onChange={setGuideId}
+                                placeholder="Select guide..."
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                            Options Variation
-                        </label>
-                        <GlassCombobox
-                            options={[
-                                { value: "retail", label: "Retail" },
-                                { value: "online", label: "Online" },
-                                { value: "special", label: "Special" },
-                                { value: "custom", label: "Custom" }
-                            ]}
-                            value={optionVariation}
-                            onChange={setOptionVariation}
-                            placeholder="Select variation..."
-                        />
-                    </div>
-                </div>
 
-                {/* Private Note - at bottom */}
-                <div className="space-y-2">
-                    <label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
-                        Private Note
-                    </label>
-                    <textarea
-                        value={headline}
-                        onChange={(e) => setHeadline(e.target.value)}
-                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white text-sm resize-none focus:outline-none focus:border-cyan-500/50 placeholder-zinc-600"
-                        rows={2}
-                        placeholder="Internal note for staff..."
-                    />
+                    {/* Pricing Schedule & Rate Tier Row */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Pricing Schedule
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No schedule" },
+                                    ...pricingSchedules.map(p => ({ value: p.id, label: p.name }))
+                                ]}
+                                value={pricingScheduleId}
+                                onChange={setPricingScheduleId}
+                                placeholder="Select pricing..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Rate Tier
+                            </Label>
+                            <GlassCombobox
+                                options={tiers.map(t => ({ value: t, label: t }))}
+                                value={rateTier}
+                                onChange={setRateTier}
+                                placeholder="Select tier..."
+                            />
+                        </div>
+                    </div>
+
+                    {/* Booking Options Schedule & Variation Row */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Booking Options
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "", label: "No options" },
+                                    ...bookingOptionSchedules.map(b => ({ value: b.id, label: b.name }))
+                                ]}
+                                value={bookingOptionScheduleId}
+                                onChange={setBookingOptionScheduleId}
+                                placeholder="Select options..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                                Options Variation
+                            </Label>
+                            <GlassCombobox
+                                options={[
+                                    { value: "retail", label: "Retail" },
+                                    { value: "online", label: "Online" },
+                                    { value: "special", label: "Special" },
+                                    { value: "custom", label: "Custom" }
+                                ]}
+                                value={optionVariation}
+                                onChange={setOptionVariation}
+                                placeholder="Select variation..."
+                            />
+                        </div>
+                    </div>
+
+                    {/* Private Note - at bottom */}
+                    <div className="space-y-2">
+                        <Label className="text-zinc-500 text-xs uppercase font-bold tracking-wider">
+                            Private Note
+                        </Label>
+                        <Textarea
+                            value={headline}
+                            onChange={(e) => setHeadline(e.target.value)}
+                            className="bg-black/20 border-white/10 text-white placeholder:text-zinc-600 focus-visible:border-cyan-500/50 min-h-[80px]"
+                            placeholder="Internal note for staff..."
+                        />
+                    </div>
                 </div>
             </div>
         </div>

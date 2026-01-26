@@ -294,7 +294,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         reset,
         watch,
         setValue,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<BookingOptionScheduleFormData>({
         resolver: zodResolver(BookingOptionScheduleSchema) as any,
         defaultValues: {
@@ -686,14 +686,22 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                         </div>
                     </div>
 
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all"
-                    >
-                        {isSubmitting ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save className="mr-2" size={16} />}
-                        Save Booking Options
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !isDirty}
+                            className={cn(
+                                "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                                isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                    isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                        "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            )}
+                        >
+                            {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                                isDirty ? <><Save size={16} /> Save Booking Options</> :
+                                    "No Changes"}
+                        </Button>
+                    </div>
                 </div>
             </form>
         </SidePanel>

@@ -9,7 +9,24 @@
     4.  **Diff** against your broken file.
     5.  **Copy** the working logic exactly (Logic patterns, Zod schemas, Initialization).
 
-## 1. UI Components (Deep Core)
+## 1. UI Standards
+
+### Save/Update Buttons
+All form submission buttons must follow this state logic:
+1.  **No Changes** (Default):
+    -   Text: "No Changes"
+    -   Style: Zinc/Gray (`bg-zinc-800 text-zinc-500 border border-white/5`)
+    -   State: Disabled (`cursor-not-allowed`)
+2.  **Has Changes**:
+    -   Text: "Save Changes" (or "Create X")
+    -   Style: Cyan Primary (`bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]`)
+    -   State: Enabled
+3.  **Saving/Loading**:
+    -   Text: "Saving..."
+    -   Style: Cyan Disabled (`bg-cyan-500/50 text-white`)
+    -   State: Disabled (`cursor-not-allowed`) with `Loader2` spinner.
+
+## 2. UI Components (Deep Core)
 *   **Tables**:
     *   **Headers**: Always visible, even when empty.
     *   **Empty State**: Use a `<tr><td colSpan={4} ...>Message</td></tr>` inside `<tbody>` instead of a wrapper `div`. This maintains layout stability.
@@ -21,6 +38,43 @@
 *   **Forms**:
     *   **Inputs**: `bg-black/20` with `border-white/10`. Focus `cyan-500/50`.
     *   **Tabs**: Use internal `useState` for tabs within SidePanels. Use `animate-in fade-in slide-in-from-right-4` for smooth transitions.
+    *   **SidePanel / Sheet Layouts**:
+        *   **Standard Structure**:
+            ```tsx
+            <SidePanel ...>
+                <form ... className="flex flex-col h-full">
+                    {/* Content: Scrollable */}
+                    <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
+                       {/* Grid or Fields */}
+                    </div>
+
+                    {/* Footer: Fixed at Bottom */}
+                    <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                        {/* Left: Delete (if Edit Mode) */}
+                        {isEditMode && <Button variant="ghost" className="mr-auto text-red-400 ...">Delete</Button>}
+
+                        {/* Right: Actions */}
+                        {/* NO CANCEL BUTTON - Use 'X' in header or click mask */}
+                        <Button type="submit" className="text-white ...">Save</Button>
+                    </div>
+                </form>
+            </SidePanel>
+            ```
+        *   **Footer Rules**:
+            *   **Spacing**: `py-4 px-6 gap-4`.
+            *   **Color**: `bg-[#0b1115]` with `border-t border-white/10`.
+            *   **Buttons**: Primary Button must use `text-white` (never black text on Cyan).
+            *   **No Cancel**: Do not include a "Cancel" button.
+    *   **Columned Layouts (Booking Desk / Availability)**:
+        *   **Container**: Use `min-h-full` on the Grid container to ensure columns stretch to the bottom of the visible area.
+        *   **Column Wrapper**: Use `h-full` and `border-r` on the column wrapper to create full-height vertical dividers.
+        *   **Header Style**:
+            *   Full Width: `bg-white/5`, `backdrop-blur-md`, `border-b border-white/5`.
+            *   Behavior: `sticky top-0 z-10`.
+            *   Typography: `text-zinc-400`, `text-xs`, `uppercase`, `font-bold`, `tracking-wider`.
+            *   Padding: `px-4 py-3`.
+            *   Icons: `text-zinc-500` (16px).
+        *   **Content Area**: Apply `p-6` to the content container below the header.
 
 ## 2. Database & RLS
 *   **Local Development**:
@@ -101,6 +155,7 @@
         onChange={(val) => setValue("field_id", val)}
         options={options}
         placeholder="Search or select..."
+        inputClassName="bg-zinc-900/80 ..." // Optional: Match standard input background
         // Ensure parent handles the "None" logic if manually implemented
     />
     ```
@@ -122,3 +177,119 @@
         placeholder="Enter text..."
     />
     ```
+
+## 12. Multi-Select Field Pattern (Checkbox Standard)
+*   **Standard**: Use this pattern for all "Multi-Select" or "Checkbox" type fields across the system.
+*   **Reference Implementation**: `features/settings/custom-fields/components/edit-custom-field-sheet.tsx`
+*   **Settings Schema**:
+    ```typescript
+    settings: {
+        multi_select_style: 'vertical' | 'horizontal' | 'columns',
+        multi_select_columns: 2 | 3 | 4,  // Only when style is 'columns'
+        multi_select_visual: 'button' | 'list',
+        binary_mode: boolean,  // True = Yes/No toggle only
+        allow_multiselect: boolean
+    }
+    ```
+
+### Layout Toolbar (Icon-Based Selector)
+*   **Location**: Above the options list.
+*   **Icons** (from `lucide-react`):
+    *   `AlignJustify` → Vertical layout
+    *   `Columns` → Horizontal layout (flex-wrap)
+    *   `LayoutGrid` → Columns layout (grid)
+*   **Styling**:
+    *   Container: `flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit`
+    *   Active Button: `bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10`
+    *   Inactive Button: `text-zinc-500 hover:text-zinc-300 hover:bg-white/5`
+
+### Column Count Selector (Nested)
+*   **When Visible**: Only when `multi_select_style === 'columns'`.
+*   **Values**: 2, 3, 4 columns.
+*   **Styling**:
+    *   Container: `flex items-center gap-0.5 ml-1 pl-1 border-l border-white/10`
+    *   Active Button: `bg-cyan-500 text-black shadow-sm`
+    *   Inactive Button: `text-zinc-500 hover:text-zinc-300 hover:bg-white/5`
+*   **Animation**: `animate-in fade-in zoom-in-50 duration-200`
+
+### Visual Style Toolbar
+*   **Icons** (from `lucide-react`):
+    *   `Square` → Button Style (default, boxed items)
+    *   `LayoutList` → List Style (compact, minimal borders)
+*   **Usage**: Same styling as Layout Toolbar.
+
+### Binary Mode Toggle
+*   **Icon**: `ToggleRight`
+*   **Behavior**: When ON, hides options list and shows a single Switch toggle.
+*   **Output**: `'yes' | 'no'` instead of option values.
+*   **Note**: Selecting a layout style automatically turns OFF binary mode.
+
+### Rendering Classes
+*   **Vertical**: `space-y-3`
+*   **Horizontal**: `flex flex-wrap gap-3`
+*   **Columns (2)**: `grid grid-cols-2 gap-3`
+*   **Columns (3)**: `grid grid-cols-3 gap-3`
+*   **Columns (4)**: `grid grid-cols-4 gap-3`
+
+### Item Styling
+*   **Button Style (default)**:
+    ```css
+    px-3 py-3 rounded-lg border cursor-pointer
+    /* Selected */ bg-cyan-500/10 border-cyan-500/50
+    /* Unselected */ bg-black/20 border-white/10 hover:border-white/20
+    ```
+*   **List Style**:
+    ```css
+    px-1 py-1 border-none hover:bg-white/5 rounded
+    /* Outer Container */ border border-white/10 rounded-lg p-3 bg-black/10
+    ```
+
+### Usage Example
+```tsx
+<div className={cn(
+    (settings.multi_select_style === 'horizontal') ? "flex flex-wrap gap-3" :
+    (settings.multi_select_style === 'columns') ?
+        ((settings.multi_select_columns === 3) ? "grid grid-cols-3 gap-3" :
+         (settings.multi_select_columns === 4) ? "grid grid-cols-4 gap-3" :
+         "grid grid-cols-2 gap-3") :
+    "space-y-3" // Default Vertical
+)}>
+    {options.map(opt => (
+        <div
+            key={opt.value}
+            className={cn(
+                "flex items-center space-x-3 transition-all cursor-pointer",
+                settings.multi_select_visual === 'list'
+                    ? "px-1 py-1 border-none hover:bg-white/5 rounded"
+                    : "px-3 py-3 rounded-lg border",
+                isSelected
+                    ? "bg-cyan-500/10 border-cyan-500/50"
+                    : "bg-black/20 border-white/10 hover:border-white/20"
+            )}
+        >
+            <Checkbox checked={isSelected} />
+            <span className="text-sm text-zinc-300">{opt.label}</span>
+        </div>
+    ))}
+</div>
+```
+
+
+## 13. Dynamic Custom Forms Design Strategy
+*   **Strategy**: For dynamic fields (e.g., in Booking Desk, Custom Field Forms), use a "Card Object" pattern with "Unboxed Inputs".
+*   **Core Rules**:
+    1.  **Combobox Only**: NEVER use native `<select>`. Always use `<Combobox>`.
+    2.  **Unboxed Inputs**:
+        *   The *Input* itself (Combobox trigger or Text input) must match the standard system input style (`bg-zinc-900/80`).
+        *   Do NOT double-wrap the input in another styled container (e.g., `bg-black/20`) if the component already provides one.
+        *   Use the `inputClassName` prop on `<Combobox>` to override default `bg-black/20` to `bg-zinc-900/80`.
+    3.  **Card Item Wrapper**:
+        *   Wrap the *Field Object* (Label + Input + Description) in a "card" container if it's part of a list.
+        *   Style: `p-3 bg-black/20 border border-white/10 rounded-lg`.
+        *   This creates a clear visual distinction for "Content Objects" while keeping the "Form Controls" (Inputs) consistent.
+    4.  **Layout**:
+        *   **Top Controls**: Use `grid grid-cols-2` for primary controls (e.g., Schedule | Variation). Use conditional col-spanning to handle empty states.
+        *   **Inline Actions**: Place "Add New" or "Edit" buttons as **Icon Buttons** inline with the field (e.g., inside the label row or flex-aligned), reducing vertical clutter.
+    5.  **Reusability**:
+        *   Define a standard `inputStyles` constant at the top of the file to ensure all inputs in the form share the exact class string.
+        *   `const inputStyles = "w-full bg-zinc-900/80 ...";`

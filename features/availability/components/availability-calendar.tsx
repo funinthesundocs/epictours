@@ -27,15 +27,21 @@ import { Settings2 } from "lucide-react";
 export function AvailabilityCalendar({
     experiences = [],
     onEventClick,
-    onEditEvent
+    onEditEvent,
+    currentDate,
+    onDateChange,
+    selectedExperience,
+    onExperienceChange
 }: {
     experiences: { id: string, name: string, short_code?: string }[],
     onEventClick?: (date: string, experienceId?: string) => void,
-    onEditEvent?: (availability: Availability) => void
+    onEditEvent?: (availability: Availability) => void,
+    currentDate: Date,
+    onDateChange: (date: Date) => void,
+    selectedExperience: string,
+    onExperienceChange: (expName: string) => void
 }) {
-    const [currentDate, setCurrentDate] = useState(new Date()); // Dynamic Date
-    // Default to first available experience or fallback
-    const [selectedExperience, setSelectedExperience] = useState(experiences[0]?.name || "Mauna Kea Summit");
+    // State lifted to parent
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
     // Data State
@@ -134,7 +140,8 @@ export function AvailabilityCalendar({
             // Let's just alert success and user navigates or waits.
             // Ideally: refetch.
             alert("Duplicated successfully! Refreshing view...");
-            setCurrentDate(new Date(currentDate)); // Trigger effect
+            alert("Duplicated successfully! Refreshing view...");
+            onDateChange(new Date(currentDate)); // Trigger effect
             setSelectedIds(new Set());
             setIsSelectMode(false);
         }
@@ -235,15 +242,15 @@ export function AvailabilityCalendar({
     // --- NAVIGATION LOGIC ---
 
     const handlePrevMonth = () => {
-        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+        onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     };
 
     const handleNextMonth = () => {
-        setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+        onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
     const handleYearSelect = (year: number) => {
-        setCurrentDate(prev => new Date(year, prev.getMonth(), 1));
+        onDateChange(new Date(year, currentDate.getMonth(), 1));
         setIsYearPickerOpen(false);
     };
 
@@ -359,7 +366,7 @@ export function AvailabilityCalendar({
                                                 : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                                         )}
                                         onClick={() => {
-                                            setSelectedExperience(exp.name);
+                                            onExperienceChange(exp.name);
                                             setIsExpPickerOpen(false);
                                         }}
                                     >
@@ -417,14 +424,7 @@ export function AvailabilityCalendar({
                         disabled={isSelectMode}
                     />
 
-                    {/* Create Button - Far Right, Cyan */}
-                    <ToolbarButton
-                        icon={Plus}
-                        label="Create"
-                        primary
-                        onClick={() => onEventClick?.(format(currentDate, 'yyyy-MM-dd'), currentExp?.id)}
-                        disabled={isSelectMode}
-                    />
+                    {/* Create Button Removed - Moved to Page Header */}
                 </div>
             </div>
 
@@ -441,7 +441,7 @@ export function AvailabilityCalendar({
                                 selectedCount={selectedIds.size}
                                 selectedIds={selectedIds}
                                 onClearSelection={() => setSelectedIds(new Set())}
-                                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                                onSuccess={() => onDateChange(new Date(currentDate))}
                                 onExitBulkMode={() => {
                                     setIsSelectMode(false);
                                     setSelectedIds(new Set());
@@ -474,7 +474,7 @@ export function AvailabilityCalendar({
                                 selectedCount={selectedIds.size}
                                 selectedIds={selectedIds}
                                 onClearSelection={() => setSelectedIds(new Set())}
-                                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                                onSuccess={() => onDateChange(new Date(currentDate))}
                                 onExitBulkMode={() => {
                                     setIsSelectMode(false);
                                     setSelectedIds(new Set());
@@ -503,7 +503,7 @@ export function AvailabilityCalendar({
             <BulkEditSheet
                 isOpen={isDirectBulkEditOpen}
                 onClose={() => setIsDirectBulkEditOpen(false)}
-                onSuccess={() => setCurrentDate(new Date(currentDate))}
+                onSuccess={() => onDateChange(new Date(currentDate))}
                 selectedIds={new Set()}
                 showDateRangeSelector
             />

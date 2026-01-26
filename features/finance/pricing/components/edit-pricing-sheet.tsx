@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -53,7 +54,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         reset,
         watch,
         setValue,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<PricingScheduleFormData>({
         resolver: zodResolver(PricingScheduleSchema),
         defaultValues: {
@@ -234,7 +235,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             width="w-[85vw] max-w-4xl"
             contentClassName="p-0"
         >
-            <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="pb-12 pt-0 h-full flex flex-col">
+            <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="pt-0 h-full flex flex-col">
 
                 {/* Header Fields (Always Visible) */}
                 <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
@@ -270,7 +271,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 </div>
 
                 {/* Tab Content Area */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24">
                     {pricingVariations.length > 0 && activeTab && (
                         <div className="space-y-4 animate-in fade-in duration-300">
                             <div className="flex items-center justify-between mb-4">
@@ -407,7 +408,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                     )}
                 </div>
 
-                <div className="flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
                     {/* Copy to All Checkbox */}
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <input
@@ -421,14 +422,22 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                         </span>
                     </label>
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                    >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        Save Schedule
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !isDirty}
+                            className={cn(
+                                "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                                isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                    isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                        "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            )}
+                        >
+                            {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                                isDirty ? <><Save size={16} /> Save Schedule</> :
+                                    "No Changes"}
+                        </Button>
+                    </div>
                 </div>
             </form>
         </SidePanel>

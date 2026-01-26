@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { BookingOption, BookingOptionSchedule } from "@/features/bookings/types";
 import { Availability } from "@/features/availability/components/availability-list-table";
-import { GlassCombobox } from "@/components/ui/glass-combobox";
-import { Settings, ChevronDown, Plus, Minus, MapPin, Loader2, ExternalLink } from "lucide-react";
+import { Combobox } from "@/components/ui/combobox";
+import { Settings, Plus, Minus, MapPin, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
@@ -21,6 +21,8 @@ interface ColumnTwoProps {
     optionValues: Record<string, any>;
     setOptionValues: (values: Record<string, any>) => void;
 }
+
+const inputStyles = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
 
 export function ColumnTwo({
     availability,
@@ -94,51 +96,48 @@ export function ColumnTwo({
         const optId = opt.id || opt.field_id || String(Math.random());
         const currentValue = optionValues[optId];
 
-        const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
-        const selectClasses = cn(inputClasses, "appearance-none cursor-pointer");
+        // inputStyles defined at top
+        const selectClasses = cn(inputStyles, "appearance-none cursor-pointer");
 
         if (opt.type === 'smart_pickup') {
             const pickupDetails = resolvePickupDetails(currentValue);
 
             return (
                 <div className="space-y-3">
-                    <GlassCombobox
+                    <Combobox
                         value={currentValue || ""}
                         onChange={(val) => handleValueChange(optId, val)}
                         options={hotels.map(h => ({ label: h.name, value: h.id }))}
                         placeholder={isLoadingSmartData ? "Loading..." : "Select Pickup Hotel"}
-                        searchPlaceholder="Search hotel..."
-                        className={inputClasses}
+                        inputClassName={inputStyles}
                         disabled={isLoadingSmartData}
                     />
 
-                    {
-                        currentValue && pickupDetails && (
-                            <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                                <div className="mt-0.5 text-cyan-500 flex-shrink-0">
-                                    <MapPin size={16} />
-                                </div>
-                                <div className="space-y-1 min-w-0">
-                                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
-                                    <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
-                                    <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                        <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
-                                        {pickupDetails.mapLink && (
-                                            <a
-                                                href={pickupDetails.mapLink}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
-                                            >
-                                                Map <ExternalLink size={10} />
-                                            </a>
-                                        )}
-                                    </div>
+                    {currentValue && pickupDetails && (
+                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                            <div className="mt-0.5 text-cyan-500 flex-shrink-0">
+                                <MapPin size={16} />
+                            </div>
+                            <div className="space-y-1 min-w-0">
+                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
+                                <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
+                                <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
+                                    {pickupDetails.mapLink && (
+                                        <a
+                                            href={pickupDetails.mapLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
+                                        >
+                                            Map <ExternalLink size={10} />
+                                        </a>
+                                    )}
                                 </div>
                             </div>
-                        )
-                    }
-                </div >
+                        </div>
+                    )}
+                </div>
             );
         }
 
@@ -147,21 +146,16 @@ export function ColumnTwo({
             case 'quantity':
                 // Dropdown select
                 return (
-                    <div className="relative">
-                        <select
-                            value={currentValue || ""}
-                            onChange={(e) => handleValueChange(optId, e.target.value)}
-                            className={selectClasses}
-                        >
-                            <option value="">-- Select --</option>
-                            {opt.options?.map((o: any, i: number) => (
-                                <option key={o.value || i} value={o.value}>
-                                    {o.label}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-                    </div>
+                    <Combobox
+                        value={currentValue || ""}
+                        onChange={(val) => handleValueChange(optId, val)}
+                        options={opt.options?.map((o: any) => ({
+                            label: o.label,
+                            value: o.value
+                        })) || []}
+                        placeholder="-- Select --"
+                        inputClassName={inputStyles}
+                    />
                 );
 
             case 'checkbox':
@@ -236,7 +230,7 @@ export function ColumnTwo({
                             type="number"
                             value={numValue}
                             onChange={(e) => handleValueChange(optId, Number(e.target.value) || 0)}
-                            className={cn(inputClasses, "w-20 text-center")}
+                            className={cn(inputStyles, "w-20 text-center")}
                             min={0}
                         />
                         <button
@@ -255,7 +249,7 @@ export function ColumnTwo({
                         type="date"
                         value={currentValue || ""}
                         onChange={(e) => handleValueChange(optId, e.target.value)}
-                        className={inputClasses}
+                        className={inputStyles}
                     />
                 );
 
@@ -269,7 +263,7 @@ export function ColumnTwo({
                             value={currentValue || ""}
                             onChange={(e) => handleValueChange(optId, e.target.value)}
                             placeholder="Enter details..."
-                            className={cn(inputClasses, "min-h-[80px] resize-none")}
+                            className={cn(inputStyles, "min-h-[80px] resize-none")}
                         />
                     );
                 }
@@ -279,124 +273,119 @@ export function ColumnTwo({
                         value={currentValue || ""}
                         onChange={(e) => handleValueChange(optId, e.target.value)}
                         placeholder="Enter value..."
-                        className={inputClasses}
+                        className={inputStyles}
                     />
                 );
         }
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500 delay-100 flex flex-col h-full">
-
+        <div className="flex flex-col h-full bg-[#0b1115] animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
             {/* Header */}
-            <h3 className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                <Settings size={18} className="text-cyan-500" />
-                Booking Options
-            </h3>
-
-            {/* Controls */}
-            <div className="space-y-4">
-                {/* Schedule Selector */}
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Option Schedule</label>
-                    <div className="relative">
-                        <select
-                            value={selectedOptionScheduleId || ""}
-                            onChange={(e) => setSelectedOptionScheduleId(e.target.value || null)}
-                            className="w-full bg-zinc-900/80 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
-                        >
-                            <option value="">-- No Options --</option>
-                            {optionSchedules.map(sch => {
-                                const isDefault = sch.id === availability.booking_option_schedule_id;
-                                return (
-                                    <option key={sch.id} value={sch.id} className="bg-zinc-950">
-                                        {sch.name}{isDefault ? " (Default)" : ""}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-                    </div>
-                </div>
-
-                {/* Variation Selector (Only show if schedule selected) */}
-                {selectedOptionScheduleId && (
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Variation</label>
-                        <div className="relative">
-                            <select
-                                value={selectedVariation}
-                                onChange={(e) => setSelectedVariation(e.target.value)}
-                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg p-2 text-sm text-white appearance-none focus:outline-none focus:border-cyan-500 transition-colors"
-                            >
-                                <option value="retail" className="bg-zinc-950">Retail (Default)</option>
-                                <option value="online" className="bg-zinc-950">Online</option>
-                                <option value="special" className="bg-zinc-950">Special</option>
-                                <option value="custom" className="bg-zinc-950">Custom</option>
-                            </select>
-                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-                        </div>
-                    </div>
-                )}
+            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+                <Settings size={16} className="text-cyan-500" />
+                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Options & Notes</span>
             </div>
 
-            {/* Options List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                {selectedOptionScheduleId && currentOptions.length === 0 && (
-                    <div className="text-zinc-500 text-xs italic p-2 border border-dashed border-zinc-800 rounded">
-                        No options configured for this variation.
+            {/* Content */}
+            <div className="flex-1 flex flex-col min-h-0">
+                {/* Controls */}
+                <div className="px-6 py-6 grid grid-cols-2 gap-4 shrink-0 border-b border-white/5">
+                    {/* Schedule Selector */}
+                    <div className={cn("space-y-1.5", !selectedOptionScheduleId ? "col-span-2" : "col-span-1")}>
+                        <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Option Schedule</label>
+                        <div className="relative">
+                            <Combobox
+                                value={selectedOptionScheduleId || undefined}
+                                onChange={(val) => setSelectedOptionScheduleId(val || null)}
+                                options={optionSchedules.map(sch => ({
+                                    label: sch.name + (sch.id === availability.booking_option_schedule_id ? " (Default)" : ""),
+                                    value: sch.id
+                                }))}
+                                placeholder="-- No Options --"
+                                inputClassName={inputStyles}
+                            />
+                        </div>
                     </div>
-                )}
 
-                {currentOptions.map(opt => {
-                    const optId = opt.id || opt.field_id || String(Math.random());
-
-                    // Special Handling: Section Headers
-                    if (opt.type === 'header') {
-                        return (
-                            <div key={optId} className="pt-4 pb-2">
-                                <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/30 pb-1 mb-1">
-                                    {opt.label}
-                                </h4>
-                                {opt.description && (
-                                    <p className="text-xs text-zinc-500 italic">
-                                        {opt.description}
-                                    </p>
-                                )}
+                    {/* Variation Selector (Only show if schedule selected) */}
+                    {selectedOptionScheduleId && (
+                        <div className="space-y-1.5 col-span-1">
+                            <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Variation</label>
+                            <div className="relative">
+                                <Combobox
+                                    value={selectedVariation}
+                                    onChange={(val) => setSelectedVariation(val)}
+                                    options={[
+                                        { label: "Retail (Default)", value: "retail" },
+                                        { label: "Online", value: "online" },
+                                        { label: "Special", value: "special" },
+                                        { label: "Custom", value: "custom" }
+                                    ]}
+                                    placeholder="Select variation..."
+                                    inputClassName={inputStyles}
+                                />
                             </div>
-                        );
-                    }
+                        </div>
+                    )}
+                </div>
 
-                    return (
-                        <div key={optId} className="p-3 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors">
-                            {/* Label and Price */}
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <div className="text-sm font-medium text-white flex items-center gap-2">
-                                        {opt.label || "Unnamed Option"}
-                                        {opt.required && (
-                                            <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">Required</span>
-                                        )}
-                                    </div>
+                {/* Options List */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3 custom-scrollbar">
+                    {selectedOptionScheduleId && currentOptions.length === 0 && (
+                        <div className="text-zinc-500 text-xs italic p-2 border border-dashed border-zinc-800 rounded">
+                            No options configured for this variation.
+                        </div>
+                    )}
+
+                    {currentOptions.map(opt => {
+                        const optId = opt.id || opt.field_id || String(Math.random());
+
+                        // Special Handling: Section Headers
+                        if (opt.type === 'header') {
+                            return (
+                                <div key={optId} className="pt-4 pb-2">
+                                    <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/30 pb-1 mb-1">
+                                        {opt.label}
+                                    </h4>
                                     {opt.description && (
-                                        <div className="text-xs text-zinc-500 mt-0.5">{opt.description}</div>
+                                        <p className="text-xs text-zinc-500 italic">
+                                            {opt.description}
+                                        </p>
                                     )}
                                 </div>
-                                {opt.price > 0 && (
-                                    <div className="text-sm font-semibold text-cyan-400">
-                                        ${opt.price}
-                                    </div>
-                                )}
-                            </div>
+                            );
+                        }
 
-                            {/* Field Input */}
-                            {renderFieldInput(opt)}
-                        </div>
-                    );
-                })}
+                        return (
+                            <div key={optId} className="p-3 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors">
+                                {/* Label and Price */}
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div className="text-sm font-medium text-white flex items-center gap-2">
+                                            {opt.label || "Unnamed Option"}
+                                            {opt.required && (
+                                                <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">Required</span>
+                                            )}
+                                        </div>
+                                        {opt.description && (
+                                            <div className="text-xs text-zinc-500 mt-0.5">{opt.description}</div>
+                                        )}
+                                    </div>
+                                    {opt.price > 0 && (
+                                        <div className="text-sm font-semibold text-cyan-400">
+                                            ${opt.price}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Field Input */}
+                                {renderFieldInput(opt)}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
 }
-
-

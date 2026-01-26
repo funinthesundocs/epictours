@@ -13,11 +13,6 @@ export default async function AvailabilityPage() {
         .order('name') as any;
 
     return (
-        <PageShell
-            title="Availability Calendar"
-            description="Publish and Manage Your Availabilities"
-        >
-            <AvailabilityCalendarWrapper experiences={experiences || []} />
-        </PageShell>
+        <AvailabilityCalendarWrapper experiences={experiences || []} />
     );
 }

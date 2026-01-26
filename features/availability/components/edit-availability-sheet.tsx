@@ -26,6 +26,7 @@ import {
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
 // Schema
@@ -374,7 +375,7 @@ export function EditAvailabilitySheet({
             onClose={onClose}
             title={isEditMode ? "Edit Availability" : "New Availability"}
             description="Configure availability settings and scheduling."
-            width="w-[85vw] max-w-[85vw]"
+            width="full-content"
             contentClassName="p-0"
         >
             <form onSubmit={handleSubmit(onSubmit, (err) => console.error(err))} className="h-full flex flex-col">
@@ -673,33 +674,28 @@ export function EditAvailabilitySheet({
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    {/* Delete (if edit mode) */}
                     {isEditMode && onDelete && (
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
                             onClick={() => setIsDeleteDialogOpen(true)}
-                            className="mr-auto px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
+                            className="mr-auto px-4 py-2 bg-transparent text-red-400 hover:text-red-300 hover:bg-red-500/10 border-none justify-start"
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={16} className="mr-2" />
                             Delete
-                        </button>
+                        </Button>
                     )}
 
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 text-zinc-400 hover:text-white transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
+                    <Button
                         type="submit"
                         disabled={isSubmitting || isLoading}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                        {isSubmitting ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save className="mr-2" size={16} />}
                         Save Availability
-                    </button>
+                    </Button>
                 </div>
             </form>
 

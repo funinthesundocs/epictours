@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ColumnTwo } from "./booking-desk/column-two";
 import { ColumnThree } from "./booking-desk/column-three";
-import { ColumnFour } from "./booking-desk/column-four";
 import {
     Customer, PricingSchedule, PricingTier, PricingRate,
     BookingOption, BookingOptionSchedule
 } from "@/features/bookings/types";
+import { cn } from "@/lib/utils";
+import { Trash2, Loader2, Save } from "lucide-react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface BookingDeskProps {
     isOpen: boolean;
@@ -61,6 +63,26 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         amount: 0 // Will auto-update in ColumnThree based on total
     });
     const [grandTotal, setGrandTotal] = useState(0);
+    const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
+
+    // Snapshot Helper
+    const getSnapshot = () => JSON.stringify({
+        customer: selectedCustomer?.id,
+        pax: paxCounts,
+        notes,
+        options: optionValues,
+        payment: {
+            status: paymentState.status,
+            method: paymentState.method,
+            amount: paymentState.amount,
+            override: paymentState.overrideTotal,
+            promo: paymentState.promoCode
+        },
+        schedule: selectedScheduleId,
+        tier: selectedTier,
+        optSchedule: selectedOptionScheduleId,
+        optVariation: selectedOptionVariation
+    });
 
     // --- Effects ---
 
@@ -175,6 +197,12 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                         promoCode: booking.promo_code
                     });
                 }
+
+                // Set initial snapshot after loading data
+                setTimeout(() => setInitialSnapshot(getSnapshot()), 100);
+            } else {
+                // CREATE MODE
+                setTimeout(() => setInitialSnapshot(getSnapshot()), 500);
             }
         };
         fetchData();
@@ -332,6 +360,10 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
     const totalPax = Object.values(paxCounts).reduce((a, b) => a + b, 0);
     const canSave = !!selectedCustomer && totalPax > 0;
 
+    // Derived: isDirty
+    const currentSnapshot = getSnapshot();
+    const isDirty = initialSnapshot !== currentSnapshot;
+
     // Derived: Current Options
     // Derived: Current Options (Resolved)
     const currentOptionSchedule = optionSchedules.find(s => s.id === selectedOptionScheduleId);
@@ -372,71 +404,99 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     const [y, m, d] = availability.start_date.split('-');
                     return `${m}-${d}-${y}`;
                 })()}`}
-            width="w-[90vw] max-w-[90vw]"
-            contentClassName="p-0"
+            width="full-content"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <div className="h-full grid grid-cols-1 lg:grid-cols-[20fr_35fr_25fr_20fr] gap-6 p-6 overflow-hidden">
+            <div className="flex-1 min-h-0">
+                <div className="grid grid-cols-1 lg:grid-cols-[25fr_45fr_30fr] h-full divide-x divide-zinc-800">
 
-                {/* COLUMN 1: Customer & Pax */}
-                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
-                    <ColumnOne
-                        availability={availability}
-                        customers={customers}
-                        selectedCustomer={selectedCustomer}
-                        setSelectedCustomer={setSelectedCustomer}
-                        schedules={schedules}
-                        selectedScheduleId={selectedScheduleId}
-                        setSelectedScheduleId={setSelectedScheduleId}
-                        tiers={tiers}
-                        selectedTier={selectedTier}
-                        setSelectedTier={setSelectedTier}
-                        currentRates={currentRates}
-                        paxCounts={paxCounts}
-                        setPaxCounts={setPaxCounts}
-                        onCustomerCreated={handleCustomerCreated}
-                        onCustomerUpdated={handleCustomerUpdated}
-                    />
+                    {/* COLUMN 1: Customer & Pax */}
+                    <div className="flex flex-col h-full min-h-0">
+                        <ColumnOne
+                            availability={availability}
+                            customers={customers}
+                            selectedCustomer={selectedCustomer}
+                            setSelectedCustomer={setSelectedCustomer}
+                            schedules={schedules}
+                            selectedScheduleId={selectedScheduleId}
+                            setSelectedScheduleId={setSelectedScheduleId}
+                            tiers={tiers}
+                            selectedTier={selectedTier}
+                            setSelectedTier={setSelectedTier}
+                            currentRates={currentRates}
+                            paxCounts={paxCounts}
+                            setPaxCounts={setPaxCounts}
+                            onCustomerCreated={handleCustomerCreated}
+                            onCustomerUpdated={handleCustomerUpdated}
+                        />
+                    </div>
+
+                    {/* COLUMN 2: Options & Notes */}
+                    <div className="flex flex-col h-full min-h-0">
+                        <ColumnTwo
+                            availability={availability}
+                            optionSchedules={optionSchedules}
+                            selectedOptionScheduleId={selectedOptionScheduleId}
+                            setSelectedOptionScheduleId={setSelectedOptionScheduleId}
+                            selectedVariation={selectedOptionVariation}
+                            setSelectedVariation={setSelectedOptionVariation}
+                            currentOptions={currentOptionsList}
+                            optionValues={optionValues}
+                            setOptionValues={setOptionValues}
+                        />
+                    </div>
+
+                    {/* COLUMN 3: Payment */}
+                    <div className="flex flex-col h-full min-h-0">
+                        <ColumnThree
+                            currentRates={currentRates}
+                            paxCounts={paxCounts}
+                            paymentState={paymentState}
+                            setPaymentState={setPaymentState}
+                            setGrandTotal={setGrandTotal}
+                        />
+                    </div>
                 </div>
-
-                {/* COLUMN 2: Options & Notes */}
-                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
-                    <ColumnTwo
-                        availability={availability}
-                        optionSchedules={optionSchedules}
-                        selectedOptionScheduleId={selectedOptionScheduleId}
-                        setSelectedOptionScheduleId={setSelectedOptionScheduleId}
-                        selectedVariation={selectedOptionVariation}
-                        setSelectedVariation={setSelectedOptionVariation}
-                        currentOptions={currentOptionsList}
-                        optionValues={optionValues}
-                        setOptionValues={setOptionValues}
-                    />
-                </div>
-
-                {/* COLUMN 3: Payment */}
-                <div className="h-full flex flex-col overflow-y-auto border-r border-zinc-800 pr-6">
-                    <ColumnThree
-                        currentRates={currentRates}
-                        paxCounts={paxCounts}
-                        paymentState={paymentState}
-                        setPaymentState={setPaymentState}
-                        setGrandTotal={setGrandTotal}
-                    />
-                </div>
-
-                {/* COLUMN 4: Submit */}
-                <div className="h-full flex flex-col overflow-y-auto">
-                    <ColumnFour
-                        onSave={handleSave}
-                        isSaving={isSaving}
-                        canSave={canSave}
-                        isEditMode={isEditMode}
-                        onDelete={handleDelete}
-                        isDeleting={isDeleting}
-                    />
-                </div>
-
             </div>
+
+            {/* Footer */}
+            <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                {isEditMode && (
+                    <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="mr-auto px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                        <Trash2 size={16} />
+                        Delete
+                    </button>
+                )}
+
+                <Button
+                    onClick={handleSave}
+                    disabled={isSaving || !canSave || !isDirty}
+                    className={cn(
+                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                        isSaving ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                            (canSave && isDirty) ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]" : // Cyan-600 for booking desk distinction or keep 500? Using 600 as per original but standard is 500. Let's use 500 to match others.
+                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                    )}
+                >
+                    {isSaving ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                        (!canSave || !isDirty) ? "No Changes" :
+                            (isEditMode ? <><Save size={16} /> Update Booking</> : <><Save size={16} /> Create Booking</>)}
+                </Button>
+            </div>
+
+            <AlertDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDelete}
+                title="Delete Booking?"
+                description="Are you sure you want to delete this booking? This action cannot be undone."
+                confirmLabel={isDeleting ? "Deleting..." : "Delete"}
+                isDestructive={true}
+            />
         </SidePanel>
     );
 }

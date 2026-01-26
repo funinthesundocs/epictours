@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { useSidebar } from "@/components/shell/sidebar-context";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ interface SidePanelProps {
     title: string;
     description?: string;
     children: React.ReactNode;
-    width?: string; // Allow custom width, default to 'max-w-md'
+    width?: string; // Allow custom width, default to 'max-w-md'. Pass "full-content" for main area coverage.
     contentClassName?: string;
 }
 
@@ -25,6 +26,26 @@ export function SidePanel({
     width = "max-w-md",
     contentClassName = "p-6"
 }: SidePanelProps) {
+    // Access sidebar state to determine offset for "full-content" mode
+    const { isCollapsed } = useSidebar();
+
+    // Check if we are in "full-content" mode
+    const isFullContent = width === "full-content";
+
+    // Dynamic styles
+    const sidebarWidth = isCollapsed ? "80px" : "240px";
+
+    // Position classes
+    // Standard: Fixed right, explicit width
+    // Full Content: Fixed right, top, bottom. Left depends on sidebar.
+    const positionClassName = isFullContent
+        ? `fixed right-0 top-0 bottom-0 z-50 flex flex-col bg-[#0b1115]/90 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
+        : `fixed right-0 top-0 z-50 h-full w-full ${width} bg-[#0b1115]/90 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
+
+    // Inline styles for dynamic values
+    const panelStyle = isFullContent
+        ? { left: sidebarWidth, width: "auto", backdropFilter: "blur(20px)" }
+        : { backdropFilter: "blur(20px)" };
 
     // Close on Escape key
     useEffect(() => {
@@ -49,14 +70,17 @@ export function SidePanel({
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-                    />
+                    {/* Backdrop - Only show if NOT full content mode */}
+                    {!isFullContent && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            className="fixed right-0 top-0 bottom-0 z-40 bg-[#0b1115]/80 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
+                            style={{ left: sidebarWidth }}
+                        />
+                    )}
 
                     {/* Panel */}
                     <motion.div
@@ -64,11 +88,11 @@ export function SidePanel({
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`fixed right-0 top-0 z-50 h-full w-full ${width} bg-[#0b1115]/90 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`}
-                        style={{ backdropFilter: "blur(20px)" }}
+                        className={positionClassName}
+                        style={panelStyle}
                     >
                         {/* Header */}
-                        <div className="flex items-start justify-between p-6 border-b border-white/5">
+                        <div className="flex items-start justify-between p-6 border-b border-white/5 bg-[#0b1115]">
                             <div>
                                 <h2 className="text-xl font-bold text-white tracking-tight">{title}</h2>
                                 {description && (

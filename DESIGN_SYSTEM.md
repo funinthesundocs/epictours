@@ -103,6 +103,16 @@ For tables that need to scroll independently within the page:
 - Wrap inputs in `FormItem` -> `FormLabel` -> `FormControl` -> `FormMessage`.
 - Use `components/ui` inputs (Input, Select, Switch).
 
+### SidePanels & Sheets
+- **Purpose**: Complex editing, creation flows, or deeper details that don't warrant a full page navigation.
+- **Layout**: Fixed positioning.
+    - **Header**: Standard Title + Description.
+    - **Body**: Scrollable independent of footer.
+    - **Footer**: Fixed to bottom. Contains primary actions (Save) and destructive actions (Delete). **No Cancel buttons.**
+- **Styling**:
+    - **Primary Button**: Cyan Background, **White Text**, Shadow.
+    - **Background**: `#0b1115` (Deep Zinc).
+
 ## 5. AI Instructions (The "Agent")
 When asking an AI (like me) to build a new feature, provide this file as context.
 **Rule**: If a requested UI element does not exist in `components/ui`, **do not create it from scratch**. Ask the user if it should be added to the system first.

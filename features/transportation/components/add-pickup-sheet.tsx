@@ -7,6 +7,8 @@ import * as z from "zod";
 import { Save, Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Schema
 const PickupSchema = z.object({
@@ -31,7 +33,7 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
         register,
         handleSubmit,
         reset,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<FormData>({
         resolver: zodResolver(PickupSchema),
         defaultValues: {
@@ -87,49 +89,57 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
             onClose={onClose}
             title={initialData ? "Edit Location" : "Add Location"}
             description={initialData ? "Modify pickup details." : "Create a new centralized pickup point."}
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Location Name <span className="text-red-400">*</span></label>
-                    <input
-                        {...register("name")}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="e.g. Waikiki Gateway"
-                    />
-                    {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Location Name <span className="text-red-400">*</span></label>
+                        <input
+                            {...register("name")}
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                            placeholder="e.g. Waikiki Gateway"
+                        />
+                        {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Google Map Link</label>
+                        <input
+                            {...register("map_link")}
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                            placeholder="https://goo.gl/maps/..."
+                        />
+                        {errors.map_link && <p className="text-xs text-red-400">{errors.map_link.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Instructions / Notes</label>
+                        <textarea
+                            {...register("instructions")}
+                            rows={4}
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                            placeholder="Specific pickup details..."
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Google Map Link</label>
-                    <input
-                        {...register("map_link")}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="https://goo.gl/maps/..."
-                    />
-                    {errors.map_link && <p className="text-xs text-red-400">{errors.map_link.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Instructions / Notes</label>
-                    <textarea
-                        {...register("instructions")}
-                        rows={4}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="Specific pickup details..."
-                    />
-                </div>
-
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
-                    <button
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || !isDirty}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        {initialData ? "Update" : "Create"}
-                    </button>
-                    {/* Cancel button removed per user request */}
+                        {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                            isDirty ? <><Save size={16} /> {initialData ? "Update" : "Create"}</> :
+                                "No Changes"}
+                    </Button>
                 </div>
             </form>
         </SidePanel>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Loader2, Plus, User, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const BookingSchema = z.object({
     customer_id: z.string().min(1, "Customer is required"),
@@ -29,7 +30,7 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
     const [isLoading, setIsLoading] = useState(false);
     const [customers, setCustomers] = useState<{ id: string, name: string, email: string }[]>([]);
 
-    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<BookingFormData>({
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors, isDirty } } = useForm<BookingFormData>({
         resolver: zodResolver(BookingSchema),
         defaultValues: {
             pax_count: 1,
@@ -84,6 +85,8 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
             onClose={onClose}
             title="Create New Booking"
             description="Add a booking for this availability slot."
+            width="full-content"
+            contentClassName="p-0"
         >
             <div className="p-6 h-full flex flex-col">
                 <div className="text-sm text-zinc-400 mb-6 p-4 bg-zinc-900 rounded border border-zinc-800">
@@ -142,13 +145,20 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                 </form>
 
                 {/* Footer pinned to bottom */}
-                <div className="mt-auto pt-6 border-t border-zinc-800 flex justify-end gap-3">
-                    <Button type="button" variant="outline" onClick={onClose} className="border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit(onSubmit)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                        Create Booking
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={isLoading || !isDirty}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isLoading ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
+                    >
+                        {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> :
+                            isDirty ? "Create Booking" :
+                                "No Changes"}
                     </Button>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Save, Plus, Trash2, Type, List, GripVertical, Eye, Settings, ListPlus, ChevronDown, Check, MapPin, Info, ExternalLink, Star, Search, Ban, ChevronsUpDown, Minus, Heading, Calendar as CalendarIcon, Hotel, Circle, AlignJustify, Columns, LayoutGrid, Square, LayoutList, CheckSquare, ToggleRight } from "lucide-react";
+import { X, Save, Plus, Trash2, Type, List, GripVertical, Eye, Settings, ListPlus, ChevronDown, Check, MapPin, Info, ExternalLink, Star, Search, Ban, ChevronsUpDown, Minus, Heading, Calendar as CalendarIcon, Hotel, Circle, AlignJustify, Columns, LayoutGrid, Square, LayoutList, CheckSquare, ToggleRight, Loader2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import {
@@ -1223,22 +1223,26 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                 </div>
 
                 {/* Footer */}
-                <div className="p-10 border-t border-white/5 bg-[#0b1115] flex justify-end gap-3">
-                    <Button variant="outline" onClick={onClose} className="border-white/10 text-zinc-400 hover:text-white hover:bg-white/5">
-                        Cancel
-                    </Button>
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
                     <Button
                         type="submit"
                         form="custom-field-form"
-                        disabled={isSubmitting}
-                        className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold min-w-[120px]"
+                        disabled={isSubmitting || !form.formState.isDirty}
+                        className={cn(
+                            "bg-cyan-500 hover:bg-cyan-400 text-white font-bold min-w-[120px]",
+                            isSubmitting
+                                ? "bg-cyan-500/50 text-white cursor-not-allowed"
+                                : form.formState.isDirty
+                                    ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
                     >
                         {isSubmitting ? (
-                            <span className="animate-pulse">Saving...</span>
+                            <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> Saving...</span>
+                        ) : form.formState.isDirty ? (
+                            <span className="flex items-center gap-2"><Save size={16} /> Save Field</span>
                         ) : (
-                            <>
-                                <Save size={16} className="mr-2" /> Save Field
-                            </>
+                            "No Changes"
                         )}
                     </Button>
                 </div>

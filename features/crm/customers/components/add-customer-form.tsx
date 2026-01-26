@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { Combobox } from "@/components/ui/combobox";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { Button } from "@/components/ui/button";
 
 // Options Lists
 const MESSAGING_OPTIONS = ["WhatsApp", "FB Messenger", "Signal", "Telegram", "Viber", "Line", "WeChat"];
@@ -268,15 +269,14 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
 
             {/* Actions */}
             <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
-                <button
+                <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                 >
                     {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                     {initialData ? "Update" : "Create"}
-                </button>
-                {/* Cancel button removed per user request */}
+                </Button>
             </div>
         </form>
     );

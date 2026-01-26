@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Ban } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { cn } from "@/lib/utils";
+
 export type ComboboxOption = { value: string; label: string };
 
 interface ComboboxProps {
@@ -12,9 +14,12 @@ interface ComboboxProps {
     options: (string | ComboboxOption)[];
     placeholder?: string;
     forceOpen?: boolean;
+    className?: string;
+    inputClassName?: string;
+    disabled?: boolean;
 }
 
-export function Combobox({ value, onChange, options, placeholder, forceOpen }: ComboboxProps) {
+export function Combobox({ value, onChange, options, placeholder, forceOpen, className, inputClassName, disabled }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(forceOpen || false);
     const [query, setQuery] = useState("");
     const [position, setPosition] = useState<'bottom' | 'top'>('bottom');
@@ -101,14 +106,19 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen }: C
     };
 
     return (
-        <div className="relative" ref={containerRef}>
+        <div className={cn("relative", className)} ref={containerRef}>
             <div className="relative">
                 <input
                     type="text"
                     value={query}
                     onChange={handleInputChange}
-                    onFocus={() => setIsOpen(true)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                    onFocus={() => !disabled && setIsOpen(true)}
+                    disabled={disabled}
+                    className={cn(
+                        "w-full bg-black/20 border border-white/10 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
+                        inputClassName,
+                        disabled && "opacity-50 cursor-not-allowed"
+                    )}
                     placeholder={placeholder}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">

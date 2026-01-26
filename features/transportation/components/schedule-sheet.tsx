@@ -12,6 +12,7 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // Master Schema
 const ScheduleSchema = z.object({
@@ -45,7 +46,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         register,
         handleSubmit,
         reset,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<ScheduleFormData>({
         resolver: zodResolver(ScheduleSchema),
         defaultValues: { name: "", start_time: "" }
@@ -190,10 +191,11 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             title={currentScheduleId ? "Edit Schedule" : "New Schedule"}
             description="Manage schedule details and pickup stops."
             width="max-w-2xl"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <div className="pb-12 pt-4 space-y-10">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-10">
                 {/* Section 1: Master Details */}
-                <form onSubmit={handleSubmit(handleMasterSubmit)} className="space-y-6">
+                <form id="schedule-form" onSubmit={handleSubmit(handleMasterSubmit)} className="space-y-6">
                     <div>
                         <SectionHeader icon={Calendar} title="Schedule Details" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -215,16 +217,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                             </div>
                         </div>
                     </div>
-                    <div className="flex justify-end pt-2">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-lg text-sm flex items-center gap-2 transition-colors"
-                        >
-                            {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-                            {currentScheduleId ? "Update Details" : "Create Schedule"}
-                        </button>
-                    </div>
+                    {/* Submit button moved to footer */}
                 </form>
 
                 {/* Section 2: Stops Manager */}
@@ -291,7 +284,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                         type="button"
                                         onClick={handleAddStop}
                                         disabled={isAddingStop}
-                                        className="h-[42px] px-4 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                                        className="h-[42px] px-4 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
                                     >
                                         {isAddingStop ? <Loader2 className="animate-spin" size={16} /> : <Plus size={16} />}
                                         Add
@@ -307,6 +300,24 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                         </div>
                     )}
                 </div>
+            </div>
+
+            <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <Button
+                    type="submit"
+                    form="schedule-form"
+                    disabled={isSubmitting || !isDirty}
+                    className={cn(
+                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                        isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                            isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                    )}
+                >
+                    {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                        isDirty ? <><Save size={16} /> {currentScheduleId ? "Update Details" : "Create Schedule"}</> :
+                            "No Changes"}
+                </Button>
             </div>
 
             <AlertDialog

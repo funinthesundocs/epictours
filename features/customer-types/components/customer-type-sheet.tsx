@@ -7,6 +7,11 @@ import * as z from "zod";
 import { Save, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Schema
 const CustomerTypeSchema = z.object({
@@ -31,7 +36,7 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
         register,
         handleSubmit,
         reset,
-        formState: { errors }
+        formState: { errors, isDirty }
     } = useForm<FormData>({
         resolver: zodResolver(CustomerTypeSchema),
         defaultValues: {
@@ -87,49 +92,55 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
             onClose={onClose}
             title={initialData ? "Edit Customer Type" : "Add Customer Type"}
             description={initialData ? "Modify classification details." : "Create a new customer classification."}
+            width="max-w-lg"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Customer Type Name <span className="text-red-400">*</span></label>
-                    <input
-                        {...register("name")}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="e.g. Regular Guest"
-                    />
-                    {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
+                    <div className="space-y-2">
+                        <Label>Customer Type Name</Label>
+                        <Input
+                            {...register("name")}
+                            placeholder="e.g. Regular Guest"
+                        />
+                        {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Unique Code</Label>
+                        <Input
+                            {...register("code")}
+                            placeholder="e.g. REG"
+                        />
+                        {errors.code && <p className="text-xs text-red-400">{errors.code.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Notes / Description</Label>
+                        <Textarea
+                            {...register("description")}
+                            placeholder="Internal notes about this segment..."
+                            className="min-h-[100px]"
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Unique Code <span className="text-red-400">*</span></label>
-                    <input
-                        {...register("code")}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="e.g. REG"
-                    />
-                    {errors.code && <p className="text-xs text-red-400">{errors.code.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Notes / Description</label>
-                    <textarea
-                        {...register("description")}
-                        rows={4}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
-                        placeholder="Internal notes about this segment..."
-                    />
-                </div>
-
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
-                    <button
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <Button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || !isDirty}
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        )}
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        {initialData ? "Update" : "Create"}
-                    </button>
-                    {/* Cancel button removed per user request strategy */}
+                        {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                            isDirty ? <><Save size={16} /> {initialData ? "Update" : "Create"}</> :
+                                "No Changes"}
+                    </Button>
                 </div>
             </form>
         </SidePanel>
