@@ -84,11 +84,29 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         optVariation: selectedOptionVariation
     });
 
+    const [currentAvailability, setCurrentAvailability] = useState<Availability | null>(availability);
+
+    // Sync state when prop changes
+    useEffect(() => {
+        setCurrentAvailability(availability);
+    }, [availability]);
+
+    const handleAvailabilityChange = (newAvailability: Availability) => {
+        setCurrentAvailability(newAvailability);
+        // Auto-update schedules if present in new availability
+        if (newAvailability.pricing_schedule_id) {
+            setSelectedScheduleId(newAvailability.pricing_schedule_id);
+        }
+        if (newAvailability.booking_option_schedule_id) {
+            setSelectedOptionScheduleId(newAvailability.booking_option_schedule_id);
+        }
+    };
+
     // --- Effects ---
 
     // 1. Init from Availability & Fetch Lists
     useEffect(() => {
-        if (!isOpen || !availability) return;
+        if (!isOpen || !currentAvailability) return;
 
         // Reset State only for NEW bookings (not edit mode)
         // In edit mode, we'll populate from the fetched booking data
@@ -100,11 +118,11 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         }
         setIsSaving(false);
         // Default Schedule
-        if (availability.pricing_schedule_id) {
-            setSelectedScheduleId(availability.pricing_schedule_id);
+        if (currentAvailability.pricing_schedule_id) {
+            setSelectedScheduleId(currentAvailability.pricing_schedule_id);
         }
-        if (availability.booking_option_schedule_id) {
-            setSelectedOptionScheduleId(availability.booking_option_schedule_id);
+        if (currentAvailability.booking_option_schedule_id) {
+            setSelectedOptionScheduleId(currentAvailability.booking_option_schedule_id);
         }
 
         const fetchData = async () => {
@@ -300,7 +318,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
     };
 
     const handleSave = async () => {
-        if (!availability || !selectedCustomer) return;
+        if (!currentAvailability || !selectedCustomer) return;
 
         const totalPax = Object.values(paxCounts).reduce((a, b) => a + b, 0);
         if (totalPax === 0) {
@@ -311,7 +329,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         setIsSaving(true);
         try {
             const bookingData = {
-                availability_id: availability.id,
+                availability_id: currentAvailability.id,
                 customer_id: selectedCustomer.id,
                 status: 'confirmed',
                 pax_count: totalPax,
@@ -384,7 +402,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
         }
     };
 
-    if (!availability) return null;
+    if (!currentAvailability) return null;
 
     // Derived: Current Rates for Tier (Shared with Col 1 & 3)
     const currentRates = rates.filter(r => r.tier === selectedTier);
@@ -432,7 +450,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             description={isEditMode
                 ? `Editing booking for ${selectedCustomer?.name || 'Customer'}`
                 : `Create a new booking for ${(() => {
-                    const [y, m, d] = availability.start_date.split('-');
+                    const [y, m, d] = currentAvailability.start_date.split('-');
                     return `${m}-${d}-${y}`;
                 })()}`}
             width="full-content"
@@ -443,38 +461,44 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
                     {/* COLUMN 1: Customer & Pax */}
                     <div className="flex flex-col h-full min-h-0">
-                        <ColumnOne
-                            availability={availability}
-                            customers={customers}
-                            selectedCustomer={selectedCustomer}
-                            setSelectedCustomer={setSelectedCustomer}
-                            schedules={schedules}
-                            selectedScheduleId={selectedScheduleId}
-                            setSelectedScheduleId={setSelectedScheduleId}
-                            tiers={tiers}
-                            selectedTier={selectedTier}
-                            setSelectedTier={setSelectedTier}
-                            currentRates={currentRates}
-                            paxCounts={paxCounts}
-                            setPaxCounts={setPaxCounts}
-                            onCustomerCreated={handleCustomerCreated}
-                            onCustomerUpdated={handleCustomerUpdated}
-                        />
+                        {currentAvailability && (
+                            <ColumnOne
+                                availability={currentAvailability}
+                                customers={customers}
+                                selectedCustomer={selectedCustomer}
+                                setSelectedCustomer={setSelectedCustomer}
+                                schedules={schedules}
+                                selectedScheduleId={selectedScheduleId}
+                                setSelectedScheduleId={setSelectedScheduleId}
+                                tiers={tiers}
+                                selectedTier={selectedTier}
+                                setSelectedTier={setSelectedTier}
+                                currentRates={currentRates}
+                                paxCounts={paxCounts}
+                                setPaxCounts={setPaxCounts}
+                                onCustomerCreated={handleCustomerCreated}
+                                onCustomerUpdated={handleCustomerUpdated}
+                                isEditMode={isEditMode}
+                                onAvailabilityChange={handleAvailabilityChange}
+                            />
+                        )}
                     </div>
 
                     {/* COLUMN 2: Options & Notes */}
                     <div className="flex flex-col h-full min-h-0">
-                        <ColumnTwo
-                            availability={availability}
-                            optionSchedules={optionSchedules}
-                            selectedOptionScheduleId={selectedOptionScheduleId}
-                            setSelectedOptionScheduleId={setSelectedOptionScheduleId}
-                            selectedVariation={selectedOptionVariation}
-                            setSelectedVariation={setSelectedOptionVariation}
-                            currentOptions={currentOptionsList}
-                            optionValues={optionValues}
-                            setOptionValues={setOptionValues}
-                        />
+                        {currentAvailability && (
+                            <ColumnTwo
+                                availability={currentAvailability}
+                                optionSchedules={optionSchedules}
+                                selectedOptionScheduleId={selectedOptionScheduleId}
+                                setSelectedOptionScheduleId={setSelectedOptionScheduleId}
+                                selectedVariation={selectedOptionVariation}
+                                setSelectedVariation={setSelectedOptionVariation}
+                                currentOptions={currentOptionsList}
+                                optionValues={optionValues}
+                                setOptionValues={setOptionValues}
+                            />
+                        )}
                     </div>
 
                     {/* COLUMN 3: Payment */}

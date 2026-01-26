@@ -68,7 +68,7 @@ export function AvailabilityManager({
         <SidePanel
             isOpen={isOpen}
             onClose={onClose}
-            title="Manage Availability"
+            title="Manage Booking Availability"
             description=""
             width="full-content"
             contentClassName="p-0 h-full flex flex-col"

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { format } from "date-fns";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Settings } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -27,8 +28,8 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
     const [onlineStatus, setOnlineStatus] = useState<"open" | "closed">(availability.online_booking_status || "open");
 
     const formatDate = (dateStr: string) => {
-        const [y, m, d] = dateStr.split('-');
-        return `${m}-${d}-${y}`;
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return format(new Date(y, m - 1, d), "MMM d, yyyy");
     };
 
     const formatTime = (timeStr: string | undefined) => {
@@ -88,15 +89,15 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                     <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Session Details</div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Time</div>
-                            <div className="text-white font-medium">
-                                {formatTime(availability.start_time)}
-                            </div>
-                        </div>
-                        <div>
                             <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Date</div>
                             <div className="text-white font-medium">
                                 {formatDate(availability.start_date)}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Time</div>
+                            <div className="text-white font-medium">
+                                {formatTime(availability.start_time)}
                             </div>
                         </div>
                     </div>

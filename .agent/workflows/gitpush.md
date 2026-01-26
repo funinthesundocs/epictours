@@ -3,17 +3,7 @@ description: Stages, commits, and pushes all changes to GitHub (Quick Save).
 ---
 
 // turbo-all
-1. Stage All Changes
+1. Quick Save (Stage, Commit, Push)
 ```bash
-git add .
-```
-
-2. Commit Changes
-```bash
-git commit -m "Quick Save"
-```
-
-3. Push to Remote
-```bash
-git push
+git add .; git commit -m "Quick Save"; git push
 ```

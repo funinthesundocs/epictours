@@ -11,6 +11,9 @@ import { Combobox } from "@/components/ui/combobox";
 
 
 
+import { NewBookingMenu } from "../new-booking-menu";
+import { format } from "date-fns";
+
 interface ColumnOneProps {
     availability: Availability;
     customers: Customer[];
@@ -28,6 +31,8 @@ interface ColumnOneProps {
     // Note: setPaxCounts type might need to be simpler if I don't want to import React types explicitly or just use (v: ...)
     onCustomerCreated: (c: Customer) => void;
     onCustomerUpdated: (c: Customer) => void;
+    isEditMode?: boolean;
+    onAvailabilityChange?: (a: Availability) => void;
 }
 
 export function ColumnOne({
@@ -45,7 +50,9 @@ export function ColumnOne({
     paxCounts,
     setPaxCounts,
     onCustomerCreated,
-    onCustomerUpdated
+    onCustomerUpdated,
+    isEditMode,
+    onAvailabilityChange
 }: ColumnOneProps) {
 
     // UI State (Local)
@@ -80,8 +87,8 @@ export function ColumnOne({
                             <div className="text-zinc-500 text-xs uppercase font-bold tracking-wider">Date</div>
                             <div className="text-white font-medium">
                                 {(() => {
-                                    const [y, m, d] = availability.start_date.split('-');
-                                    return `${m}-${d}-${y}`;
+                                    const [y, m, d] = availability.start_date.split('-').map(Number);
+                                    return format(new Date(y, m - 1, d), "EEE MMM d, yyyy");
                                 })()}
                             </div>
                         </div>
@@ -118,6 +125,40 @@ export function ColumnOne({
             {/* Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <div className="p-6 space-y-8">
+
+                    {/* Rescheduling Field (Edit Mode Only) */}
+                    {isEditMode && onAvailabilityChange && (
+                        <div className="space-y-2">
+                            <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
+                                <Calendar size={18} className="text-cyan-500" />
+                                Reschedule
+                            </label>
+                            <NewBookingMenu
+                                onSelectAvailability={onAvailabilityChange}
+                                defaultExperienceId={availability.experience_id}
+                            >
+                                <button className="w-full flex items-center justify-between p-3 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-cyan-500/50 hover:bg-zinc-900 transition-all group group/btn">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-cyan-500/10 p-2 rounded-md group-hover/btn:bg-cyan-500/20 text-cyan-400">
+                                            <Calendar size={16} />
+                                        </div>
+                                        <div className="flex flex-col items-start gap-0.5">
+                                            <span className="text-sm font-bold text-white group-hover/btn:text-cyan-400 transition-colors">
+                                                {(() => {
+                                                    const [y, m, d] = availability.start_date.split('-').map(Number);
+                                                    return format(new Date(y, m - 1, d), "EEE MMM d, yyyy");
+                                                })()}
+                                            </span>
+                                            <span className="text-xs text-zinc-400">
+                                                {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Edit2 size={16} className="text-zinc-600 group-hover/btn:text-cyan-500 transition-colors" />
+                                </button>
+                            </NewBookingMenu>
+                        </div>
+                    )}
 
                     {/* Customer Search */}
                     <div className="space-y-2">

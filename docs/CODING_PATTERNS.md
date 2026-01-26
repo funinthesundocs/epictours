@@ -107,6 +107,11 @@
 *   **Uniform Row Heights**: All calendar rows must have a `min-height` that accommodates at least one data chip (e.g. `160px`) to prevent layout jumping between empty and filled rows. Rows with >1 item may expand naturally.
 *   **Dynamic Grid**: Always calculate precise row counts (`Math.ceil((first + days) / 7) * 7`) to prevent extra empty rows at the bottom.
 *   **Strict Colors**: Calendar inactive days/headers must strictly match the design token (e.g. `zinc-950/80`), even if it requires `!important` or specific class overrides.
+*   **Popup Calendar Selection Style**:
+    *   **Context**: For small popup calendars (e.g. Booking Modal).
+    *   **Rule**: Selected date must use **Border Only** styling. NO background color ("glow") and NO shadow.
+    *   **Implementation**: Override the `selected` class key.
+    *   **Class**: `border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold`
 
 ## 10. Custom Select Pattern (Combobox Standard)
 *   **Standard**: Use the Combobox pattern for all "Select" inputs.
