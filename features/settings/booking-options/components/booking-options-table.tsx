@@ -3,6 +3,8 @@
 import { Edit2, Trash2, Search, Copy, Calendar, List, CheckSquare } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface BookingOptionSchedule {
     id: string;
@@ -24,6 +26,8 @@ interface BookingOptionsTableProps {
 }
 
 export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: BookingOptionsTableProps) {
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
     if (data.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
@@ -86,25 +90,18 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                                         <button
                                             onClick={() => onEdit(schedule)}
                                             className="p-2 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
-                                            title="Edit Schedule"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => onDuplicate(schedule)}
                                             className="p-2 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
-                                            title="Duplicate Schedule"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                if (confirm("Are you sure? This action cannot be undone.")) {
-                                                    onDelete(schedule.id);
-                                                }
-                                            }}
+                                            onClick={() => setDeleteId(schedule.id)}
                                             className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
-                                            title="Delete Schedule"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -115,6 +112,19 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                     })}
                 </tbody>
             </table>
+
+            <AlertDialog
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => {
+                    if (deleteId) onDelete(deleteId);
+                    setDeleteId(null);
+                }}
+                isDestructive={true}
+                title="Delete Schedule"
+                description="Are you sure you want to delete this schedule? This action cannot be undone."
+                confirmLabel="Delete Schedule"
+            />
         </div>
     );
 }

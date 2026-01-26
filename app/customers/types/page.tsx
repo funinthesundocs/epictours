@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { PageShell } from "@/components/shell/page-shell";
 import { CustomerTypesTable } from "@/features/customer-types/components/customer-types-table";
 import { CustomerTypeSheet } from "@/features/customer-types/components/customer-type-sheet";
@@ -47,6 +48,7 @@ export default function CustomerTypesPage() {
             .eq("id", id);
 
         if (!error) {
+            toast.success("Customer type deleted");
             loadData();
         } else {
             alert("Failed to delete. Check console.");

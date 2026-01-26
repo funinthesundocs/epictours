@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
     ChevronLeft,
     ChevronRight,
@@ -23,6 +24,7 @@ import { Availability, AvailabilityListTable } from "./availability-list-table";
 import { BulkActionToolbar } from "./bulk-action-toolbar";
 import { BulkEditSheet } from "./bulk-edit-sheet";
 import { Settings2 } from "lucide-react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 export function AvailabilityCalendar({
     experiences = [],
@@ -61,6 +63,9 @@ export function AvailabilityCalendar({
     const [isDragging, setIsDragging] = useState(false);
     const [isDirectBulkEditOpen, setIsDirectBulkEditOpen] = useState(false);
 
+    // Confirm Dialog State
+    const [pendingAction, setPendingAction] = useState<{ type: 'delete' | 'duplicate'; count: number } | null>(null);
+
     // Clear selection when mode changes
     useEffect(() => {
         if (!isSelectMode) setSelectedIds(new Set());
@@ -87,65 +92,59 @@ export function AvailabilityCalendar({
         });
     };
 
-    const handleBatchDelete = async () => {
-        if (!confirm(`Delete ${selectedIds.size} items?`)) return;
-
-        setIsLoading(true);
-        const { error } = await supabase
-            .from('availabilities' as any)
-            .delete()
-            .in('id', Array.from(selectedIds));
-
-        if (error) {
-            console.error(error);
-            alert("Failed to delete items");
-        } else {
-            // Optimistic update
-            setAvailabilities(prev => prev.filter(a => !selectedIds.has(a.id)));
-            setSelectedIds(new Set());
-            setIsSelectMode(false);
-        }
-        setIsLoading(false);
+    const handleBatchDeleteClick = () => {
+        if (selectedIds.size === 0) return;
+        setPendingAction({ type: 'delete', count: selectedIds.size });
     };
 
-    const handleBatchDuplicate = async () => {
-        if (!confirm(`Duplicate ${selectedIds.size} items?`)) return;
+    const handleBatchDuplicateClick = () => {
+        if (selectedIds.size === 0) return;
+        setPendingAction({ type: 'duplicate', count: selectedIds.size });
+    };
+
+    const executeBatchAction = async () => {
+        if (!pendingAction) return;
 
         setIsLoading(true);
-        const itemsToClone = availabilities.filter(a => selectedIds.has(a.id));
 
-        // Prepare payloads (remove ID, created_at, etc)
-        const payloads = itemsToClone.map(item => {
-            const { id, created_at, updated_at, route_name, staff_display, vehicle_name, ...rest } = item as any;
-            return {
-                ...rest,
-                // Ensure unique constraints handled if any? Tables usually allow same time different ID.
-            };
-        });
+        if (pendingAction.type === 'delete') {
+            const { error } = await supabase
+                .from('availabilities' as any)
+                .delete()
+                .in('id', Array.from(selectedIds));
 
-        const { error } = await supabase.from('availabilities' as any).insert(payloads);
+            if (error) {
+                console.error(error);
+                alert("Failed to delete items");
+            } else {
+                toast.success(`Deleted ${selectedIds.size} items`);
+                setAvailabilities(prev => prev.filter(a => !selectedIds.has(a.id)));
+                setSelectedIds(new Set());
+                setIsSelectMode(false);
+            }
+        } else if (pendingAction.type === 'duplicate') {
+            const itemsToClone = availabilities.filter(a => selectedIds.has(a.id));
 
-        if (error) {
-            console.error(error);
-            alert("Failed to duplicate items");
-        } else {
-            // Force refresh is easiest here to get new IDs
-            // Re-trigger the fetch effect by toggling a dummy state or just...
-            // Actually, we can just call setAvailabilities with re-fetch, but let's just use the existing effect dependency?
-            // HACK: Quick toggle view mode or just rely on parent? 
-            // Better: trigger a re-fetch manually. 
-            // For now, reload window is harsh. Let's toggle viewMode safely? 
-            // Actually, let's just call the effect... but it depends on currentExp. 
-            // Simple hack: toggle currentDate then toggle back? No.
-            // Let's just alert success and user navigates or waits.
-            // Ideally: refetch.
-            alert("Duplicated successfully! Refreshing view...");
-            alert("Duplicated successfully! Refreshing view...");
-            onDateChange(new Date(currentDate)); // Trigger effect
-            setSelectedIds(new Set());
-            setIsSelectMode(false);
+            // Prepare payloads
+            const payloads = itemsToClone.map(item => {
+                const { id, created_at, updated_at, route_name, staff_display, vehicle_name, ...rest } = item as any;
+                return { ...rest };
+            });
+
+            const { error } = await supabase.from('availabilities' as any).insert(payloads);
+
+            if (error) {
+                console.error(error);
+                alert("Failed to duplicate items");
+            } else {
+                onDateChange(new Date(currentDate)); // Trigger refresh
+                setSelectedIds(new Set());
+                setIsSelectMode(false);
+            }
         }
+
         setIsLoading(false);
+        setPendingAction(null);
     };
 
     // Refs for click outside
@@ -233,6 +232,7 @@ export function AvailabilityCalendar({
             console.error("Failed to delete availability:", error);
             alert("Failed to delete. Check console.");
         } else {
+            toast.success("Availability deleted");
             setAvailabilities(prev => prev.filter(item => item.id !== id));
         }
     };
@@ -446,7 +446,7 @@ export function AvailabilityCalendar({
                                     setIsSelectMode(false);
                                     setSelectedIds(new Set());
                                 }}
-                                onDuplicate={handleBatchDuplicate}
+                                onDuplicate={handleBatchDuplicateClick}
                             />
                         )}
                         <div className="flex-1 min-h-0">
@@ -479,7 +479,7 @@ export function AvailabilityCalendar({
                                     setIsSelectMode(false);
                                     setSelectedIds(new Set());
                                 }}
-                                onDuplicate={handleBatchDuplicate}
+                                onDuplicate={handleBatchDuplicateClick}
                             />
                         )}
                         <div className="flex-1 min-h-0">
@@ -506,6 +506,20 @@ export function AvailabilityCalendar({
                 onSuccess={() => onDateChange(new Date(currentDate))}
                 selectedIds={new Set()}
                 showDateRangeSelector
+            />
+
+            <AlertDialog
+                isOpen={!!pendingAction}
+                onClose={() => setPendingAction(null)}
+                onConfirm={executeBatchAction}
+                isDestructive={pendingAction?.type === 'delete'}
+                title={pendingAction?.type === 'delete' ? "Delete Items?" : "Duplicate Items?"}
+                description={
+                    pendingAction?.type === 'delete'
+                        ? `Are you sure you want to delete ${pendingAction.count} items? This action cannot be undone.`
+                        : `Are you sure you want to duplicate ${pendingAction?.count} items?`
+                }
+                confirmLabel={pendingAction?.type === 'delete' ? "Delete" : "Duplicate"}
             />
         </div>
     );

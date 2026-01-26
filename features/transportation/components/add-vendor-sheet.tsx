@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Zod Schema
 const VendorSchema = z.object({
@@ -113,65 +115,92 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             title={initialData ? "Edit Vendor" : "Add Vendor"}
             description="Manage vendor profiles and contact information."
             width="max-w-2xl"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="pb-12 pt-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
 
-                {/* 1. Basic Info */}
-                <div className="space-y-8">
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
                     <div>
                         <SectionHeader icon={Info} title="Vendor Profile" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2 col-span-2">
-                                <Label>Vendor Name</Label>
-                                <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Acme Transport Co." />
+                                <Label className="text-zinc-300">Vendor Name <span className="text-red-400">*</span></Label>
+                                <Input
+                                    {...register("name")}
+                                    className="bg-black/20 border-white/10 text-white focus:border-cyan-500/50 focus:outline-none"
+                                    placeholder="e.g. Acme Transport Co."
+                                />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
 
                             <div className="space-y-2 col-span-2">
-                                <Label>Address</Label>
+                                <Label className="text-zinc-300">Address</Label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-2.5 text-zinc-500" size={16} />
-                                    <Input {...register("address")} className="pl-9" placeholder="Full address..." />
+                                    <Input
+                                        {...register("address")}
+                                        className="pl-9 bg-black/20 border-white/10 text-white focus:border-cyan-500/50 focus:outline-none"
+                                        placeholder="Full address..."
+                                    />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Phone Number</Label>
+                                <Label className="text-zinc-300">Phone Number</Label>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-2.5 text-zinc-500" size={16} />
-                                    <Input {...register("phone")} className="pl-9" placeholder="(555) 123-4567" />
+                                    <Input
+                                        {...register("phone")}
+                                        className="pl-9 bg-black/20 border-white/10 text-white focus:border-cyan-500/50 focus:outline-none"
+                                        placeholder="(555) 123-4567"
+                                    />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Email Address</Label>
+                                <Label className="text-zinc-300">Email Address</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-2.5 text-zinc-500" size={16} />
-                                    <Input {...register("email")} className="pl-9" placeholder="contact@vendor.com" />
+                                    <Input
+                                        {...register("email")}
+                                        className="pl-9 bg-black/20 border-white/10 text-white focus:border-cyan-500/50 focus:outline-none"
+                                        placeholder="contact@vendor.com"
+                                    />
                                 </div>
                                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label>EIN Number</Label>
+                                <Label className="text-zinc-300">EIN Number</Label>
                                 <div className="relative">
                                     <FileText className="absolute left-3 top-2.5 text-zinc-500" size={16} />
-                                    <Input {...register("ein_number")} className="pl-9 font-mono" placeholder="12-3456789" />
+                                    <Input
+                                        {...register("ein_number")}
+                                        className="pl-9 font-mono bg-black/20 border-white/10 text-white focus:border-cyan-500/50 focus:outline-none"
+                                        placeholder="12-3456789"
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10 mt-8">
-                    <button
+                {/* Fixed Footer */}
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                    <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={cn(
+                            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                            isSubmitting
+                                ? "bg-cyan-500/50 text-white cursor-not-allowed"
+                                : "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                        )}
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                        {initialData ? "Update" : "Create"}
-                    </button>
+                        {initialData ? "Update Vendor" : "Create Vendor"}
+                    </Button>
                 </div>
 
             </form>

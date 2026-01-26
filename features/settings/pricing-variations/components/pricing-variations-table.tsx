@@ -18,6 +18,8 @@ import {
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useState } from "react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface PricingVariation {
     id: string;
@@ -84,18 +86,12 @@ function SortableRow({ variation, onEdit, onDelete }: {
                     <button
                         onClick={() => onEdit(variation)}
                         className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
-                        title="Edit Variation"
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
-                        onClick={() => {
-                            if (confirm("Are you sure you want to delete this variation?")) {
-                                onDelete(variation.id);
-                            }
-                        }}
+                        onClick={() => onDelete(variation.id)}
                         className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
-                        title="Delete Variation"
                     >
                         <Trash2 size={16} />
                     </button>
@@ -106,6 +102,8 @@ function SortableRow({ variation, onEdit, onDelete }: {
 }
 
 export function PricingVariationsTable({ data, onEdit, onDelete, onReorder }: PricingVariationsTableProps) {
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -159,13 +157,26 @@ export function PricingVariationsTable({ data, onEdit, onDelete, onReorder }: Pr
                                     key={variation.id}
                                     variation={variation}
                                     onEdit={onEdit}
-                                    onDelete={onDelete}
+                                    onDelete={(id) => setDeleteId(id)}
                                 />
                             ))}
                         </tbody>
                     </SortableContext>
                 </table>
             </DndContext>
+
+            <AlertDialog
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => {
+                    if (deleteId) onDelete(deleteId);
+                    setDeleteId(null);
+                }}
+                isDestructive={true}
+                title="Delete Variation"
+                description="Are you sure you want to delete this variation? This action cannot be undone."
+                confirmLabel="Delete Variation"
+            />
         </div>
     );
 }

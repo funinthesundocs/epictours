@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { Building2, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { HotelsTable } from "@/features/transportation/components/hotels-table";
 import { AddHotelSheet } from "@/features/transportation/components/add-hotel-sheet";
@@ -65,6 +66,8 @@ export default function HotelsPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            if (error) throw error;
+            toast.success("Hotel deleted");
             fetchHotels();
         } catch (err) {
             console.error("Error deleting hotel:", err);

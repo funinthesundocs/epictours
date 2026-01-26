@@ -1,6 +1,8 @@
 "use client";
 
 import { Edit2, Trash2, Search, Coins } from "lucide-react";
+import { useState } from "react";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface PricingSchedule {
     id: string;
@@ -16,6 +18,8 @@ interface PricingSchedulesTableProps {
 }
 
 export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedulesTableProps) {
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
     if (data.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
@@ -63,18 +67,12 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                                     <button
                                         onClick={() => onEdit(schedule)}
                                         className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
-                                        title="Edit Schedule"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            if (confirm("Are you sure? This will delete all associated rates.")) {
-                                                onDelete(schedule.id);
-                                            }
-                                        }}
+                                        onClick={() => setDeleteId(schedule.id)}
                                         className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
-                                        title="Delete Schedule"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -84,6 +82,19 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                     ))}
                 </tbody>
             </table>
+
+            <AlertDialog
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => {
+                    if (deleteId) onDelete(deleteId);
+                    setDeleteId(null);
+                }}
+                isDestructive={true}
+                title="Delete Schedule"
+                description="Are you sure you want to delete this pricing schedule? This will delete all associated rates and cannot be undone."
+                confirmLabel="Delete Schedule"
+            />
         </div>
     );
 }

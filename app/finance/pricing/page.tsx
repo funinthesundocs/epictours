@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Coins, Plus, Loader2, Search } from "lucide-react";
+import { toast } from "sonner";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { PricingSchedulesTable } from "@/features/finance/pricing/components/pricing-table";
@@ -60,6 +61,7 @@ export default function PricingPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            toast.success("Pricing schedule deleted");
             fetchSchedules();
         } catch (err) {
             console.error("Error deleting schedule:", err);

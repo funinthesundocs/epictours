@@ -22,6 +22,7 @@ import { GripVertical, Plus, Trash2, Bus, Truck, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useSidebar } from "@/components/shell/sidebar-context";
 
 // Types
 export interface Assignment {
@@ -110,6 +111,7 @@ function SortableItem({
 }
 
 export function ResourceClusterList({ assignments, onChange, vehicles, routes, staff, maxCapacity }: ResourceClusterListProps) {
+    const { isCollapsed } = useSidebar();
     const [isAdding, setIsAdding] = useState(false);
 
     // New Cluster State
@@ -205,7 +207,11 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                             Add Vehicle Cluster
                         </button>
                     </DialogTrigger>
-                    <DialogContent className="bg-[#0b1115] border-white/10 text-white sm:max-w-[425px]">
+                    <DialogContent
+                        portal={false}
+                        overlayClassName="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-[#0b1115] border-white/10 text-white sm:max-w-[425px] shadow-2xl"
+                    >
                         <DialogHeader>
                             <DialogTitle>Add Vehicle Cluster</DialogTitle>
                         </DialogHeader>

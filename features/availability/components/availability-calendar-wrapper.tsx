@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { AvailabilityCalendar } from "@/features/availability/components/availability-calendar";
 import { EditAvailabilitySheet } from "@/features/availability/components/edit-availability-sheet";
 import { Availability } from "@/features/availability/components/availability-list-table";
@@ -63,6 +64,7 @@ export function AvailabilityCalendarWrapper({ experiences }: AvailabilityCalenda
             console.error("Failed to delete availability:", error);
             // In a real app, maybe show a toast
         } else {
+            toast.success("Availability deleted");
             handleSuccess(); // Triggers refresh and close
         }
     };

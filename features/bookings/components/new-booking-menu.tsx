@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Loader2, CalendarDays, Clock, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/components/shell/sidebar-context";
 
 interface NewBookingMenuProps {
     children: React.ReactNode;
@@ -20,6 +21,7 @@ interface NewBookingMenuProps {
 }
 
 export function NewBookingMenu({ children, onSelectAvailability }: NewBookingMenuProps) {
+    const { isCollapsed } = useSidebar();
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [availabilities, setAvailabilities] = useState<Availability[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -93,13 +95,21 @@ export function NewBookingMenu({ children, onSelectAvailability }: NewBookingMen
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="max-w-none w-auto p-0 bg-[#0a0a0a] border-zinc-800 gap-0 overflow-hidden">
+            <DialogContent
+                portal={true}
+                overlayClassName="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
+                overlayStyle={{ left: isCollapsed ? "80px" : "240px" }}
+                className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 max-w-none w-auto p-0 bg-[#0a0a0a] border-zinc-800 gap-0 overflow-hidden shadow-2xl transition-[left] duration-300 ease-in-out"
+                style={{
+                    left: `calc(50% + ${isCollapsed ? 40 : 120}px)`
+                }}
+            >
                 <div className="sr-only">
                     <DialogTitle>Select Booking Date</DialogTitle>
                 </div>
-                <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-zinc-800">
+                <div className="flex flex-col divide-y divide-zinc-800">
                     {/* Calendar Section */}
-                    <div className="p-3">
+                    <div className="p-3 flex justify-center">
                         <Calendar
                             mode="single"
                             selected={date}
@@ -121,7 +131,7 @@ export function NewBookingMenu({ children, onSelectAvailability }: NewBookingMen
                     </div>
 
                     {/* Availabilities List Section */}
-                    <div className="w-full sm:w-[400px] max-h-[400px] flex flex-col">
+                    <div className="w-full max-h-[300px] flex flex-col">
                         <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
                             <h3 className="font-bold text-white flex items-center gap-2">
                                 <CalendarDays size={16} className="text-cyan-500" />

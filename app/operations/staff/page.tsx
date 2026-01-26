@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { Users, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { StaffTable } from "@/features/operations/staff/components/staff-table";
 import { AddStaffSheet } from "@/features/operations/staff/components/add-staff-sheet";
@@ -69,6 +70,7 @@ export default function StaffPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            toast.success("Staff member deleted");
             fetchStaff();
         } catch (err) {
             console.error("Error deleting staff:", err);

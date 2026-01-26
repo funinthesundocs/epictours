@@ -24,6 +24,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface CustomField {
     id: string;
@@ -68,6 +69,7 @@ const FILTER_OPTS = [
 
 export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, onDuplicate, onDelete }: CustomFieldsTableProps) {
     const [expandedFields, setExpandedFields] = React.useState<Set<string>>(new Set());
+    const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
     const toggleExpand = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -406,19 +408,13 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                         </button>
                                         <button
                                             onClick={() => onDuplicate(field)}
-                                            className="p-2 text-zinc-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
-                                            title="Duplicate Field"
+                                            className="p-2 text-zinc-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                if (confirm("Are you sure? This action cannot be undone.")) {
-                                                    onDelete(field.id);
-                                                }
-                                            }}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
-                                            title="Delete Field"
+                                            onClick={() => setDeleteId(field.id)}
+                                            className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -429,6 +425,19 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                     })}
                 </tbody>
             </table>
+
+            <AlertDialog
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => {
+                    if (deleteId) onDelete(deleteId);
+                    setDeleteId(null);
+                }}
+                isDestructive={true}
+                title="Delete Custom Field"
+                description="Are you sure you want to delete this custom field? This action cannot be undone and will remove data associated with this field from existing bookings."
+                confirmLabel="Delete Field"
+            />
         </div>
     );
 }

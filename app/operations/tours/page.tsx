@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Map, Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { ExperiencesTable } from "@/features/experiences/components/experiences-table";
@@ -41,6 +42,7 @@ export default function ToursPage() {
 
     const handleDelete = async (id: string) => {
         await supabase.from("experiences").delete().eq("id", id);
+        toast.success("Experience deleted");
         fetchExperiences();
     };
 

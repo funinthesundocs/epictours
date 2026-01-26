@@ -104,7 +104,6 @@ export function RolesTable({ data, onEdit, onDelete }: RolesTableProps) {
                                                 onEdit(role);
                                             }}
                                             className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
-                                            title="Edit"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -115,7 +114,6 @@ export function RolesTable({ data, onEdit, onDelete }: RolesTableProps) {
                                                 setDeletingItem(role);
                                             }}
                                             className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
-                                            title="Delete"
                                         >
                                             <Trash2 size={16} />
                                         </button>

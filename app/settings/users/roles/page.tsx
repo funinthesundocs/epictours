@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { UserCog, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { RolesTable } from "@/features/settings/roles/components/roles-table";
 import { AddRoleSheet } from "@/features/settings/roles/components/add-role-sheet";
@@ -60,6 +61,7 @@ export default function RolesPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            toast.success("Role deleted");
             fetchRoles();
         } catch (err) {
             console.error("Error deleting role:", err);

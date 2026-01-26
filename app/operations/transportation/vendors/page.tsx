@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { Building2, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { VendorsTable } from "@/features/transportation/components/vendors-table";
 import { AddVendorSheet } from "@/features/transportation/components/add-vendor-sheet";
@@ -62,6 +63,8 @@ export default function VendorsPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            if (error) throw error;
+            toast.success("Vendor deleted");
             fetchVendors();
         } catch (err) {
             console.error("Error deleting vendor:", err);
@@ -87,7 +90,7 @@ export default function VendorsPage() {
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
                     Add Vendor

@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { CalendarClock, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { SchedulesTable } from "@/features/transportation/components/schedules-table";
 import { ScheduleSheet } from "@/features/transportation/components/schedule-sheet";
@@ -58,6 +59,8 @@ export default function SchedulesPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            if (error) throw error;
+            toast.success("Schedule deleted");
             fetchSchedules();
         } catch (err) {
             console.error("Error deleting schedule:", err);

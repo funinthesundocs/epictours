@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { Bus, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { VehiclesTable } from "@/features/transportation/components/vehicles-table";
 import { AddVehicleSheet } from "@/features/transportation/components/add-vehicle-sheet";
@@ -60,6 +61,8 @@ export default function VehiclesPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            if (error) throw error;
+            toast.success("Vehicle deleted");
             fetchVehicles();
         } catch (err) {
             console.error("Error deleting vehicle:", err);

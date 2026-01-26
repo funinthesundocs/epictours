@@ -56,14 +56,12 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                                         <button
                                             onClick={() => onEdit(item)}
                                             className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
-                                            title="Edit Details"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeletingItem(item)}
                                             className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
-                                            title="Delete"
                                         >
                                             <Trash2 size={16} />
                                         </button>

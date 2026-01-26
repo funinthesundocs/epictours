@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { MapPin, Loader2, Plus } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { PickupPointsTable } from "@/features/transportation/components/pickup-points-table";
 import { AddPickupSheet } from "@/features/transportation/components/add-pickup-sheet";
@@ -42,6 +43,7 @@ export default function PickupPointsPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            toast.success("Location deleted");
             fetchPoints(); // Refresh
         } catch (err) {
             console.error("Error deleting:", err);

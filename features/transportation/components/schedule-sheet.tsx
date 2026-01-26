@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Save, Loader2, Plus, Clock, MapPin, Trash2, Calendar, Route } from "lucide-react";
@@ -167,6 +168,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         if (!deletingStopId) return;
         try {
             await supabase.from("schedule_stops").delete().eq("id", deletingStopId);
+            toast.success("Stop removed");
             if (currentScheduleId) fetchStops(currentScheduleId);
         } catch (err) {
             console.error("Error deleting stop:", err);

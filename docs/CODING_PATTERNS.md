@@ -12,98 +12,46 @@
 ## 1. UI Standards
 
 ### Save/Update Buttons
-### Save/Update Buttons
-All form submission buttons must follow this state logic:
 
-1.  **Logic Requirement**:
-    *   **Dirty State**: The button must ONLY be enabled if `isDirty` is true OR if deep resources (like assignments) have changed.
-    *   **Strict Type Checking**: React Hook Form's `isDirty` can fail if types mismatch (e.g. initial `0` vs form string `"0"`).
-        *   **Rule**: Always initialize form values as **Strings** in `reset()` if the input is an HTML `<input>` to prevent false dirty states.
-        *   Example: `max_capacity: String(data.max_capacity)`
-    *   **Logic Pattern**:
-        ```tsx
-        const hasChanges = isDirty || isAssignmentsDirty; // Define explicitly
-        ```
+### 1.2 Deletion & Confirmation Protocol
+*   **Strict Rule**: Never use browser native `window.confirm()`.
+*   **Component**: Always use `AlertDialog` (`@/components/ui/alert-dialog`).
+*   **Pattern**: Use local state (e.g., `const [deletingItem, setDeletingItem] = useState...`) to control dialog visibility.
+*   **Notification**: Upon successful deletion, **ALWAYS** display a toast notification confirming the action.
+    *   `toast.success("${itemName} deleted");`
+    *   Do NOT just silently remove the item.
 
-2.  **Visual States**:
-    *   **No Changes** (Default):
-        *   Text: "No Changes"
-        *   Style: Zinc/Gray (`bg-zinc-800 text-zinc-500 border border-white/5 cursor-not-allowed`)
-    *   **Has Changes** (Ready):
-        *   Text: "Save [Entity]" (e.g. "Save Availability")
-        *   Style: Cyan Primary (`bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]`)
-    *   **Saving** (Loading):
-        *   Text: "Saving..."
-        *   Style: Cyan Disabled (`bg-cyan-500/50 text-white cursor-not-allowed`)
-        *   Icon: `<Loader2 className="animate-spin" />`
-
-3.  **Implementation Template**:
-    ```tsx
-    <button
-        type="submit"
-        disabled={isSubmitting || isLoading || !hasChanges}
-        className={cn(
-            "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-            (isSubmitting || isLoading) ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                hasChanges ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
-        )}
-    >
-        {(isSubmitting || isLoading) ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
-            hasChanges ? <><Save size={16} /> Save [Entity]</> :
-                "No Changes"}
-    </button>
-    ```
+### 1.3 UI Action Standards
+*   **Tooltips**: Do NOT add `title="..."` tooltips to standard action buttons (Edit, Delete, Duplicate) in tables. They add unnecessary clutter.
+*   **Icons**: Use `lucide-react` icons (16px).
+*   **Indicators**: Use `cyan-500` for active states.
 
 ## 2. UI Components (Deep Core)
+*   **SidePanel / Sheet Layouts**:
+    *   **Standard Structure (Glass Pattern)**:
+        *   **Content**: `p-0 overflow-hidden flex flex-col`.
+        *   **Form**: `h-full flex flex-col`.
+        *   **Scroll Area**: Wrap content in `<div className="flex-1 overflow-y-auto p-6 ...">`.
+    *   **Footer Rules**:
+        *   **Position**: Sticky at bottom (`mt-auto`).
+        *   **Style**: `bg-zinc-950/40 backdrop-blur-md` with `border-t border-white/10`.
+        *   **Buttons**: Primary Action Button must use **White Text** (`text-white`) on Cyan background. Never use black text.
+    *   **Snippet**:
+        ```tsx
+        <SidePanel contentClassName="p-0 overflow-hidden flex flex-col" ...>
+            <form className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
+                    {/* Content */}
+                </div>
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                    <Button type="submit" className="text-white ...">Save</Button>
+                </div>
+            </form>
+        </SidePanel>
+        ```
 *   **Tables**:
-    *   **Headers**: Always visible, even when empty.
-    *   **Empty State**: Use a `<tr><td colSpan={4} ...>Message</td></tr>` inside `<tbody>` instead of a wrapper `div`. This maintains layout stability.
-    *   **Styling**: `bg-black` or `bg-zinc-900` backgrounds. Text `zinc-300`. Headers `zinc-400`.
-    *   **Dropdowns**: Use the `DropdownMenu` component (`@/components/ui/dropdown-menu.tsx`) for actions and complex filters. NEVER use page-level horizontal scroll buttons for complex filters; put them in the column header.
-*   **Icons**:
-    *   **Action Buttons**: Use `lucide-react` icons (16px).
-    *   **Indicators**: Use `cyan-500` for active states.
-*   **Forms**:
-    *   **Inputs**: `bg-black/20` with `border-white/10`. Focus `cyan-500/50`.
-    *   **Tabs**: Use internal `useState` for tabs within SidePanels. Use `animate-in fade-in slide-in-from-right-4` for smooth transitions.
-    *   **SidePanel / Sheet Layouts**:
-        *   **Standard Structure (Glass Pattern)**:
-            ```tsx
-            <SidePanel ...>
-                <form ... className="flex flex-col h-full bg-transparent">
-                    {/* Content: Scrollable */}
-                    <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
-                       {/* Grid or Fields */}
-                    </div>
-
-                    {/* Footer: Fixed at Bottom (Glass) */}
-                    <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
-                        {/* Left: Delete (if Edit Mode) */}
-                        {isEditMode && <Button variant="ghost" className="mr-auto text-red-400 ...">Delete</Button>}
-
-                        {/* Right: Actions */}
-                        {/* NO CANCEL BUTTON - Use 'X' in header or click mask */}
-                        <Button type="submit" className="text-white ...">Save</Button>
-                    </div>
-                </form>
-            </SidePanel>
-            ```
-        *   **Footer Rules**:
-            *   **Spacing**: `py-4 px-6 gap-4`.
-            *   **Color**: `bg-zinc-950/40 backdrop-blur-md` (Glass) with `border-t border-white/10`.
-            *   **Buttons**: Primary Button must use `text-white` (never black text on Cyan).
-            *   **No Cancel**: Do not include a "Cancel" button.
-    *   **Columned Layouts (Booking Desk / Availability)**:
-        *   **Container**: Use `bg-transparent` for column containers to allow sheet backdrop to show through.
-        *   **Column Wrapper**: Use `h-full` and `border-r` on the column wrapper to create full-height vertical dividers. Removing padding (`p-0`) is preferred for full-width sticky headers.
-        *   **Header Style**:
-            *   Full Width: `bg-white/5` (or `zinc-950/30`), `backdrop-blur-md`, `border-b border-white/5`.
-            *   Behavior: `sticky top-0 z-10`.
-            *   Typography: `text-zinc-400`, `text-xs`, `uppercase`, `font-bold`, `tracking-wider`.
-            *   Padding: `px-4 py-3`.
-            *   Icons: `text-zinc-500` (16px).
-        *   **Content Area**: Apply `p-6` to the content container below the header.
+    *   **Headers**: Always visible.
+    *   **Actions**: Align right.
 
 ## 2. Database & RLS
 *   **Local Development**:

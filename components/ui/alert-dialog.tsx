@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { createPortal } from "react-dom";
 
+import { useSidebar } from "@/components/shell/sidebar-context";
+
 interface AlertDialogProps {
     isOpen: boolean;
     onClose: () => void;
@@ -27,6 +29,7 @@ export function AlertDialog({
     isDestructive = false,
     isLoading = false
 }: AlertDialogProps) {
+    const { isCollapsed } = useSidebar();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -38,7 +41,10 @@ export function AlertDialog({
     if (!isOpen) return null;
 
     const content = (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 transition-[left] duration-300 ease-in-out"
+            style={{ left: isCollapsed ? "80px" : "240px" }}
+        >
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"

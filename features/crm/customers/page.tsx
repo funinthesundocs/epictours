@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Customer } from "./types";
 import { CustomerTable } from "./components/customer-table";
@@ -139,6 +140,7 @@ export function CustomersPage() {
         try {
             const { error } = await supabase.from('customers').delete().eq('id', id);
             if (error) throw error;
+            toast.success("Customer deleted");
             fetchCustomers(); // Re-fetch to update count and page
         } catch (err: any) {
             alert("Error deleting customer: " + err.message);

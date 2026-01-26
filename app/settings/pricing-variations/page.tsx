@@ -71,6 +71,7 @@ export default function PricingVariationsPage() {
                 .eq("id", id);
 
             if (error) throw error;
+            toast.success("Variation deleted");
             fetchVariations();
         } catch (err) {
             console.error("Error deleting variation:", err);
