@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Info, User, Contact } from "lucide-react";
+import { Save, Loader2, Info, User, Contact, Phone, MessageCircle, Mail, FileText, BadgeCheck, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,11 @@ const StaffSchema = z.object({
     name: z.string().min(2, "Name is required"),
     role_id: z.string().min(1, "Role is required"),
     phone: z.string().optional().nullable(),
-    messaging_app: z.string().optional().nullable(),
+    // messaging_app is now just for storage, form uses messaging_apps array
+    messaging_apps: z.array(z.object({
+        app: z.string().min(1, "App required"),
+        handle: z.string().min(1, "Handle required")
+    })).optional(),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     notes: z.string().optional().nullable(),
 });
@@ -47,12 +51,21 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
 
+    const formatPhoneNumber = (value: string) => {
+        const numbers = value.replace(/\D/g, "");
+        if (numbers.length === 0) return "";
+        if (numbers.length <= 3) return `(${numbers}`;
+        if (numbers.length <= 6) return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
+        return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+    };
+
     const {
         register,
         handleSubmit,
         reset,
         setValue,
         watch,
+        control,
         formState: { errors }
     } = useForm<StaffFormData>({
         resolver: zodResolver(StaffSchema),
@@ -60,10 +73,15 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             name: "",
             role_id: "",
             phone: "",
-            messaging_app: "",
+            messaging_apps: [],
             email: "",
             notes: ""
         }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "messaging_apps"
     });
 
     // Fetch Roles on mount
@@ -81,11 +99,28 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
+                // Parse existing messaging_app JSON or migrate legacy string
+                let parsedApps = [];
+                try {
+                    if (initialData.messaging_app?.startsWith('[')) {
+                        parsedApps = JSON.parse(initialData.messaging_app);
+                    } else if (initialData.messaging_app) {
+                        parsedApps = [{ app: initialData.messaging_app, handle: "" }];
+                    }
+                } catch (e) {
+                    console.warn("Failed to parse messaging apps", e);
+                }
+
+                // Ensure at least one empty row if none exist
+                if (parsedApps.length === 0) {
+                    parsedApps = [{ app: "", handle: "" }];
+                }
+
                 reset({
                     name: initialData.name,
                     role_id: initialData.role_id || "",
-                    phone: initialData.phone || "",
-                    messaging_app: initialData.messaging_app || "",
+                    phone: formatPhoneNumber(initialData.phone || ""),
+                    messaging_apps: parsedApps,
                     email: initialData.email || "",
                     notes: initialData.notes || "",
                 });
@@ -94,7 +129,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     name: "",
                     role_id: "",
                     phone: "",
-                    messaging_app: "",
+                    messaging_apps: [{ app: "", handle: "" }], // Default to one empty row
                     email: "",
                     notes: "",
                 });
@@ -105,11 +140,14 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
     const onSubmit = async (data: StaffFormData) => {
         setIsSubmitting(true);
         try {
+            // Filter out empty rows before saving
+            const validApps = data.messaging_apps?.filter(a => a.app && a.handle) || [];
+
             const payload = {
                 name: data.name,
                 role_id: data.role_id,
-                phone: data.phone || null,
-                messaging_app: data.messaging_app || null,
+                phone: data.phone?.replace(/\D/g, "") || null,
+                messaging_app: validApps.length > 0 ? JSON.stringify(validApps) : null,
                 email: data.email || null,
                 notes: data.notes || null,
             };
@@ -139,9 +177,9 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
-            <Icon size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+        <div className="flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5">
+            <Icon size={16} className="text-cyan-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -160,14 +198,20 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     {/* Basic Info */}
                     <div>
                         <SectionHeader icon={Info} title="Basic Information" />
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Full Name</Label>
-                                <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. John Doe" />
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <User size={16} className="text-zinc-500" />
+                                    Full Name
+                                </Label>
+                                <Input {...register("name")} placeholder="e.g. John Doe" />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label>Role</Label>
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <BadgeCheck size={16} className="text-zinc-500" />
+                                    Role
+                                </Label>
                                 <Combobox
                                     options={roles}
                                     value={watch('role_id')}
@@ -185,26 +229,112 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Phone Number</Label>
-                                    <Input {...register("phone")} placeholder="+1 (555)..." />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Messaging App</Label>
-                                    <Combobox
-                                        options={APP_OPTIONS}
-                                        value={watch('messaging_app') || ""}
-                                        onChange={(val) => setValue('messaging_app', val)}
-                                        placeholder="Select App..."
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        <Phone size={16} className="text-zinc-500" />
+                                        Phone Number
+                                    </Label>
+                                    <Input
+                                        {...register("phone", {
+                                            onChange: (e) => {
+                                                e.target.value = formatPhoneNumber(e.target.value);
+                                            }
+                                        })}
+                                        placeholder="(555) 123-4567"
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        <Mail size={16} className="text-zinc-500" />
+                                        Email Address
+                                    </Label>
+                                    <Input {...register("email")} type="email" placeholder="john@example.com" />
+                                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Email Address</Label>
-                                <Input {...register("email")} type="email" placeholder="john@example.com" />
-                                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+
+                            <div className="space-y-3">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <MessageCircle size={16} className="text-zinc-500" />
+                                    Messaging Apps
+                                </Label>
+
+                                <div className="space-y-2">
+                                    {fields.map((field, index) => (
+                                        <div key={field.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
+                                            <div className="flex-1 flex items-center pr-2 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-500/30">
+                                                {/* App Name */}
+                                                <div className="w-[40%] min-w-[120px] border-r border-white/5 h-full relative">
+                                                    <Controller
+                                                        control={control}
+                                                        name={`messaging_apps.${index}.app`}
+                                                        render={({ field }) => (
+                                                            <Combobox
+                                                                options={APP_OPTIONS}
+                                                                value={field.value}
+                                                                onChange={(val) => field.onChange(val)}
+                                                                placeholder="App..."
+                                                                className="w-full bg-transparent border-none text-white text-sm h-[42px] px-3 shadow-none hover:bg-white/5 rounded-none rounded-l-lg"
+                                                            />
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                {/* Handle Input */}
+                                                <div className="flex-1 h-full relative">
+                                                    <input
+                                                        {...register(`messaging_apps.${index}.handle`, {
+                                                            onChange: (e) => {
+                                                                const app = watch(`messaging_apps.${index}.app`) || "";
+                                                                const isPhoneApp = ["WhatsApp", "Signal", "Viber", "iMessage"].includes(app);
+                                                                const val = e.target.value;
+                                                                const hasLetters = /[a-zA-Z]/.test(val);
+
+                                                                // Format if it's a known phone app OR if the input looks like a phone number (no letters)
+                                                                if (isPhoneApp || (!hasLetters && val.length > 0)) {
+                                                                    const formatted = formatPhoneNumber(val);
+                                                                    // We need to set the value explicitly to update the form state and UI
+                                                                    if (formatted !== val) {
+                                                                        setValue(`messaging_apps.${index}.handle`, formatted);
+                                                                    }
+                                                                }
+                                                            }
+                                                        })}
+                                                        placeholder="@handle or number"
+                                                        className="w-full bg-transparent border-none text-white text-sm focus:ring-0 placeholder:text-zinc-600 h-[42px] px-3 outline-none"
+                                                    />
+                                                </div>
+                                                {/* Delete Button (Inside) */}
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => remove(index)}
+                                                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0 rounded-full mr-1"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </Button>
+                                            </div>
+
+                                            {/* Add Button (Outside) */}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => append({ app: "", handle: "" })}
+                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-8 w-8 p-0 rounded-lg transition-colors shrink-0"
+                                            >
+                                                <Plus size={16} />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
+
                             <div className="space-y-2">
-                                <Label>Notes</Label>
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <FileText size={16} className="text-zinc-500" />
+                                    Notes
+                                </Label>
                                 <Textarea
                                     {...register("notes")}
                                     placeholder="Additional notes..."
@@ -227,6 +357,6 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                 </div>
 
             </form>
-        </SidePanel>
+        </SidePanel >
     );
 }

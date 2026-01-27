@@ -96,13 +96,6 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
-            <Icon size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
-        </div>
-    );
-
     return (
         <SidePanel
             isOpen={isOpen}
@@ -116,7 +109,6 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24">
                     <div className="space-y-8">
                         <div>
-                            <SectionHeader icon={UserCog} title="Role Details" />
                             <div className="space-y-6">
                                 <div className="space-y-2">
                                     <Label>Role Name</Label>

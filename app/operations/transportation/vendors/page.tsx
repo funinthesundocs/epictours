@@ -1,7 +1,7 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Building2, Plus, Loader2, Search } from "lucide-react";
+import { Handshake, Plus, Loader2, Search } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -86,7 +86,7 @@ export default function VendorsPage() {
         <PageShell
             title="Transportation Vendors"
             description="Manage external transportation providers and partners."
-            icon={Building2}
+            icon={Handshake}
             action={
                 <button
                     onClick={handleAddNew}

@@ -37,13 +37,15 @@ export function HotelsTable({ data, onEdit, onDelete }: HotelTableProps) {
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {data.map((hotel) => (
                             <tr key={hotel.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                        <Building2 size={16} />
+                                <td className="px-6 py-4 align-middle font-medium text-white">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                            <Building2 size={16} />
+                                        </div>
+                                        {hotel.name}
                                     </div>
-                                    {hotel.name}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     {hotel.contact_phone ? (
                                         <span className="flex items-center gap-2 text-zinc-400">
                                             <Phone size={14} />
@@ -53,17 +55,17 @@ export function HotelsTable({ data, onEdit, onDelete }: HotelTableProps) {
                                         <span className="text-zinc-600">-</span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     {hotel.pickup_points ? (
-                                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-zinc-400 rounded-full text-xs font-medium">
-                                            <MapPin size={12} />
+                                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-zinc-400 rounded-full text-sm font-medium">
+                                            <MapPin size={14} />
                                             {hotel.pickup_points.name}
                                         </span>
                                     ) : (
                                         <span className="text-red-400 text-xs italic">Unassigned</span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 align-middle text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <button
                                             type="button"
@@ -139,8 +141,8 @@ export function HotelsTable({ data, onEdit, onDelete }: HotelTableProps) {
                                 <div className="text-zinc-500">Pickup Point</div>
                                 <div>
                                     {hotel.pickup_points ? (
-                                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-zinc-400 rounded-full text-xs font-medium">
-                                            <MapPin size={12} />
+                                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-zinc-400 rounded-full text-sm font-medium">
+                                            <MapPin size={14} />
                                             {hotel.pickup_points.name}
                                         </span>
                                     ) : (

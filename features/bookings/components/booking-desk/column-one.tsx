@@ -189,7 +189,6 @@ export function ColumnOne({
                                         setCustomerToEdit(selectedCustomer);
                                         setShowAddCustomer(true);
                                     }}
-                                    title="Edit Customer"
                                 >
                                     <Edit2 size={16} />
                                 </Button>
@@ -202,7 +201,6 @@ export function ColumnOne({
                                     setCustomerToEdit(null);
                                     setShowAddCustomer(true);
                                 }}
-                                title="New Customer"
                             >
                                 <Plus size={16} />
                             </Button>

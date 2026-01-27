@@ -92,13 +92,15 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {sortedData.map((staff) => (
                             <tr key={staff.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                        <User size={16} />
+                                <td className="px-6 py-4 font-medium text-white align-middle">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                            <User size={16} />
+                                        </div>
+                                        {staff.name}
                                     </div>
-                                    {staff.name}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     {staff.role?.name ? (
                                         <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
                                             {staff.role.name}
@@ -107,7 +109,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                         <span className="text-zinc-500 italic">-</span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="flex flex-col gap-1 text-xs">
                                         {staff.phone && (
                                             <div className="flex items-center gap-2 text-zinc-300">
@@ -129,10 +131,10 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 text-xs italic max-w-[200px] truncate">
+                                <td className="px-6 py-4 text-zinc-400 text-xs italic max-w-[200px] truncate align-middle">
                                     {staff.notes || "-"}
                                 </td>
-                                <td className="px-6 py-4 text-center">
+                                <td className="px-6 py-4 text-center align-middle">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -144,7 +146,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                         View Rates
                                     </button>
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right align-middle">
                                     <div className="flex items-center justify-end gap-2">
                                         <button
                                             onClick={(e) => {

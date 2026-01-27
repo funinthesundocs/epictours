@@ -99,7 +99,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
     // Fetch vendors on mount
     useEffect(() => {
         const fetchVendors = async () => {
-            const { data } = await supabase.from('vendors').select('id, name').order('name');
+            const { data } = await supabase.from('vendors' as any).select('id, name').order('name');
             if (data) {
                 setVendors(data.map(v => ({ value: v.id, label: v.name })));
             }
@@ -173,10 +173,10 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
-            <Icon size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+    const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
+        <div className={cn("flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5", className)}>
+            <Icon size={16} className="text-cyan-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -190,27 +190,25 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
             contentClassName="p-0 overflow-hidden flex flex-col"
         >
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
-                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-6 space-y-8">
                     {/* 1. Basic Info */}
                     <div>
-                        <SectionHeader icon={Info} title="Vehicle Information" />
+                        <SectionHeader icon={Info} title="Vehicle Information" className="-mt-6 border-t-0" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2 col-span-2">
                                 <Label>Vehicle Name</Label>
-                                <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Mercedes Sprinter" />
+                                <Input {...register("name")} placeholder="e.g. Mercedes Sprinter" />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
 
                             {/* Vendor Selection */}
                             <div className="space-y-2">
-                                <Label>Vendor (Optical)</Label>
+                                <Label>Vendor (Optional)</Label>
                                 <Combobox
                                     options={vendors}
                                     value={watch('vendor_id') || ""}
                                     onChange={(val) => setValue('vendor_id', val || null)}
                                     placeholder="Select Vendor..."
-                                    searchPlaceholder="Search vendors..."
-                                    emptyMessage="No vendors found."
                                 />
                                 <p className="text-[10px] text-zinc-500">Leave empty for internal fleet.</p>
                             </div>

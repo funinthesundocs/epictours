@@ -115,7 +115,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                     onFocus={() => !disabled && setIsOpen(true)}
                     disabled={disabled}
                     className={cn(
-                        "w-full bg-black/20 border border-white/10 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
+                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
                         inputClassName,
                         disabled && "opacity-50 cursor-not-allowed"
                     )}

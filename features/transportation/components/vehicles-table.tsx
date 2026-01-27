@@ -16,7 +16,6 @@ interface Vehicle {
     rate_per_hour: number;
     fixed_rate: number;
     per_pax_rate: number;
-    per_pax_rate: number;
     status: string;
     vendor?: { name: string } | null; // Joined vendor data
 }
@@ -128,50 +127,52 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {sortedData.map((v) => (
                             <tr key={v.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                        <Bus size={16} />
+                                <td className="px-6 py-4 font-medium text-white align-middle">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                            <Bus size={16} />
+                                        </div>
+                                        {v.name}
                                     </div>
-                                    {v.name}
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400">
+                                <td className="px-6 py-4 text-zinc-400 align-middle">
                                     {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
                                 </td>
-                                <td className="px-6 py-4">{v.capacity}</td>
-                                <td className="px-6 py-4 text-xs text-zinc-400">{v.license_requirement}</td>
-                                <td className="px-6 py-4 font-mono text-xs">{v.plate_number}</td>
-                                <td className="px-6 py-4">{v.miles_per_gallon}</td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col gap-2">
+                                <td className="px-6 py-4 align-middle">{v.capacity}</td>
+                                <td className="px-6 py-4 text-sm text-zinc-400 align-middle">{v.license_requirement}</td>
+                                <td className="px-6 py-4 font-mono text-sm align-middle">{v.plate_number}</td>
+                                <td className="px-6 py-4 align-middle">{v.miles_per_gallon}</td>
+                                <td className="px-6 py-4 align-middle">
+                                    <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-1.5 items-center">
                                         {v.rate_per_hour > 0 && (
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Hourly</span>
-                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.rate_per_hour)}</span>
-                                            </div>
+                                            <>
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Hourly</span>
+                                                <span className="font-mono text-white text-sm">{formatCurrency(v.rate_per_hour)}</span>
+                                            </>
                                         )}
                                         {v.fixed_rate > 0 && (
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Fixed</span>
-                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.fixed_rate)}</span>
-                                            </div>
+                                            <>
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Fixed</span>
+                                                <span className="font-mono text-white text-sm">{formatCurrency(v.fixed_rate)}</span>
+                                            </>
                                         )}
                                         {v.per_pax_rate > 0 && (
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Per PAX</span>
-                                                <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.per_pax_rate)}</span>
-                                            </div>
+                                            <>
+                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Per PAX</span>
+                                                <span className="font-mono text-white text-sm">{formatCurrency(v.per_pax_rate)}</span>
+                                            </>
                                         )}
                                         {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
-                                            <span className="text-zinc-600 italic">-</span>
+                                            <span className="text-zinc-600 italic col-span-2">-</span>
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
                                         {v.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right align-middle">
                                     <div className="flex items-center justify-end gap-2">
                                         <button
                                             type="button"
@@ -257,27 +258,27 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                 <div className="text-white">{v.miles_per_gallon}</div>
 
                                 <div className="text-zinc-500">Rates</div>
-                                <div className="flex flex-col gap-2">
+                                <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-1.5 items-center">
                                     {v.rate_per_hour > 0 && (
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Hourly</span>
-                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.rate_per_hour)}</span>
-                                        </div>
+                                        <>
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Hourly</span>
+                                            <span className="font-mono text-white text-sm">{formatCurrency(v.rate_per_hour)}</span>
+                                        </>
                                     )}
                                     {v.fixed_rate > 0 && (
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Fixed</span>
-                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.fixed_rate)}</span>
-                                        </div>
+                                        <>
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Fixed</span>
+                                            <span className="font-mono text-white text-sm">{formatCurrency(v.fixed_rate)}</span>
+                                        </>
                                     )}
                                     {v.per_pax_rate > 0 && (
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider leading-none mb-0.5">Per PAX</span>
-                                            <span className="font-mono text-white text-xs leading-none">{formatCurrency(v.per_pax_rate)}</span>
-                                        </div>
+                                        <>
+                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Per PAX</span>
+                                            <span className="font-mono text-white text-sm">{formatCurrency(v.per_pax_rate)}</span>
+                                        </>
                                     )}
                                     {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
-                                        <span className="text-zinc-600 italic">-</span>
+                                        <span className="text-zinc-600 italic col-span-2">-</span>
                                     )}
                                 </div>
                             </div>

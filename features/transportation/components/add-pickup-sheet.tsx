@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, MapPin } from "lucide-react";
+import { Save, Loader2, MapPin, Link, FileText } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -95,31 +97,37 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Location Name <span className="text-red-400">*</span></label>
-                        <input
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <MapPin size={16} className="text-zinc-500" />
+                            Location Name <span className="text-red-400">*</span>
+                        </label>
+                        <Input
                             {...register("name")}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                             placeholder="e.g. Waikiki Gateway"
                         />
                         {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Google Map Link</label>
-                        <input
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Link size={16} className="text-zinc-500" />
+                            Google Map Link
+                        </label>
+                        <Input
                             {...register("map_link")}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                             placeholder="https://goo.gl/maps/..."
                         />
                         {errors.map_link && <p className="text-xs text-red-400">{errors.map_link.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Instructions / Notes</label>
-                        <textarea
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <FileText size={16} className="text-zinc-500" />
+                            Instructions / Notes
+                        </label>
+                        <Textarea
                             {...register("instructions")}
                             rows={4}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                             placeholder="Specific pickup details..."
                         />
                     </div>

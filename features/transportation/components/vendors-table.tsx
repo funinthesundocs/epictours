@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Building2 } from "lucide-react";
+import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Handshake, MapPin, Phone, Mail, FileText } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface Vendor {
     id: string;
     name: string;
     address: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
     phone: string;
     email: string;
     ein_number: string;
@@ -27,6 +30,15 @@ type SortConfig = {
 export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>(null);
     const [deletingItem, setDeletingItem] = useState<Vendor | null>(null);
+
+    const formatPhoneNumber = (str: string | null | undefined) => {
+        if (!str) return "—";
+        const cleaned = str.replace(/\D/g, "");
+        if (cleaned.length === 10) {
+            return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+        }
+        return str;
+    };
 
     const handleSort = (key: keyof Vendor) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -89,17 +101,46 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {sortedData.map((v) => (
                             <tr key={v.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                        <Building2 size={16} />
+                                <td className="px-6 py-4 align-middle font-medium text-white">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                            <Handshake size={16} />
+                                        </div>
+                                        {v.name}
                                     </div>
-                                    {v.name}
                                 </td>
-                                <td className="px-6 py-4 truncate max-w-xs" title={v.address || ""}>{v.address || "—"}</td>
-                                <td className="px-6 py-4">{v.phone || "—"}</td>
-                                <td className="px-6 py-4">{v.email || "—"}</td>
-                                <td className="px-6 py-4 font-mono text-xs">{v.ein_number || "—"}</td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 align-middle truncate max-w-xs" title={v.address || ""}>
+                                    <div className="flex items-start gap-2 text-zinc-400">
+                                        <MapPin size={14} className="mt-0.5 shrink-0" />
+                                        <div className="flex flex-col">
+                                            <span>{v.address || "—"}</span>
+                                            {(v.city || v.state || v.zip_code) && (
+                                                <span className="text-xs text-zinc-500">
+                                                    {[v.city, v.state].filter(Boolean).join(", ")} {v.zip_code}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 align-middle">
+                                    <span className="flex items-center gap-2 text-zinc-400">
+                                        <Phone size={14} />
+                                        {formatPhoneNumber(v.phone)}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 align-middle">
+                                    <span className="flex items-center gap-2 text-zinc-400">
+                                        <Mail size={14} />
+                                        {v.email || "—"}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 align-middle">
+                                    <span className="flex items-center gap-2 text-zinc-400 font-mono text-xs">
+                                        <FileText size={14} />
+                                        {v.ein_number || "—"}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 align-middle text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <button
                                             type="button"
@@ -136,7 +177,7 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Building2 size={16} />
+                                        <Handshake size={16} />
                                     </div>
                                     <h3 className="text-lg font-bold text-white leading-tight">
                                         {v.name}
@@ -161,16 +202,35 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                             {/* Body Grid */}
                             <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
                                 <div className="text-zinc-500">Address</div>
-                                <div className="text-white truncate">{v.address || "—"}</div>
+                                <div className="text-zinc-400 truncate flex items-start gap-2">
+                                    <MapPin size={14} className="mt-0.5 shrink-0" />
+                                    <div className="flex flex-col">
+                                        <span>{v.address || "—"}</span>
+                                        {(v.city || v.state || v.zip_code) && (
+                                            <span className="text-xs text-zinc-500">
+                                                {[v.city, v.state].filter(Boolean).join(", ")} {v.zip_code}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div className="text-zinc-500">Phone</div>
-                                <div className="text-white">{v.phone || "—"}</div>
+                                <div className="text-zinc-400 flex items-center gap-2">
+                                    <Phone size={14} />
+                                    {formatPhoneNumber(v.phone)}
+                                </div>
 
                                 <div className="text-zinc-500">Email</div>
-                                <div className="text-zinc-400 text-xs truncate">{v.email || "—"}</div>
+                                <div className="text-zinc-400 text-xs truncate flex items-center gap-2">
+                                    <Mail size={14} />
+                                    {v.email || "—"}
+                                </div>
 
                                 <div className="text-zinc-500">EIN</div>
-                                <div className="text-white font-mono text-xs">{v.ein_number || "—"}</div>
+                                <div className="text-zinc-400 font-mono text-xs flex items-center gap-2">
+                                    <FileText size={14} />
+                                    {v.ein_number || "—"}
+                                </div>
                             </div>
                         </div>
                     ))}

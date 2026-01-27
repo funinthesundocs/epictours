@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, MapPin, Trash2, Edit2 } from "lucide-react";
+import { ExternalLink, MapPin, Trash2, Edit2, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
@@ -12,6 +12,17 @@ interface PickupTableProps {
 
 export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) {
     const [deletingItem, setDeletingItem] = useState<any>(null);
+    const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+
+    const toggleExpand = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setExpandedNotes(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
 
     if (!data || data.length === 0) {
         return (
@@ -36,11 +47,13 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                     <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
                         {data.map((point) => (
                             <tr key={point.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                        <MapPin size={16} />
+                                <td className="px-6 py-4 font-medium text-white align-middle">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                            <MapPin size={16} />
+                                        </div>
+                                        {point.name}
                                     </div>
-                                    {point.name}
                                 </td>
                                 <td className="px-6 py-4">
                                     {point.map_link ? (
@@ -56,8 +69,30 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                         <span className="text-zinc-600 italic">No link</span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 text-xs max-w-xs truncate">
-                                    {point.instructions || "-"}
+                                <td className="px-6 py-4 text-zinc-400 max-w-xs align-middle">
+                                    {point.instructions && point.instructions.length > 30 && !expandedNotes.has(point.id) ? (
+                                        <span className="flex items-center gap-2">
+                                            <span>{point.instructions.substring(0, 30)}...</span>
+                                            <button
+                                                onClick={(e) => toggleExpand(point.id, e)}
+                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                            >
+                                                <Plus size={10} />
+                                            </button>
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-start gap-2">
+                                            <span>{point.instructions || "-"}</span>
+                                            {point.instructions && point.instructions.length > 30 && (
+                                                <button
+                                                    onClick={(e) => toggleExpand(point.id, e)}
+                                                    className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+                                                >
+                                                    <Minus size={10} />
+                                                </button>
+                                            )}
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end gap-2">
@@ -137,8 +172,30 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                 </div>
 
                                 <div className="text-zinc-500">Notes</div>
-                                <div className="text-zinc-400 text-xs">
-                                    {point.instructions || "-"}
+                                <div className="text-zinc-400 text-sm">
+                                    {point.instructions && point.instructions.length > 30 && !expandedNotes.has(point.id) ? (
+                                        <span className="flex items-center gap-2">
+                                            <span>{point.instructions.substring(0, 30)}...</span>
+                                            <button
+                                                onClick={(e) => toggleExpand(point.id, e)}
+                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                            >
+                                                <Plus size={10} />
+                                            </button>
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-start gap-2">
+                                            <span>{point.instructions || "-"}</span>
+                                            {point.instructions && point.instructions.length > 30 && (
+                                                <button
+                                                    onClick={(e) => toggleExpand(point.id, e)}
+                                                    className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+                                                >
+                                                    <Minus size={10} />
+                                                </button>
+                                            )}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>

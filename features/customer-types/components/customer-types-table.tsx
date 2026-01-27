@@ -45,7 +45,7 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                                         {type.code}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 text-xs max-w-xs truncate">
+                                <td className="px-6 py-4 text-zinc-400 max-w-xs truncate">
                                     {type.description || "-"}
                                 </td>
                                 <td className="px-6 py-4 text-right">

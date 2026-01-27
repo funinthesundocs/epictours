@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Users, Truck, DollarSign } from "lucide-react";
+import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { ResourceClusterList, Assignment } from "./resource-cluster-list";
@@ -51,10 +51,7 @@ export function ColumnTwo({
                 <div className="p-6 space-y-8 animate-in fade-in duration-300 delay-200">
                     {/* Capacity & Pricing Section */}
                     <div className="space-y-5">
-                        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4">
-                            <DollarSign size={16} />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">Pricing</h3>
-                        </div>
+
 
                         <div>
                             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Max Capacity</label>
@@ -97,10 +94,7 @@ export function ColumnTwo({
 
                     {/* Resources Section (Clustered) */}
                     <div>
-                        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4">
-                            <Truck size={16} />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">Resources</h3>
-                        </div>
+
                         <ResourceClusterList
                             assignments={assignments}
                             onChange={onAssignmentsChange}

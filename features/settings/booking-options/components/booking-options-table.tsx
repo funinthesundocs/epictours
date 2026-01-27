@@ -42,9 +42,10 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
             <table className="w-full text-left">
                 <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
-                        <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
-                        <th className="px-6 py-4 font-medium w-[40%]">Description</th>
+                        <th className="px-6 py-4 font-medium w-[25%]">Schedule Name</th>
+                        <th className="px-6 py-4 font-medium w-[35%]">Description</th>
                         <th className="px-6 py-4 font-medium">Field Count</th>
+                        <th className="px-6 py-4 font-medium">Created</th>
                         <th className="px-6 py-4 font-medium text-right w-[120px]">Actions</th>
                     </tr>
                 </thead>
@@ -61,10 +62,7 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                                         <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
                                             <List size={16} />
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span>{schedule.name}</span>
-                                            <span className="text-xs text-zinc-500 font-normal">Created {new Date(schedule.created_at).toLocaleDateString()}</span>
-                                        </div>
+                                        <span>{schedule.name}</span>
                                     </div>
                                 </td>
 
@@ -81,6 +79,13 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-400">
                                             {fieldCount} Fields
                                         </span>
+                                    </div>
+                                </td>
+
+                                {/* Created */}
+                                <td className="px-6 py-4 align-top text-zinc-400">
+                                    <div className="pt-3">
+                                        {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 

@@ -56,8 +56,8 @@ export function GlassCombobox({
                     className={cn(
                         "w-full justify-between font-normal",
                         // Trigger Styling: Black/20, White Text, Subtle Border
-                        "bg-black/20 border-white/10 text-white hover:bg-black/30 hover:text-white hover:border-white/20",
-                        !value && "text-zinc-400",
+                        "bg-zinc-900/80 border-white/10 text-white hover:bg-zinc-900 hover:text-white hover:border-white/20",
+                        !value && "text-zinc-500",
                         className
                     )}
                 >

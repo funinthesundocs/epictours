@@ -149,7 +149,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
 
                 <div className="px-6 pb-6 space-y-4">
                     {/* Online Status */}
-                    <div className="flex items-center justify-between p-3 bg-black/20 border border-white/5 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-zinc-900/80 border border-white/10 rounded-lg">
                         <div className="space-y-0.5">
                             <Label className="text-sm text-zinc-400">
                                 Online Booking
@@ -173,7 +173,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                         <Textarea
                             value={headline}
                             onChange={(e) => setHeadline(e.target.value)}
-                            className="bg-black/20 border-white/10 text-white placeholder:text-zinc-600 focus-visible:border-cyan-500/50 min-h-[80px]"
+                            className="bg-zinc-900/80 border-white/10 text-white placeholder:text-zinc-600 focus-visible:border-cyan-500/50 min-h-[80px]"
                             placeholder="Internal note for staff..."
                         />
                     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { DollarSign, MessageSquare, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -28,10 +28,7 @@ export function ColumnThree({ bookingSchedules }: ColumnThreeProps) {
                 <div className="p-6 space-y-8 animate-in fade-in duration-300 delay-300">
                     {/* Booking & Pricing Section */}
                     <div className="space-y-5">
-                        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4">
-                            <DollarSign size={16} />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">Booking & Settings</h3>
-                        </div>
+
 
                         {/* Online Booking Status (Switch) */}
                         <div className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-lg">
@@ -78,20 +75,17 @@ export function ColumnThree({ bookingSchedules }: ColumnThreeProps) {
                         </div>
                     </div>
 
-                    <div className="h-px bg-white/5 my-6" />
+
 
                     {/* Notes Section */}
                     <div>
-                        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4">
-                            <MessageSquare size={16} />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">Internal Notes</h3>
-                        </div>
+
                         <div>
                             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Private Announcement</label>
                             <textarea
                                 {...register("private_announcement")}
                                 rows={4}
-                                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none resize-none transition-colors"
+                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none resize-none transition-colors"
                                 placeholder="Internal notes for this availability..."
                             />
                         </div>

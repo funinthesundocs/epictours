@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { CalendarDays, Clock, Repeat } from "lucide-react";
+import { CalendarDays, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -140,14 +140,11 @@ export function ColumnOne() {
                         )}
                     </div>
 
-                    <div className="h-px bg-white/5 my-6" />
+
 
                     {/* Duration Section */}
                     <div className="space-y-5">
-                        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4">
-                            <Clock size={16} />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">Duration</h3>
-                        </div>
+
 
                         <div>
                             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Duration Type</label>

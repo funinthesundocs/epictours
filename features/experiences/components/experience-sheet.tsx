@@ -3,7 +3,7 @@
 // @read: docs/ANTI_PATTERNS.md
 
 import { useEffect, useState, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Save, Loader2, Info, ClipboardList, Clock, Users, FileText, ChevronDown } from "lucide-react";
@@ -12,6 +12,7 @@ import { SidePanel } from "@/components/ui/side-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TimePicker } from "@/components/ui/time-picker";
 import { toast } from "sonner";
 import { Experience, ExperienceFormData, ExperienceSchema, NewExperience } from "../types";
 import { cn } from "@/lib/utils";
@@ -24,30 +25,22 @@ interface ExperienceSheetProps {
 }
 
 // Generate Time Options (05:00 AM to 11:45 PM)
-const timeOptions = Array.from({ length: 76 }, (_, i) => {
-    const totalMinutes = 300 + (i * 15);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    const displayMinutes = minutes.toString().padStart(2, '0');
-    return `${displayHours}:${displayMinutes} ${period}`;
-});
+// const timeOptions = ... (Removed in favor of TimePicker)
 
 export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: ExperienceSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Custom Time Picker State
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
+    // const [showStartPicker, setShowStartPicker] = useState(false);
+    // const [showEndPicker, setShowEndPicker] = useState(false);
     const [showEventTypePicker, setShowEventTypePicker] = useState(false);
 
     // Tab State
     const [activeTab, setActiveTab] = useState<"basics" | "pricing" | "booking" | "legal">("basics");
 
     // Refs for click outside
-    const startWrapperRef = useRef<HTMLDivElement>(null);
-    const endWrapperRef = useRef<HTMLDivElement>(null);
+    // const startWrapperRef = useRef<HTMLDivElement>(null);
+    // const endWrapperRef = useRef<HTMLDivElement>(null);
     const eventTypeWrapperRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -56,6 +49,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         reset,
         setValue,
         watch,
+        control, // Added control
         formState, // Destructure full formState to access isDirty
         formState: { errors }
     } = useForm({
@@ -138,12 +132,12 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     // Close pickers on click outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (startWrapperRef.current && !startWrapperRef.current.contains(event.target as Node)) {
-                setShowStartPicker(false);
-            }
-            if (endWrapperRef.current && !endWrapperRef.current.contains(event.target as Node)) {
-                setShowEndPicker(false);
-            }
+            // if (startWrapperRef.current && !startWrapperRef.current.contains(event.target as Node)) {
+            //     setShowStartPicker(false);
+            // }
+            // if (endWrapperRef.current && !endWrapperRef.current.contains(event.target as Node)) {
+            //     setShowEndPicker(false);
+            // }
             if (eventTypeWrapperRef.current && !eventTypeWrapperRef.current.contains(event.target as Node)) {
                 setShowEventTypePicker(false);
             }
@@ -207,12 +201,13 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
-            <Icon size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+        <div className="flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5">
+            <Icon size={16} className="text-cyan-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors";
+    // Updated to match Input component (bg-zinc-900/80)
+    const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors text-sm shadow-sm";
     const labelClasses = "text-xs font-medium text-zinc-400 uppercase tracking-wider ml-1";
 
     const eventTypeOptions = ["Tour", "Activity", "Transport", "Event"];
@@ -256,9 +251,9 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {/* TAB: THE BASICS */}
                     {activeTab === "basics" && (
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 mb-12 animate-in fade-in duration-300 slide-in-from-left-4 px-6 pt-8">
-                            {/* LEFT COLUMN */}
-                            <div className="xl:col-span-4 space-y-10">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-y-6 xl:gap-0 xl:divide-x xl:divide-white/10 animate-in fade-in duration-300 slide-in-from-left-4 pt-8 pb-6">
+                            {/* COLUMN 1: BASICS & CAPACITY */}
+                            <div className="xl:col-span-4 space-y-10 px-6">
                                 <div>
                                     <SectionHeader icon={Info} title="Basic Information" />
                                     <div className="space-y-6">
@@ -333,99 +328,69 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                 </div>
                             </div>
 
-                            {/* RIGHT COLUMN */}
-                            <div className="xl:col-span-8 space-y-10">
+                            {/* COLUMN 2: LOGISTICS */}
+                            <div className="xl:col-span-4 space-y-10 px-6">
                                 <div>
                                     <SectionHeader icon={Clock} title="Logistics & Timing" />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-6">
 
-                                        {/* Start Time with Custom Picker */}
-                                        <div className="space-y-2 relative" ref={startWrapperRef}>
-                                            <label className={labelClasses}>Start Time</label>
-                                            <div className="relative">
-                                                <input
-                                                    {...register("start_time")}
-                                                    className={cn(inputClasses, "cursor-pointer")}
-                                                    placeholder="e.g. 07:00 AM"
-                                                    autoComplete="off"
-                                                    onClick={() => setShowStartPicker(true)}
-                                                    onFocus={() => setShowStartPicker(true)}
-                                                />
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
-                                            </div>
-                                            {showStartPicker && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                                    {timeOptions.map(time => (
-                                                        <div
-                                                            key={time}
-                                                            className={cn(
-                                                                "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                startTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                            )}
-                                                            onMouseDown={(e) => {
-                                                                e.preventDefault(); // Prevent blur
-                                                                setValue("start_time", time);
-                                                                setShowStartPicker(false);
-                                                            }}
-                                                        >
-                                                            {time}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                        {/* Start Time with Standard Picker */}
+                                        <div className="space-y-2">
+                                            <Label>Start Time</Label>
+                                            <Controller
+                                                control={control}
+                                                name="start_time"
+                                                render={({ field }) => (
+                                                    <TimePicker
+                                                        value={field.value || undefined}
+                                                        onChange={field.onChange}
+                                                        placeholder="Select Start Time"
+                                                    />
+                                                )}
+                                            />
                                         </div>
 
-                                        {/* End Time with Custom Picker */}
-                                        <div className="space-y-2 relative" ref={endWrapperRef}>
-                                            <label className={labelClasses}>End Time</label>
-                                            <div className="relative">
-                                                <input
-                                                    {...register("end_time")}
-                                                    className={cn(inputClasses, "cursor-pointer")}
-                                                    placeholder="e.g. 04:00 PM"
-                                                    autoComplete="off"
-                                                    onClick={() => setShowEndPicker(true)}
-                                                    onFocus={() => setShowEndPicker(true)}
-                                                />
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
-                                            </div>
-                                            {showEndPicker && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                                    {timeOptions.map(time => (
-                                                        <div
-                                                            key={time}
-                                                            className={cn(
-                                                                "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                endTimeValue === time ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                            )}
-                                                            onMouseDown={(e) => {
-                                                                e.preventDefault(); // Prevent blur
-                                                                setValue("end_time", time);
-                                                                setShowEndPicker(false);
-                                                            }}
-                                                        >
-                                                            {time}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                        {/* End Time with Standard Picker */}
+                                        <div className="space-y-2">
+                                            <Label>End Time</Label>
+                                            <Controller
+                                                control={control}
+                                                name="end_time"
+                                                render={({ field }) => (
+                                                    <TimePicker
+                                                        value={field.value || undefined}
+                                                        onChange={field.onChange}
+                                                        placeholder="Select End Time"
+                                                    />
+                                                )}
+                                            />
                                         </div>
 
-                                        <div className="col-span-2 space-y-2">
+                                        <div className="space-y-2">
                                             <Label>Check-in Details</Label>
                                             <Input {...register("checkin_details")} placeholder="Meeting point instructions..." />
                                         </div>
-                                        <div className="col-span-2 space-y-2">
+                                        <div className="space-y-2">
                                             <Label>Transport Details</Label>
                                             <textarea {...register("transport_details")} rows={2} className={inputClasses} placeholder="Pickup locations and vehicle info..." />
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
+                            {/* COLUMN 3: DETAILS */}
+                            <div className="xl:col-span-4 space-y-10 px-6">
                                 <div>
                                     <SectionHeader icon={FileText} title="Experience Details" />
                                     <div className="space-y-8">
-                                        <div className="space-y-2"><Label>Full Description</Label><textarea {...register("description")} className={cn(inputClasses, "resize-y min-h-[200px] leading-relaxed")} placeholder="Detailed overview..." /></div>
+                                        <div className="space-y-2">
+                                            <Label>Full Description</Label>
+                                            <textarea
+                                                {...register("description")}
+                                                className={cn(inputClasses, "resize-y min-h-[400px] leading-relaxed")}
+                                                placeholder="Detailed overview..."
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

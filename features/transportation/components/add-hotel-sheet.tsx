@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Building2 } from "lucide-react";
+import { Save, Loader2, Building2, Phone, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Combobox } from "@/components/ui/combobox";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -111,26 +112,33 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Hotel Name <span className="text-red-400">*</span></label>
-                        <input
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Building2 size={16} className="text-zinc-500" />
+                            Hotel Name <span className="text-red-400">*</span>
+                        </label>
+                        <Input
                             {...register("name")}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                             placeholder="e.g. Hilton Hawaiian Village"
                         />
                         {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Contact Phone</label>
-                        <input
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Phone size={16} className="text-zinc-500" />
+                            Contact Phone
+                        </label>
+                        <Input
                             {...register("contact_phone")}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
                             placeholder="(808) 555-0123"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Assigned Pickup Point <span className="text-red-400">*</span></label>
+                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <MapPin size={16} className="text-zinc-500" />
+                            Assigned Pickup Point <span className="text-red-400">*</span>
+                        </label>
                         <Combobox
                             options={pickupOptions}
                             value={currentPickupId}

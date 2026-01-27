@@ -137,7 +137,6 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                         <button
                             onClick={onManifestClick}
                             className="h-8 px-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-md text-xs font-medium text-zinc-300 hover:text-white transition-colors whitespace-nowrap flex items-center gap-2"
-                            title="View Manifest"
                         >
                             <FileText size={14} />
                             Manifest
@@ -178,7 +177,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                         <button
                                             key={booking.id}
                                             onClick={() => onBookingClick(booking.id)}
-                                            className="w-full p-3 bg-black/20 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-all text-left"
+                                            className="w-full p-3 bg-zinc-900/80 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-all text-left"
                                         >
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>
@@ -224,7 +223,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                         <button
                                             key={booking.id}
                                             onClick={() => onBookingClick(booking.id)}
-                                            className="w-full p-3 bg-black/10 rounded-lg border border-white/5 text-left"
+                                            className="w-full p-3 bg-zinc-900/40 rounded-lg border border-white/5 text-left"
                                         >
                                             <div className="text-zinc-500 text-sm line-through">{booking.customer_name}</div>
                                             <div className="text-zinc-600 text-xs">{booking.pax_count} Pax</div>

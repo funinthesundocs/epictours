@@ -57,7 +57,7 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                             </td>
 
                             {/* Created At */}
-                            <td className="px-6 py-4 text-zinc-500 text-xs">
+                            <td className="px-6 py-4 text-zinc-500">
                                 {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </td>
 

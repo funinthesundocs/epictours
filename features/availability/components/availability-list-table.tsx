@@ -126,7 +126,7 @@ export function AvailabilityListTable({
                                 onClick={() => isBulkMode ? handleSelectItem(item.id, { stopPropagation: () => { } } as React.MouseEvent) : onEdit?.(item.id, item)}
                             >
                                 {isBulkMode && (
-                                    <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                                    <td className="px-4 py-4 align-middle" onClick={(e) => e.stopPropagation()}>
                                         <input
                                             type="checkbox"
                                             checked={selectedIds.has(item.id)}
@@ -136,7 +136,7 @@ export function AvailabilityListTable({
                                     </td>
                                 )}
                                 {/* Status */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <span className={cn(
                                         "px-2 py-1 rounded text-xs font-bold uppercase",
                                         item.online_booking_status === 'open'
@@ -148,7 +148,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Date */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="flex flex-col">
                                         <span className="font-semibold text-white flex items-center gap-2">
                                             <Calendar size={14} className="text-cyan-500" />
@@ -167,7 +167,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Start Time */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     {item.duration_type === 'all_day' ? (
                                         <span className="text-zinc-400 italic flex items-center gap-2"><Clock size={14} /> All Day</span>
                                     ) : (
@@ -179,7 +179,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Duration */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     {item.duration_type === 'all_day' ? (
                                         <span className="text-zinc-500 italic">All Day</span>
                                     ) : (
@@ -188,7 +188,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Capacity */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="flex items-center gap-2">
                                         <Users size={14} className="text-zinc-500" />
                                         <span className={cn(
@@ -200,7 +200,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Route Schedule */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="flex items-center gap-2 text-zinc-300">
                                         <MapPin size={14} className="text-zinc-500" />
                                         <span>{item.route_name || <span className="text-zinc-600 italic">-</span>}</span>
@@ -208,7 +208,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Vehicle */}
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="flex items-center gap-2 text-zinc-300">
                                         <Bus size={14} className="text-zinc-500" />
                                         <span>{item.vehicle_name || <span className="text-zinc-600 italic">-</span>}</span>
@@ -216,12 +216,12 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Staff */}
-                                <td className="px-6 py-4 text-zinc-400 max-w-[200px] truncate" title={item.staff_display}>
+                                <td className="px-6 py-4 align-middle text-zinc-400 max-w-[200px] truncate" title={item.staff_display}>
                                     {item.staff_display || <span className="text-zinc-600 italic">Unassigned</span>}
                                 </td>
 
                                 {/* Private Note */}
-                                <td className="px-6 py-4 text-zinc-400 max-w-[200px] truncate" title={item.private_announcement}>
+                                <td className="px-6 py-4 align-middle text-zinc-400 max-w-[200px] truncate" title={item.private_announcement}>
                                     {item.private_announcement ? (
                                         <div className="flex items-center gap-2">
                                             <StickyNote size={14} className="text-zinc-500" />
@@ -233,7 +233,7 @@ export function AvailabilityListTable({
                                 </td>
 
                                 {/* Actions */}
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 align-middle text-right">
                                     <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => onEdit?.(item.id, item)}
