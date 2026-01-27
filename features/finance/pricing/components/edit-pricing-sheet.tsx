@@ -64,7 +64,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         }
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "rates"
     });
@@ -274,9 +274,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24">
                     {pricingVariations.length > 0 && activeTab && (
                         <div className="space-y-4 animate-in fade-in duration-300">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{activeTab} Pricing</h3>
-                            </div>
+
 
                             {currentTabFields.length === 0 && (
                                 <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-500">
@@ -291,119 +289,146 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                     const total = price + (price * (tax / 100));
 
                                     return (
-                                        <div key={item.id} className="grid grid-cols-12 gap-3 items-end bg-white/5 p-4 rounded-xl border border-white/5 relative">
-                                            {/* Hidden Tier Field - uses activeTab dynamically */}
-                                            <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
+                                        <div key={item.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
+                                            {/* Field Container */}
+                                            <div className="flex-1 grid grid-cols-12 gap-3 items-end bg-white/5 px-4 py-2 rounded-xl border border-white/5 relative">
+                                                {/* Hidden Tier Field - uses activeTab dynamically */}
+                                                <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
 
-                                            {/* Customer Type (Custom Dropdown) */}
-                                            <div className="col-span-4 space-y-1 relative">
-                                                <Label className="text-xs text-zinc-400">Customer Type</Label>
-                                                <div
-                                                    className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
-                                                    }}
-                                                >
-                                                    <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
-                                                        {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
-                                                    </span>
-                                                    <ChevronDown size={14} className="text-zinc-500" />
-                                                </div>
-
-                                                {/* Dropdown Options */}
-                                                {openDropdownIndex === item.index && (
-                                                    <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
-                                                        {customerTypes.map(type => (
-                                                            <div
-                                                                key={type.id}
-                                                                className={cn(
-                                                                    "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                    watch(`rates.${item.index}.customer_type_id`) === type.id
-                                                                        ? "bg-cyan-500/10 text-cyan-400"
-                                                                        : "text-zinc-300 hover:bg-white/5 hover:text-white"
-                                                                )}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setValue(`rates.${item.index}.customer_type_id`, type.id);
-                                                                    setOpenDropdownIndex(null);
-                                                                }}
-                                                            >
-                                                                {type.name}
-                                                            </div>
-                                                        ))}
+                                                {/* Customer Type (Custom Dropdown) */}
+                                                <div className="col-span-4 space-y-1 relative">
+                                                    <Label className="text-xs text-zinc-400">Customer Type</Label>
+                                                    <div
+                                                        className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
+                                                        }}
+                                                    >
+                                                        <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
+                                                            {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
+                                                        </span>
+                                                        <ChevronDown size={14} className="text-zinc-500" />
                                                     </div>
-                                                )}
 
-                                                <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
+                                                    {/* Dropdown Options */}
+                                                    {openDropdownIndex === item.index && (
+                                                        <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                            {customerTypes.map(type => (
+                                                                <div
+                                                                    key={type.id}
+                                                                    className={cn(
+                                                                        "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
+                                                                        watch(`rates.${item.index}.customer_type_id`) === type.id
+                                                                            ? "bg-cyan-500/10 text-cyan-400"
+                                                                            : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                                    )}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setValue(`rates.${item.index}.customer_type_id`, type.id);
+                                                                        setOpenDropdownIndex(null);
+                                                                    }}
+                                                                >
+                                                                    {type.name}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
 
-                                                {errors.rates?.[item.index]?.customer_type_id && (
-                                                    <p className="text-xs text-red-500">Required</p>
-                                                )}
-                                            </div>
+                                                    <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
 
-                                            {/* Price */}
-                                            <div className="col-span-2 space-y-1">
-                                                <Label className="text-xs text-zinc-400">Price ($)</Label>
-                                                <div className="relative">
-                                                    <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                    <input
-                                                        type="number" step="0.01"
-                                                        {...register(`rates.${item.index}.price`)}
-                                                        className={cn(inputClasses, "pl-8 text-right")}
-                                                        placeholder="0.00"
-                                                    />
+                                                    {errors.rates?.[item.index]?.customer_type_id && (
+                                                        <p className="text-xs text-red-500">Required</p>
+                                                    )}
                                                 </div>
-                                            </div>
 
-                                            {/* Tax */}
-                                            <div className="col-span-2 space-y-1">
-                                                <Label className="text-xs text-zinc-400">Tax (%)</Label>
-                                                <div className="relative">
-                                                    <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                    <input
-                                                        type="number" step="0.01"
-                                                        {...register(`rates.${item.index}.tax_percentage`)}
-                                                        className={cn(inputClasses, "pr-8 text-right")}
-                                                        placeholder="0"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Total (Calculated) */}
-                                            <div className="col-span-3 space-y-1">
-                                                <Label className="text-xs text-zinc-400">Total ($)</Label>
-                                                <div className="relative">
-                                                    <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                                    <div className={cn(inputClasses, "pl-8 text-right bg-white/5 text-zinc-300 cursor-not-allowed")}>
-                                                        {total.toFixed(2)}
+                                                {/* Price */}
+                                                <div className="col-span-2 space-y-1">
+                                                    <Label className="text-xs text-zinc-400">Price ($)</Label>
+                                                    <div className="relative">
+                                                        <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                        <input
+                                                            type="number" step="0.01"
+                                                            {...register(`rates.${item.index}.price`)}
+                                                            onInput={(e) => {
+                                                                const target = e.currentTarget;
+                                                                const value = target.value;
+                                                                if (value.includes(".")) {
+                                                                    const [integer, decimal] = value.split(".");
+                                                                    if (decimal && decimal.length > 2) {
+                                                                        target.value = `${integer}.${decimal.substring(0, 2)}`;
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className={cn(inputClasses, "pl-8 text-right")}
+                                                            placeholder="0.00"
+                                                        />
                                                     </div>
                                                 </div>
+
+                                                {/* Tax */}
+                                                <div className="col-span-2 space-y-1">
+                                                    <Label className="text-xs text-zinc-400">Tax (%)</Label>
+                                                    <div className="relative">
+                                                        <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                        <input
+                                                            type="number" step="0.01"
+                                                            {...register(`rates.${item.index}.tax_percentage`)}
+                                                            className={cn(inputClasses, "pr-8 text-right")}
+                                                            placeholder="0"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Total (Calculated) */}
+                                                <div className="col-span-3 space-y-1">
+                                                    <Label className="text-xs text-zinc-400">Total ($)</Label>
+                                                    <div className="relative">
+                                                        <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                        <div className={cn(inputClasses, "pl-8 text-right bg-white/5 text-zinc-300 cursor-not-allowed")}>
+                                                            {total.toFixed(2)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Delete */}
+                                                <div className="col-span-1 flex justify-end self-center pb-0">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => remove(item.index)}
+                                                        className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            {/* Delete */}
-                                            <div className="col-span-1 flex justify-end pb-1">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => remove(item.index)}
-                                                    className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
+                                            {/* Insert Button (External) */}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => insert(item.index + 1, { tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
+                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
+                                            >
+                                                <Plus size={16} />
+                                            </Button>
                                         </div>
                                     );
                                 })}
-                            </div>
 
-                            <button
-                                type="button"
-                                onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                                className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-500 hover:text-cyan-400 transition-colors"
-                            >
-                                <Plus size={16} />
-                                Add Row
-                            </button>
+                                {/* Empty State / Add First Button */}
+                                {currentTabFields.length === 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
+                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-2"
+                                    >
+                                        <Plus size={24} className="opacity-50" />
+                                        <span className="text-sm font-medium">Add First Rate</span>
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

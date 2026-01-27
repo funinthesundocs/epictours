@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, Layers } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -94,7 +94,10 @@ export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: 
             <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="flex flex-col h-full">
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     <div className="space-y-2">
-                        <Label>Variation Name *</Label>
+                        <Label className="text-zinc-300 flex items-center gap-2">
+                            <Layers size={16} className="text-zinc-500" />
+                            Variation Name <span className="text-red-400">*</span>
+                        </Label>
                         <Input
                             {...register("name")}
                             placeholder="e.g. Retail, Online, Partner"

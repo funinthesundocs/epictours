@@ -164,7 +164,7 @@ function SortableOptionItem({
                                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                     onChange(e);
                                     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-                                    setValue(`options.${index}.value`, slug);
+                                    setValue(`options.${index}.value`, slug, { shouldDirty: true });
                                     // If this was default, update default value too? Not necessary as value changes
                                     if (isDefault) {
                                         // Wait effectively handled by form state if we used component state, but here we might need to be careful?
@@ -172,7 +172,7 @@ function SortableOptionItem({
                                         // Complex to sync. Let's assume user re-clicks default if needed or simple slug update works if bound by ref (it's not).
                                         // Simple approch: Just let value update. If slug changes, default_value might point to old slug.
                                         // Fixing:
-                                        setValue('default_value', slug);
+                                        setValue('default_value', slug, { shouldDirty: true });
                                     }
                                 }
                             };
@@ -427,9 +427,9 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
     const toggleDefault = (value: string) => {
         const current = form.getValues("default_value");
         if (current === value) {
-            form.setValue("default_value", "");
+            form.setValue("default_value", "", { shouldDirty: true });
         } else {
-            form.setValue("default_value", value);
+            form.setValue("default_value", value, { shouldDirty: true });
         }
     };
 
@@ -521,9 +521,9 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 onClick={() => {
                                                     // If selecting "Text Field" group, default to 'text' if not already in group
                                                     if (t.value === 'text') {
-                                                        form.setValue("type", "text");
+                                                        form.setValue("type", "text", { shouldDirty: true });
                                                     } else {
-                                                        form.setValue("type", t.value as any);
+                                                        form.setValue("type", t.value as any, { shouldDirty: true });
                                                     }
                                                 }}
                                                 className={cn(
@@ -572,7 +572,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                         <button
                                                             key={sub.id}
                                                             type="button"
-                                                            onClick={() => form.setValue("type", sub.id as any)}
+                                                            onClick={() => form.setValue("type", sub.id as any, { shouldDirty: true })}
                                                             className={cn(
                                                                 "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                                 currentType === sub.id
@@ -600,7 +600,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             <button
                                                                 key={style.id}
                                                                 type="button"
-                                                                onClick={() => form.setValue("settings.display_style", style.id as any)}
+                                                                onClick={() => form.setValue("settings.display_style", style.id as any, { shouldDirty: true })}
                                                                 className={cn(
                                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                                     (form.watch("settings.display_style") || 'text') === style.id
@@ -624,7 +624,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest mb-2">Range Limits</h4>
                                                             <div className="grid grid-cols-3 gap-3">
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">Start (Min)</Label>
+                                                                    <Label className="text-sm text-zinc-400">Start</Label>
                                                                     <input
                                                                         type="number"
                                                                         {...form.register("settings.min")}
@@ -633,7 +633,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">End (Max)</Label>
+                                                                    <Label className="text-sm text-zinc-400">End</Label>
                                                                     <input
                                                                         type="number"
                                                                         {...form.register("settings.max")}
@@ -642,7 +642,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">Step (Increment)</Label>
+                                                                    <Label className="text-sm text-zinc-400">Increment</Label>
                                                                     <input
                                                                         type="number"
                                                                         defaultValue={1}
@@ -689,8 +689,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                                         type="button"
                                                                                         onClick={() => {
                                                                                             // Selecting a layout style turns OFF binary mode
-                                                                                            form.setValue("settings.binary_mode", false);
-                                                                                            form.setValue("settings.multi_select_style", layout.value as any);
+                                                                                            form.setValue("settings.binary_mode", false, { shouldDirty: true });
+                                                                                            form.setValue("settings.multi_select_style", layout.value as any, { shouldDirty: true });
                                                                                         }}
                                                                                         className={cn(
                                                                                             "p-1.5 rounded-md transition-all",
@@ -717,7 +717,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                                         <button
                                                                                             key={cols}
                                                                                             type="button"
-                                                                                            onClick={() => form.setValue("settings.multi_select_columns", cols)}
+                                                                                            onClick={() => form.setValue("settings.multi_select_columns", cols, { shouldDirty: true })}
                                                                                             className={cn(
                                                                                                 "w-5 h-5 flex items-center justify-center rounded text-[9px] font-bold transition-all",
                                                                                                 currentCols === cols
@@ -744,9 +744,9 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                             onClick={() => {
                                                                                 const current = form.getValues("settings.binary_mode");
                                                                                 const next = !current;
-                                                                                form.setValue("settings.binary_mode", next);
+                                                                                form.setValue("settings.binary_mode", next, { shouldDirty: true });
                                                                                 if (next) {
-                                                                                    form.setValue("settings.multi_select_style", null as any);
+                                                                                    form.setValue("settings.multi_select_style", null as any, { shouldDirty: true });
                                                                                 }
                                                                             }}
                                                                             className={cn(
@@ -781,7 +781,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                             <TooltipTrigger asChild>
                                                                                 <button
                                                                                     type="button"
-                                                                                    onClick={() => form.setValue("settings.multi_select_visual", style.value as any)}
+                                                                                    onClick={() => form.setValue("settings.multi_select_visual", style.value as any, { shouldDirty: true })}
                                                                                     className={cn(
                                                                                         "p-1.5 rounded-md transition-all",
                                                                                         isActive

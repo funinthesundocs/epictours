@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, Copy, List, Eye, EyeOff, Calendar as CalendarIcon } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, Copy, List, Eye, EyeOff, Calendar as CalendarIcon, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,44 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Combobox } from "@/components/ui/combobox";
+
+// ...
+
+interface FieldSelectorProps {
+    availableFields: any[];
+    currentFields: any[];
+    onSelect: (fieldId: string) => void;
+    onCancel: () => void;
+}
+
+function FieldSelector({ availableFields, currentFields, onSelect, onCancel }: FieldSelectorProps) {
+    // Filter available options
+    const options = availableFields
+        .filter(f => !currentFields.some((cf: any) => cf.field_id === f.id))
+        .map(f => ({ value: f.id, label: f.label }));
+
+    return (
+        <div className="w-full flex items-center gap-2 animate-in fade-in zoom-in-95 duration-150 my-2">
+            <div className="flex-1">
+                <Combobox
+                    value=""
+                    onChange={onSelect}
+                    options={options}
+                    placeholder="Search fields to add..."
+                    inputClassName="bg-[#1a1f2e] border-cyan-500/30 text-zinc-200 placeholder:text-zinc-500 h-11"
+                />
+            </div>
+            <button
+                type="button"
+                onClick={onCancel}
+                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:text-white transition-colors rounded-lg"
+            >
+                <X size={18} />
+            </button>
+        </div>
+    );
+}
 
 // DnD Imports
 import {
@@ -66,6 +104,7 @@ interface SortableItemProps {
     onRemove: () => void;
     onToggleRequired: (val: boolean) => void;
     onTogglePublic: (val: boolean) => void;
+    onInsert?: () => void;
 }
 
 // --- Field Preview Component ---
@@ -170,7 +209,7 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
     );
 }
 
-function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, onTogglePublic }: SortableItemProps) {
+function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, onTogglePublic, onInsert }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -191,67 +230,91 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
         <div
             ref={setNodeRef}
             style={style}
-            className="bg-white/5 p-4 rounded-lg border border-white/5 group hover:border-white/10 transition-colors"
+            className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300"
         >
-            {/* Top Row: Label + Controls */}
-            <div className="flex items-center gap-3 mb-3">
-                {/* Drag Handle */}
-                <div {...attributes} {...listeners} className="cursor-grab text-zinc-600 hover:text-zinc-400 p-1">
-                    <GripVertical size={16} />
-                </div>
-
-                {/* Field Info */}
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-zinc-200">{item.label || "Unknown Field"}</span>
-                        <span className="text-[10px] uppercase bg-black/40 text-zinc-500 px-1.5 py-0.5 rounded border border-white/5">{item.type || "field"}</span>
+            {/* Field Container */}
+            <div className="flex-1 grid grid-cols-12 gap-3 items-center bg-white/5 px-4 py-2 rounded-xl border border-white/5 relative">
+                {/* Grip & Label */}
+                <div className="col-span-4 flex items-center gap-3">
+                    <div {...attributes} {...listeners} className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing border-r border-white/10 pr-3 py-1">
+                        <GripVertical size={16} />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-medium text-zinc-200 truncate" title={item.label}>
+                            {(item.label || "Unknown Field").length > 25
+                                ? (item.label || "Unknown Field").substring(0, 25) + "..."
+                                : (item.label || "Unknown Field")}
+                        </span>
+                        <span className="text-[10px] uppercase text-zinc-500">{item.type || "field"}</span>
                     </div>
                 </div>
 
-                {/* Visibility Toggle */}
-                <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
-                    <span
-                        onClick={() => onTogglePublic(!item.is_public)}
-                        className={cn("text-xs font-medium transition-colors cursor-pointer select-none", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                {/* Field Preview */}
+                <div className="col-span-4">
+                    <FieldPreview type={item.type} fieldDef={fieldDef} />
+                </div>
+
+                {/* Toggles */}
+                <div className="col-span-3 flex items-center justify-end gap-4">
+                    {/* Public Toggle */}
+                    <div className="flex items-center gap-1.5">
+                        <span
+                            onClick={() => onTogglePublic(!item.is_public)}
+                            className={cn("text-[10px] font-medium transition-colors cursor-pointer select-none uppercase tracking-wider", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                        >
+                            {!item.is_public ? "Private" : "Public"}
+                        </span>
+                        <Switch
+                            checked={!item.is_public}
+                            onCheckedChange={(val) => onTogglePublic(!val)}
+                            className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                        />
+                    </div>
+
+                    {/* Required Toggle */}
+                    <div className="flex items-center gap-1.5">
+                        <span className={cn("text-[10px] font-medium uppercase tracking-wider", item.required ? "text-cyan-400" : "text-zinc-500")}>
+                            {item.required ? "Req" : "Opt"}
+                        </span>
+                        <Switch
+                            checked={item.required}
+                            onCheckedChange={onToggleRequired}
+                            className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Delete */}
+                <div className="col-span-1 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={onRemove}
+                        className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     >
-                        {!item.is_public ? "Private" : "Public"}
-                    </span>
-                    <Switch
-                        checked={!item.is_public}
-                        onCheckedChange={(val) => onTogglePublic(!val)}
-                        className="data-[state=checked]:bg-cyan-500"
-                    />
+                        <Trash2 size={16} />
+                    </button>
                 </div>
+            </div>
 
-                {/* Required Toggle */}
-                <div className="flex items-center gap-2 pr-4 border-r border-white/5 mr-2">
-                    <span className={cn("text-xs font-medium", item.required ? "text-cyan-400" : "text-zinc-500")}>
-                        {item.required ? "Required" : "Optional"}
-                    </span>
-                    <Switch
-                        checked={item.required}
-                        onCheckedChange={onToggleRequired}
-                        className="data-[state=checked]:bg-cyan-500"
-                    />
-                </div>
-
-                {/* Remove */}
-                <button
+            {/* Contextual Insert Button */}
+            {onInsert && (
+                <Button
                     type="button"
-                    onClick={onRemove}
-                    className="text-zinc-600 hover:text-red-400 p-1 transition-colors"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onInsert}
+                    className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
                 >
-                    <Trash2 size={16} />
-                </button>
-            </div>
-
-            {/* Bottom Row: Visual Preview */}
-            <div className="ml-9 mr-2">
-                <FieldPreview type={item.type} fieldDef={fieldDef} />
-            </div>
+                    <Plus size={16} />
+                </Button>
+            )}
         </div>
     );
 }
+
+
+
+
 
 // --- Main Sheet Component ---
 
@@ -262,12 +325,13 @@ interface EditBookingOptionSheetProps {
     initialData?: any;
 }
 
+
 export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData }: EditBookingOptionSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<"Retail" | "Online" | "Special" | "Custom">("Retail");
     const [availableFields, setAvailableFields] = useState<any[]>([]);
-    const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
-    const [fieldSearch, setFieldSearch] = useState("");
+    const [isLoadingFields, setIsLoadingFields] = useState(true);
+    const [insertIndex, setInsertIndex] = useState<number | null>(null); // null = none, -1 = empty/start, 0+ = after index
     const [saveToAll, setSaveToAll] = useState(false);
 
     // Sensors for DnD
@@ -284,8 +348,6 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         "Special": "config_special",
         "Custom": "config_custom"
     };
-
-    const currentFormKey = formKeyMap[activeTab];
 
     const {
         register,
@@ -307,12 +369,6 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         }
     });
 
-    // We can't use simple useFieldArray because we have 4 independent arrays.
-    // Instead we will rely on watch/setValue pattern for simplicity OR use 4 field arrays. 
-    // Given the dynamic nature, watching the array and manual manipulation is often cleaner for drag/drop than useFieldArray, 
-    // but useFieldArray is "React Hook Form way".
-    // Let's use useFieldArray for all 4 to be safe.
-
     const retailFields = useFieldArray({ control, name: "config_retail", keyName: "key" });
     const onlineFields = useFieldArray({ control, name: "config_online", keyName: "key" });
     const specialFields = useFieldArray({ control, name: "config_special", keyName: "key" });
@@ -329,34 +385,46 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
 
     // Fetch Custom Fields
     useEffect(() => {
-        const fetchFields = async () => {
-            const { data } = await supabase.from("custom_field_definitions" as any).select("*").order("label");
-            if (data) setAvailableFields(data);
-        };
-        fetchFields();
-    }, []);
+        if (isOpen) {
+            setIsLoadingFields(true);
+            const fetchFields = async () => {
+                const { data, error } = await supabase.from("custom_field_definitions" as any).select("*").order("label");
+                if (data) setAvailableFields(data);
+                if (error) console.error("Error fetching fields:", error);
+                setIsLoadingFields(false);
+            };
+            fetchFields();
+        }
+    }, [isOpen]);
 
     // Load Data
     useEffect(() => {
-        if (isOpen && initialData) {
+        // Only run if the sheet is open
+        if (!isOpen) return;
+
+        // Wait for fields to load before hydrating to ensure we can properly validate/filter
+        if (isLoadingFields) return;
+
+        if (initialData) {
             // Need to merge with latest field defs to get labels/types
             const hydrateConfig = (config: any[]) => {
-                return (config || []).map(item => {
-                    const fieldDef = availableFields.find(f => f.id === item.field_id);
-                    return {
-                        id: item.field_id, // Use field_id as unique key for dnd
-                        field_id: item.field_id,
-                        required: item.required,
-                        is_public: item.is_public ?? true,
-                        label: fieldDef?.label || "Unknown",
-                        type: fieldDef?.type || "unknown"
-                    };
-                });
+                return (config || [])
+                    .filter(item => {
+                        // Filter out fields that no longer exist in the system
+                        return availableFields.some(f => f.id === item.field_id);
+                    })
+                    .map(item => {
+                        const fieldDef = availableFields.find(f => f.id === item.field_id);
+                        return {
+                            id: item.field_id, // Use field_id as unique key for dnd
+                            field_id: item.field_id,
+                            required: item.required,
+                            is_public: item.is_public ?? true,
+                            label: fieldDef?.label || "Unknown Field",
+                            type: fieldDef?.type || "unknown"
+                        };
+                    });
             };
-
-            // Wait for available fields to load before hydrating fully? 
-            // Actually availableFields might lag.
-            // For now, load raw data, labels update when availableFields loads.
 
             reset({
                 id: initialData.id,
@@ -367,7 +435,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 config_special: hydrateConfig(initialData.config_special || []),
                 config_custom: hydrateConfig(initialData.config_custom || [])
             });
-        } else if (isOpen) {
+        } else {
             reset({
                 name: "",
                 description: "",
@@ -378,10 +446,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             });
             setSaveToAll(false);
         }
-    }, [isOpen, initialData, reset]);
-
-    // Hydrate labels when availableFields updates
-    // This is tricky with RHF. We'll just look up labels during render time (in the SortableItem or parent).
+    }, [isOpen, initialData, reset, availableFields, isLoadingFields]);
 
     const onSubmit: any = async (data: BookingOptionScheduleFormData) => {
         console.log("onSubmit started", data);
@@ -451,9 +516,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         }
     };
 
-    // --- Actions ---
-
-    const handleAddField = (fieldId: string) => {
+    const handleAddField = (fieldId: string, index: number = -1) => {
         const fieldDef = availableFields.find(f => f.id === fieldId);
         if (!fieldDef) return;
 
@@ -464,16 +527,22 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             return;
         }
 
-        currentArray.append({
+        const newField = {
             id: fieldId, // Important: use fieldId as id for dnd-kit context
             field_id: fieldId,
             required: false,
             is_public: true,
             label: fieldDef.label,
             type: fieldDef.type
-        });
-        setIsFieldDropdownOpen(false);
-        setFieldSearch("");
+        };
+
+        if (index === -1) {
+            currentArray.append(newField);
+        } else {
+            currentArray.insert(index + 1, newField);
+        }
+
+        setInsertIndex(null);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -548,9 +617,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
 
                 {/* Builder Area */}
                 <div className="flex-1 overflow-y-auto p-6 bg-zinc-950/20">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">{activeTab} Schedule</h3>
-
+                    <div className="flex items-center justify-end mb-6">
                         {activeTab !== "Retail" && (
                             <Button
                                 type="button"
@@ -564,56 +631,30 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                         )}
                     </div>
 
-                    {/* Add Field Dropdown */}
-                    <div className="relative mb-6 z-20">
-                        <div
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white flex items-center justify-between cursor-pointer hover:border-cyan-500/50 transition-colors"
-                            onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
-                        >
-                            <span className="text-zinc-400 flex items-center gap-2">
-                                <Plus size={16} className="text-cyan-500" />
-                                Add Object to Schedule...
-                            </span>
-                            <ChevronDown size={16} className="text-zinc-500" />
+                    {/* Empty State Add Button */}
+                    {currentArray.fields.length === 0 && (
+                        <div className="mb-6">
+                            {insertIndex !== -1 ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setInsertIndex(-1)}
+                                    className="w-full py-8 border border-dashed border-white/10 rounded-xl text-zinc-500 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                                >
+                                    <div className="p-3 rounded-full bg-white/5 group-hover:bg-cyan-500/10 transition-colors">
+                                        <Plus size={24} className="opacity-50 group-hover:opacity-100" />
+                                    </div>
+                                    <span className="text-sm font-medium">Add First Option</span>
+                                </button>
+                            ) : (
+                                <FieldSelector
+                                    availableFields={availableFields}
+                                    currentFields={currentArray.fields}
+                                    onSelect={(id) => handleAddField(id, -1)}
+                                    onCancel={() => setInsertIndex(null)}
+                                />
+                            )}
                         </div>
-
-                        {isFieldDropdownOpen && (
-                            <div className="absolute top-full left-0 w-full mt-2 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-150">
-                                <div className="relative mb-2">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                                    <Input
-                                        autoFocus
-                                        placeholder="Search fields..."
-                                        value={fieldSearch}
-                                        onChange={(e) => setFieldSearch(e.target.value)}
-                                        className="bg-black/20 border-white/10 pl-9 h-9 text-sm"
-                                    />
-                                </div>
-                                <div className="max-h-[240px] overflow-y-auto space-y-1 pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
-                                    {availableFields
-                                        .filter(f => f.label.toLowerCase().includes(fieldSearch.toLowerCase()))
-                                        .map(field => {
-                                            const isAdded = currentArray.fields.some((f: any) => f.field_id === field.id);
-                                            return (
-                                                <button
-                                                    key={field.id}
-                                                    type="button"
-                                                    disabled={isAdded}
-                                                    onClick={() => handleAddField(field.id)}
-                                                    className={cn(
-                                                        "w-full text-left px-3 py-2 rounded-md text-sm flex items-center justify-between group transition-colors",
-                                                        isAdded ? "opacity-50 cursor-not-allowed bg-black/20 text-zinc-500" : "hover:bg-cyan-500/10 text-zinc-300 hover:text-cyan-400"
-                                                    )}
-                                                >
-                                                    <span>{field.label}</span>
-                                                    {isAdded && <Check size={14} />}
-                                                </button>
-                                            );
-                                        })}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
                     {/* Drag and Drop List */}
                     <DndContext
@@ -636,32 +677,34 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                                     };
 
                                     return (
-                                        <SortableItem
-                                            key={field.id}
-                                            id={field.id}
-                                            item={displayItem}
-                                            fieldDef={fieldDef}
-                                            index={index}
-                                            onRemove={() => currentArray.remove(index)}
-                                            onToggleRequired={(val) => {
-                                                currentArray.update(index, { ...field, required: val });
-                                            }}
-                                            onTogglePublic={(val) => {
-                                                currentArray.update(index, { ...field, is_public: val });
-                                            }}
-                                        />
+                                        <div key={field.id}>
+                                            <SortableItem
+                                                id={field.id}
+                                                item={displayItem}
+                                                fieldDef={fieldDef}
+                                                index={index}
+                                                onRemove={() => currentArray.remove(index)}
+                                                onToggleRequired={(val) => {
+                                                    currentArray.update(index, { ...field, required: val });
+                                                }}
+                                                onTogglePublic={(val) => {
+                                                    currentArray.update(index, { ...field, is_public: val });
+                                                }}
+                                                onInsert={() => setInsertIndex(insertIndex === index ? null : index)}
+                                            />
+                                            {insertIndex === index && (
+                                                <div className="pl-4 mt-2 mb-2 animate-in slide-in-from-top-2 duration-200">
+                                                    <FieldSelector
+                                                        availableFields={availableFields}
+                                                        currentFields={currentArray.fields}
+                                                        onSelect={(id) => handleAddField(id, index)}
+                                                        onCancel={() => setInsertIndex(null)}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                     );
                                 })}
-
-                                {currentArray.fields.length === 0 && (
-                                    <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-600">
-                                        <div className="w-12 h-12 rounded-full bg-white/5 mx-auto flex items-center justify-center mb-3">
-                                            <List className="text-zinc-700" />
-                                        </div>
-                                        <p>No option fields in this schedule.</p>
-                                        <p className="text-xs mt-1">Add items using the dropdown above.</p>
-                                    </div>
-                                )}
                             </div>
                         </SortableContext>
                     </DndContext>
@@ -669,7 +712,6 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
 
                 {/* Footer */}
                 <div className="shrink-0 flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
-
                     {/* Save to All Option */}
                     <div className="flex items-center gap-2">
                         <div
