@@ -68,7 +68,7 @@ export function CustomerTable({ data, onEdit, onDelete, sortConfig, onSort }: Cu
                             <th className="px-6 py-4 text-right text-zinc-400">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-base text-zinc-300">
                         {data.map((customer) => (
                             <tr
                                 key={customer.id}
@@ -153,7 +153,7 @@ export function CustomerTable({ data, onEdit, onDelete, sortConfig, onSort }: Cu
                             </div>
 
                             {/* Body: Two Columns */}
-                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
+                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
                                 <div className="text-zinc-500">Email</div>
                                 <div className="text-zinc-300 break-all">{customer.email}</div>
 
