@@ -119,7 +119,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 <div className="flex items-center justify-between w-full gap-4">
                     <div className="flex items-center gap-2 shrink-0">
                         <Ticket size={16} className="text-cyan-400" />
-                        <span className="text-sm font-bold text-white uppercase tracking-wider">Bookings ({bookings.length})</span>
+                        <span className="text-base font-bold text-white uppercase tracking-wider">Bookings ({bookings.length})</span>
                     </div>
 
                     {/* Search & Manifest Controls */}
@@ -136,9 +136,9 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                         </div>
                         <button
                             onClick={onManifestClick}
-                            className="h-8 px-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-md text-xs font-medium text-zinc-300 hover:text-white transition-colors whitespace-nowrap flex items-center gap-2"
+                            className="h-8 px-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-md text-sm font-medium text-zinc-300 hover:text-white transition-colors whitespace-nowrap flex items-center gap-2"
                         >
-                            <FileText size={14} />
+                            <FileText size={16} />
                             Manifest
                         </button>
                     </div>
@@ -148,7 +148,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
             <div className="flex-1 overflow-y-auto p-0 custom-scrollbar">
                 {/* Stats Header */}
                 <div className="px-6 py-3 border-b border-white/5 bg-black/40 backdrop-blur-sm sticky top-0 z-10 w-full">
-                    <div className="flex items-center gap-3 flex-wrap text-sm text-zinc-400">
+                    <div className="flex items-center gap-3 flex-wrap text-base text-zinc-400">
                         <span className="text-zinc-300 font-medium">{totalBooked} booked</span>
                         <span className="text-zinc-600">|</span>
                         <span className="text-zinc-400">{remaining} available</span>
@@ -162,9 +162,9 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     <div className="space-y-2">
                         <button
                             onClick={() => setActiveExpanded(!activeExpanded)}
-                            className="w-full text-left flex items-center gap-2 text-zinc-400 text-sm font-medium hover:text-white transition-colors"
+                            className="w-full text-left flex items-center gap-2 text-zinc-400 text-base font-medium hover:text-white transition-colors"
                         >
-                            <ChevronDown size={16} className={cn("transition-transform", !activeExpanded && "-rotate-90")} />
+                            <ChevronDown size={18} className={cn("transition-transform", !activeExpanded && "-rotate-90")} />
                             {filteredActive.length} active booking{filteredActive.length !== 1 ? 's' : ''}
                         </button>
 
@@ -181,14 +181,14 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                         >
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>
-                                                    <div className="text-white font-medium text-sm">{booking.customer_name}</div>
-                                                    <div className="text-zinc-500 text-xs mt-0.5">
+                                                    <div className="text-white font-medium text-base">{booking.customer_name}</div>
+                                                    <div className="text-zinc-500 text-sm mt-0.5">
                                                         {booking.pax_count} Pax
                                                         {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
                                                     </div>
                                                 </div>
                                                 <span className={cn(
-                                                    "px-2 py-0.5 rounded text-xs font-medium",
+                                                    "px-2 py-0.5 rounded text-sm font-medium",
                                                     booking.payment_status === 'paid'
                                                         ? "bg-emerald-500/20 text-emerald-400"
                                                         : booking.payment_status === 'partial'

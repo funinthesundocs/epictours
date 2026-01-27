@@ -72,8 +72,9 @@ export function AvailabilityManager({
             description=""
             width="full-content"
             contentClassName="p-0 h-full flex flex-col"
+            titleClassName="text-2xl"
         >
-            <div className="flex-1 grid grid-cols-[25fr_55fr_20fr] min-h-0 divide-x divide-zinc-800 bg-transparent">
+            <div className="flex-1 grid grid-cols-[25fr_45fr_30fr] min-h-0 divide-x divide-zinc-800 bg-transparent">
                 {/* COLUMN 1: Availability Info + Transportation & Staff + Quick Settings */}
                 <div className="flex flex-col h-full overflow-hidden">
                     <ColumnOne

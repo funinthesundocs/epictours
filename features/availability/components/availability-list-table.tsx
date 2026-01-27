@@ -23,6 +23,15 @@ export interface Availability {
     staff_ids?: string[];
     bookings?: { pax_count: number, status: string }[]; // Nested relation
     booking_records_count?: number; // Calculated count of active bookings
+    // Resource Clustering
+    assignments?: {
+        id: string;
+        vehicle_id?: string;
+        transportation_route_id?: string;
+        driver_id?: string;
+        guide_id?: string;
+        sort_order: number;
+    }[];
     // Enriched fields for UI
     staff_display?: string;
     route_name?: string;

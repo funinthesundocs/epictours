@@ -33,7 +33,7 @@ export function ColumnThree({
             <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
                 <div className="h-8 flex items-center gap-2">
                     <Send size={16} className="text-cyan-400" />
-                    <span className="text-sm font-bold text-white uppercase tracking-wider">Actions</span>
+                    <span className="text-base font-bold text-white uppercase tracking-wider">Actions</span>
                 </div>
             </div>
 
@@ -50,8 +50,8 @@ export function ColumnThree({
                             <Mail size={16} className="text-zinc-400" />
                         </div>
                         <div>
-                            <div className="text-sm font-medium text-white">Email Entire Tour</div>
-                            <div className="text-xs text-zinc-500">Send update to all participants</div>
+                            <div className="text-base font-medium text-white">Email Entire Tour</div>
+                            <div className="text-sm text-zinc-500">Send update to all participants</div>
                         </div>
                     </button>
 
@@ -64,8 +64,8 @@ export function ColumnThree({
                             <MessageSquare size={16} className="text-zinc-400" />
                         </div>
                         <div>
-                            <div className="text-sm font-medium text-white">SMS Entire Tour</div>
-                            <div className="text-xs text-zinc-500">Send text to all participants</div>
+                            <div className="text-base font-medium text-white">SMS Entire Tour</div>
+                            <div className="text-sm text-zinc-500">Send text to all participants</div>
                         </div>
                     </button>
 
@@ -78,8 +78,8 @@ export function ColumnThree({
                             <XCircle size={16} className="text-amber-500" />
                         </div>
                         <div>
-                            <div className="text-sm font-medium text-white">Cancel Tour</div>
-                            <div className="text-xs text-zinc-500">Cancel all reservations at once</div>
+                            <div className="text-base font-medium text-white">Cancel Tour</div>
+                            <div className="text-sm text-zinc-500">Cancel all reservations at once</div>
                         </div>
                     </button>
 
@@ -93,8 +93,8 @@ export function ColumnThree({
                                 <Trash2 size={16} className="text-red-500" />
                             </div>
                             <div>
-                                <div className="text-sm font-medium text-red-400">Delete Availability</div>
-                                <div className="text-xs text-zinc-500">Permanently remove this slot</div>
+                                <div className="text-base font-medium text-red-400">Delete Availability</div>
+                                <div className="text-sm text-zinc-500">Permanently remove this slot</div>
                             </div>
                         </button>
                     )}
