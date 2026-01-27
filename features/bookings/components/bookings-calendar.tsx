@@ -338,8 +338,8 @@ function MonthView({
                                                         key={event.id}
                                                         abbr={event.experience_short_code || "EXP"}
                                                         time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings={`${event.booking_records_count || 0} Bookings`}
-                                                        cap={`${(event.max_capacity - (event.booked_count || 0))} / ${event.max_capacity} Capacity`}
+                                                        bookedCount={event.booked_count || 0}
+                                                        maxCapacity={event.max_capacity}
                                                         onClick={(e) => {
                                                             e?.stopPropagation();
                                                             if (onEventClick && e) onEventClick(event, e);
@@ -360,14 +360,66 @@ function MonthView({
     )
 }
 
-function EventChip({ abbr, time, bookings, cap, note, onClick }: { abbr: string, time: string, bookings: string, cap: string, note?: string, onClick?: (e?: React.MouseEvent) => void }) {
+function EventChip({ 
+    abbr, 
+    time, 
+    bookedCount, 
+    maxCapacity, 
+    note, 
+    onClick 
+}: { 
+    abbr: string, 
+    time: string, 
+    bookedCount: number, 
+    maxCapacity: number, 
+    note?: string, 
+    onClick?: (e: React.MouseEvent) => void 
+}) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    // Color logic: if bookings > 0 but < max, cyan. If full, rose? If 0, zinc? 
+    // Keeping uniform cyan for now as per design system (Primary Teal).
+    
     return (
-        <div className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500" onClick={onClick}>
-            <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
-            <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
-            <span className="text-white font-bold text-xs leading-tight">{bookings}</span>
-            <span className="text-white font-bold text-xs leading-tight">{cap}</span>
-            {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5 max-w-full truncate">{note}</span>}
+        <div 
+            className="mb-1 p-1.5 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-1 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500 overflow-hidden ring-1 ring-white/10" 
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick?.(e);
+            }}
+        >
+            {/* Header: Code + Toggle */}
+            <div className="flex justify-between items-center w-full gap-2">
+                <span className="font-bold text-white text-xs leading-tight truncate">{abbr}</span>
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className="text-white/80 hover:text-white p-0.5 rounded hover:bg-white/10 transition-colors"
+                >
+                    <ChevronDown size={14} className={cn("transition-transform duration-200 stroke-[3]", isExpanded && "rotate-180")} />
+                </button>
+            </div>
+
+            {/* Always Visible: Capacity Stats */}
+            <div className="text-white/90 font-bold text-[10px] leading-tight flex items-center gap-1">
+                 <span>{bookedCount} / {maxCapacity}</span>
+            </div>
+
+            {/* Expanded Details */}
+            {isExpanded && (
+                <div className="mt-1 pt-1 border-t border-white/20 w-full space-y-1 animate-in slide-in-from-top-1 fade-in duration-200">
+                    <div className="text-white text-[10px] flex items-center gap-1">
+                        {time}
+                    </div>
+                    {note && (
+                        <div className="text-white/80 italic text-[10px] leading-tight mt-0.5 line-clamp-2 border-l-2 border-white/30 pl-1">
+                            {note}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
