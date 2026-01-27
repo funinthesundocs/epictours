@@ -62,7 +62,7 @@ export function BookingsCalendar({
 
             const { data, error } = await supabase
                 .from('availabilities' as any)
-                .select('*, bookings:bookings(pax_count, status)')
+                .select('*, bookings:bookings(pax_count, status), assignments:availability_assignments(*)')
                 // No experience filter = Universal View
                 .gte('start_date', startOfMonth.toISOString().split('T')[0])
                 .lte('start_date', endOfMonth.toISOString().split('T')[0])
@@ -72,10 +72,48 @@ export function BookingsCalendar({
                 console.error("Error fetching availabilities:", error);
             } else if (data) {
                 const enriched: Availability[] = data.map((item: any) => {
-                    // Extract driver and guide from staff_ids (first = driver, second = guide by convention)
+                    // Resource Clustering Logic - Determine Primary Assignment
+                    const assignments = item.assignments || [];
+                    const primaryAssignment = assignments.length > 0
+                        ? assignments.sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))[0]
+                        : null;
+
+                    // Extract driver and guide from staff_ids (Legacy fallback)
                     const staffIds = item.staff_ids || [];
-                    const driverName = staffIds[0] ? staffMap[staffIds[0]] : "";
-                    const guideName = staffIds[1] ? staffMap[staffIds[1]] : "";
+
+                    // Determine values based on Primary Assignment or Fallback
+                    let driverName = "";
+                    let guideName = "";
+                    let routeName = "";
+                    let vehicleName = "";
+                    let staffDisplayList: string[] = [];
+
+                    if (primaryAssignment) {
+                        // Use assignment data
+                        if (primaryAssignment.driver_id) {
+                            const name = staffMap[primaryAssignment.driver_id];
+                            if (name) {
+                                driverName = name;
+                                staffDisplayList.push(name);
+                            }
+                        }
+                        if (primaryAssignment.guide_id) {
+                            const name = staffMap[primaryAssignment.guide_id];
+                            if (name) {
+                                guideName = name;
+                                staffDisplayList.push(name);
+                            }
+                        }
+                        routeName = routeMap[primaryAssignment.transportation_route_id] || "";
+                        vehicleName = vehicleMap[primaryAssignment.vehicle_id] || "";
+                    } else {
+                        // Use Legacy Data
+                        driverName = staffIds[0] ? staffMap[staffIds[0]] : "";
+                        guideName = staffIds[1] ? staffMap[staffIds[1]] : "";
+                        staffDisplayList = staffIds.map((id: string) => staffMap[id]).filter(Boolean);
+                        routeName = routeMap[item.transportation_route_id] || "";
+                        vehicleName = vehicleMap[item.vehicle_id] || "";
+                    }
 
                     // Calculate bookings
                     const validBookings = (item.bookings || []).filter((b: any) => b.status?.toLowerCase() !== 'cancelled');
@@ -86,13 +124,14 @@ export function BookingsCalendar({
                         ...item,
                         booked_count: totalPax,
                         booking_records_count: bookingRecords,
-                        staff_display: staffIds.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
-                        route_name: routeMap[item.transportation_route_id] || "",
-                        vehicle_name: vehicleMap[item.vehicle_id] || "",
+                        staff_display: staffDisplayList.join(", ") || "",
+                        route_name: routeName,
+                        vehicle_name: vehicleName,
                         driver_name: driverName,
                         guide_name: guideName,
                         experience_name: expMap[item.experience_id || ""]?.name || "",
-                        experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP"
+                        experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP",
+                        assignments: assignments
                     };
                 });
                 setAvailabilities(enriched);

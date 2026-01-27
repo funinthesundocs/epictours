@@ -15,6 +15,7 @@ interface SidePanelProps {
     children: React.ReactNode;
     width?: string; // Allow custom width, default to 'max-w-md'. Pass "full-content" for main area coverage.
     contentClassName?: string;
+    titleClassName?: string;
 }
 
 export function SidePanel({
@@ -24,7 +25,8 @@ export function SidePanel({
     description,
     children,
     width = "max-w-md",
-    contentClassName = "p-6"
+    contentClassName = "p-6",
+    titleClassName
 }: SidePanelProps) {
     // Access sidebar state to determine offset for "full-content" mode
     const { isCollapsed } = useSidebar();
@@ -94,7 +96,7 @@ export function SidePanel({
                         {/* Header */}
                         <div className="flex items-start justify-between p-6 border-b border-white/5 bg-transparent">
                             <div>
-                                <h2 className="text-xl font-bold text-white tracking-tight">{title}</h2>
+                                <h2 className={cn("text-xl font-bold text-white tracking-tight", titleClassName)}>{title}</h2>
                                 {description && (
                                     <p className="text-sm text-zinc-400 mt-1">{description}</p>
                                 )}

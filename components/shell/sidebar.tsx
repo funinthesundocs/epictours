@@ -64,10 +64,10 @@ export function Sidebar() {
                     <div className="relative h-[73px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
                         {!isCollapsed && (
                             <div className="overflow-hidden whitespace-nowrap">
-                                <h1 className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                                     Epic<span className="text-cyan-400">.ai</span>
                                 </h1>
-                                <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em]">Business OS</p>
+                                <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">Business OS</p>
                             </div>
                         )}
                         {/* Collapse Toggle */}
@@ -124,9 +124,9 @@ export function Sidebar() {
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
                             {!isCollapsed && (
-                                <div className="text-sm overflow-hidden whitespace-nowrap">
+                                <div className="text-base overflow-hidden whitespace-nowrap">
                                     <p className="font-medium text-white">Admin</p>
-                                    <p className="text-xs text-cyan-400">Online</p>
+                                    <p className="text-sm text-cyan-400">Online</p>
                                 </div>
                             )}
                         </div>
@@ -174,7 +174,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
-                        "w-full group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                        "w-full group flex items-center justify-between px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                         (isActive || isChildActive)
                             ? "text-cyan-400 font-medium"
                             : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -213,7 +213,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
         <Link
             href={item.href}
             className={cn(
-                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                 isActive
                     ? "bg-cyan-500/10 text-cyan-400 font-medium shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
@@ -248,7 +248,7 @@ function CollapsibleSection({
             <button
                 onClick={onToggle}
                 className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors hover:text-white",
+                    "w-full flex items-center justify-between px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-white",
                     isChildActive ? "text-cyan-400/90" : "text-zinc-500"
                 )}
             >
