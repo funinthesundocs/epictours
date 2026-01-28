@@ -1,4 +1,5 @@
-import { ArrowUpRight, DollarSign, Users, Activity, Ticket } from "lucide-react";
+import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye } from "lucide-react";
+import { RecentActivity } from "@/components/dashboard/recent-activity";
 
 export default function Home() {
     return (
@@ -58,20 +59,17 @@ export default function Home() {
                 </div>
 
                 <div className="glass-card rounded-xl p-6 h-[400px] flex flex-col">
-                    <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-                    <div className="space-y-4 overflow-hidden">
-                        {[1, 2, 3, 4, 5].map((_, i) => (
-                            <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-                                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-zinc-400">
-                                    U{i}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">New Booking confirmed</p>
-                                    <p className="text-xs text-zinc-500 truncate">2 minutes ago via Website</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
+                        <a
+                            href="/settings/activity-log"
+                            className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+                        >
+                            <Eye size={14} />
+                            View All
+                        </a>
                     </div>
+                    <RecentActivity />
                 </div>
             </div>
         </div>

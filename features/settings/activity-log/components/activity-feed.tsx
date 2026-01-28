@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
-import { Activity, User, Database, Clock, ArrowRight } from "lucide-react";
+import { Activity, Clock, ArrowRight, Loader2, Search, X, Plus, Pencil, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type ActivityLog = {
     id: string;
@@ -14,106 +15,450 @@ type ActivityLog = {
     new_data: any;
     created_at: string;
     user_id: string;
-    user?: { email: string }; // Joined manually or via view if needed
+    user?: { email: string };
 };
 
 export function ActivityFeed() {
     const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
+    const pageSize = 20;
 
-    useEffect(() => {
-        fetchLogs();
-    }, []);
+    // Debounce Ref
+    const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
 
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
         setLoading(true);
-        // Basic fetch, in production you'd want pagination
-        const { data, error } = await supabase
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        let query = supabase
             .from("activity_logs")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(50);
+            .select("*", { count: 'exact' })
+            .order("created_at", { ascending: false });
+
+        // Apply search filter - searches Item (table_name), Action, and Record Name (in JSONB)
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase().replace(/[(),]/g, " ").trim();
+
+            // Map user-friendly terms to action values (all variations)
+            const actionKeywords: Record<string, string> = {
+                // INSERT variations
+                'create': 'INSERT',
+                'created': 'INSERT',
+                'new': 'INSERT',
+                'add': 'INSERT',
+                'added': 'INSERT',
+                'insert': 'INSERT',
+                // DELETE variations
+                'delete': 'DELETE',
+                'deleted': 'DELETE',
+                'remove': 'DELETE',
+                'removed': 'DELETE',
+                // UPDATE variations
+                'update': 'UPDATE',
+                'updated': 'UPDATE',
+                'edit': 'UPDATE',
+                'edited': 'UPDATE',
+                'change': 'UPDATE',
+                'changed': 'UPDATE',
+                'modify': 'UPDATE',
+                'modified': 'UPDATE',
+            };
+
+            // Check if search term matches or STARTS any action keyword (smart partial match)
+            const matchingAction = Object.entries(actionKeywords).find(([keyword]) =>
+                keyword.startsWith(q) || q === keyword
+            );
+
+            if (matchingAction) {
+                query = query.eq('action', matchingAction[1]);
+            } else if (q) {
+                // Search across table_name, action, and name fields in JSONB data
+                query = query.or(`table_name.ilike.%${q}%,action.ilike.%${q}%,new_data->>name.ilike.%${q}%,old_data->>name.ilike.%${q}%,new_data->>label.ilike.%${q}%,old_data->>label.ilike.%${q}%,new_data->>title.ilike.%${q}%,old_data->>title.ilike.%${q}%`);
+            }
+        }
+
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
 
         if (error) {
             console.error("Error fetching logs:", error);
         } else {
             setLogs(data as any[]);
+            if (count !== null) {
+                setTotalItems(count);
+            }
         }
         setLoading(false);
+    }, [page, searchQuery]);
+
+    // Effect: Trigger Fetch on changes (Debounced Search)
+    useEffect(() => {
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+        searchTimeoutRef.current = setTimeout(() => {
+            fetchLogs();
+        }, 500); // 500ms debounce
+
+        return () => {
+            if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        };
+    }, [fetchLogs]);
+
+    // Reset Page on Search Change
+    useEffect(() => {
+        setPage(1);
+    }, [searchQuery]);
+
+    const handleReset = () => {
+        setSearchQuery("");
+        setPage(1);
     };
 
-    if (loading) {
-        return <div className="text-zinc-500 text-sm">Loading activity history...</div>;
-    }
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-    if (logs.length === 0) {
+    const flattenObject = (obj: any, prefix = ''): Record<string, any> => {
+        return Object.keys(obj || {}).reduce((acc: Record<string, any>, k) => {
+            const pre = prefix.length ? prefix + '.' : '';
+            if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+                Object.assign(acc, flattenObject(obj[k], pre + k));
+            } else {
+                acc[pre + k] = obj[k];
+            }
+            return acc;
+        }, {});
+    };
+
+    const renderDiff = (log: ActivityLog) => {
+        // Humanize table name for display
+        const contentType = log.table_name
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase())
+            .replace(/s$/, ''); // Remove trailing 's' for singular
+
+        if (log.action === 'DELETE' && log.old_data) {
+            return <span className="text-red-400">{contentType} Deleted</span>;
+        }
+        if (log.action === 'INSERT') {
+            return <span className="text-emerald-400">{contentType} Created</span>;
+        }
+        if (!log.old_data || !log.new_data) return <span className="text-zinc-500">-</span>;
+
+        const flatOld = flattenObject(log.old_data);
+        const flatNew = flattenObject(log.new_data);
+
+        const allKeys = Array.from(new Set([...Object.keys(flatOld), ...Object.keys(flatNew)]));
+
+        // Map technical field names to human-readable labels
+        const humanizeFieldName = (key: string): string => {
+            // Common field mappings
+            const fieldMap: Record<string, string> = {
+                // Settings fields
+                'settings.min': 'Minimum',
+                'settings.max': 'Maximum',
+                'settings.start': 'Start',
+                'settings.end': 'End',
+                'settings.default': 'Default Value',
+                'settings.required': 'Required',
+                'settings.multi_select_style': 'Layout Style',
+                'settings.multi_select_visual': 'Visual Style',
+                'settings.multi_select_columns': 'Columns',
+                'settings.binary_mode': 'Binary Mode',
+                'settings.allow_multiselect': 'Allow Multiple',
+                // Metadata fields
+                'metadata.hotel': 'Hotel',
+                'metadata.source': 'Referral Source',
+                'metadata.dietary': 'Dietary Restrictions',
+                // Preferences fields
+                'preferences.preferred_messaging_app': 'Messaging App',
+                'preferences.sms_notifications': 'SMS Notifications',
+                'preferences.email_notifications': 'Email Notifications',
+                'preferences.whatsapp_notifications': 'WhatsApp Notifications',
+                // Common fields
+                'source': 'Referral Source',
+                'field_type': 'Field Type',
+                'is_required': 'Required',
+                'is_active': 'Active',
+                'display_order': 'Display Order',
+                'total_value': 'Total Value',
+                'created_at': 'Created',
+                'updated_at': 'Updated',
+                // Customer fields
+                'phone': 'Phone Number',
+                'email': 'Email Address',
+                'status': 'Status',
+                'name': 'Name',
+                'dietary': 'Dietary Restrictions',
+                'sms': 'SMS Notifications',
+                'whatsapp': 'WhatsApp Notifications',
+                // Vendor/Booking fields
+                'vendor_id': 'Vendor',
+                'experience_id': 'Experience',
+                'customer_id': 'Customer',
+                'booking_date': 'Booking Date',
+                'pickup_time': 'Pickup Time',
+                'pickup_location': 'Pickup Location',
+            };
+
+            // Check direct mapping first
+            if (fieldMap[key]) return fieldMap[key];
+
+            // Clean up the key for display
+            const lastPart = key.includes('.') ? key.split('.').pop()! : key;
+
+            // Convert snake_case to Title Case
+            return lastPart
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, char => char.toUpperCase());
+        };
+
+        // Helper to normalize empty values for comparison
+        const normalizeValue = (val: any) => {
+            if (val === null || val === undefined || val === '') return null;
+            return val;
+        };
+
+        // Filter to only show fields that actually changed
+        const changes = allKeys
+            .filter(key => {
+                // Skip system fields
+                if (key === 'updated_at' || key === 'created_at' || key === 'id') return false;
+
+                const oldVal = normalizeValue(flatOld[key]);
+                const newVal = normalizeValue(flatNew[key]);
+
+                // Skip if both are empty (no real change)
+                if (oldVal === null && newVal === null) return false;
+
+                // Only include if values actually differ
+                return JSON.stringify(oldVal) !== JSON.stringify(newVal);
+            })
+            .map(key => {
+                const oldVal = flatOld[key];
+                const newVal = flatNew[key];
+                const normalizedOld = normalizeValue(oldVal);
+                const normalizedNew = normalizeValue(newVal);
+                const fieldLabel = humanizeFieldName(key);
+
+                // If changed to empty, show as cleared
+                if (normalizedNew === null && normalizedOld !== null) {
+                    return (
+                        <div key={key} className="flex items-center gap-2">
+                            <span className="text-zinc-500">{fieldLabel}:</span>
+                            <span className="text-zinc-500 italic">(cleared)</span>
+                        </div>
+                    );
+                }
+
+                const displayValue = String(newVal);
+
+                return (
+                    <div key={key} className="flex items-center gap-2">
+                        <span className="text-zinc-500">{fieldLabel}:</span>
+                        <span className="text-white font-medium">
+                            {displayValue.length > 40 ? displayValue.substring(0, 40) + '...' : displayValue}
+                        </span>
+                    </div>
+                );
+            })
+            .filter(Boolean);
+
+        if (changes.length === 0) return <span className="text-zinc-500 text-xs italic">No significant changes</span>;
+
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-zinc-500 space-y-4">
-                <Activity size={48} className="opacity-20" />
-                <p>No recent activity recorded.</p>
+            <div className="flex flex-col gap-1 text-base">
+                {changes}
+            </div>
+        );
+    };
+
+    // Action Icon component
+    const ActionIcon = ({ action }: { action: string }) => {
+        if (action === 'INSERT') {
+            return <Plus size={16} className="text-emerald-400" />;
+        }
+        if (action === 'UPDATE') {
+            return <Pencil size={16} className="text-cyan-400" />;
+        }
+        return <Trash2 size={16} className="text-red-400" />;
+    };
+
+    const getRecordName = (log: ActivityLog) => {
+        const data = log.new_data || log.old_data || {};
+        const name = data.label || data.title || data.name || data.email;
+        return name ? <span className="text-white font-medium">{name}</span> : <span className="font-mono text-xs opacity-50">{log.record_id.substring(0, 8)}...</span>;
+    };
+
+    const isFiltered = !!searchQuery;
+
+    // Initial Loading State
+    if (loading && totalItems === 0 && !searchQuery) {
+        return (
+            <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
+                <Loader2 size={24} className="animate-spin" />
+                Loading...
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            {logs.map((log) => (
-                <div key={log.id} className="bg-zinc-900/50 border border-white/5 rounded-lg p-4 hover:bg-white/5 transition-colors">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                ${log.action === 'INSERT' ? 'bg-emerald-500/20 text-emerald-400' :
-                                    log.action === 'UPDATE' ? 'bg-amber-500/20 text-amber-400' :
-                                        'bg-red-500/20 text-red-400'
-                                }`}>
-                                {log.action.substring(0, 1)}
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-white flex items-center gap-2">
-                                    <span className="capitalize">{log.action.toLowerCase()}</span>
-                                    <span className="text-zinc-500">on</span>
-                                    <span className="font-mono text-cyan-400">{log.table_name}</span>
-                                </p>
-                                <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                                    ID: {log.record_id}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-xs text-zinc-500 flex items-center gap-1 justify-end">
-                                <Clock size={12} />
-                                {format(new Date(log.created_at), "MMM d, h:mm a")}
-                            </p>
-                            <p className="text-xs text-zinc-600 mt-1">
-                                User: {log.user_id ? `${log.user_id.substring(0, 8)}...` : 'System'}
-                            </p>
+        <>
+            {/* Search Toolbar (Matching CustomerToolbar) */}
+            <div className="flex items-center gap-2 w-full max-w-xl shrink-0">
+                <div className="relative flex-1">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search table, action, record..."
+                        className="w-full h-10 bg-[#0b1115] border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                    />
+                </div>
+
+                {/* Reset Button */}
+                {isFiltered && (
+                    <button
+                        onClick={handleReset}
+                        className="h-10 px-3 flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium border border-transparent hover:border-white/10 whitespace-nowrap"
+                    >
+                        <X size={16} />
+                        Reset
+                    </button>
+                )}
+            </div>
+
+            {/* Table Container (Matching CustomersPage Structure) */}
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
+                <div className={cn("h-full", loading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                    <div className="h-full overflow-auto relative">
+                        {/* Desktop Table */}
+                        <table className="w-full text-left hidden md:table">
+                            <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                                <tr>
+                                    <th className="px-6 py-4">Item</th>
+                                    <th className="px-6 py-4">User</th>
+                                    <th className="px-6 py-4">Changes</th>
+                                    <th className="px-6 py-4">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5 text-base text-zinc-300">
+                                {logs.length === 0 && !loading ? (
+                                    <tr>
+                                        <td colSpan={5} className="text-center py-20 text-zinc-500">
+                                            {searchQuery ? "No results matching your search." : "No activity recorded yet."}
+                                        </td>
+                                    </tr>
+                                ) : logs.map((log) => (
+                                    <tr key={log.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <ActionIcon action={log.action} />
+                                                <div>
+                                                    <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{log.table_name.replace(/_/g, ' ')}</div>
+                                                    <div>{getRecordName(log)}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-zinc-400">
+                                            {log.user_id ? `${log.user_id.substring(0, 8)}...` : <span className="text-zinc-500 italic">System</span>}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm">
+                                            {renderDiff(log)}
+                                        </td>
+                                        <td className="px-6 py-4 text-zinc-400 whitespace-nowrap text-sm">
+                                            {format(new Date(log.created_at), "MMM d, h:mm a")}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4 p-4">
+                            {logs.length === 0 && !loading ? (
+                                <div className="text-center py-20 text-zinc-500">
+                                    {searchQuery ? "No results matching your search." : "No activity recorded yet."}
+                                </div>
+                            ) : logs.map((log) => {
+                                const contentType = log.table_name
+                                    .replace(/_/g, ' ')
+                                    .replace(/\b\w/g, c => c.toUpperCase())
+                                    .replace(/s$/, '');
+                                const recordName = log.new_data?.label || log.new_data?.name || log.old_data?.label || log.old_data?.name || 'Unknown';
+                                const actionText = log.action === 'INSERT' ? 'Created' : log.action === 'UPDATE' ? 'Updated' : 'Deleted';
+
+                                return (
+                                    <div key={log.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                                        {/* Header: Icon + Name + Action Badge */}
+                                        <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                                                    <ActionIcon action={log.action} />
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs text-zinc-500 uppercase tracking-wider">{contentType}</div>
+                                                    <h3 className="text-lg font-bold text-white leading-tight">{recordName}</h3>
+                                                </div>
+                                            </div>
+                                            <span className={`text-sm font-medium shrink-0 ${log.action === 'INSERT' ? 'text-emerald-400' :
+                                                    log.action === 'UPDATE' ? 'text-cyan-400' :
+                                                        'text-red-400'
+                                                }`}>
+                                                {actionText}
+                                            </span>
+                                        </div>
+
+                                        {/* Body: Two Columns */}
+                                        <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                                            <div className="text-zinc-500">User</div>
+                                            <div className="text-zinc-300">{log.user_id ? log.user_id.substring(0, 8) + '...' : 'System'}</div>
+
+                                            <div className="text-zinc-500">Date</div>
+                                            <div className="text-zinc-300">{format(new Date(log.created_at), "MMM d, h:mm a")}</div>
+
+                                            <div className="text-zinc-500">Changes</div>
+                                            <div className="text-zinc-300">{renderDiff(log)}</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-
-                    {/* Diff Preview (Simplified) */}
-                    {log.action === 'UPDATE' && log.old_data && log.new_data && (
-                        <div className="mt-3 pl-11">
-                            <div className="text-xs bg-black/40 rounded p-2 font-mono text-zinc-400 overflow-x-auto">
-                                {Object.keys(log.new_data).map(key => {
-                                    const oldVal = log.old_data[key];
-                                    const newVal = log.new_data[key];
-                                    if (JSON.stringify(oldVal) !== JSON.stringify(newVal) && key !== 'updated_at') {
-                                        return (
-                                            <div key={key} className="flex items-center gap-2">
-                                                <span className="text-zinc-500">{key}:</span>
-                                                <span className="text-red-900/50 line-through">{String(oldVal).substring(0, 20)}</span>
-                                                <ArrowRight size={10} className="text-zinc-600" />
-                                                <span className="text-emerald-400">{String(newVal).substring(0, 20)}</span>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })}
-                            </div>
-                        </div>
-                    )}
                 </div>
-            ))}
-        </div>
+            </div>
+
+            {/* Pagination Footer (Matching CustomersPage Structure) */}
+            <div className="shrink-0 flex items-center justify-between px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
+                <div>
+                    Showing <span className="text-white font-medium">{totalItems > 0 ? (page - 1) * pageSize + 1 : 0}</span> to <span className="text-white font-medium">{Math.min(page * pageSize, totalItems)}</span> of <span className="text-white font-medium">{totalItems}</span> entries
+                </div>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <span className="sm:hidden">&lt;</span>
+                        <span className="hidden sm:inline">Previous</span>
+                    </button>
+                    <div className="px-2 text-xs sm:text-sm">
+                        Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+                    </div>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <span className="sm:hidden">&gt;</span>
+                        <span className="hidden sm:inline">Next</span>
+                    </button>
+                </div>
+            </div>
+        </>
     );
 }
