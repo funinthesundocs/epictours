@@ -3,8 +3,11 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
-import { Activity, Clock, ArrowRight, Loader2, Search, X, Plus, Pencil, Trash2 } from "lucide-react";
+import { Activity, Clock, ArrowRight, Loader2, Search, X, Plus, Pencil, Trash2, AlertTriangle, Trash } from "lucide-react";
+import { differenceInDays, subDays } from "date-fns";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 type ActivityLog = {
     id: string;
@@ -24,7 +27,12 @@ export function ActivityFeed() {
     const [page, setPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
+    const [oldestLogDate, setOldestLogDate] = useState<Date | null>(null);
+    const [purging, setPurging] = useState(false);
+    const [showPurgeDialog, setShowPurgeDialog] = useState(false);
     const pageSize = 20;
+    const THRESHOLD_DAYS = 120;
+    const KEEP_DAYS = 30;
 
     // Debounce Ref
     const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
@@ -108,6 +116,62 @@ export function ActivityFeed() {
             if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
         };
     }, [fetchLogs]);
+
+    // Fetch oldest log date for purge countdown
+    const fetchOldestLog = useCallback(async () => {
+        const { data } = await supabase
+            .from("activity_logs")
+            .select("created_at")
+            .order("created_at", { ascending: true })
+            .limit(1)
+            .single();
+
+        if (data?.created_at) {
+            setOldestLogDate(new Date(data.created_at));
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchOldestLog();
+    }, [fetchOldestLog]);
+
+    // Purge old logs (keep only last 30 days)
+    const handlePurge = async () => {
+        setShowPurgeDialog(false);
+
+        setPurging(true);
+        const cutoffDate = subDays(new Date(), KEEP_DAYS);
+
+        const { error, count } = await supabase
+            .from("activity_logs")
+            .delete()
+            .lt("created_at", cutoffDate.toISOString());
+
+        setPurging(false);
+
+        if (error) {
+            toast.error("Failed to purge logs: " + error.message);
+        } else {
+            toast.success(`Purged old activity logs`);
+            fetchLogs();
+            fetchOldestLog();
+        }
+    };
+
+    // Calculate purge status
+    const getPurgeStatus = () => {
+        if (!oldestLogDate) return null;
+
+        const daysSinceOldest = differenceInDays(new Date(), oldestLogDate);
+        const daysUntilThreshold = THRESHOLD_DAYS - daysSinceOldest;
+
+        if (daysUntilThreshold <= 0) {
+            return { overdue: true, days: Math.abs(daysUntilThreshold) };
+        }
+        return { overdue: false, days: daysUntilThreshold };
+    };
+
+    const purgeStatus = getPurgeStatus();
 
     // Reset Page on Search Change
     useEffect(() => {
@@ -308,26 +372,54 @@ export function ActivityFeed() {
     return (
         <>
             {/* Search Toolbar (Matching CustomerToolbar) */}
-            <div className="flex items-center gap-2 w-full max-w-xl shrink-0">
-                <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search table, action, record..."
-                        className="w-full h-10 bg-[#0b1115] border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
-                    />
+            <div className="flex items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-2 flex-1 max-w-xl">
+                    <div className="relative flex-1">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search table, action, record..."
+                            className="w-full h-10 bg-[#0b1115] border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                        />
+                    </div>
+
+                    {/* Reset Button */}
+                    {isFiltered && (
+                        <button
+                            onClick={handleReset}
+                            className="h-10 px-3 flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium border border-transparent hover:border-white/10 whitespace-nowrap"
+                        >
+                            <X size={16} />
+                            Reset
+                        </button>
+                    )}
                 </div>
 
-                {/* Reset Button */}
-                {isFiltered && (
+                {/* Purge Button with Countdown */}
+                {purgeStatus && (
                     <button
-                        onClick={handleReset}
-                        className="h-10 px-3 flex items-center gap-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium border border-transparent hover:border-white/10 whitespace-nowrap"
+                        onClick={() => setShowPurgeDialog(true)}
+                        disabled={purging}
+                        className={cn(
+                            "h-10 px-4 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap border",
+                            purgeStatus.overdue
+                                ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                                : "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
+                        )}
                     >
-                        <X size={16} />
-                        Reset
+                        {purging ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : purgeStatus.overdue ? (
+                            <AlertTriangle size={16} />
+                        ) : (
+                            <Trash size={16} />
+                        )}
+                        {purgeStatus.overdue
+                            ? `Overdue by ${purgeStatus.days} days`
+                            : `Purge in ${purgeStatus.days} days`
+                        }
                     </button>
                 )}
             </div>
@@ -459,6 +551,17 @@ export function ActivityFeed() {
                     </button>
                 </div>
             </div>
+
+            {/* Purge Confirmation Dialog */}
+            <AlertDialog
+                isOpen={showPurgeDialog}
+                onClose={() => setShowPurgeDialog(false)}
+                onConfirm={handlePurge}
+                isDestructive={true}
+                title="Purge Activity Logs?"
+                description="This will permanently delete all activity logs older than 30 days. This action cannot be undone."
+                confirmLabel="Purge Logs"
+            />
         </>
     );
 }

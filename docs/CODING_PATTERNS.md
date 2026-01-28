@@ -129,6 +129,36 @@
         CREATE POLICY "Allow public access" ON table_name FOR ALL USING (true) WITH CHECK (true);
         ```
 
+### 2.2 Database Indexing Standards
+*   **Rule**: ALL new tables MUST include indexes in the same migration file.
+*   **Required Indexes**:
+    1.  **Foreign Keys** — Index ALL foreign key columns (e.g., `customer_id`, `experience_id`)
+    2.  **Frequently Filtered Columns** — `status`, `type`, `is_active`, etc.
+    3.  **Frequently Sorted Columns** — `created_at DESC`, `name`, `start_time`
+    4.  **Search Columns** — `name`, `email`, `title`
+*   **Composite Indexes**: For common multi-column queries (e.g., `WHERE experience_id = X ORDER BY start_time`)
+*   **Syntax**: Always use `IF NOT EXISTS` to make migrations re-runnable:
+    ```sql
+    CREATE INDEX IF NOT EXISTS idx_tablename_column ON tablename(column);
+    ```
+*   **Template**:
+    ```sql
+    -- Create table
+    CREATE TABLE IF NOT EXISTS public.new_feature (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        name TEXT NOT NULL,
+        parent_id UUID REFERENCES parent_table(id),
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Add indexes (in same migration file)
+    CREATE INDEX IF NOT EXISTS idx_new_feature_parent_id ON new_feature(parent_id);
+    CREATE INDEX IF NOT EXISTS idx_new_feature_status ON new_feature(status);
+    CREATE INDEX IF NOT EXISTS idx_new_feature_created_at ON new_feature(created_at DESC);
+    ```
+*   **When to Add Later**: If queries become slow, use `EXPLAIN ANALYZE` to identify missing indexes.
+
 ## 3. Logic & State
 *   **Math Safety**:
     *   **Inputs**: Always explicitly cast form inputs to `Number()` before performing arithmetic, especially in `useFieldArray` loops or calculated columns.
