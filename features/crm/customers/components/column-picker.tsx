@@ -21,10 +21,11 @@ export const CUSTOMER_COLUMNS: ColumnConfig[] = [
     { key: "source", label: "Source", sortKey: "source" },
     { key: "status", label: "Status", sortKey: "status" },
     { key: "total_value", label: "AP", sortKey: "total_value" },
+    { key: "created_at", label: "Created", sortKey: "created_at" },
 ];
 
 // Default visible columns
-export const DEFAULT_VISIBLE_COLUMNS = ["name", "email", "phone", "hotel", "status", "total_value"];
+export const DEFAULT_VISIBLE_COLUMNS = ["name", "email", "phone", "hotel", "app", "status", "created_at"];
 
 const STORAGE_KEY = "customer-visible-columns";
 

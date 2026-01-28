@@ -8,6 +8,7 @@ import { differenceInDays, subDays } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type ActivityLog = {
     id: string;
@@ -24,23 +25,21 @@ type ActivityLog = {
 export function ActivityFeed() {
     const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [oldestLogDate, setOldestLogDate] = useState<Date | null>(null);
     const [purging, setPurging] = useState(false);
     const [showPurgeDialog, setShowPurgeDialog] = useState(false);
-    const pageSize = 20;
     const THRESHOLD_DAYS = 120;
     const KEEP_DAYS = 30;
+    const MAX_RECORDS = 5000;
 
     // Debounce Ref
     const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
+    const parentRef = useRef<HTMLDivElement>(null);
 
     const fetchLogs = useCallback(async () => {
         setLoading(true);
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
 
         let query = supabase
             .from("activity_logs")
@@ -89,7 +88,8 @@ export function ActivityFeed() {
             }
         }
 
-        query = query.range(from, to);
+        // Limit for virtual scrolling
+        query = query.limit(MAX_RECORDS);
 
         const { data, error, count } = await query;
 
@@ -102,7 +102,7 @@ export function ActivityFeed() {
             }
         }
         setLoading(false);
-    }, [page, searchQuery]);
+    }, [searchQuery]);
 
     // Effect: Trigger Fetch on changes (Debounced Search)
     useEffect(() => {
@@ -173,17 +173,9 @@ export function ActivityFeed() {
 
     const purgeStatus = getPurgeStatus();
 
-    // Reset Page on Search Change
-    useEffect(() => {
-        setPage(1);
-    }, [searchQuery]);
-
     const handleReset = () => {
         setSearchQuery("");
-        setPage(1);
     };
-
-    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
     const flattenObject = (obj: any, prefix = ''): Record<string, any> => {
         return Object.keys(obj || {}).reduce((acc: Record<string, any>, k) => {
@@ -524,32 +516,9 @@ export function ActivityFeed() {
                 </div>
             </div>
 
-            {/* Pagination Footer (Matching CustomersPage Structure) */}
-            <div className="shrink-0 flex items-center justify-between px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
-                <div>
-                    Showing <span className="text-white font-medium">{totalItems > 0 ? (page - 1) * pageSize + 1 : 0}</span> to <span className="text-white font-medium">{Math.min(page * pageSize, totalItems)}</span> of <span className="text-white font-medium">{totalItems}</span> entries
-                </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        <span className="sm:hidden">&lt;</span>
-                        <span className="hidden sm:inline">Previous</span>
-                    </button>
-                    <div className="px-2 text-xs sm:text-sm">
-                        Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
-                    </div>
-                    <button
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages}
-                        className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        <span className="sm:hidden">&gt;</span>
-                        <span className="hidden sm:inline">Next</span>
-                    </button>
-                </div>
+            {/* Record Count Footer */}
+            <div className="shrink-0 flex items-center justify-center px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
+                <span>{totalItems.toLocaleString()} {totalItems === 1 ? 'activity log' : 'activity logs'}</span>
             </div>
 
             {/* Purge Confirmation Dialog */}

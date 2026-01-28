@@ -12,6 +12,7 @@ export const CustomerSchema = z.object({
   status: z.string().default("Lead"),
   total_value: z.number().default(0),
   last_active: z.string().optional().nullable(),
+  created_at: z.string().optional().nullable(),
   tags: z.array(z.string()).default([]),
   avatar_url: z.string().optional().nullable(),
 

@@ -9,8 +9,9 @@ import { Loader2, AlertCircle, Plus } from "lucide-react";
 import { AddCustomerSheet } from "./components/add-customer-sheet";
 import { CustomerToolbar } from "./components/customer-toolbar";
 import { useColumnVisibility } from "./components/column-picker";
-import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
+
+const MAX_RECORDS = 10000; // Maximum records to fetch for virtual scrolling
 
 export function CustomersPage() {
     const [data, setData] = useState<Customer[]>([]);
@@ -20,20 +21,16 @@ export function CustomersPage() {
 
     // Filter State
     const [searchQuery, setSearchQuery] = useState("");
-    const [sourceFilter, setSourceFilter] = useState("");
-    const [hotelFilter, setHotelFilter] = useState("");
 
-    // Sort & Pagination State
+    // Sort State (no pagination)
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>({ key: "created_at", direction: "desc" });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
 
     // Sheet State
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
 
     // Column Visibility
-    const { visibleColumns, toggleColumn, resetToDefault, isColumnVisible } = useColumnVisibility();
+    const { visibleColumns, toggleColumn, resetToDefault } = useColumnVisibility();
 
     // Debounce Ref
     const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
@@ -46,48 +43,31 @@ export function CustomersPage() {
                 .from('customers')
                 .select('*', { count: 'exact' });
 
-            // 1. Text Search (Expanded to all requested fields)
+            // Text Search
             if (searchQuery) {
-                // Sanitize input to prevent Supabase Parser errors (e.g. "failed to parse logic tree")
-                // We strip special characters that might break the .or() syntax
                 const q = searchQuery.replace(/[(),]/g, " ").trim();
-
                 if (q) {
-                    // ILIKE for Name, Email, Phone, Status, AP, and JSONB fields.
                     query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,status.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
                 }
             }
 
-            // 2. Filters (Status handled by Search now)
-
-            // 3. Sorting
+            // Sorting
             if (sortConfig) {
-                // Handle nested JSONB sorting manually? Supabase doesn't easily sort by JSON keys in .order().
-                // For MVP, if sorting by JSON key, we might need a workaround or just sort the current page client side?
-                // For Robustness: Let's accept that we only SERVER sort top-level fields (name, email, created_at, status).
-                // If it's a JSON field, we might resort to client sort or RPC. 
-                // Let's stick to simple sort for now.
                 if (["name", "email", "created_at", "status", "total_value"].includes(sortConfig.key)) {
                     query = query.order(sortConfig.key, { ascending: sortConfig.direction === "asc" });
                 } else {
-                    // Default fallback
                     query = query.order('created_at', { ascending: false });
                 }
             }
 
-            // 4. Pagination
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage - 1;
-            query = query.range(start, end);
+            // Limit for virtual scrolling (no pagination)
+            query = query.limit(MAX_RECORDS);
 
             const { data: customers, count, error } = await query;
 
             if (error) throw error;
 
             if (customers) {
-                // If we need to sort by JSON keys client-side (because Supabase .order can't easily do it without computed columns)
-                // We can do a mini-sort here, but it only sorts the returned page.
-                // For "Robust", let's trust the query order for now.
                 setData(customers as unknown as Customer[]);
                 setTotalItems(count || 0);
             }
@@ -97,7 +77,7 @@ export function CustomersPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [searchQuery, sortConfig, currentPage, rowsPerPage]);
+    }, [searchQuery, sortConfig]);
 
     // Effect: Trigger Fetch on changes (Debounced Search)
     useEffect(() => {
@@ -105,17 +85,12 @@ export function CustomersPage() {
 
         searchTimeoutRef.current = setTimeout(() => {
             fetchCustomers();
-        }, 500); // 500ms debounce
+        }, 500);
 
         return () => {
             if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
         };
     }, [fetchCustomers]);
-
-    // Reset Page on Filter Change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery, rowsPerPage]);
 
     const handleSort = (key: string) => {
         setSortConfig(current => ({
@@ -126,7 +101,6 @@ export function CustomersPage() {
 
     const handleReset = () => {
         setSearchQuery("");
-        setCurrentPage(1);
     };
 
     // CRUD Handlers
@@ -145,13 +119,11 @@ export function CustomersPage() {
             const { error } = await supabase.from('customers').delete().eq('id', id);
             if (error) throw error;
             toast.success("Customer deleted");
-            fetchCustomers(); // Re-fetch to update count and page
+            fetchCustomers();
         } catch (err: any) {
             alert("Error deleting customer: " + err.message);
         }
     };
-
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
 
     return (
         <div className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -164,19 +136,10 @@ export function CustomersPage() {
                     </div>
 
                     <div className="flex items-center gap-3 self-end md:self-auto">
-                        {/* Rows Selector Aligned */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-500 whitespace-nowrap">Rows:</span>
-                            <div className="w-20">
-                                <CustomSelect
-                                    value={rowsPerPage.toString()}
-                                    onChange={(val) => setRowsPerPage(Number(val))}
-                                    options={["50", "100", "150", "200"]}
-                                    placeholder="50"
-                                    className="h-10 py-1"
-                                />
-                            </div>
-                        </div>
+                        {/* Record Count */}
+                        <span className="text-sm text-zinc-500">
+                            {totalItems.toLocaleString()} {totalItems === 1 ? 'customer' : 'customers'}
+                        </span>
 
                         <button
                             onClick={handleAddNew}
@@ -188,7 +151,7 @@ export function CustomersPage() {
                     </div>
                 </div>
 
-                {/* New Toolbar */}
+                {/* Toolbar */}
                 <CustomerToolbar
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
@@ -200,7 +163,7 @@ export function CustomersPage() {
             </div>
 
             {/* Content */}
-            {isLoading && totalItems === 0 ? ( // Only show full loader on initial load
+            {isLoading && data.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
                     <Loader2 size={24} className="animate-spin" />
                     Loading...
@@ -211,48 +174,18 @@ export function CustomersPage() {
                     {error}
                 </div>
             ) : (
-                <>
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
-                        <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
-                            <CustomerTable
-                                data={data}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                sortConfig={sortConfig}
-                                onSort={handleSort}
-                                visibleColumns={visibleColumns}
-                            />
-                        </div>
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
+                    <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                        <CustomerTable
+                            data={data}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            sortConfig={sortConfig}
+                            onSort={handleSort}
+                            visibleColumns={visibleColumns}
+                        />
                     </div>
-
-                    {/* Pagination Footer */}
-                    <div className="shrink-0 flex items-center justify-between px-2 pt-2 text-sm text-zinc-500 border-t border-white/10">
-                        <div>
-                            Showing <span className="text-white font-medium">{(currentPage - 1) * rowsPerPage + 1}</span> to <span className="text-white font-medium">{Math.min(currentPage * rowsPerPage, totalItems)}</span> of <span className="text-white font-medium">{totalItems}</span> entries
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <span className="sm:hidden">&lt;</span>
-                                <span className="hidden sm:inline">Previous</span>
-                            </button>
-                            <div className="px-2 text-xs sm:text-sm">
-                                Page <span className="text-white">{currentPage}</span> of <span className="text-white">{Math.max(1, totalPages)}</span>
-                            </div>
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage >= totalPages}
-                                className="px-3 py-1 border border-white/10 rounded hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <span className="sm:hidden">&gt;</span>
-                                <span className="hidden sm:inline">Next</span>
-                            </button>
-                        </div>
-                    </div>
-                </>
+                </div>
             )}
 
             <AddCustomerSheet
