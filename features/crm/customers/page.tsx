@@ -8,6 +8,7 @@ import { CustomerTable } from "./components/customer-table";
 import { Loader2, AlertCircle, Plus } from "lucide-react";
 import { AddCustomerSheet } from "./components/add-customer-sheet";
 import { CustomerToolbar } from "./components/customer-toolbar";
+import { useColumnVisibility } from "./components/column-picker";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,9 @@ export function CustomersPage() {
     // Sheet State
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
+
+    // Column Visibility
+    const { visibleColumns, toggleColumn, resetToDefault, isColumnVisible } = useColumnVisibility();
 
     // Debounce Ref
     const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
@@ -189,6 +193,9 @@ export function CustomersPage() {
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     onReset={handleReset}
+                    visibleColumns={visibleColumns}
+                    onToggleColumn={toggleColumn}
+                    onResetColumns={resetToDefault}
                 />
             </div>
 
@@ -213,6 +220,7 @@ export function CustomersPage() {
                                 onDelete={handleDelete}
                                 sortConfig={sortConfig}
                                 onSort={handleSort}
+                                visibleColumns={visibleColumns}
                             />
                         </div>
                     </div>
