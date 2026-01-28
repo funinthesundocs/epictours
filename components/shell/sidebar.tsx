@@ -5,14 +5,19 @@ import { usePathname } from "next/navigation";
 import { navigation, type NavSection } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function Sidebar() {
     const pathname = usePathname();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { isCollapsed, toggleCollapse } = useSidebar();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    // Get Settings section from navigation
+    const settingsSection = navigation.find(section => section.title === "Settings");
 
     // Accordion State
     const [openSection, setOpenSection] = useState<string | null>(() => {
@@ -53,22 +58,22 @@ export function Sidebar() {
 
             {/* Sidebar Container */}
             <aside className={cn(
-                "fixed top-0 left-0 z-50 h-screen transition-all duration-300 ease-in-out border-r border-white/10 bg-zinc-950",
+                "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-zinc-950",
                 isMobileOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0",
                 isCollapsed ? "lg:w-[80px]" : "lg:w-[240px]"
             )}>
                 {/* Content Container */}
-                <div className="h-full w-full flex flex-col overflow-hidden">
+                <div className="h-full w-full flex flex-col overflow-hidden relative">
 
                     {/* Header / Logo Area */}
                     <div className="relative h-[73px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
                         {!isCollapsed && (
-                            <div className="overflow-hidden whitespace-nowrap">
+                            <Link href="/" className="overflow-hidden whitespace-nowrap hover:opacity-80 transition-opacity">
                                 <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                                     Epic<span className="text-cyan-400">.ai</span>
                                 </h1>
                                 <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">Business OS</p>
-                            </div>
+                            </Link>
                         )}
                         {/* Collapse Toggle */}
                         <button
@@ -84,6 +89,9 @@ export function Sidebar() {
                     {/* Navigation Items */}
                     <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800">
                         {navigation.map((section, idx) => {
+                            // Skip Settings section - it will be shown in the slide-up panel
+                            if (section.title === "Settings") return null;
+
                             // Section Header Logic
                             // Navigation Items
                             if (section.title) {
@@ -120,22 +128,109 @@ export function Sidebar() {
                     </div>
 
                     {/* User Profile Footer */}
-                    <div className={cn("p-4 border-t border-white/10 bg-zinc-900/50 shrink-0", isCollapsed && "flex justify-center p-2")}>
-                        <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
-                            {!isCollapsed && (
-                                <div className="text-base overflow-hidden whitespace-nowrap">
-                                    <p className="font-medium text-white">Admin</p>
-                                    <p className="text-sm text-cyan-400">Online</p>
+                    <div className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}>
+                        {isCollapsed ? (
+                            <>
+                                {/* Collapsed: Profile avatar and gear below */}
+                                <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                                <button
+                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    title="Settings"
+                                >
+                                    <Settings size={18} />
+                                </button>
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
+                                    <div className="text-base overflow-hidden whitespace-nowrap">
+                                        <p className="font-medium text-white">Admin</p>
+                                        <p className="text-sm text-cyan-400">Online</p>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+                                {/* Settings Gear Icon */}
+                                <button
+                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    title="Settings"
+                                >
+                                    <Settings size={18} />
+                                </button>
+                            </div>
+                        )}
                     </div>
+
+                    {/* Settings Slide-Up Panel */}
+                    <AnimatePresence>
+                        {isSettingsOpen && (
+                            <>
+                                {/* Glass backdrop overlay - only covers navigation area */}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-zinc-950/10 backdrop-blur-sm"
+                                    onClick={() => setIsSettingsOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                                    className={cn(
+                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        isCollapsed && "items-center"
+                                    )}
+                                >
+                                    {/* Settings Header */}
+                                    <div className={cn(
+                                        "shrink-0 px-4 py-3 bg-white/10 border-b border-white/10 flex items-center justify-between w-full",
+                                        isCollapsed && "justify-center px-2"
+                                    )}>
+                                        {!isCollapsed && (
+                                            <div className="flex items-center gap-2">
+                                                <Settings size={18} className="text-cyan-400" />
+                                                <h3 className="text-lg font-semibold text-white">Settings</h3>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => setIsSettingsOpen(false)}
+                                            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+
+                                    {/* Settings content */}
+                                    <div className={cn(
+                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-zinc-800",
+                                        isCollapsed && "px-1.5 flex flex-col items-center"
+                                    )}>
+                                        {settingsSection?.items.map((item) => (
+                                            <NavItem
+                                                key={item.href}
+                                                item={item}
+                                                pathname={pathname}
+                                                isCollapsed={isCollapsed}
+                                                onMobileItemClick={() => {
+                                                    setIsSettingsOpen(false);
+                                                    setIsMobileOpen(false);
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </div>
             </aside>
         </>
     );
 }
+
 
 // ----------------------------------------------------------------------
 // Helper Components
@@ -149,21 +244,47 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
 
     const [isOpen, setIsOpen] = useState(isChildActive);
 
-    // Collapsed Mode Rendering (Flat, Icon Only)
+    // Collapsed Mode Rendering (Flat, Icon Only with Tooltip)
     if (isCollapsed) {
         return (
-            <Link
-                href={item.href}
-                className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 group relative",
-                    isActive || isChildActive
-                        ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
-                        : "text-zinc-500 hover:text-white hover:bg-white/10"
-                )}
-                title={item.title} // Tooltip
-            >
-                <Icon size={20} />
-            </Link>
+            <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Link
+                            href={item.href}
+                            className={cn(
+                                "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 group relative",
+                                isActive || isChildActive
+                                    ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
+                                    : "text-zinc-500 hover:text-white hover:bg-white/10"
+                            )}
+                        >
+                            <Icon size={20} />
+                        </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="ml-2">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-medium">{item.title}</span>
+                            {hasChildren && (
+                                <div className="flex flex-col gap-1 pt-1 border-t border-white/10 mt-1">
+                                    {item.children.map((child: any) => (
+                                        <Link
+                                            key={child.href}
+                                            href={child.href}
+                                            className={cn(
+                                                "text-xs py-1 px-2 rounded hover:bg-white/10 transition-colors",
+                                                pathname === child.href ? "text-cyan-400" : "text-zinc-400 hover:text-white"
+                                            )}
+                                        >
+                                            {child.title}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         );
     }
 
