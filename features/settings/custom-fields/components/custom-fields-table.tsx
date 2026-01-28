@@ -132,10 +132,10 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                         </th>
                         <th className="px-6 py-4 font-medium">Visibility</th>
                         <th className="px-6 py-4 font-medium w-[30%]">Field Preview</th>
-                        <th className="px-6 py-4 font-medium text-right w-[120px]">Actions</th>
+                        <th className="px-6 py-4 font-medium w-[120px] border-l border-white/10"></th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                <tbody className="divide-y divide-white/5 text-zinc-300">
                     {data.map((field) => {
                         const Icon = TYPE_ICONS[field.type] || Type;
 
@@ -396,25 +396,25 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     {PreviewContent}
                                 </td>
 
-                                {/* Actions */}
-                                <td className="px-6 py-4 text-right align-middle">
-                                    <div className="flex items-center justify-end gap-2 mt-2">
+                                {/* Actions - Last Column */}
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             onClick={() => onEdit(field)}
-                                            className="p-2 text-zinc-400 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                             title="Edit Field"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => onDuplicate(field)}
-                                            className="p-2 text-zinc-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeleteId(field.id)}
-                                            className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -433,66 +433,60 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                     const typeLabel = field.type === 'quantity' ? 'Number' : field.type;
 
                     return (
-                        <div key={field.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
-                            {/* Header: Name + Actions */}
-                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Icon size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white leading-tight">{field.label}</h3>
+                        <div key={field.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                            {/* Header: Type Icon + Actions */}
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                    <Icon size={20} />
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(field)}
-                                        className="p-2 hover:bg-cyan-500/10 rounded text-zinc-400 hover:text-cyan-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => onDuplicate(field)}
-                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Copy size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeleteId(field.id)}
-                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Body: Two Columns */}
-                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
-                                <div className="text-zinc-500">Type</div>
-                                <div>
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize bg-white/5 border-white/10 text-zinc-400">
+                            {/* Field Name - beneath icon */}
+                            <h3 className="text-lg font-bold text-white leading-tight">{field.label}</h3>
+
+                            {/* Body: Icon-based layout */}
+                            <div className="space-y-2 pt-2 border-t border-white/5">
+                                <div className="flex items-center gap-2 text-zinc-400">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize bg-white/5 border-white/10">
                                         {typeLabel}
                                     </span>
-                                </div>
-
-                                <div className="text-zinc-500">Visibility</div>
-                                <div>
                                     {field.is_internal ? (
-                                        <div className="flex items-center gap-2 text-zinc-500 text-xs bg-white/5 border border-white/10 px-2 py-1 rounded w-fit">
+                                        <div className="flex items-center gap-1 text-zinc-500 text-xs">
                                             <Lock size={12} />
-                                            <span>Internal Only</span>
+                                            <span>Internal</span>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-2 text-zinc-500 text-xs bg-white/5 border border-white/10 px-2 py-1 rounded w-fit">
+                                        <div className="flex items-center gap-1 text-zinc-500 text-xs">
                                             <Globe size={12} />
                                             <span>Public</span>
                                         </div>
                                     )}
                                 </div>
-
                                 {field.type === 'select' && field.options?.length > 0 && (
-                                    <>
-                                        <div className="text-zinc-500">Options</div>
-                                        <div className="text-zinc-300 text-sm">{field.options.length} options</div>
-                                    </>
+                                    <div className="flex items-center gap-2 text-zinc-400">
+                                        <List size={14} className="text-zinc-500" />
+                                        {field.options.length} options
+                                    </div>
                                 )}
                             </div>
                         </div>

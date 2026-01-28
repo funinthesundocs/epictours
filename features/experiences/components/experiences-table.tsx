@@ -24,10 +24,10 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                             <th className="px-6 py-4">Event Type</th>
                             <th className="px-6 py-4">Start Time</th>
                             <th className="px-6 py-4">End Time</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-zinc-300">
                         {data.map((item) => (
                             <tr key={item.id} className="hover:bg-white/5 transition-colors group">
                                 {/* Name */}
@@ -50,18 +50,18 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                                     {item.end_time || "-"}
                                 </td>
 
-                                {/* Actions */}
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                                {/* Actions - Last Column */}
+                                <td className="px-6 py-4 border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             onClick={() => onEdit(item)}
-                                            className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeletingItem(item)}
-                                            className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -84,29 +84,29 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(item)}
-                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(item)}
-                                        className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Body Grid */}
-                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
-                                <div className="text-zinc-500">Event Type</div>
-                                <div className="text-zinc-300">{item.event_type}</div>
-
-                                <div className="text-zinc-500">Start Time</div>
-                                <div className="text-zinc-300">{item.start_time || "-"}</div>
-
-                                <div className="text-zinc-500">End Time</div>
-                                <div className="text-zinc-300">{item.end_time || "-"}</div>
+                            {/* Body */}
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-zinc-400">
+                                    <Tag size={14} className="text-zinc-500" />
+                                    {item.event_type}
+                                </div>
+                                <div className="flex items-center gap-2 text-zinc-400">
+                                    <Clock size={14} className="text-zinc-500" />
+                                    {item.start_time || "-"} - {item.end_time || "-"}
+                                </div>
                             </div>
                         </div>
                     ))}

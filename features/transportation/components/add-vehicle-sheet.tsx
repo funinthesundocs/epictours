@@ -241,16 +241,16 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                             </div>
                             <div className="space-y-2">
                                 <Label>License Plate</Label>
-                                <Input {...register("plate_number")} className="font-mono uppercase" placeholder="ABC-1234" />
+                                <Input {...register("plate_number")} className="uppercase" placeholder="ABC-1234" />
                                 {errors.plate_number && <p className="text-xs text-red-500">{errors.plate_number.message}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label>VIN Number</Label>
-                                <Input {...register("vin_number")} className="font-mono text-sm uppercase" placeholder="VIN..." />
+                                <Input {...register("vin_number")} className="uppercase" placeholder="VIN..." />
                             </div>
                             <div className="space-y-2">
                                 <Label>DOT Number</Label>
-                                <Input {...register("dot_number")} className="font-mono text-sm" placeholder="USDOT..." />
+                                <Input {...register("dot_number")} placeholder="USDOT..." />
                             </div>
                             <div className="space-y-2">
                                 <Label>Fuel Efficiency (MPG)</Label>

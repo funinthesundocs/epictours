@@ -96,7 +96,7 @@ export default function VendorsPage() {
                     Add Vendor
                 </button>
             }
-            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col"
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
             <div className="h-full flex flex-col space-y-4">

@@ -6,7 +6,7 @@ import { PageShell } from "@/components/shell/page-shell";
 import { CustomerTypesTable } from "@/features/customer-types/components/customer-types-table";
 import { CustomerTypeSheet } from "@/features/customer-types/components/customer-type-sheet";
 import { supabase } from "@/lib/supabase";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Tags } from "lucide-react";
 
 export default function CustomerTypesPage() {
     const [data, setData] = useState<any[]>([]);
@@ -60,7 +60,8 @@ export default function CustomerTypesPage() {
         <PageShell
             title="Customer Types"
             description="Manage customer classifications and segments."
-            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            icon={Tags}
+            className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col"
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
             action={
                 <button

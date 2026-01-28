@@ -5,15 +5,33 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabase";
 import { CustomerSchema, Customer, CustomerStatus } from "../types";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Contact, MapPin, User, Mail, Phone, Building, MessageCircle, Users, Flag, FileText } from "lucide-react";
 import { z } from "zod";
+
+// Brand icons for messaging apps
+import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine } from "react-icons/fa";
+import { SiSignal } from "react-icons/si";
 
 import { Combobox } from "@/components/ui/combobox";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RequiredIndicator } from "@/components/ui/required-indicator";
+import { cn } from "@/lib/utils";
 
-// Options Lists
-const MESSAGING_OPTIONS = ["WhatsApp", "FB Messenger", "Signal", "Telegram", "Viber", "Line", "WeChat"];
+// Options Lists with icons
+const MESSAGING_OPTIONS = [
+    { value: "", label: "None", icon: null },
+    { value: "WhatsApp", label: "WhatsApp", icon: <FaWhatsapp size={16} className="text-green-500" /> },
+    { value: "FB Messenger", label: "FB Messenger", icon: <FaFacebookMessenger size={16} className="text-blue-500" /> },
+    { value: "Signal", label: "Signal", icon: <SiSignal size={16} className="text-blue-400" /> },
+    { value: "Telegram", label: "Telegram", icon: <FaTelegram size={16} className="text-sky-400" /> },
+    { value: "Viber", label: "Viber", icon: <FaViber size={16} className="text-purple-500" /> },
+    { value: "Line", label: "Line", icon: <FaLine size={16} className="text-green-400" /> },
+    { value: "WeChat", label: "WeChat", icon: <FaWeixin size={16} className="text-green-600" /> },
+];
 const REFERRAL_OPTIONS = ["Google Ad", "Google Map", "AI Search", "Facebook", "YouTube", "Instagram", "Word of Mouth", "Repeat Customer", "Email Offer", "Other"];
 const STATUS_OPTIONS = ["Lead", "Customer", "Refund", "Problem"];
 
@@ -46,7 +64,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isDirty },
         reset,
         watch,
         setValue
@@ -95,10 +113,28 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
         }
     }, [initialData, reset]);
 
+    // Helper to format phone number
+    const formatPhoneNumber = (phone: string | null | undefined): string | null => {
+        if (!phone) return null;
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length === 0) return null;
+        if (digits.length >= 10) {
+            return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+        } else if (digits.length >= 6) {
+            return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+        } else if (digits.length >= 3) {
+            return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+        }
+        return digits;
+    };
+
     const onSubmit = async (data: FormData) => {
         console.log("🚀 onSubmit called with data:", data);
         setIsSubmitting(true);
         setSubmitError(null);
+
+        // Auto-format phone number before saving
+        const formattedPhone = formatPhoneNumber(data.phone);
 
         try {
             // Check for duplicate email on Create
@@ -123,7 +159,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     .update({
                         name: data.name,
                         email: data.email,
-                        phone: data.phone,
+                        phone: formattedPhone,
                         status: data.status,
                         tags: data.tags,
                         preferences: data.preferences,
@@ -138,7 +174,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     .insert([{
                         name: data.name,
                         email: data.email,
-                        phone: data.phone,
+                        phone: formattedPhone,
                         status: data.status,
                         tags: data.tags,
                         preferences: data.preferences,
@@ -167,130 +203,200 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
         setSubmitError("Validation failed. Check console for details.");
     };
 
+    const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
+        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
+            <Icon size={16} className="text-cyan-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        </div>
+    );
+
     return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="h-full flex flex-col">
 
-            {/* 1. Identity */}
-            <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider border-b border-white/10 pb-2">
-                    Contact Details
-                </h3>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Name <span className="text-red-400">*</span></label>
-                    <input
-                        {...register("name")}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
-                        placeholder="Jane Doe"
-                    />
-                    {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                {/* 1. Identity */}
+                <div>
+                    <SectionHeader icon={Contact} title="Contact Details" className="-mt-6 border-t-0" />
+
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2 md:col-span-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <User size={16} className="text-zinc-500" />
+                                    Name <RequiredIndicator />
+                                </Label>
+                                <Input
+                                    {...register("name")}
+                                    placeholder="Jane Doe"
+                                />
+                                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Flag size={16} className="text-zinc-500" />
+                                    Status
+                                </Label>
+                                <CustomSelect
+                                    value={watch("status")}
+                                    onChange={(val) => setValue("status", val as any, { shouldValidate: true })}
+                                    options={STATUS_OPTIONS}
+                                    placeholder="Status..."
+                                />
+                                {errors.status && <p className="text-xs text-red-400">{errors.status.message}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Mail size={16} className="text-zinc-500" />
+                                    Email <RequiredIndicator />
+                                </Label>
+                                <Input
+                                    {...register("email")}
+                                    type="email"
+                                    placeholder="jane@example.com"
+                                />
+                                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Phone size={16} className="text-zinc-500" />
+                                    Phone
+                                </Label>
+                                <Input
+                                    {...register("phone", {
+                                        onChange: (e) => {
+                                            // Auto-format phone number
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            let formatted = value;
+                                            if (value.length >= 6) {
+                                                formatted = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                                            } else if (value.length >= 3) {
+                                                formatted = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                                            } else if (value.length > 0) {
+                                                formatted = `(${value}`;
+                                            }
+                                            e.target.value = formatted;
+                                        }
+                                    })}
+                                    placeholder="(555) 000-0000"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Preferred Messaging App */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <MessageCircle size={16} className="text-zinc-500" />
+                                    Preferred Messaging
+                                </Label>
+                                <CustomSelect
+                                    value={watch("preferences.preferred_messaging_app") || ""}
+                                    onChange={(val) => {
+                                        setValue("preferences.preferred_messaging_app", val || null as any, { shouldValidate: true });
+                                        // Clear handle when app is unselected
+                                        if (!val) setValue("preferences.messaging_handle", null);
+                                    }}
+                                    options={MESSAGING_OPTIONS}
+                                    placeholder="Select App..."
+                                />
+                            </div>
+
+                            {/* Handle/Nickname - Only shows when app is selected */}
+                            {watch("preferences.preferred_messaging_app") && (
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        Handle / Nickname
+                                    </Label>
+                                    <Input
+                                        {...register("preferences.messaging_handle")}
+                                        placeholder="@username or phone"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Email <span className="text-red-400">*</span></label>
-                        <input
-                            {...register("email")}
-                            type="email"
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
-                            placeholder="jane@example.com"
-                        />
-                        {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
-                    </div>
+                {/* 2. Logistics & Preferences */}
+                <div>
+                    <SectionHeader icon={MapPin} title="Logistics & Context" />
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Cell Phone</label>
-                        <input
-                            {...register("phone")}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
-                            placeholder="+1 (555) 000-0000"
-                        />
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Hotel - Smart Autocomplete */}
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Building size={16} className="text-zinc-500" />
+                                    Hotel / Accommodation
+                                </Label>
+                                <Combobox
+                                    value={watch("metadata.hotel") || ""}
+                                    onChange={(val) => setValue("metadata.hotel", val, { shouldValidate: true })}
+                                    options={MOCK_HOTELS}
+                                    placeholder="Search or type hotel..."
+                                />
+                            </div>
+
+                            {/* Referral Source */}
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Users size={16} className="text-zinc-500" />
+                                    Referral Source
+                                </Label>
+                                <CustomSelect
+                                    value={watch("metadata.source") || undefined}
+                                    onChange={(val) => setValue("metadata.source", val as any, { shouldValidate: true })}
+                                    options={REFERRAL_OPTIONS}
+                                    placeholder="Select Source..."
+                                />
+                            </div>
+                        </div>
+
+
+                        {/* Notes */}
+                        <div className="space-y-2">
+                            <Label className="text-zinc-300 flex items-center gap-2">
+                                <FileText size={16} className="text-zinc-500" />
+                                Notes (Internal)
+                            </Label>
+                            <Textarea
+                                {...register("preferences.notes")}
+                                placeholder="Any special requests, internal context, or details..."
+                                className="min-h-[100px] bg-[#0b1115] border-white/10"
+                            />
+                        </div>
                     </div>
                 </div>
+
+                {/* Error Message */}
+                {submitError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">
+                        {submitError}
+                    </div>
+                )}
             </div>
 
-            {/* 2. Logistics & Preferences */}
-            <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider border-b border-white/10 pb-2">
-                    Logistics & Context
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Hotel - Smart Autocomplete */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Hotel / Accommodation</label>
-                        <Combobox
-                            value={watch("metadata.hotel") || ""}
-                            onChange={(val) => setValue("metadata.hotel", val, { shouldValidate: true })}
-                            options={MOCK_HOTELS}
-                            placeholder="Search or type hotel..."
-                        />
-                    </div>
-
-                    {/* Preferred Messaging App - Updated Options */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Preferred Messaging</label>
-                        <CustomSelect
-                            value={watch("preferences.preferred_messaging_app") || undefined}
-                            onChange={(val) => setValue("preferences.preferred_messaging_app", val as any, { shouldValidate: true })}
-                            options={MESSAGING_OPTIONS}
-                            placeholder="Select App..."
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Referral Source - Updated Options */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Referral Source</label>
-                        <CustomSelect
-                            value={watch("metadata.source") || undefined}
-                            onChange={(val) => setValue("metadata.source", val as any, { shouldValidate: true })}
-                            options={REFERRAL_OPTIONS}
-                            placeholder="Select Source..."
-                        />
-                    </div>
-                    {/* Status */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Status</label>
-                        <CustomSelect
-                            value={watch("status")}
-                            onChange={(val) => setValue("status", val as any, { shouldValidate: true })}
-                            options={STATUS_OPTIONS}
-                            placeholder="Select Status..."
-                        />
-                        {errors.status && <p className="text-xs text-red-400">{errors.status.message}</p>}
-                    </div>
-                </div>
-
-                {/* Notes */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-300">Notes (Internal)</label>
-                    <textarea
-                        {...register("preferences.notes")}
-                        rows={3}
-                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
-                        placeholder="Any special requests, internal context, or details..."
-                    />
-                </div>
-            </div>
-
-            {/* Error Message */}
-            {submitError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">
-                    {submitError}
-                </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex justify-end items-center gap-4 pt-4 border-t border-white/10">
+            {/* Fixed Footer */}
+            <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                 <Button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    disabled={isSubmitting || !isDirty}
+                    className={cn(
+                        "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
+                        isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                            isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                    )}
                 >
-                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                    {initialData ? "Update" : "Create"}
+                    {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :
+                        isDirty ? <><Save size={16} /> {initialData ? "Update Customer" : "Create Customer"}</> :
+                            "No Changes"}
                 </Button>
             </div>
         </form>

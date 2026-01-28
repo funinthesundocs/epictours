@@ -6,6 +6,7 @@ export default function PermissionsPage() {
         <PageShell
             title="Roles & Permissions"
             description="RBAC configuration."
+            icon={Shield}
             stats={[
                 { label: "Defined Roles", value: "5", icon: Shield },
                 { label: "Super Admins", value: "1", icon: Lock },

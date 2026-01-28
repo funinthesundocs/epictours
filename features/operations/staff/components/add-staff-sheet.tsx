@@ -13,6 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 
+// Brand icons for messaging apps
+import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine, FaApple } from "react-icons/fa";
+import { SiSignal } from "react-icons/si";
+
 // Zod Schema
 const StaffSchema = z.object({
     name: z.string().min(2, "Name is required"),
@@ -37,14 +41,14 @@ interface AddStaffSheetProps {
 }
 
 const APP_OPTIONS = [
-    { value: "WhatsApp", label: "WhatsApp" },
-    { value: "Telegram", label: "Telegram" },
-    { value: "Signal", label: "Signal" },
-    { value: "WeChat", label: "WeChat" },
-    { value: "Line", label: "Line" },
-    { value: "Viber", label: "Viber" },
-    { value: "Messenger", label: "Messenger" },
-    { value: "iMessage", label: "iMessage" },
+    { value: "WhatsApp", label: "WhatsApp", icon: <FaWhatsapp size={16} className="text-green-500" /> },
+    { value: "Telegram", label: "Telegram", icon: <FaTelegram size={16} className="text-sky-400" /> },
+    { value: "Signal", label: "Signal", icon: <SiSignal size={16} className="text-blue-400" /> },
+    { value: "WeChat", label: "WeChat", icon: <FaWeixin size={16} className="text-green-600" /> },
+    { value: "Line", label: "Line", icon: <FaLine size={16} className="text-green-400" /> },
+    { value: "Viber", label: "Viber", icon: <FaViber size={16} className="text-purple-500" /> },
+    { value: "Messenger", label: "Messenger", icon: <FaFacebookMessenger size={16} className="text-blue-500" /> },
+    { value: "iMessage", label: "iMessage", icon: <FaApple size={16} className="text-zinc-400" /> },
 ];
 
 export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddStaffSheetProps) {
@@ -176,8 +180,8 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5">
+    const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
+        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
             <Icon size={16} className="text-cyan-500" />
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
@@ -197,7 +201,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
                     {/* Basic Info */}
                     <div>
-                        <SectionHeader icon={Info} title="Basic Information" />
+                        <SectionHeader icon={Info} title="Basic Information" className="-mt-6 border-t-0" />
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-zinc-300 flex items-center gap-2">

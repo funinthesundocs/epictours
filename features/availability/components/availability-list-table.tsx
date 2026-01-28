@@ -121,10 +121,10 @@ export function AvailabilityListTable({
                             <th className="px-6 py-4">Vehicle</th>
                             <th className="px-6 py-4">Assigned Staff</th>
                             <th className="px-6 py-4">Private Note</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-zinc-800 text-zinc-300">
                         {data.map((item) => (
                             <tr
                                 key={item.id}
@@ -192,7 +192,7 @@ export function AvailabilityListTable({
                                     {item.duration_type === 'all_day' ? (
                                         <span className="text-zinc-500 italic">All Day</span>
                                     ) : (
-                                        <span className="text-zinc-300">{item.hours_long} Hours</span>
+                                        <span className="text-zinc-400">{item.hours_long} Hours</span>
                                     )}
                                 </td>
 
@@ -210,7 +210,7 @@ export function AvailabilityListTable({
 
                                 {/* Route Schedule */}
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="flex items-center gap-2 text-zinc-300">
+                                    <div className="flex items-center gap-2 text-zinc-400">
                                         <MapPin size={14} className="text-zinc-500" />
                                         <span>{item.route_name || <span className="text-zinc-600 italic">-</span>}</span>
                                     </div>
@@ -218,7 +218,7 @@ export function AvailabilityListTable({
 
                                 {/* Vehicle */}
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="flex items-center gap-2 text-zinc-300">
+                                    <div className="flex items-center gap-2 text-zinc-400">
                                         <Bus size={14} className="text-zinc-500" />
                                         <span>{item.vehicle_name || <span className="text-zinc-600 italic">-</span>}</span>
                                     </div>
@@ -241,18 +241,18 @@ export function AvailabilityListTable({
                                     )}
                                 </td>
 
-                                {/* Actions */}
-                                <td className="px-6 py-4 align-middle text-right">
-                                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                {/* Actions - Last Column */}
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => onEdit?.(item.id, item)}
-                                            className="p-2 hover:bg-zinc-800 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeletingItem(item)}
-                                            className="p-2 hover:bg-red-950/20 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>

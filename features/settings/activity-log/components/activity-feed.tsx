@@ -22,6 +22,17 @@ type ActivityLog = {
     user?: { email: string };
 };
 
+// Helper to format phone numbers
+const formatPhoneNumber = (phone: string): string => {
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 10) {
+        return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+        return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    }
+    return phone;
+};
+
 export function ActivityFeed() {
     const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -96,7 +107,11 @@ export function ActivityFeed() {
         if (error) {
             console.error("Error fetching logs:", error);
         } else {
-            setLogs(data as any[]);
+            // Filter out pricing_variations UPDATE logs (sort order changes)
+            const filteredData = (data as any[]).filter(log =>
+                !(log.table_name === 'pricing_variations' && log.action === 'UPDATE')
+            );
+            setLogs(filteredData);
             if (count !== null) {
                 setTotalItems(count);
             }
@@ -310,7 +325,12 @@ export function ActivityFeed() {
                     );
                 }
 
-                const displayValue = String(newVal);
+                // Format phone numbers
+                const isPhoneField = key === 'phone' || key.includes('phone');
+                let displayValue = String(newVal);
+                if (isPhoneField && displayValue) {
+                    displayValue = formatPhoneNumber(displayValue);
+                }
 
                 return (
                     <div key={key} className="flex items-center gap-2">
@@ -480,7 +500,7 @@ export function ActivityFeed() {
                                     <div key={log.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                                         {/* Header: Icon + Name + Action Badge */}
                                         <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-start gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
                                                     <ActionIcon action={log.action} />
                                                 </div>
@@ -497,16 +517,13 @@ export function ActivityFeed() {
                                             </span>
                                         </div>
 
-                                        {/* Body: Two Columns */}
-                                        <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
-                                            <div className="text-zinc-500">User</div>
-                                            <div className="text-zinc-300">{log.user_id ? log.user_id.substring(0, 8) + '...' : 'System'}</div>
+                                        {/* Body: Changes */}
+                                        <div className="text-zinc-300">{renderDiff(log)}</div>
 
-                                            <div className="text-zinc-500">Date</div>
-                                            <div className="text-zinc-300">{format(new Date(log.created_at), "MMM d, h:mm a")}</div>
-
-                                            <div className="text-zinc-500">Changes</div>
-                                            <div className="text-zinc-300">{renderDiff(log)}</div>
+                                        {/* Footer: By User + Date (right-justified) */}
+                                        <div className="flex items-center justify-between text-zinc-500 pt-2 border-t border-white/5">
+                                            <span>By <span className="text-white">{log.user_id ? log.user_id.substring(0, 8) + '...' : 'System'}</span></span>
+                                            <span>{format(new Date(log.created_at), "MMM d, h:mm a")}</span>
                                         </div>
                                     </div>
                                 );

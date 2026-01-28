@@ -15,9 +15,9 @@ export type ColumnConfig = {
 export const CUSTOMER_COLUMNS: ColumnConfig[] = [
     { key: "name", label: "Full Name", sortKey: "name", alwaysVisible: true },
     { key: "email", label: "Email", sortKey: "email" },
-    { key: "phone", label: "Cell", sortKey: "phone" },
+    { key: "phone", label: "Phone", sortKey: "phone" },
     { key: "hotel", label: "Hotel", sortKey: "hotel" },
-    { key: "app", label: "App", sortKey: "app" },
+    { key: "app", label: "Com App", sortKey: "app" },
     { key: "source", label: "Source", sortKey: "source" },
     { key: "status", label: "Status", sortKey: "status" },
     { key: "total_value", label: "AP", sortKey: "total_value" },

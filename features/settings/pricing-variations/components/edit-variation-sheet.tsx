@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { RequiredIndicator } from "@/components/ui/required-indicator";
 
 const VariationSchema = z.object({
     id: z.string().optional(),
@@ -96,7 +97,7 @@ export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: 
                     <div className="space-y-2">
                         <Label className="text-zinc-300 flex items-center gap-2">
                             <Layers size={16} className="text-zinc-500" />
-                            Variation Name <span className="text-red-400">*</span>
+                            Variation Name <RequiredIndicator />
                         </Label>
                         <Input
                             {...register("name")}

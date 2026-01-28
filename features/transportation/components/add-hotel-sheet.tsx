@@ -11,6 +11,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { RequiredIndicator } from "@/components/ui/required-indicator";
 
 // Schema
 const HotelSchema = z.object({
@@ -114,7 +115,7 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                             <Building2 size={16} className="text-zinc-500" />
-                            Hotel Name <span className="text-red-400">*</span>
+                            Hotel Name <RequiredIndicator />
                         </label>
                         <Input
                             {...register("name")}
@@ -137,7 +138,7 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                             <MapPin size={16} className="text-zinc-500" />
-                            Assigned Pickup Point <span className="text-red-400">*</span>
+                            Assigned Pickup Point <RequiredIndicator />
                         </label>
                         <Combobox
                             options={pickupOptions}

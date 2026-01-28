@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { RequiredIndicator } from "@/components/ui/required-indicator";
 
 // Schema
 const PickupSchema = z.object({
@@ -99,7 +100,7 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                             <MapPin size={16} className="text-zinc-500" />
-                            Location Name <span className="text-red-400">*</span>
+                            Location Name <RequiredIndicator />
                         </label>
                         <Input
                             {...register("name")}

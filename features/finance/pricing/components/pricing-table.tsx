@@ -37,17 +37,14 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                         <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
                         <th className="px-6 py-4 font-medium">Notes</th>
                         <th className="px-6 py-4 font-medium w-[150px]">Created</th>
-                        <th className="px-6 py-4 font-medium text-right w-[100px]">Actions</th>
+                        <th className="px-6 py-4 font-medium w-[100px] border-l border-white/10"></th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                <tbody className="divide-y divide-white/5 text-zinc-300">
                     {data.map((schedule) => (
                         <tr key={schedule.id} className="hover:bg-white/5 transition-colors group">
                             {/* Name */}
-                            <td className="px-6 py-4 font-medium text-white flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                    <Coins size={16} />
-                                </div>
+                            <td className="px-6 py-4 font-medium text-white">
                                 {schedule.name}
                             </td>
 
@@ -57,22 +54,22 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                             </td>
 
                             {/* Created At */}
-                            <td className="px-6 py-4 text-zinc-500">
+                            <td className="px-6 py-4 text-zinc-400">
                                 {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </td>
 
-                            {/* Actions */}
-                            <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
+                            {/* Actions - Last Column */}
+                            <td className="px-6 py-4 border-l border-white/10">
+                                <div className="flex items-center gap-2 justify-end">
                                     <button
                                         onClick={() => onEdit(schedule)}
-                                        className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeleteId(schedule.id)}
-                                        className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -89,35 +86,31 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                     <div key={schedule.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                         {/* Header: Name + Actions */}
                         <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                    <Coins size={20} />
-                                </div>
-                                <h3 className="text-lg font-bold text-white leading-tight">{schedule.name}</h3>
-                            </div>
+                            <h3 className="text-lg font-bold text-white leading-tight">{schedule.name}</h3>
                             <div className="flex items-center gap-1 shrink-0">
                                 <button
                                     onClick={() => onEdit(schedule)}
-                                    className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                    className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                 >
                                     <Edit2 size={16} />
                                 </button>
                                 <button
                                     onClick={() => setDeleteId(schedule.id)}
-                                    className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                    className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                 >
                                     <Trash2 size={16} />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Body: Two Columns */}
-                        <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
-                            <div className="text-zinc-500">Notes</div>
-                            <div className="text-zinc-400">{schedule.notes || <span className="opacity-50 italic">No notes</span>}</div>
-
-                            <div className="text-zinc-500">Created</div>
-                            <div className="text-zinc-300">{new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                        {/* Body */}
+                        <div className="space-y-3">
+                            {schedule.notes && (
+                                <div className="text-zinc-400">{schedule.notes}</div>
+                            )}
+                            <div className="flex justify-end text-zinc-400">
+                                {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </div>
                         </div>
                     </div>
                 ))}

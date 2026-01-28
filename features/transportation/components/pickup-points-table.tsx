@@ -41,19 +41,14 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                             <th className="px-6 py-4">Location Name</th>
                             <th className="px-6 py-4">Map Link</th>
                             <th className="px-6 py-4">Notes</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-zinc-300">
                         {data.map((point) => (
                             <tr key={point.id} className="hover:bg-white/5 transition-colors group">
                                 <td className="px-6 py-4 font-medium text-white align-middle">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                            <MapPin size={16} />
-                                        </div>
-                                        {point.name}
-                                    </div>
+                                    {point.name}
                                 </td>
                                 <td className="px-6 py-4">
                                     {point.map_link ? (
@@ -94,15 +89,15 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                         </span>
                                     )}
                                 </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEdit(point);
                                             }}
-                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -112,7 +107,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                                 e.stopPropagation();
                                                 setDeletingItem(point);
                                             }}
-                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -129,24 +124,19 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                         <div key={point.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                             {/* Header */}
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <MapPin size={16} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white leading-tight">
-                                        {point.name}
-                                    </h3>
-                                </div>
+                                <h3 className="text-lg font-bold text-white leading-tight">
+                                    {point.name}
+                                </h3>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(point)}
-                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(point)}
-                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>

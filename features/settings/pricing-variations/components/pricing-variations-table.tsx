@@ -6,6 +6,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragEndEvent
@@ -61,7 +62,7 @@ function SortableRow({ variation, onEdit, onDelete }: {
         <tr
             ref={setNodeRef}
             style={style}
-            className="hover:bg-white/5 transition-colors group"
+            className="hover:bg-white/5 transition-colors group select-none"
         >
             {/* Drag Handle + Name */}
             <td className="px-6 py-4 font-medium text-white">
@@ -73,25 +74,22 @@ function SortableRow({ variation, onEdit, onDelete }: {
                     >
                         <GripVertical size={16} />
                     </div>
-                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                        <Layers size={16} />
-                    </div>
                     {variation.name}
                 </div>
             </td>
 
-            {/* Actions - Always Visible */}
-            <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2">
+            {/* Actions - Last Column */}
+            <td className="px-6 py-4 border-l border-white/10">
+                <div className="flex items-center gap-2 justify-end">
                     <button
                         onClick={() => onEdit(variation)}
-                        className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
+                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(variation.id)}
-                        className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                     >
                         <Trash2 size={16} />
                     </button>
@@ -101,11 +99,79 @@ function SortableRow({ variation, onEdit, onDelete }: {
     );
 }
 
+// Sortable Mobile Card Component
+function SortableMobileCard({ variation, onEdit, onDelete }: {
+    variation: PricingVariation;
+    onEdit: (v: PricingVariation) => void;
+    onDelete: (id: string) => void;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: variation.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : 'auto',
+        opacity: isDragging ? 0.5 : 1
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="bg-white/5 border border-white/10 rounded-xl p-4 select-none"
+        >
+            {/* Header: Drag Handle + Name + Actions */}
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab text-zinc-600 hover:text-zinc-400 p-1 touch-none"
+                    >
+                        <GripVertical size={20} />
+                    </div>
+                    <h3 className="text-lg font-bold text-white leading-tight">{variation.name}</h3>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                    <button
+                        onClick={() => onEdit(variation)}
+                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                    >
+                        <Edit2 size={16} />
+                    </button>
+                    <button
+                        onClick={() => onDelete(variation.id)}
+                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
 export function PricingVariationsTable({ data, onEdit, onDelete, onReorder }: PricingVariationsTableProps) {
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates
         })
@@ -147,11 +213,11 @@ export function PricingVariationsTable({ data, onEdit, onDelete, onReorder }: Pr
                     <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                         <tr>
                             <th className="px-6 py-4 font-medium">Variation Name</th>
-                            <th className="px-6 py-4 font-medium text-right w-[100px]">Actions</th>
+                            <th className="px-6 py-4 font-medium w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
                     <SortableContext items={data.map(v => v.id)} strategy={verticalListSortingStrategy}>
-                        <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                        <tbody className="divide-y divide-white/5 text-zinc-300">
                             {data.map((variation) => (
                                 <SortableRow
                                     key={variation.id}
@@ -165,35 +231,18 @@ export function PricingVariationsTable({ data, onEdit, onDelete, onReorder }: Pr
                 </table>
 
                 {/* Mobile Card View */}
-                <div className="md:hidden space-y-4 p-4">
-                    {data.map((variation) => (
-                        <div key={variation.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
-                            {/* Header: Name + Actions */}
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Layers size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white leading-tight">{variation.name}</h3>
-                                </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <button
-                                        onClick={() => onEdit(variation)}
-                                        className="p-2 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg transition-colors"
-                                    >
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => setDeleteId(variation.id)}
-                                        className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <SortableContext items={data.map(v => v.id)} strategy={verticalListSortingStrategy}>
+                    <div className="md:hidden space-y-4 p-4">
+                        {data.map((variation) => (
+                            <SortableMobileCard
+                                key={variation.id}
+                                variation={variation}
+                                onEdit={onEdit}
+                                onDelete={(id) => setDeleteId(id)}
+                            />
+                        ))}
+                    </div>
+                </SortableContext>
             </DndContext>
 
             <AlertDialog

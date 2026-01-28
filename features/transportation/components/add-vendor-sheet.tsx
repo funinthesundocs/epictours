@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Info, Handshake, Phone, Mail, FileText, MapPin } from "lucide-react";
+import { Save, Loader2, Info, Handshake, Phone, Mail, FileText, MapPin, Contact, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,24 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Combobox } from "@/components/ui/combobox";
+import { CustomSelect } from "@/components/ui/custom-select";
+import { RequiredIndicator } from "@/components/ui/required-indicator";
+
+// Brand icons for messaging apps
+import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine } from "react-icons/fa";
+import { SiSignal } from "react-icons/si";
+
+// Messaging app options with icons
+const MESSAGING_OPTIONS = [
+    { value: "", label: "None", icon: null },
+    { value: "WhatsApp", label: "WhatsApp", icon: <FaWhatsapp size={16} className="text-green-500" /> },
+    { value: "FB Messenger", label: "FB Messenger", icon: <FaFacebookMessenger size={16} className="text-blue-500" /> },
+    { value: "Signal", label: "Signal", icon: <SiSignal size={16} className="text-blue-400" /> },
+    { value: "Telegram", label: "Telegram", icon: <FaTelegram size={16} className="text-sky-400" /> },
+    { value: "Viber", label: "Viber", icon: <FaViber size={16} className="text-purple-500" /> },
+    { value: "Line", label: "Line", icon: <FaLine size={16} className="text-green-400" /> },
+    { value: "WeChat", label: "WeChat", icon: <FaWeixin size={16} className="text-green-600" /> },
+];
 
 const US_STATES = [
     { value: "AL", label: "Alabama" },
@@ -77,6 +95,8 @@ const VendorSchema = z.object({
     phone: z.string().optional(),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     ein_number: z.string().optional(),
+    preferred_messaging_app: z.string().optional().nullable(),
+    messaging_handle: z.string().optional().nullable(),
 });
 
 type VendorFormData = z.infer<typeof VendorSchema>;
@@ -116,7 +136,9 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             zip_code: "",
             phone: "",
             email: "",
-            ein_number: ""
+            ein_number: "",
+            preferred_messaging_app: "",
+            messaging_handle: ""
         }
     });
 
@@ -133,7 +155,9 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     zip_code: initialData.zip_code || "",
                     phone: formatPhoneNumber(initialData.phone || ""),
                     email: initialData.email || "",
-                    ein_number: initialData.ein_number || ""
+                    ein_number: initialData.ein_number || "",
+                    preferred_messaging_app: initialData.preferred_messaging_app || "",
+                    messaging_handle: initialData.messaging_handle || ""
                 });
             } else {
                 // New Mode
@@ -145,7 +169,9 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     zip_code: "",
                     phone: "",
                     email: "",
-                    ein_number: ""
+                    ein_number: "",
+                    preferred_messaging_app: "",
+                    messaging_handle: ""
                 });
             }
         }
@@ -155,7 +181,12 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
         setIsSubmitting(true);
         try {
             // Strip formatting from phone before saving
-            const payload = { ...data, phone: data.phone?.replace(/\D/g, "") || null };
+            const payload = {
+                ...data,
+                phone: data.phone?.replace(/\D/g, "") || null,
+                preferred_messaging_app: data.preferred_messaging_app || null,
+                messaging_handle: data.messaging_handle || null
+            };
 
             if (initialData?.id) {
                 // Update
@@ -181,7 +212,12 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
         }
     };
 
-
+    const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
+        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
+            <Icon size={16} className="text-cyan-500" />
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        </div>
+    );
 
     return (
         <SidePanel
@@ -196,13 +232,15 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
 
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-8">
-                    <div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2 col-span-2">
+                    {/* Basic Information Section */}
+                    <div>
+                        <SectionHeader icon={Info} title="Basic Information" className="-mt-6 border-t-0" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
                                 <Label className="text-zinc-300 flex items-center gap-2">
                                     <Handshake size={16} className="text-zinc-500" />
-                                    Vendor Name <span className="text-red-400">*</span>
+                                    Vendor Name <RequiredIndicator />
                                 </Label>
                                 <Input
                                     {...register("name")}
@@ -210,19 +248,96 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                 />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
+                            <div className="space-y-2">
+                                <Label className="text-zinc-300 flex items-center gap-2">
+                                    <FileText size={16} className="text-zinc-500" />
+                                    EIN Number
+                                </Label>
+                                <Input
+                                    {...register("ein_number")}
+                                    placeholder="12-3456789"
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                            <div className="space-y-2 col-span-2">
+                    {/* Contact Details Section */}
+                    <div>
+                        <SectionHeader icon={Contact} title="Contact Details" />
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        <Phone size={16} className="text-zinc-500" />
+                                        Phone Number
+                                    </Label>
+                                    <Input
+                                        {...register("phone", {
+                                            onChange: (e) => {
+                                                e.target.value = formatPhoneNumber(e.target.value);
+                                            }
+                                        })}
+                                        placeholder="(555) 123-4567"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        <Mail size={16} className="text-zinc-500" />
+                                        Email Address
+                                    </Label>
+                                    <Input
+                                        {...register("email")}
+                                        placeholder="contact@vendor.com"
+                                    />
+                                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                                </div>
+                            </div>
+
+                            {/* Preferred Messaging App */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                        <MessageCircle size={16} className="text-zinc-500" />
+                                        Preferred Messaging
+                                    </Label>
+                                    <CustomSelect
+                                        value={watch("preferred_messaging_app") || ""}
+                                        onChange={(val) => {
+                                            setValue("preferred_messaging_app", val || null, { shouldDirty: true });
+                                            // Clear handle when app is unselected
+                                            if (!val) setValue("messaging_handle", null);
+                                        }}
+                                        options={MESSAGING_OPTIONS}
+                                        placeholder="Select App..."
+                                    />
+                                </div>
+
+                                {/* Handle/Nickname - Only shows when app is selected */}
+                                {watch("preferred_messaging_app") && (
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-300 flex items-center gap-2">
+                                            Handle / Nickname
+                                        </Label>
+                                        <Input
+                                            {...register("messaging_handle")}
+                                            placeholder="@username or phone"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
                                 <Label className="text-zinc-300 flex items-center gap-2">
                                     <MapPin size={16} className="text-zinc-500" />
-                                    Address
+                                    Street Address
                                 </Label>
                                 <Input
                                     {...register("address")}
-                                    placeholder="Street Address..."
+                                    placeholder="123 Main Street..."
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="col-span-2 space-y-2">
                                     <Label className="text-zinc-300">City</Label>
                                     <Input {...register("city")} placeholder="City" />
@@ -240,45 +355,6 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                     <Label className="text-zinc-300">Zip Code</Label>
                                     <Input {...register("zip_code")} placeholder="Zip" />
                                 </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Phone size={16} className="text-zinc-500" />
-                                    Phone Number
-                                </Label>
-                                <Input
-                                    {...register("phone", {
-                                        onChange: (e) => {
-                                            e.target.value = formatPhoneNumber(e.target.value);
-                                        }
-                                    })}
-                                    placeholder="(555) 123-4567"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Mail size={16} className="text-zinc-500" />
-                                    Email Address
-                                </Label>
-                                <Input
-                                    {...register("email")}
-                                    placeholder="contact@vendor.com"
-                                />
-                                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <FileText size={16} className="text-zinc-500" />
-                                    EIN Number
-                                </Label>
-                                <Input
-                                    {...register("ein_number")}
-                                    className="font-mono"
-                                    placeholder="12-3456789"
-                                />
                             </div>
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Customer } from "./types";
 import { CustomerTable } from "./components/customer-table";
-import { Loader2, AlertCircle, Plus } from "lucide-react";
+import { Loader2, AlertCircle, Plus, Users } from "lucide-react";
 import { AddCustomerSheet } from "./components/add-customer-sheet";
 import { CustomerToolbar } from "./components/customer-toolbar";
 import { useColumnVisibility } from "./components/column-picker";
@@ -126,24 +126,24 @@ export function CustomersPage() {
     };
 
     return (
-        <div className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
             <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">Customers</h1>
-                        <p className="text-zinc-400 text-sm">Manage your relationships and leads.</p>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                            <Users size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">Customers</h1>
+                            <p className="text-zinc-400 text-sm">Manage your relationships and leads.</p>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3 self-end md:self-auto">
-                        {/* Record Count */}
-                        <span className="text-sm text-zinc-500">
-                            {totalItems.toLocaleString()} {totalItems === 1 ? 'customer' : 'customers'}
-                        </span>
-
                         <button
                             onClick={handleAddNew}
-                            className="h-10 px-4 bg-primary hover:bg-cyan-300 text-primary-foreground font-semibold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center gap-2"
+                            className="h-10 px-4 bg-cyan-400 hover:bg-cyan-300 text-white font-semibold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center gap-2"
                         >
                             <Plus size={16} />
                             Add Customer

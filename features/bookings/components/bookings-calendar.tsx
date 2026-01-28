@@ -238,7 +238,7 @@ export function BookingsCalendar({
 
 
     return (
-        <div className="w-full h-[calc(100vh_-_9rem)] font-sans flex flex-col">
+        <div className="w-full h-[calc(100dvh_-_9rem)] font-sans flex flex-col">
             {/* TOP COMPONENT: Control Bar */}
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-[60]">
 

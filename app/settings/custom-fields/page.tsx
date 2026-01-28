@@ -130,7 +130,8 @@ export default function CustomFieldsPage() {
         <PageShell
             title="Custom Fields"
             description="Manage custom data types for your organization."
-            className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)] flex flex-col"
+            icon={Settings}
+            className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col"
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
             action={
                 <Button

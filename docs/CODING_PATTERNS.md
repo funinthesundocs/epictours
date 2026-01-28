@@ -60,6 +60,20 @@
         *   Header styling (`bg-white/5 backdrop-blur-sm`)
         *   Row hover states and transitions
 
+### 2.2 Mobile Viewport Height (dvh Standard)
+*   **Rule**: ALL page containers with viewport-based heights MUST use `dvh` (Dynamic Viewport Height) instead of `vh`.
+*   **Reason**: On mobile browsers, `100vh` includes the address bar area, causing content to be cut off until the user scrolls to hide the address bar. `dvh` automatically adjusts to the actual visible viewport.
+*   **Pattern**:
+    ```tsx
+    // ❌ WRONG - causes content cutoff on mobile
+    className="h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)]"
+    
+    // ✅ CORRECT - adapts to mobile browser chrome
+    className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)]"
+    ```
+*   **Applies To**: All data list pages, calendar views, and any full-height scrollable containers.
+*   **Reference**: `features/crm/customers/page.tsx`
+
 ### 2.1 Mobile Card View Pattern (Data Tables)
 *   **Standard**: ALL data tables MUST have a mobile card view alternative.
 *   **Trigger**: Use `hidden md:table` on the desktop `<table>` element and `md:hidden` on the mobile card container.

@@ -28,6 +28,7 @@ export function AddCustomerSheet({
             title={editingCustomer ? "Edit Customer" : "Add New Customer"}
             description={editingCustomer ? "Update the customer profile below." : "Enter the details below to create a new customer profile."}
             width="max-w-lg"
+            contentClassName="p-0 overflow-hidden flex flex-col"
         >
             <AddCustomerForm
                 onSuccess={handleSuccess}

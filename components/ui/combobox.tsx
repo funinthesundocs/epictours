@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { ChevronDown, Check, Ban } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-export type ComboboxOption = { value: string; label: string };
+export type ComboboxOption = { value: string; label: string; icon?: ReactNode };
 
 interface ComboboxProps {
     value?: string;
@@ -108,6 +108,12 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
     return (
         <div className={cn("relative", className)} ref={containerRef}>
             <div className="relative">
+                {/* Show selected icon in the input */}
+                {selectedOption?.icon && (
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        {selectedOption.icon}
+                    </div>
+                )}
                 <input
                     type="text"
                     value={query}
@@ -115,7 +121,8 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                     onFocus={() => !disabled && setIsOpen(true)}
                     disabled={disabled}
                     className={cn(
-                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
+                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
+                        selectedOption?.icon ? "pl-10" : "pl-4",
                         inputClassName,
                         disabled && "opacity-50 cursor-not-allowed"
                     )}
@@ -147,7 +154,10 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                                         ${isSelected ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
                                     `}
                                 >
-                                    <span>{option.label}</span>
+                                    <span className="flex items-center gap-2">
+                                        {option.icon}
+                                        {option.label}
+                                    </span>
                                     {isSelected && (
                                         option.value === ''
                                             ? <Ban size={14} className="text-cyan-400" />

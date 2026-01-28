@@ -40,6 +40,7 @@ export const CustomerSchema = z.object({
       "Line",
       "WeChat"
     ]).optional().nullable(),
+    messaging_handle: z.string().optional().nullable(),
     notes: z.string().optional().nullable()
   }).default({}),
 

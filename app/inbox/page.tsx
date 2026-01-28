@@ -6,6 +6,7 @@ export default function InboxPage() {
         <PageShell
             title="Inbox"
             description="Unified Communications Center"
+            icon={InboxIcon}
             stats={[
                 { label: "Unread", value: "12", icon: Mail, trend: "+2 since last login" },
                 { label: "Support Tickets", value: "5", icon: MessageSquare },

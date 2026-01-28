@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+interface CustomSelectOption {
+    value: string;
+    label: string;
+    icon?: ReactNode;
+}
 
 interface CustomSelectProps {
     value?: string;
     onChange: (value: string) => void;
-    // Support both simple strings and object options
-    options: (string | { value: string; label: string })[];
+    // Support both simple strings and object options with optional icons
+    options: (string | CustomSelectOption)[];
     placeholder?: string;
     className?: string; // Trigger button class
 }
@@ -33,12 +39,12 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
     };
 
     // Normalize options to objects
-    const normalizedOptions = options.map(opt =>
+    const normalizedOptions: CustomSelectOption[] = options.map(opt =>
         typeof opt === 'string' ? { value: opt, label: opt } : opt
     );
 
-    // Find label for current value
-    const selectedLabel = normalizedOptions.find(o => o.value === value)?.label || value;
+    // Find selected option
+    const selectedOption = normalizedOptions.find(o => o.value === value);
 
     return (
         <div className="relative" ref={containerRef}>
@@ -48,8 +54,9 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                 onClick={() => setIsOpen(!isOpen)}
                 className={`w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group ${className || "py-2.5"}`}
             >
-                <span className={value ? "text-white" : "text-zinc-500"}>
-                    {selectedLabel || placeholder}
+                <span className={`flex items-center gap-2 ${value ? "text-white" : "text-zinc-500"}`}>
+                    {selectedOption?.icon}
+                    {selectedOption?.label || placeholder}
                 </span>
                 <ChevronDown size={16} className={`text-zinc-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
             </button>
@@ -74,7 +81,10 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                             ${isSelected ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
                         `}
                                 >
-                                    <span>{option.label}</span>
+                                    <span className="flex items-center gap-2">
+                                        {option.icon}
+                                        {option.label}
+                                    </span>
                                     {isSelected && <Check size={14} className="text-cyan-400" />}
                                 </button>
                             );

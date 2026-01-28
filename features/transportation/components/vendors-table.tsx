@@ -95,23 +95,18 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                                     </div>
                                 </th>
                             ))}
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-zinc-300">
                         {sortedData.map((v) => (
                             <tr key={v.id} className="hover:bg-white/5 transition-colors group">
                                 <td className="px-6 py-4 align-middle font-medium text-white">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                            <Handshake size={16} />
-                                        </div>
-                                        {v.name}
-                                    </div>
+                                    {v.name}
                                 </td>
                                 <td className="px-6 py-4 align-middle truncate max-w-xs" title={v.address || ""}>
                                     <div className="flex items-start gap-2 text-zinc-400">
-                                        <MapPin size={14} className="mt-0.5 shrink-0" />
+                                        <MapPin size={14} className="mt-0.5 shrink-0 text-zinc-500" />
                                         <div className="flex flex-col">
                                             <span>{v.address || "—"}</span>
                                             {(v.city || v.state || v.zip_code) && (
@@ -124,31 +119,31 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                                 </td>
                                 <td className="px-6 py-4 align-middle">
                                     <span className="flex items-center gap-2 text-zinc-400">
-                                        <Phone size={14} />
+                                        <Phone size={14} className="shrink-0 text-zinc-500" />
                                         {formatPhoneNumber(v.phone)}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 align-middle">
                                     <span className="flex items-center gap-2 text-zinc-400">
-                                        <Mail size={14} />
+                                        <Mail size={14} className="shrink-0 text-zinc-500" />
                                         {v.email || "—"}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 align-middle">
-                                    <span className="flex items-center gap-2 text-zinc-400 font-mono text-xs">
-                                        <FileText size={14} />
+                                    <span className="flex items-center gap-2 text-zinc-400">
+                                        <FileText size={14} className="shrink-0 text-zinc-500" />
                                         {v.ein_number || "—"}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 align-middle text-right">
-                                    <div className="flex items-center justify-end gap-2">
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEdit(v);
                                             }}
-                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -158,7 +153,7 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                                                 e.stopPropagation();
                                                 setDeletingItem(v);
                                             }}
-                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -175,24 +170,19 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                         <div key={v.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                             {/* Header */}
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Handshake size={16} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white leading-tight">
-                                        {v.name}
-                                    </h3>
-                                </div>
+                                <h3 className="text-lg font-bold text-white leading-tight">
+                                    {v.name}
+                                </h3>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(v)}
-                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(v)}
-                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -227,7 +217,7 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                                 </div>
 
                                 <div className="text-zinc-500">EIN</div>
-                                <div className="text-zinc-400 font-mono text-xs flex items-center gap-2">
+                                <div className="text-zinc-400 flex items-center gap-2">
                                     <FileText size={14} />
                                     {v.ein_number || "—"}
                                 </div>

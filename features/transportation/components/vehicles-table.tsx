@@ -121,27 +121,22 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                     <SortIcon column="status" />
                                 </div>
                             </th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-zinc-300">
                         {sortedData.map((v) => (
                             <tr key={v.id} className="hover:bg-white/5 transition-colors group">
                                 <td className="px-6 py-4 font-medium text-white align-middle">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                            <Bus size={16} />
-                                        </div>
-                                        {v.name}
-                                    </div>
+                                    {v.name}
                                 </td>
                                 <td className="px-6 py-4 text-zinc-400 align-middle">
                                     {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
                                 </td>
-                                <td className="px-6 py-4 align-middle">{v.capacity}</td>
-                                <td className="px-6 py-4 text-sm text-zinc-400 align-middle">{v.license_requirement}</td>
-                                <td className="px-6 py-4 font-mono text-sm align-middle">{v.plate_number}</td>
-                                <td className="px-6 py-4 align-middle">{v.miles_per_gallon}</td>
+                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.capacity}</td>
+                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.license_requirement}</td>
+                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.plate_number}</td>
+                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.miles_per_gallon}</td>
                                 <td className="px-6 py-4 align-middle">
                                     <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-1.5 items-center">
                                         {v.rate_per_hour > 0 && (
@@ -172,15 +167,15 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                         {v.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-right align-middle">
-                                    <div className="flex items-center justify-end gap-2">
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEdit(v);
                                             }}
-                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -190,7 +185,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                                 e.stopPropagation();
                                                 setDeletingItem(v);
                                             }}
-                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -207,24 +202,19 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                         <div key={v.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                             {/* Header */}
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <Bus size={16} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white leading-tight">
-                                        {v.name}
-                                    </h3>
-                                </div>
+                                <h3 className="text-lg font-bold text-white leading-tight">
+                                    {v.name}
+                                </h3>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(v)}
-                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(v)}
-                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>

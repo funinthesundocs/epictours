@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, User, DollarSign, MessageCircle, Phone, Mail } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,36 @@ type SortConfig = {
     key: keyof Staff | 'role';
     direction: 'asc' | 'desc';
 } | null;
+
+// Helper to format phone number as (XXX)XXX-XXXX
+function formatPhoneNumber(phone: string): string {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) {
+        return `(${digits.slice(0, 3)})${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length === 11 && digits[0] === '1') {
+        return `(${digits.slice(1, 4)})${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+    return phone; // Return original if not standard format
+}
+
+// Helper to parse messaging_app JSON and format for display
+function parseContactInfo(messagingApp: string): { app: string; handle: string }[] {
+    if (!messagingApp) return [];
+    try {
+        const parsed = JSON.parse(messagingApp);
+        if (Array.isArray(parsed)) {
+            return parsed.map(item => ({
+                app: item.app || '',
+                handle: item.handle || ''
+            }));
+        }
+        return [];
+    } catch {
+        // If not JSON, return as-is with empty app
+        return [{ app: '', handle: messagingApp }];
+    }
+}
 
 export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>(null);
@@ -86,19 +116,14 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                             <th className="px-6 py-4">Contact</th>
                             <th className="px-6 py-4">Notes</th>
                             <th className="px-6 py-4 text-center">Compensation</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-sm text-zinc-300">
+                    <tbody className="divide-y divide-white/5 text-zinc-300">
                         {sortedData.map((staff) => (
                             <tr key={staff.id} className="hover:bg-white/5 transition-colors group">
                                 <td className="px-6 py-4 font-medium text-white align-middle">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                            <User size={16} />
-                                        </div>
-                                        {staff.name}
-                                    </div>
+                                    {staff.name}
                                 </td>
                                 <td className="px-6 py-4 align-middle">
                                     {staff.role?.name ? (
@@ -110,28 +135,28 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                     )}
                                 </td>
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="flex flex-col gap-1 text-xs">
+                                    <div className="flex flex-col gap-1">
                                         {staff.phone && (
-                                            <div className="flex items-center gap-2 text-zinc-300">
-                                                <Phone size={12} className="text-zinc-500" />
-                                                {staff.phone}
-                                            </div>
-                                        )}
-                                        {staff.messaging_app && (
                                             <div className="flex items-center gap-2 text-zinc-400">
-                                                <MessageCircle size={12} className="text-zinc-500" />
-                                                {staff.messaging_app}
+                                                <Phone size={14} className="text-zinc-500" />
+                                                {formatPhoneNumber(staff.phone)}
                                             </div>
                                         )}
+                                        {parseContactInfo(staff.messaging_app).map((contact, idx) => (
+                                            <div key={idx} className="flex items-center gap-2 text-zinc-400">
+                                                <MessageCircle size={14} className="text-zinc-500" />
+                                                {contact.app ? `${contact.app}: ` : ''}{formatPhoneNumber(contact.handle)}
+                                            </div>
+                                        ))}
                                         {staff.email && (
                                             <div className="flex items-center gap-2 text-zinc-400">
-                                                <Mail size={12} className="text-zinc-500" />
+                                                <Mail size={14} className="text-zinc-500" />
                                                 {staff.email}
                                             </div>
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 text-xs italic max-w-[200px] truncate align-middle">
+                                <td className="px-6 py-4 text-zinc-400 max-w-[200px] truncate align-middle">
                                     {staff.notes || "-"}
                                 </td>
                                 <td className="px-6 py-4 text-center align-middle">
@@ -146,14 +171,14 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                         View Rates
                                     </button>
                                 </td>
-                                <td className="px-6 py-4 text-right align-middle">
-                                    <div className="flex items-center justify-end gap-2">
+                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                    <div className="flex items-center gap-2 justify-end">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onEdit(staff);
                                             }}
-                                            className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -162,7 +187,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                                 e.stopPropagation();
                                                 setDeletingItem(staff);
                                             }}
-                                            className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -179,60 +204,54 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                         <div key={staff.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                             {/* Header: Name + Actions */}
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
-                                        <User size={20} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-white leading-tight">{staff.name}</h3>
-                                        {staff.role?.name && (
-                                            <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
-                                                {staff.role.name}
-                                            </span>
-                                        )}
-                                    </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white leading-tight">{staff.name}</h3>
+                                    {staff.role?.name && (
+                                        <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
+                                            {staff.role.name}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(staff)}
-                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(staff)}
-                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Body: Two Columns */}
-                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                            {/* Contact Info */}
+                            <div className="flex flex-col gap-2">
                                 {staff.phone && (
-                                    <>
-                                        <div className="text-zinc-500">Phone</div>
-                                        <div className="text-zinc-300">{staff.phone}</div>
-                                    </>
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Phone size={14} className="text-zinc-500" />
+                                        {formatPhoneNumber(staff.phone)}
+                                    </div>
                                 )}
+                                {parseContactInfo(staff.messaging_app).map((contact, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 text-zinc-400">
+                                        <MessageCircle size={14} className="text-zinc-500" />
+                                        {contact.app ? `${contact.app}: ` : ''}{formatPhoneNumber(contact.handle)}
+                                    </div>
+                                ))}
                                 {staff.email && (
-                                    <>
-                                        <div className="text-zinc-500">Email</div>
-                                        <div className="text-zinc-300 break-all">{staff.email}</div>
-                                    </>
-                                )}
-                                {staff.messaging_app && (
-                                    <>
-                                        <div className="text-zinc-500">App</div>
-                                        <div className="text-zinc-300">{staff.messaging_app}</div>
-                                    </>
+                                    <div className="flex items-center gap-2 text-zinc-400">
+                                        <Mail size={14} className="text-zinc-500" />
+                                        {staff.email}
+                                    </div>
                                 )}
                                 {staff.notes && (
-                                    <>
-                                        <div className="text-zinc-500">Notes</div>
-                                        <div className="text-zinc-400 italic text-sm">{staff.notes}</div>
-                                    </>
+                                    <div className="text-zinc-400 pt-2 border-t border-white/5">
+                                        {staff.notes}
+                                    </div>
                                 )}
                             </div>
 
