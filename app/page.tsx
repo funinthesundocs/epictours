@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye } from "lucide-react";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { NewBookingMenu } from "@/features/bookings/components/new-booking-menu";
 
 export default function Home() {
     return (
@@ -19,9 +22,11 @@ export default function Home() {
                     <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition-colors">
                         Customize Layout
                     </button>
-                    <button className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                        Create Booking
-                    </button>
+                    <NewBookingMenu onSelectAvailability={() => { }}>
+                        <button className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                            Create Booking
+                        </button>
+                    </NewBookingMenu>
                 </div>
             </div>
 
