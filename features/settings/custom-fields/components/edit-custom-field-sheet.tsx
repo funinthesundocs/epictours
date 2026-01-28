@@ -12,6 +12,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragEndEvent
@@ -150,9 +151,9 @@ function SortableOptionItem({
                 <div
                     {...attributes}
                     {...listeners}
-                    className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing px-2 py-2"
+                    className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing px-3 py-3 md:px-2 md:py-2 touch-none"
                 >
-                    <GripVertical size={16} />
+                    <GripVertical size={20} className="md:w-4 md:h-4" />
                 </div>
 
                 <div className="flex-1">
@@ -263,9 +264,19 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
         name: "options",
     });
 
-    // DnD Sensors
+    // DnD Sensors - includes TouchSensor for mobile support
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -439,11 +450,10 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
 
             {/* Side Panel */}
-            {/* Side Panel */}
-            <div className="fixed inset-y-0 right-0 w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="fixed inset-y-0 right-0 w-full md:w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-10 py-4 border-b border-white/5 bg-transparent">
+                <div className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/5 bg-transparent">
                     <div>
                         <h2 className="text-xl font-semibold text-white">
                             {fieldToEdit ? "Edit Custom Field" : "Create Custom Field"}
@@ -456,12 +466,12 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                     </Button>
                 </div>
 
-                {/* Content Area - Fixed Flex Layout for Column Scrolling */}
-                <div className="flex-1 w-full flex flex-col min-h-0 bg-transparent">
-                    <form id="custom-field-form" onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col w-full">
+                {/* Content Area - Single Scrolling Container */}
+                <div className="flex-1 w-full flex flex-col min-h-0 overflow-y-auto bg-transparent">
+                    <form id="custom-field-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col w-full">
 
                         {/* Top Section: Label, Internal, and Field Type - Fixed Header */}
-                        <div className="shrink-0 p-8 border-b border-white/5 space-y-6">
+                        <div className="shrink-0 pt-6 px-6 md:pt-8 md:px-8 pb-0 border-b border-white/5 space-y-6">
 
                             {/* Label and Internal Toggle Grid */}
                             <div className="grid grid-cols-2 gap-6">
@@ -480,8 +490,35 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                 </div>
 
                                 {/* Internal Field Toggle */}
-                                <div className="col-span-2 md:col-span-1 flex items-end pb-3 justify-end">
-                                    <div className="flex items-center gap-4 p-3 rounded-lg border border-white/10 bg-white/5">
+                                <div className="col-span-2 md:col-span-1 flex items-end pb-3 justify-start md:justify-end">
+                                    {/* Mobile: Field Type + Internal in same row */}
+                                    <div className="md:hidden flex items-start gap-4 w-full">
+                                        {/* Field Type Dropdown */}
+                                        <div className="flex-1 flex flex-col gap-2">
+                                            <Label className="text-sm text-zinc-300">Field Type</Label>
+                                            <CustomSelect
+                                                value={currentType === 'textarea' || currentType === 'quantity' ? 'text' : currentType}
+                                                onChange={(val) => form.setValue("type", val as any, { shouldDirty: true })}
+                                                options={FIELD_TYPES.map(t => ({
+                                                    value: t.value,
+                                                    label: t.label,
+                                                    icon: <t.icon size={16} className="text-zinc-400" />
+                                                }))}
+                                                placeholder="Select field type..."
+                                            />
+                                        </div>
+                                        {/* Internal Toggle */}
+                                        <div className="flex flex-col gap-2 shrink-0">
+                                            <Label className="text-sm text-zinc-300">INTERNAL</Label>
+                                            <Switch
+                                                checked={form.watch("is_internal")}
+                                                onCheckedChange={(c) => form.setValue("is_internal", c)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop: Original styled layout with tooltip */}
+                                    <div className="hidden md:flex items-center gap-4 p-3 rounded-lg border border-white/10 bg-white/5">
                                         <div className="flex items-center gap-2">
                                             <Label className="text-sm text-zinc-200 font-medium cursor-help translate-y-[1px] mb-0">
                                                 Internal
@@ -505,10 +542,12 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                 </div>
                             </div>
 
-                            {/* Field Type Selection */}
-                            <div className="space-y-4">
+                            {/* Field Type Selection - Desktop Only */}
+                            <div className="hidden md:block space-y-4">
                                 <Label className="text-sm text-zinc-300">Field Type</Label>
-                                <div className="flex flex-wrap gap-2">
+
+                                {/* Desktop: Buttons */}
+                                <div className="hidden md:flex flex-wrap gap-2">
                                     {FIELD_TYPES.map((t) => {
                                         const Icon = t.icon;
                                         // Highlight "Text Field" for text, textarea, or quantity
@@ -540,21 +579,19 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                     })}
                                 </div>
 
-
                             </div>
                         </div>
 
-
-                        {/* Split Layout: Config vs Preview - Independent Scrolling Columns */}
-                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 divide-x divide-white/10 min-h-0">
-
+                        {/* Split Layout: Config vs Preview - Stacked on mobile, side-by-side on desktop */}
+                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-white/10">
                             {/* LEFT COLUMN: Configuration & Options */}
-                            <div className="flex flex-col h-full overflow-hidden">
+                            <div className="flex flex-col">
                                 {/* Configuration Header */}
-                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 flex items-center gap-2">
+                                    <Settings size={16} className="text-cyan-500" />
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Configuration</h3>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                <div className="flex-1 p-6 md:p-8 space-y-6 md:space-y-8">
                                     <div className="space-y-6">
 
                                         {/* Text Field Specific Options (Text/Textarea/Quantity) */}
@@ -810,7 +847,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 )}
 
                                                 {!form.watch("settings.binary_mode") && (
-                                                    <div className="flex justify-between items-center mb-6">
+                                                    <div className="flex justify-between items-center mb-6 pt-4">
                                                         <h4 className="text-xs uppercase text-cyan-500 font-bold tracking-widest">Options List</h4>
                                                     </div>
                                                 )}
@@ -900,13 +937,13 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                             </div>
 
                             {/* RIGHT COLUMN: Live Preview */}
-                            <div className="flex flex-col h-full overflow-hidden bg-black/20">
+                            <div className="flex flex-col bg-black/20">
                                 {/* Preview Header */}
                                 <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 flex items-center gap-2">
                                     <Eye size={16} className="text-cyan-500" />
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Preview</h3>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                <div className="flex-1 p-8 space-y-8">
                                     <div className="h-full relative">
                                         <div className="w-full relative">
                                             {/* Header Removed - replaced by sticky header */}
