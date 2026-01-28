@@ -363,7 +363,7 @@ export function BookingsCalendar({
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'list' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")}
                                 title="List View"
                             >
                                 <List size={16} />
@@ -904,8 +904,8 @@ function DailyView({
                                             duration = event.hours_long * 60;
                                         }
                                         // 2. Calculated from End Time
-                                        else if (event.end_time) {
-                                            const endDateTime = new Date(`${startDateStr}T${event.end_time}`);
+                                        else if ((event as any).end_time) {
+                                            const endDateTime = new Date(`${startDateStr}T${(event as any).end_time}`);
                                             if (!isNaN(endDateTime.getTime())) {
                                                 duration = differenceInMinutes(endDateTime, startDateTime);
                                             }

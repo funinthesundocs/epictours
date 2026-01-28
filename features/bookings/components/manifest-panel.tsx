@@ -22,7 +22,7 @@ export function ManifestPanel({ isOpen, onClose, availability }: ManifestPanelPr
                 const [y, m, d] = availability.start_date.split('-');
                 return `${m}-${d}-${y}`;
             })()}`}
-            size="lg"
+            width="max-w-lg"
         >
             <div className="flex flex-col items-center justify-center h-full p-12 text-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 rounded-full flex items-center justify-center mb-6">

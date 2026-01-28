@@ -65,14 +65,14 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
             if (initialData?.id) {
                 // Update
                 const { error } = await supabase
-                    .from("customer_types")
+                    .from("customer_types" as any)
                     .update(data)
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
                 // Insert
                 const { error } = await supabase
-                    .from("customer_types")
+                    .from("customer_types" as any)
                     .insert([data]);
                 if (error) throw error;
             }

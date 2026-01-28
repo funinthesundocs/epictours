@@ -89,7 +89,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
     useEffect(() => {
         const fetchReferenceData = async () => {
             // Fetch Customer Types for Pax Labels
-            const { data: ctData } = await supabase.from('customer_types').select('id, name');
+            const { data: ctData } = await supabase.from('customer_types' as any).select('id, name');
             if (ctData) {
                 const map: Record<string, string> = {};
                 ctData.forEach((ct: any) => map[ct.id] = ct.name);
@@ -97,7 +97,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
             }
 
             // Fetch Custom Field Defs (for smart_pickup detection)
-            const { data: cfData } = await supabase.from('custom_field_definitions').select('id, label, type, options');
+            const { data: cfData } = await supabase.from('custom_field_definitions' as any).select('id, label, type, options');
             if (cfData) {
                 const map: Record<string, { label: string, type?: string, options?: any[] }> = {};
                 cfData.forEach((cf: any) => map[cf.id] = { label: cf.label, type: cf.type, options: cf.options });
@@ -144,7 +144,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                 await fetchReferenceData();
 
                 const { data, error } = await supabase
-                    .from('bookings')
+                    .from('bookings' as any)
                     .select(`
                         id, status, pax_count, pax_breakdown, option_values, 
                         payment_status, amount_paid, total_amount, voucher_numbers, notes,

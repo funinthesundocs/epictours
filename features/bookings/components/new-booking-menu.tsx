@@ -63,7 +63,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                 .from("experiences" as any)
                 .select("id, name")
                 .order("name");
-            if (data) setExperiences(data);
+            if (data) setExperiences(data as unknown as { id: string; name: string }[]);
             setIsInitializing(false);
         };
         fetchExperiences();
