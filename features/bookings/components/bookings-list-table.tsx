@@ -31,6 +31,7 @@ interface Booking {
 interface BookingsListTableProps {
     startDate: Date;
     endDate: Date;
+    searchQuery?: string;
     onBookingClick?: (bookingId: string) => void;
 }
 
@@ -73,7 +74,7 @@ function formatPhoneNumber(phone: string | null | undefined): string {
     return phone; // Fallback to original
 }
 
-export function BookingsListTable({ startDate, endDate, onBookingClick }: BookingsListTableProps) {
+export function BookingsListTable({ startDate, endDate, searchQuery = "", onBookingClick }: BookingsListTableProps) {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -266,87 +267,97 @@ export function BookingsListTable({ startDate, endDate, onBookingClick }: Bookin
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800 text-zinc-300">
-                        {bookings.map((booking) => (
-                            <tr
-                                key={booking.id}
-                                className="hover:bg-cyan-500/5 transition-colors cursor-pointer group"
-                                onClick={() => onBookingClick?.(booking.id)}
-                            >
-                                {/* Exp */}
-                                <td className="px-6 py-4 font-mono text-cyan-400 font-bold">
-                                    {booking.experience_short_code}
-                                </td>
+                        {bookings
+                            .filter((booking) => {
+                                if (!searchQuery.trim()) return true;
+                                const q = searchQuery.toLowerCase();
+                                const pickupDetails = resolvePickupDetails(booking).toLowerCase();
+                                return (
+                                    booking.customer_name.toLowerCase().includes(q) ||
+                                    booking.customer_email.toLowerCase().includes(q) ||
+                                    booking.customer_phone.toLowerCase().includes(q) ||
+                                    booking.experience_short_code.toLowerCase().includes(q) ||
+                                    booking.status.toLowerCase().includes(q) ||
+                                    booking.id.toLowerCase().includes(q) ||
+                                    (booking.voucher_numbers || "").toLowerCase().includes(q) ||
+                                    (booking.notes || "").toLowerCase().includes(q) ||
+                                    booking.start_date.includes(q) ||
+                                    pickupDetails.includes(q)
+                                );
+                            })
+                            .map((booking) => (
+                                <tr
+                                    key={booking.id}
+                                    className="hover:bg-cyan-500/5 transition-colors cursor-pointer group"
+                                    onClick={() => onBookingClick?.(booking.id)}
+                                >
+                                    {/* Exp */}
+                                    <td className="px-6 py-4 font-mono text-cyan-400 font-bold">
+                                        {booking.experience_short_code}
+                                    </td>
 
-                                {/* Date */}
-                                <td className="px-6 py-4">
-                                    {(() => {
-                                        const [y, m, d] = booking.start_date.split('-');
-                                        return `${m}-${d}-${y}`;
-                                    })()}
-                                </td>
+                                    {/* Date */}
+                                    <td className="px-6 py-4">
+                                        {(() => {
+                                            const [y, m, d] = booking.start_date.split('-');
+                                            return `${m}-${d}-${y}`;
+                                        })()}
+                                    </td>
 
-                                {/* Pickup Details */}
-                                <td className="px-6 py-4 text-white font-medium">
-                                    {resolvePickupDetails(booking)}
-                                </td>
+                                    {/* Pickup Details */}
+                                    <td className="px-6 py-4 text-white font-medium">
+                                        {resolvePickupDetails(booking)}
+                                    </td>
 
-                                {/* Customer */}
-                                <td className="px-6 py-4 font-bold text-white">
-                                    {booking.customer_name}
-                                </td>
+                                    {/* Customer */}
+                                    <td className="px-6 py-4 font-bold text-white">
+                                        {booking.customer_name}
+                                    </td>
 
-                                {/* Pax */}
-                                <td className="px-6 py-4">
-                                    {booking.pax_breakdown && Object.keys(booking.pax_breakdown).length > 0 ? (
-                                        <div className="flex flex-col gap-0.5 text-xs text-zinc-400">
-                                            {Object.entries(booking.pax_breakdown).map(([typeId, count]) => (
-                                                <span key={typeId}>{count} {customerTypeMap[typeId] || "Pax"}</span>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <span className="text-zinc-500">{booking.pax_count} Pax</span>
-                                    )}
-                                </td>
+                                    {/* Pax - Just the total number */}
+                                    <td className="px-6 py-4 text-center font-medium">
+                                        {booking.pax_count}
+                                    </td>
 
-                                {/* Phone */}
-                                <td className="px-6 py-4 font-mono text-xs">
-                                    {formatPhoneNumber(booking.customer_phone)}
-                                </td>
+                                    {/* Phone */}
+                                    <td className="px-6 py-4 font-mono text-xs">
+                                        {formatPhoneNumber(booking.customer_phone)}
+                                    </td>
 
-                                {/* Email */}
-                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.customer_email}>
-                                    {booking.customer_email || "-"}
-                                </td>
+                                    {/* Email */}
+                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.customer_email}>
+                                        {booking.customer_email || "-"}
+                                    </td>
 
-                                {/* Voucher Numbers */}
-                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[120px] truncate" title={booking.voucher_numbers}>
-                                    {booking.voucher_numbers || "-"}
-                                </td>
+                                    {/* Voucher Numbers */}
+                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[120px] truncate" title={booking.voucher_numbers}>
+                                        {booking.voucher_numbers || "-"}
+                                    </td>
 
-                                {/* Booking Notes */}
-                                <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.notes}>
-                                    {booking.notes || "-"}
-                                </td>
+                                    {/* Booking Notes */}
+                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.notes}>
+                                        {booking.notes || "-"}
+                                    </td>
 
-                                {/* Total */}
-                                <td className="px-6 py-4 text-right font-mono text-white font-bold">
-                                    ${booking.total_amount.toFixed(2)}
-                                </td>
+                                    {/* Total */}
+                                    <td className="px-6 py-4 text-right font-mono text-white font-bold">
+                                        ${booking.total_amount.toFixed(2)}
+                                    </td>
 
-                                {/* Paid */}
-                                <td className="px-6 py-4 text-right font-mono text-emerald-400">
-                                    ${booking.amount_paid.toFixed(2)}
-                                </td>
+                                    {/* Paid */}
+                                    <td className="px-6 py-4 text-right font-mono text-emerald-400">
+                                        ${booking.amount_paid.toFixed(2)}
+                                    </td>
 
-                                {/* Due */}
-                                <td className={cn(
-                                    "px-6 py-4 text-right font-mono font-bold",
-                                    (booking.total_amount - booking.amount_paid) > 0 ? "text-red-400" : "text-zinc-500"
-                                )}>
-                                    ${(booking.total_amount - booking.amount_paid).toFixed(2)}
-                                </td>
-                            </tr>
-                        ))}
+                                    {/* Due */}
+                                    <td className={cn(
+                                        "px-6 py-4 text-right font-mono font-bold",
+                                        (booking.total_amount - booking.amount_paid) > 0 ? "text-red-400" : "text-zinc-500"
+                                    )}>
+                                        ${(booking.total_amount - booking.amount_paid).toFixed(2)}
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
             </div>

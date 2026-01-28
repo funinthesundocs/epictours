@@ -15,6 +15,7 @@ import {
     ZoomIn,
     ZoomOut,
     Minus,
+    X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
@@ -53,6 +54,19 @@ export function BookingsCalendar({
     const [selectedExperienceId, setSelectedExperienceId] = useState<string>("all");
     const [isExpPickerOpen, setIsExpPickerOpen] = useState(false);
     const expPickerRef = useRef<HTMLDivElement>(null);
+
+    // List View State
+    const [listStartDate, setListStartDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        return d;
+    });
+    const [listEndDate, setListEndDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 30);
+        return d;
+    });
+    const [listSearchQuery, setListSearchQuery] = useState("");
 
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -222,9 +236,6 @@ export function BookingsCalendar({
         ? availabilities
         : availabilities.filter(a => a.experience_id === selectedExperienceId);
 
-    // List View State
-    const [listStartDate, setListStartDate] = useState(new Date());
-    const [listEndDate, setListEndDate] = useState(new Date(new Date().setMonth(new Date().getMonth() + 1)));
 
     return (
         <div className="w-full h-[calc(100vh_-_9rem)] font-sans flex flex-col">
@@ -234,26 +245,7 @@ export function BookingsCalendar({
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
                     {viewMode === 'list' ? (
-                        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-left-4">
-                            <span className="text-2xl font-black text-white tracking-tighter uppercase">Booking List</span>
-                            <div className="h-8 w-px bg-zinc-800 mx-2" />
-                            {/* Simple Date Inputs for now */}
-                            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 p-1 rounded-lg">
-                                <input
-                                    type="date"
-                                    value={listStartDate.toISOString().split('T')[0]}
-                                    onChange={(e) => e.target.value && setListStartDate(new Date(e.target.value))}
-                                    className="bg-transparent text-sm text-zinc-300 outline-none px-2 font-mono"
-                                />
-                                <span className="text-zinc-600">-</span>
-                                <input
-                                    type="date"
-                                    value={listEndDate.toISOString().split('T')[0]}
-                                    onChange={(e) => e.target.value && setListEndDate(new Date(e.target.value))}
-                                    className="bg-transparent text-sm text-zinc-300 outline-none px-2 font-mono"
-                                />
-                            </div>
-                        </div>
+                        null
                     ) : (
                         <>
                             <div className="flex items-center gap-2">
@@ -306,77 +298,79 @@ export function BookingsCalendar({
                     )}
                 </div>
 
-                {/* RIGHT: Toolbar Actions */}
-                <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
-                    {/* Experience Filter Dropdown */}
-                    <div className="relative w-[220px] mr-2" ref={expPickerRef}>
-                        <div
-                            className={cn(
-                                "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
+                {/* RIGHT: Toolbar Actions - Hidden in List View */}
+                {viewMode !== 'list' && (
+                    <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                        {/* Experience Filter Dropdown */}
+                        <div className="relative w-[220px] mr-2" ref={expPickerRef}>
+                            <div
+                                className={cn(
+                                    "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
+                                    isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
+                                )}
+                                onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
+                            >
+                                <span className="font-semibold text-sm truncate">{selectedExpName}</span>
+                                <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
+                            </div>
+
+                            {/* Dropdown Menu */}
+                            {isExpPickerOpen && (
+                                <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    {experienceOptions.map((exp) => (
+                                        <div
+                                            key={exp.id}
+                                            className={cn(
+                                                "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
+                                                selectedExperienceId === exp.id
+                                                    ? "bg-cyan-900/20 text-cyan-400"
+                                                    : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                            )}
+                                            onClick={() => {
+                                                setSelectedExperienceId(exp.id);
+                                                setIsExpPickerOpen(false);
+                                            }}
+                                        >
+                                            {exp.name}
+                                            {selectedExperienceId === exp.id && <span className="text-cyan-400">✓</span>}
+                                        </div>
+                                    ))}
+                                </div>
                             )}
-                            onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
-                        >
-                            <span className="font-semibold text-sm truncate">{selectedExpName}</span>
-                            <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
                         </div>
 
-                        {/* Dropdown Menu */}
-                        {isExpPickerOpen && (
-                            <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                {experienceOptions.map((exp) => (
-                                    <div
-                                        key={exp.id}
-                                        className={cn(
-                                            "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
-                                            selectedExperienceId === exp.id
-                                                ? "bg-cyan-900/20 text-cyan-400"
-                                                : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                                        )}
-                                        onClick={() => {
-                                            setSelectedExperienceId(exp.id);
-                                            setIsExpPickerOpen(false);
-                                        }}
-                                    >
-                                        {exp.name}
-                                        {selectedExperienceId === exp.id && <span className="text-cyan-400">✓</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
+                            <button
+                                onClick={() => setViewMode('month')}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                title="Month View"
+                            >
+                                <Grid size={16} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('week')}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                title="Week View"
+                            >
+                                <Columns size={16} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('day')}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                title="Day View"
+                            >
+                                <Clock size={16} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'list' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                title="List View"
+                            >
+                                <List size={16} />
+                            </button>
+                        </div>
                     </div>
-
-                    <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
-                        <button
-                            onClick={() => setViewMode('month')}
-                            className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
-                            title="Month View"
-                        >
-                            <Grid size={16} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('week')}
-                            className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
-                            title="Week View"
-                        >
-                            <Columns size={16} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('day')}
-                            className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
-                            title="Day View"
-                        >
-                            <Clock size={16} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={cn("p-1.5 rounded-md transition-all", viewMode === 'list' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
-                            title="List View"
-                        >
-                            <List size={16} />
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* CONTENT AREA */}
@@ -410,13 +404,77 @@ export function BookingsCalendar({
                     />
                 )}
                 {viewMode === 'list' && (
-                    <BookingsListTable
-                        startDate={listStartDate}
-                        endDate={listEndDate}
-                        // For now clicking a booking does nothing or could open edit. User didn't specify.
-                        // We'll leave empty for now.
-                        onBookingClick={() => { }}
-                    />
+                    <div className="flex flex-col gap-3">
+                        {/* Single Toolbar Row - All Controls */}
+                        <div className="flex items-end justify-between gap-4">
+                            {/* LEFT: Date Range + Search */}
+                            <div className="flex items-end gap-4">
+                                {/* Date Range Selectors - Double Decker */}
+                                <div className="flex flex-col gap-1 shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">From</span>
+                                        <CustomSelect value={listStartDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listStartDate); d.setMonth(val); setListStartDate(d); }} className="w-[80px] text-xs" />
+                                        <CustomSelect value={listStartDate.getDate()} options={Array.from({ length: new Date(listStartDate.getFullYear(), listStartDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listStartDate); d.setDate(val); setListStartDate(d); }} className="w-[60px] text-xs" />
+                                        <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-cyan-500" />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">To</span>
+                                        <CustomSelect value={listEndDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listEndDate); d.setMonth(val); setListEndDate(d); }} className="w-[80px] text-xs" />
+                                        <CustomSelect value={listEndDate.getDate()} options={Array.from({ length: new Date(listEndDate.getFullYear(), listEndDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listEndDate); d.setDate(val); setListEndDate(d); }} className="w-[60px] text-xs" />
+                                        <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-cyan-500" />
+                                    </div>
+                                </div>
+                                {/* Search Bar - 25% larger */}
+                                <div className="flex items-center gap-2 w-[350px]">
+                                    <div className="relative flex-1">
+                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                        <input
+                                            type="text"
+                                            value={listSearchQuery}
+                                            onChange={(e) => setListSearchQuery(e.target.value)}
+                                            placeholder="Search customer, experience, status..."
+                                            className="w-full h-8 bg-[#0b1115] border border-white/10 rounded-lg pl-8 pr-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                                        />
+                                    </div>
+                                    {listSearchQuery && (
+                                        <button
+                                            onClick={() => setListSearchQuery("")}
+                                            className="h-8 px-2 flex items-center text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-xs"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            {/* RIGHT: Filter + View Buttons */}
+                            <div className="flex items-center gap-2">
+                                <div className="relative w-[180px]" ref={expPickerRef}>
+                                    <div className={cn("w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700", isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
+                                        <span className="font-semibold text-xs truncate">{selectedExpName}</span>
+                                        <ChevronDown className={cn("w-3 h-3 text-zinc-500 transition-transform shrink-0 ml-1", isExpPickerOpen && "rotate-180")} />
+                                    </div>
+                                    {isExpPickerOpen && (
+                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                            {experienceOptions.map((exp) => (
+                                                <div key={exp.id} className={cn("px-3 py-2 text-xs cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0", selectedExperienceId === exp.id ? "bg-cyan-900/20 text-cyan-400" : "text-zinc-400 hover:bg-zinc-900 hover:text-white")} onClick={() => { setSelectedExperienceId(exp.id); setIsExpPickerOpen(false); }}>
+                                                    {exp.name}
+                                                    {selectedExperienceId === exp.id && <span className="text-cyan-400">✓</span>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+                                    <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Month View"><Grid size={14} /></button>
+                                    <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Week View"><Columns size={14} /></button>
+                                    <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Day View"><Clock size={14} /></button>
+                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-cyan-500/20 text-cyan-400 shadow-sm")} title="List View"><List size={14} /></button>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Table */}
+                        <BookingsListTable startDate={listStartDate} endDate={listEndDate} searchQuery={listSearchQuery} onBookingClick={() => { }} />
+                    </div>
                 )}
             </div>
         </div>
