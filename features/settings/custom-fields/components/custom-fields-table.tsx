@@ -97,7 +97,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
 
     return (
         <div className="h-full overflow-auto relative">
-            <table className="w-full text-left">
+            <table className="w-full text-left hidden md:table">
                 <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Field Name</th>
@@ -425,6 +425,80 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                     })}
                 </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4 p-4">
+                {data.map((field) => {
+                    const Icon = TYPE_ICONS[field.type] || Type;
+                    const typeLabel = field.type === 'quantity' ? 'Number' : field.type;
+
+                    return (
+                        <div key={field.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                            {/* Header: Name + Actions */}
+                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                        <Icon size={20} />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white leading-tight">{field.label}</h3>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => onEdit(field)}
+                                        className="p-2 hover:bg-cyan-500/10 rounded text-zinc-400 hover:text-cyan-400 transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => onDuplicate(field)}
+                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                    >
+                                        <Copy size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setDeleteId(field.id)}
+                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Body: Two Columns */}
+                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                                <div className="text-zinc-500">Type</div>
+                                <div>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize bg-white/5 border-white/10 text-zinc-400">
+                                        {typeLabel}
+                                    </span>
+                                </div>
+
+                                <div className="text-zinc-500">Visibility</div>
+                                <div>
+                                    {field.is_internal ? (
+                                        <div className="flex items-center gap-2 text-zinc-500 text-xs bg-white/5 border border-white/10 px-2 py-1 rounded w-fit">
+                                            <Lock size={12} />
+                                            <span>Internal Only</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-zinc-500 text-xs bg-white/5 border border-white/10 px-2 py-1 rounded w-fit">
+                                            <Globe size={12} />
+                                            <span>Public</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {field.type === 'select' && field.options?.length > 0 && (
+                                    <>
+                                        <div className="text-zinc-500">Options</div>
+                                        <div className="text-zinc-300 text-sm">{field.options.length} options</div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
             <AlertDialog
                 isOpen={!!deleteId}

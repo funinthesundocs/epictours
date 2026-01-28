@@ -52,6 +52,74 @@
 *   **Tables**:
     *   **Headers**: Always visible.
     *   **Actions**: Align right.
+    *   **Responsive**: Add `hidden md:table` to desktop table and `md:hidden` to mobile card view.
+    *   **Canonical Reference**: **ALL new tables MUST be modeled exactly after `features/crm/customers/components/customer-table.tsx`**. This includes:
+        *   Desktop table structure and styling
+        *   Mobile card view implementation
+        *   Action button placement and hover effects
+        *   Header styling (`bg-white/5 backdrop-blur-sm`)
+        *   Row hover states and transitions
+
+### 2.1 Mobile Card View Pattern (Data Tables)
+*   **Standard**: ALL data tables MUST have a mobile card view alternative.
+*   **Trigger**: Use `hidden md:table` on the desktop `<table>` element and `md:hidden` on the mobile card container.
+*   **Card Container**: `<div className="md:hidden space-y-4 p-4">`
+*   **Card Styling**:
+    ```css
+    bg-white/5 border border-white/10 rounded-xl p-4 space-y-4
+    ```
+*   **Card Structure**:
+    1.  **Header Section**: Name/Title + Action Buttons (flex, justify-between)
+        *   Icon in circle: `w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400`
+        *   Name: `text-lg font-bold text-white leading-tight`
+        *   Separator: `border-b border-white/5 pb-3`
+    2.  **Body Section**: Two-column grid for details
+        *   Container: `grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base`
+        *   Labels: `text-zinc-500`
+        *   Values: `text-zinc-300`
+*   **Action Buttons**:
+    *   Container: `flex items-center gap-1 shrink-0`
+    *   Edit: `p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors`
+    *   Delete: `p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors`
+*   **Reference Implementation**: `features/crm/customers/components/customer-table.tsx`
+*   **Template**:
+    ```tsx
+    {/* Desktop Table */}
+    <table className="w-full text-left hidden md:table">
+        {/* ... thead and tbody ... */}
+    </table>
+
+    {/* Mobile Card View */}
+    <div className="md:hidden space-y-4 p-4">
+        {data.map((item) => (
+            <div key={item.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                {/* Header: Name + Actions */}
+                <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                            <Icon size={20} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white leading-tight">{item.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => onEdit(item)} className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors">
+                            <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => setDeleteId(item.id)} className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors">
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Body: Two Columns */}
+                <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                    <div className="text-zinc-500">Label</div>
+                    <div className="text-zinc-300">{item.value}</div>
+                </div>
+            </div>
+        ))}
+    </div>
+    ```
 
 ## 2. Database & RLS
 *   **Local Development**:

@@ -31,7 +31,7 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
 
     return (
         <div className="h-full overflow-auto relative">
-            <table className="w-full text-left">
+            <table className="w-full text-left hidden md:table">
                 <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
@@ -82,6 +82,46 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                     ))}
                 </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4 p-4">
+                {data.map((schedule) => (
+                    <div key={schedule.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                        {/* Header: Name + Actions */}
+                        <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                    <Coins size={20} />
+                                </div>
+                                <h3 className="text-lg font-bold text-white leading-tight">{schedule.name}</h3>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                    onClick={() => onEdit(schedule)}
+                                    className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                >
+                                    <Edit2 size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setDeleteId(schedule.id)}
+                                    className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Body: Two Columns */}
+                        <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                            <div className="text-zinc-500">Notes</div>
+                            <div className="text-zinc-400">{schedule.notes || <span className="opacity-50 italic">No notes</span>}</div>
+
+                            <div className="text-zinc-500">Created</div>
+                            <div className="text-zinc-300">{new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             <AlertDialog
                 isOpen={!!deleteId}

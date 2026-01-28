@@ -173,9 +173,79 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                     </tbody>
                 </table>
 
-                {/* Mobile View Omitted for brevity, assuming Desktop first for Internal Ops. Can add if requested. */}
-                <div className="md:hidden p-8 text-center text-zinc-500 italic">
-                    Switch to desktop to view staff table.
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4 p-4">
+                    {sortedData.map((staff) => (
+                        <div key={staff.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                            {/* Header: Name + Actions */}
+                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                        <User size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white leading-tight">{staff.name}</h3>
+                                        {staff.role?.name && (
+                                            <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
+                                                {staff.role.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => onEdit(staff)}
+                                        className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setDeletingItem(staff)}
+                                        className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Body: Two Columns */}
+                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
+                                {staff.phone && (
+                                    <>
+                                        <div className="text-zinc-500">Phone</div>
+                                        <div className="text-zinc-300">{staff.phone}</div>
+                                    </>
+                                )}
+                                {staff.email && (
+                                    <>
+                                        <div className="text-zinc-500">Email</div>
+                                        <div className="text-zinc-300 break-all">{staff.email}</div>
+                                    </>
+                                )}
+                                {staff.messaging_app && (
+                                    <>
+                                        <div className="text-zinc-500">App</div>
+                                        <div className="text-zinc-300">{staff.messaging_app}</div>
+                                    </>
+                                )}
+                                {staff.notes && (
+                                    <>
+                                        <div className="text-zinc-500">Notes</div>
+                                        <div className="text-zinc-400 italic text-sm">{staff.notes}</div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Compensation Button */}
+                            <button
+                                onClick={() => onCompensation(staff)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors text-sm font-medium"
+                            >
+                                <DollarSign size={14} />
+                                View Compensation Rates
+                            </button>
+                        </div>
+                    ))}
                 </div>
             </div>
 
