@@ -298,6 +298,50 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string | null
+          action: string
+          table_name: string
+          record_id: string | null
+          old_data: Json | null
+          new_data: Json | null
+          created_at: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          action: string
+          table_name: string
+          record_id?: string | null
+          old_data?: Json | null
+          new_data?: Json | null
+          created_at?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          action?: string
+          table_name?: string
+          record_id?: string | null
+          old_data?: Json | null
+          new_data?: Json | null
+          created_at?: string | null
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       vendors: {
         Row: {
           id: string

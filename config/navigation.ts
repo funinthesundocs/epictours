@@ -2,6 +2,7 @@ import {
     LayoutDashboard,
     Inbox,
     Calendar,
+    Activity, // Added
     CalendarClock,
     CalendarRange, // Bookings
     Map,           // Tours
@@ -140,6 +141,7 @@ export const navigation: NavSection[] = [
             { title: "Customer Types", href: "/customers/types", icon: Users },
             { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
             { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers },
+            { title: "Activity Log", href: "/settings/activity-log", icon: Activity },
         ]
     }
 ];
