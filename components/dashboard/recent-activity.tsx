@@ -110,7 +110,7 @@ export function RecentActivity() {
                                 </span>
                             </p>
                             <p className="text-xs text-zinc-500 truncate">
-                                {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })} by admin
                             </p>
                         </div>
                     </div>
