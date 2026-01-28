@@ -16,6 +16,26 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+// DnD Imports
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 // Master Schema
 const StopSchema = z.object({
     id: z.string().optional(),
@@ -38,34 +58,124 @@ interface ScheduleSheetProps {
     initialData?: any;
 }
 
-// Sub-component for individual stop row to match Custom Field style
-function ScheduleStopRow({
-    index,
-    register,
-    remove,
-    insert,
-    control,
-    pickupOptions,
-    item
-}: {
+// Sortable Stop Row Component
+interface SortableStopProps {
+    id: string;
     index: number;
-    register: any;
+    control: any;
     remove: (index: number) => void;
     insert: (index: number, val: any) => void;
-    control: any;
-    pickupOptions: any[];
-    item: any;
-}) {
-    // We need to use Controller or manual registration for Combobox since it's a custom component
-    // But Combobox usually takes value/onChange. We can use <Controller> or just pass props if we had access to setValue.
-    // simpler to pass `setValue` or use `useFormContext` if nested, but here we pass props.
-    // Actually `Combobox` in this project seems to be a controlled component.
-    // Accessing `setValue` from parent is better.
+    pickupOptions: { value: string; label: string }[];
+}
 
-    // Let's grab setValue from a hook in parent and pass it down?
-    // Or just use render prop in parent map.
-    // I'll define this inline in the main component to access `form`.
-    return null;
+function SortableStop({ id, index, control, remove, insert, pickupOptions }: SortableStopProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : 'auto',
+        opacity: isDragging ? 0.5 : 1
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300 select-none"
+        >
+            {/* Field Container */}
+            <div className="flex-1 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-500/30 relative">
+                {/* Mobile Delete Button - Top Right */}
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                    className="md:hidden absolute top-1 right-1 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-7 w-7 p-0 rounded-full z-10"
+                >
+                    <Trash2 size={14} />
+                </Button>
+
+                {/* Desktop: Single row / Mobile: Flex with grip on left */}
+                <div className="flex gap-0 md:items-center">
+                    {/* Grip Handle */}
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing px-3 py-3 border-r border-white/5 touch-none flex items-center self-stretch"
+                    >
+                        <GripVertical size={16} />
+                    </div>
+
+                    {/* Content Area - Stacked on mobile */}
+                    <div className="flex-1 flex flex-col md:flex-row md:items-center pr-8 md:pr-2">
+                        {/* Time Input */}
+                        <div className="w-32 md:w-32 md:border-r border-b md:border-b-0 border-white/5 relative p-2 md:p-0">
+                            <Controller
+                                control={control}
+                                name={`stops.${index}.pickup_time`}
+                                render={({ field }) => (
+                                    <TimePicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="00:00 AM"
+                                        className="w-full md:bg-transparent md:border-none text-white text-sm h-[42px] md:rounded-none px-3 md:hover:bg-white/5 md:shadow-none"
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Location Select */}
+                        <div className="flex-1 min-w-0 relative">
+                            <Controller
+                                control={control}
+                                name={`stops.${index}.pickup_point_id`}
+                                render={({ field }) => (
+                                    <Combobox
+                                        options={pickupOptions}
+                                        value={field.value}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Select Location..."
+                                        className="w-full bg-transparent border-none text-white text-sm h-[42px] px-3 shadow-none hover:bg-white/5"
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Desktop Delete Button */}
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            className="hidden md:flex text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0 rounded-full mr-1"
+                        >
+                            <Trash2 size={15} />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Insert Button (External) */}
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => insert(index + 1, { pickup_point_id: "", pickup_time: "" })}
+                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
+            >
+                <Plus size={16} />
+            </Button>
+        </div>
+    );
 }
 
 
@@ -81,10 +191,41 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         defaultValues: { name: "", start_time: "", stops: [] }
     });
 
-    const { fields, append, remove, insert, replace } = useFieldArray({
+    const { fields, append, remove, insert, replace, move } = useFieldArray({
         control: form.control,
         name: "stops"
     });
+
+    // Sensors for DnD
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            const oldIndex = fields.findIndex((f) => f.id === active.id);
+            const newIndex = fields.findIndex((f) => f.id === over?.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                move(oldIndex, newIndex);
+            }
+        }
+    };
 
     // Load Pickup Options
     useEffect(() => {
@@ -238,10 +379,9 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             <div className="h-full flex flex-col bg-transparent">
                 <form id="schedule-form" onSubmit={form.handleSubmit(handleMasterSubmit)} className="h-full flex flex-col">
                     {/* Top Section: Schedule Details (Fixed) */}
-                    {/* Top Section: Schedule Details (Fixed) */}
                     <div className="shrink-0 p-6 border-b border-white/5 space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
+                        <div className="flex flex-row gap-4 items-end">
+                            <div className="flex-1 space-y-2">
                                 <Label>Schedule Name</Label>
                                 <Input
                                     {...form.register("name")}
@@ -249,8 +389,11 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                 />
                                 {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <Label>Default Start Time</Label>
+                            <div className="w-32 md:w-40 space-y-2 shrink-0">
+                                <Label>
+                                    <span className="md:hidden">Start</span>
+                                    <span className="hidden md:inline">Default Start Time</span>
+                                </Label>
                                 <Controller
                                     control={form.control}
                                     name="start_time"
@@ -281,73 +424,28 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                             <div className="p-6 space-y-2">
                                 {/* Header Row? Custom fields doesn't usually have a header row for the list itself, but maybe useful here? No, stick to design. */}
 
-                                {fields.map((field, index) => (
-                                    <div key={field.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
-                                        {/* Field Container */}
-                                        <div className="flex-1 flex items-center pr-2 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-500/30">
-
-                                            {/* Grip */}
-                                            <div className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing px-3 py-3 border-r border-white/5">
-                                                <GripVertical size={16} />
-                                            </div>
-
-                                            {/* Time Input */}
-                                            <div className="w-32 border-r border-white/5 h-full relative">
-                                                <Controller
-                                                    control={form.control}
-                                                    name={`stops.${index}.pickup_time`}
-                                                    render={({ field }) => (
-                                                        <TimePicker
-                                                            value={field.value}
-                                                            onChange={field.onChange}
-                                                            placeholder="00:00 AM"
-                                                            className="w-full bg-transparent border-none text-white text-sm h-[42px] rounded-none px-3 hover:bg-white/5 shadow-none"
-                                                        />
-                                                    )}
-                                                />
-                                            </div>
-
-                                            {/* Location Select */}
-                                            <div className="flex-1 h-full min-w-0 relative">
-                                                <Controller
-                                                    control={form.control}
-                                                    name={`stops.${index}.pickup_point_id`}
-                                                    render={({ field }) => (
-                                                        <Combobox
-                                                            options={pickupOptions}
-                                                            value={field.value}
-                                                            onChange={(val) => field.onChange(val)}
-                                                            placeholder="Select Location..."
-                                                            className="w-full bg-transparent border-none text-white text-sm h-[42px] px-3 shadow-none hover:bg-white/5"
-                                                        />
-                                                    )}
-                                                />
-                                            </div>
-
-                                            {/* Delete Button (Internal) */}
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => remove(index)}
-                                                className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0 rounded-full mr-1"
-                                            >
-                                                <Trash2 size={15} />
-                                            </Button>
-                                        </div>
-
-                                        {/* Insert Button (External) */}
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => insert(index + 1, { pickup_point_id: "", pickup_time: "" })}
-                                            className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
-                                        >
-                                            <Plus size={16} />
-                                        </Button>
-                                    </div>
-                                ))}
+                                <DndContext
+                                    sensors={sensors}
+                                    collisionDetection={closestCenter}
+                                    onDragEnd={handleDragEnd}
+                                >
+                                    <SortableContext
+                                        items={fields.map(f => f.id)}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        {fields.map((field, index) => (
+                                            <SortableStop
+                                                key={field.id}
+                                                id={field.id}
+                                                index={index}
+                                                control={form.control}
+                                                remove={remove}
+                                                insert={insert}
+                                                pickupOptions={pickupOptions}
+                                            />
+                                        ))}
+                                    </SortableContext>
+                                </DndContext>
 
                                 {/* Empty State / Add First Button */}
                                 {fields.length === 0 && (

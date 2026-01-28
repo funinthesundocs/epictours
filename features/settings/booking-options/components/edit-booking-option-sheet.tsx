@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, Copy, List, Eye, EyeOff, Calendar as CalendarIcon, X } from "lucide-react";
+import { Save, Loader2, Plus, Trash2, GripVertical, Check, Search, ChevronDown, ChevronLeft, ChevronRight, Copy, List, Eye, EyeOff, Calendar as CalendarIcon, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragEndEvent
@@ -230,69 +231,90 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300"
+            className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300 select-none"
         >
             {/* Field Container */}
-            <div className="flex-1 grid grid-cols-12 gap-3 items-center bg-white/5 px-4 py-2 rounded-xl border border-white/5 relative">
-                {/* Grip & Label */}
-                <div className="col-span-4 flex items-center gap-3">
-                    <div {...attributes} {...listeners} className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing border-r border-white/10 pr-3 py-1">
+            <div className="flex-1 bg-white/5 px-4 py-3 rounded-xl border border-white/5 relative">
+                {/* Mobile Delete Button - Top Right */}
+                <button
+                    type="button"
+                    onClick={onRemove}
+                    className="md:hidden absolute top-2 right-2 p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                    <Trash2 size={16} />
+                </button>
+
+                {/* Desktop: Single row grid / Mobile: Flex with grip on left */}
+                <div className="flex gap-3 md:grid md:grid-cols-12 md:items-center">
+                    {/* Grip Handle - Spans full height on mobile */}
+                    <div {...attributes} {...listeners} className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing flex items-center border-r border-white/10 pr-3 md:hidden touch-none">
                         <GripVertical size={16} />
                     </div>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-medium text-zinc-200 truncate" title={item.label}>
-                            {(item.label || "Unknown Field").length > 25
-                                ? (item.label || "Unknown Field").substring(0, 25) + "..."
-                                : (item.label || "Unknown Field")}
-                        </span>
-                        <span className="text-[10px] uppercase text-zinc-500">{item.type || "field"}</span>
+
+                    {/* Content area */}
+                    <div className="flex-1 flex flex-col md:contents gap-2">
+                        {/* Row 1 (Mobile) / Col 1-4 (Desktop): Grip (desktop) & Label */}
+                        <div className="md:col-span-4 flex items-center gap-3 pr-10 md:pr-0">
+                            {/* Desktop grip */}
+                            <div {...attributes} {...listeners} className="hidden md:block text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing border-r border-white/10 pr-3 py-1">
+                                <GripVertical size={16} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-zinc-200 truncate" title={item.label}>
+                                    {(item.label || "Unknown Field").length > 25
+                                        ? (item.label || "Unknown Field").substring(0, 25) + "..."
+                                        : (item.label || "Unknown Field")}
+                                </span>
+                                <span className="text-[10px] uppercase text-zinc-500">{item.type || "field"}</span>
+                            </div>
+                        </div>
+
+                        {/* Field Preview - Desktop Only */}
+                        <div className="hidden md:block md:col-span-4">
+                            <FieldPreview type={item.type} fieldDef={fieldDef} />
+                        </div>
+
+                        {/* Row 2 (Mobile) / Col 9-11 (Desktop): Toggles */}
+                        <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-4">
+                            {/* Public Toggle */}
+                            <div className="flex items-center gap-1.5">
+                                <span
+                                    onClick={() => onTogglePublic(!item.is_public)}
+                                    className={cn("text-[10px] font-medium transition-colors cursor-pointer select-none uppercase tracking-wider", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                                >
+                                    {!item.is_public ? "Private" : "Public"}
+                                </span>
+                                <Switch
+                                    checked={!item.is_public}
+                                    onCheckedChange={(val) => onTogglePublic(!val)}
+                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                                />
+                            </div>
+
+                            {/* Required Toggle */}
+                            <div className="flex items-center gap-1.5">
+                                <span className={cn("text-[10px] font-medium uppercase tracking-wider", item.required ? "text-cyan-400" : "text-zinc-500")}>
+                                    {item.required ? "Req" : "Opt"}
+                                </span>
+                                <Switch
+                                    checked={item.required}
+                                    onCheckedChange={onToggleRequired}
+                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Desktop Delete Button */}
+                        <div className="hidden md:flex md:col-span-1 justify-end">
+                            <button
+                                type="button"
+                                onClick={onRemove}
+                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                {/* Field Preview */}
-                <div className="col-span-4">
-                    <FieldPreview type={item.type} fieldDef={fieldDef} />
-                </div>
-
-                {/* Toggles */}
-                <div className="col-span-3 flex items-center justify-end gap-4">
-                    {/* Public Toggle */}
-                    <div className="flex items-center gap-1.5">
-                        <span
-                            onClick={() => onTogglePublic(!item.is_public)}
-                            className={cn("text-[10px] font-medium transition-colors cursor-pointer select-none uppercase tracking-wider", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
-                        >
-                            {!item.is_public ? "Private" : "Public"}
-                        </span>
-                        <Switch
-                            checked={!item.is_public}
-                            onCheckedChange={(val) => onTogglePublic(!val)}
-                            className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
-                        />
-                    </div>
-
-                    {/* Required Toggle */}
-                    <div className="flex items-center gap-1.5">
-                        <span className={cn("text-[10px] font-medium uppercase tracking-wider", item.required ? "text-cyan-400" : "text-zinc-500")}>
-                            {item.required ? "Req" : "Opt"}
-                        </span>
-                        <Switch
-                            checked={item.required}
-                            onCheckedChange={onToggleRequired}
-                            className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
-                        />
-                    </div>
-                </div>
-
-                {/* Delete */}
-                <div className="col-span-1 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={onRemove}
-                        className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={16} />
-                    </button>
                 </div>
             </div>
 
@@ -336,11 +358,23 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
 
     // Sensors for DnD
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    const tabsRef = useRef<HTMLDivElement>(null);
 
     const formKeyMap: Record<string, "config_retail" | "config_online" | "config_special" | "config_custom"> = {
         "Retail": "config_retail",
@@ -567,12 +601,22 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         toast.success("Copied from Retail");
     };
 
+    const scrollTabs = (direction: 'left' | 'right') => {
+        if (tabsRef.current) {
+            const scrollAmount = 150;
+            tabsRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     const TabButton = ({ id, label }: { id: typeof activeTab, label: string }) => (
         <button
             type="button"
             onClick={() => setActiveTab(id)}
             className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
+                "shrink-0 px-6 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                 activeTab === id
                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
                     : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
@@ -591,9 +635,9 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             width="w-[85vw] max-w-4xl"
             contentClassName="p-0"
         >
-            <form onSubmit={handleSubmit(onSubmit, (errors) => console.error("Form Validation Errors:", errors))} className="pb-12 pt-0 h-full flex flex-col">
+            <form onSubmit={handleSubmit(onSubmit, (errors) => console.error("Form Validation Errors:", errors))} className="pt-0 h-full flex flex-col">
                 {/* Header Config */}
-                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
+                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Schedule Name *</Label>
@@ -608,11 +652,36 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10 px-6">
-                    <TabButton id="Retail" label="Retail Options" />
-                    <TabButton id="Online" label="Online Options" />
-                    <TabButton id="Special" label="Special Options" />
-                    <TabButton id="Custom" label="Custom Options" />
+                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10">
+                    {/* Left Arrow */}
+                    <button
+                        type="button"
+                        onClick={() => scrollTabs('left')}
+                        className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-r border-white/10"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+
+                    {/* Scrollable Tabs Container */}
+                    <div
+                        ref={tabsRef}
+                        className="flex-1 flex overflow-x-auto scrollbar-hide"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                        <TabButton id="Retail" label="Retail Options" />
+                        <TabButton id="Online" label="Online Options" />
+                        <TabButton id="Special" label="Special Options" />
+                        <TabButton id="Custom" label="Custom Options" />
+                    </div>
+
+                    {/* Right Arrow */}
+                    <button
+                        type="button"
+                        onClick={() => scrollTabs('right')}
+                        className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-l border-white/10"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
                 </div>
 
                 {/* Builder Area */}
@@ -711,7 +780,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 flex justify-between items-center gap-4 pt-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
                     {/* Save to All Option */}
                     <div className="flex items-center gap-2">
                         <div
@@ -724,7 +793,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                             )}>
                                 {saveToAll && <Check size={12} strokeWidth={3} />}
                             </div>
-                            <Label className="cursor-pointer text-zinc-400 group-hover:text-zinc-300">Save settings to all variations</Label>
+                            <Label className="cursor-pointer text-zinc-400 group-hover:text-zinc-300 normal-case text-sm mb-0">Apply to all variations</Label>
                         </div>
                     </div>
 

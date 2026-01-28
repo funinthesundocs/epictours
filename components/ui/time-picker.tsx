@@ -34,7 +34,9 @@ export function TimePicker({
     // Parse current value
     const parseTime = (val?: string) => {
         if (!val) return { h: '', m: '', p: '' }
-        const [hStr, mStr] = val.split(':')
+        // Strip any existing AM/PM suffix
+        const cleanVal = val.replace(/\s*(AM|PM)$/i, '').trim()
+        const [hStr, mStr] = cleanVal.split(':')
         const h = parseInt(hStr, 10)
         const p = h >= 12 ? 'PM' : 'AM'
         let h12 = h % 12

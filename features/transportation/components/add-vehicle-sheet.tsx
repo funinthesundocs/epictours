@@ -194,23 +194,12 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                     {/* 1. Basic Info */}
                     <div>
                         <SectionHeader icon={Info} title="Vehicle Information" className="-mt-6 border-t-0" />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-3 gap-6">
+                            {/* Row 1: Name (2/3) + Status (1/3) */}
                             <div className="space-y-2 col-span-2">
                                 <Label>Vehicle Name</Label>
                                 <Input {...register("name")} placeholder="e.g. Mercedes Sprinter" />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                            </div>
-
-                            {/* Vendor Selection */}
-                            <div className="space-y-2">
-                                <Label>Vendor (Optional)</Label>
-                                <Combobox
-                                    options={vendors}
-                                    value={watch('vendor_id') || ""}
-                                    onChange={(val) => setValue('vendor_id', val || null)}
-                                    placeholder="Select Vendor..."
-                                />
-                                <p className="text-[10px] text-zinc-500">Leave empty for internal fleet.</p>
                             </div>
 
                             <div className="space-y-2">
@@ -222,8 +211,21 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                                 />
                                 {errors.status && <p className="text-xs text-red-500">{errors.status.message}</p>}
                             </div>
+
+                            {/* Row 2: Vendor (2/3) + Capacity (1/3) */}
+                            <div className="space-y-2 col-span-2">
+                                <Label>Vendor (Optional)</Label>
+                                <Combobox
+                                    options={vendors}
+                                    value={watch('vendor_id') || ""}
+                                    onChange={(val) => setValue('vendor_id', val || null)}
+                                    placeholder="Select Vendor..."
+                                />
+                                <p className="text-[10px] text-zinc-500">Leave empty for internal fleet.</p>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label>Passenger Capacity</Label>
+                                <Label>Capacity</Label>
                                 <Input type="number" {...register("capacity")} placeholder="e.g. 14" />
                                 {errors.capacity && <p className="text-xs text-red-500">{errors.capacity.message}</p>}
                             </div>
