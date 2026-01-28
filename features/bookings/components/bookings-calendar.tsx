@@ -19,7 +19,12 @@ import {
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { BookingsListTable } from "./bookings-list-table";
-import { addDays, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay, isToday, differenceInMinutes, startOfDay, addMinutes } from "date-fns";
+import {
+    addDays, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay, isToday, differenceInMinutes,
+    addMinutes,
+    subDays,
+    startOfDay
+} from "date-fns";
 
 export function BookingsCalendar({
     onEventClick
@@ -30,8 +35,8 @@ export function BookingsCalendar({
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
 
     // Zoom Level for Day View (Pixels Per Minute)
-    // Default 2px = 1 min (1 hour = 120px)
-    const [pixelsPerMinute, setPixelsPerMinute] = useState(2);
+    // Default 1.5px = 1 min
+    const [pixelsPerMinute, setPixelsPerMinute] = useState(1.5);
 
     // Data State
     const [availabilities, setAvailabilities] = useState<Availability[]>([]);
@@ -43,6 +48,11 @@ export function BookingsCalendar({
 
     const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
     const yearPickerRef = useRef<HTMLDivElement>(null);
+
+    // Experience Filter State
+    const [selectedExperienceId, setSelectedExperienceId] = useState<string>("all");
+    const [isExpPickerOpen, setIsExpPickerOpen] = useState(false);
+    const expPickerRef = useRef<HTMLDivElement>(null);
 
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -75,10 +85,9 @@ export function BookingsCalendar({
                 startRange = startOfWeek(currentDate);
                 endRange = endOfWeek(currentDate);
             } else if (viewMode === 'day') {
-                // Fetch full week around the day to allow smoother next/prev, or just the day?
-                // Fetches are cheap. Let's do the day.
-                startRange = startOfDay(currentDate);
-                endRange = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59);
+                // BUG FIX: Widen the net. Fetch +/- 1 day to ensure we don't miss anything due to TZ or strict bounds
+                startRange = subDays(startOfDay(currentDate), 1);
+                endRange = addDays(startOfDay(currentDate), 1);
             } else {
                 // Month or List (default to month context)
                 startRange = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -190,6 +199,9 @@ export function BookingsCalendar({
             if (yearPickerRef.current && !yearPickerRef.current.contains(event.target as Node)) {
                 setIsYearPickerOpen(false);
             }
+            if (expPickerRef.current && !expPickerRef.current.contains(event.target as Node)) {
+                setIsExpPickerOpen(false);
+            }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -198,6 +210,18 @@ export function BookingsCalendar({
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
+    // Experience Options for Filter
+    const experienceOptions = [
+        { id: "all", name: "All Experiences", short_code: "ALL" },
+        ...Object.entries(expMap).map(([id, exp]) => ({ id, ...exp }))
+    ];
+    const selectedExpName = experienceOptions.find(e => e.id === selectedExperienceId)?.name || "All Experiences";
+
+    // Filtered Availabilities
+    const filteredAvailabilities = selectedExperienceId === "all"
+        ? availabilities
+        : availabilities.filter(a => a.experience_id === selectedExperienceId);
+
     // List View State
     const [listStartDate, setListStartDate] = useState(new Date());
     const [listEndDate, setListEndDate] = useState(new Date(new Date().setMonth(new Date().getMonth() + 1)));
@@ -205,7 +229,7 @@ export function BookingsCalendar({
     return (
         <div className="w-full h-[calc(100vh_-_9rem)] font-sans flex flex-col">
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-30">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-[60]">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -284,6 +308,44 @@ export function BookingsCalendar({
 
                 {/* RIGHT: Toolbar Actions */}
                 <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                    {/* Experience Filter Dropdown */}
+                    <div className="relative w-[220px] mr-2" ref={expPickerRef}>
+                        <div
+                            className={cn(
+                                "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
+                                isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
+                            )}
+                            onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
+                        >
+                            <span className="font-semibold text-sm truncate">{selectedExpName}</span>
+                            <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
+                        </div>
+
+                        {/* Dropdown Menu */}
+                        {isExpPickerOpen && (
+                            <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                {experienceOptions.map((exp) => (
+                                    <div
+                                        key={exp.id}
+                                        className={cn(
+                                            "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
+                                            selectedExperienceId === exp.id
+                                                ? "bg-cyan-900/20 text-cyan-400"
+                                                : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                        )}
+                                        onClick={() => {
+                                            setSelectedExperienceId(exp.id);
+                                            setIsExpPickerOpen(false);
+                                        }}
+                                    >
+                                        {exp.name}
+                                        {selectedExperienceId === exp.id && <span className="text-cyan-400">✓</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
                         <button
                             onClick={() => setViewMode('month')}
@@ -325,7 +387,7 @@ export function BookingsCalendar({
                 {viewMode === 'month' && (
                     <MonthView
                         currentDate={currentDate}
-                        availabilities={availabilities}
+                        availabilities={filteredAvailabilities}
                         onEventClick={onEventClick}
                         expMap={expMap}
                     />
@@ -333,14 +395,14 @@ export function BookingsCalendar({
                 {viewMode === 'week' && (
                     <WeekView
                         currentDate={currentDate}
-                        availabilities={availabilities}
+                        availabilities={filteredAvailabilities}
                         onEventClick={onEventClick}
                     />
                 )}
                 {viewMode === 'day' && (
                     <DailyView
                         currentDate={currentDate}
-                        availabilities={availabilities}
+                        availabilities={filteredAvailabilities}
                         onEventClick={onEventClick}
                         pixelsPerMinute={pixelsPerMinute}
                         setPixelsPerMinute={setPixelsPerMinute}
@@ -547,21 +609,27 @@ function DailyView({
     setPixelsPerMinute: (ppm: number) => void,
     expMap: Record<string, { name: string, short_code: string }>
 }) {
-    // 1. Group by Experience (Swimlanes)
-    // We want to iterate experiences, even empty ones? Or just ones with events?
-    // "Premium" usually implies seeing all capacities.
-    // Let's use the expMap to drive the rows if we have it, otherwise fallback to finding unique IDs in availabilities.
-    // However, if we only fetched availabilities, we might miss empty experiences.
-    // But we have expMap from the parent ref fetch!
-
-    // Sort experiences by Short Code for consistency
+    // 1. Group by Experience
     const sortedExperienceIds = Object.keys(expMap).sort((a, b) =>
         expMap[a].short_code.localeCompare(expMap[b].short_code)
     );
 
     // Filter availabilities for the day
     const dateStr = format(currentDate, "yyyy-MM-dd");
-    const daysEvents = availabilities.filter(a => a.start_date === dateStr);
+
+    // DEBUG: Log all availabilities passed to DailyView
+    console.log(`[DEBUG DailyView] CurrentDate=${dateStr}, TotalAvailabilities=${availabilities.length}`);
+
+    // Relaxed Filter: If it's within the window, show it?
+    // Or stick to strict date matching?
+    // Let's Log what gets filtered OUT vs IN
+    const daysEvents = availabilities.filter(a => {
+        const match = a.start_date === dateStr;
+        if (!match) console.log(`[DEBUG] Skipped event ${a.id} date=${a.start_date} (Expected ${dateStr})`);
+        return match;
+    });
+
+    console.log(`[DEBUG DailyView] Filtered Events for ${dateStr}:`, daysEvents.length);
 
     // Grouping
     const grouped: Record<string, Availability[]> = {};
@@ -574,16 +642,32 @@ function DailyView({
     });
 
     // Time Config
-    const startHour = 6; // 6 AM
-    const endHour = 22; // 10 PM
+    // 1. Calculate Earliest Start Time
+    let earliestMinute = 24 * 60; // Default to end of day
+    let hasAllDay = false;
+
+    daysEvents.forEach(e => {
+        if (e.duration_type === 'all_day') {
+            hasAllDay = true;
+        } else if (e.start_time) {
+            const [h, m] = e.start_time.split(':').map(Number);
+            const totalM = h * 60 + m;
+            if (totalM < earliestMinute) earliestMinute = totalM;
+        }
+    });
+
+    // If All Day exists, force start to 00:00 (0 minutes)
+    // If no events found (earliestMinute still max), default to 08:00 (480 min) or 00:00? Let's default to 6 AM (360) for emptiness.
+    if (hasAllDay) {
+        earliestMinute = 0;
+    } else if (earliestMinute === 24 * 60) {
+        earliestMinute = 360; // Default 6 AM if no events
+    }
+
+    const startHour = Math.floor(earliestMinute / 60);
+    const endHour = startHour + 24; // Show full 24 hour cycle from start
     const totalMinutes = (endHour - startHour) * 60;
     const viewWidth = totalMinutes * pixelsPerMinute;
-
-    // Grid Lines (every 15 mins)
-    const gridMarkers = [];
-    for (let m = 0; m <= totalMinutes; m += 15) {
-        gridMarkers.push(m);
-    }
 
     // "Now" Indicator Logic
     const [now, setNow] = useState(new Date());
@@ -595,7 +679,18 @@ function DailyView({
     const getMinutesFromStart = (date: Date) => {
         const h = date.getHours();
         const m = date.getMinutes();
-        return (h * 60 + m) - (startHour * 60);
+        // Handle wrapping if we want? No, pure subtraction.
+        // If startHour is 8, and time is 10, returns 120.
+        // If time is 01:00 (next day implicity?), Date object usually is specific point in time.
+        // BUT our availabilities are "Start Date + Start Time".
+        // Daily View usually implies "One Calendar Day".
+        // If we "run 8am to 8am", we are showing 08:00 (Day 1) to 08:00 (Day 2).
+        // Standard "Day View" clipping usually hides Day 2.
+        // But the user requested "Run the timeline from 8am to 8am".
+        // This implies visual wrapping or extended axis.
+
+        let diff = (h * 60 + m) - (startHour * 60);
+        return diff;
     };
 
     const nowOffset = getMinutesFromStart(now);
@@ -603,19 +698,17 @@ function DailyView({
 
     return (
         <div className="flex flex-col h-full bg-[#0b1115] relative group/view">
-            {/* Zoom Control (Floating in top right of content area, or integrated?) 
-                Let's put it in a nice absolute container in the top right
-            */}
-            <div className="absolute top-4 right-4 z-40 flex items-center gap-2 bg-zinc-900/90 backdrop-blur border border-zinc-800 p-1 rounded-lg shadow-xl">
+            {/* Zoom Control */}
+            <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-zinc-900/90 backdrop-blur border border-zinc-800 p-1 rounded-lg shadow-xl">
                 <button
-                    onClick={() => setPixelsPerMinute(Math.max(1, pixelsPerMinute - 0.5))}
+                    onClick={() => setPixelsPerMinute(Math.max(0.5, pixelsPerMinute - 0.25))}
                     className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded"
                 >
                     <ZoomOut size={14} />
                 </button>
                 <span className="text-[10px] font-mono text-zinc-500 min-w-[30px] text-center">{pixelsPerMinute}x</span>
                 <button
-                    onClick={() => setPixelsPerMinute(Math.min(5, pixelsPerMinute + 0.5))}
+                    onClick={() => setPixelsPerMinute(Math.min(5, pixelsPerMinute + 0.25))}
                     className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded"
                 >
                     <ZoomIn size={14} />
@@ -626,22 +719,24 @@ function DailyView({
             <div className="flex-1 overflow-auto relative custom-scrollbar">
 
                 {/* Header: Time Scale */}
-                <div className="sticky top-0 z-30 bg-[#0b1115] border-b border-zinc-800 flex items-end h-10 shadow-sm" style={{ width: viewWidth, minWidth: '100%' }}>
-                    {/* Sticky Left Spacer for Row Headers */}
-                    <div className="sticky left-0 w-[140px] h-full bg-[#0b1115] z-40 border-r border-zinc-800 shrink-0"></div>
+                <div className="sticky top-0 z-40 bg-[#0b1115] border-b border-zinc-800 flex items-end h-10 shadow-md ring-1 ring-white/5" style={{ width: Math.max(viewWidth + 200, 1000) }}>
+                    {/* Sticky Left Corner */}
+                    <div className="sticky left-0 w-[200px] h-full bg-[#0b1115] z-50 border-r border-zinc-800 shrink-0"></div>
 
                     {/* Time Labels */}
-                    <div className="relative flex-1 h-full">
+                    <div className="relative flex-1 h-full bg-[#0b1115]">
                         {Array.from({ length: (endHour - startHour) + 1 }).map((_, i) => {
-                            const hour = startHour + i;
-                            const isPM = hour >= 12;
-                            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+                            const hourRaw = startHour + i;
+                            // Modulo 24 for label display 8, 9... 23, 0, 1...
+                            const hourMod = hourRaw % 24;
+                            const isPM = hourMod >= 12;
+                            const displayHour = hourMod > 12 ? hourMod - 12 : (hourMod === 0 ? 12 : hourMod);
                             const label = `${displayHour} ${isPM ? 'PM' : 'AM'}`;
                             const offset = i * 60 * pixelsPerMinute;
 
                             return (
                                 <div
-                                    key={hour}
+                                    key={hourRaw}
                                     className="absolute bottom-1 text-xs font-bold text-zinc-500 pl-1 border-l-2 border-zinc-700 h-4"
                                     style={{ left: offset }}
                                 >
@@ -653,19 +748,25 @@ function DailyView({
                 </div>
 
                 {/* Main Grid Area */}
-                <div className="relative flex" style={{ width: viewWidth, minWidth: '100%' }}>
+                <div className="relative flex flex-col group/grid" style={{ width: Math.max(viewWidth + 200, 1000) }}>
 
-                    {/* 1. Global Grid Lines (Background) */}
+                    {/* 1. Global Background Grid Lines */}
                     <div className="absolute inset-0 z-0 pointer-events-none">
-                        <div className="pl-[140px] h-full relative">
-                            {gridMarkers.map(m => (
+                        <div className="pl-[200px] h-full relative">
+                            {/* Hour Lines */}
+                            {Array.from({ length: (endHour - startHour) + 1 }).map((_, i) => (
                                 <div
-                                    key={m}
-                                    className={cn(
-                                        "absolute top-0 bottom-0 border-r",
-                                        m % 60 === 0 ? "border-zinc-800" : "border-zinc-800/30"
-                                    )}
-                                    style={{ left: m * pixelsPerMinute }}
+                                    key={`grid-${i}`}
+                                    className="absolute top-0 bottom-0 border-r border-zinc-800/40"
+                                    style={{ left: i * 60 * pixelsPerMinute }}
+                                />
+                            ))}
+                            {/* 15-min Lines */}
+                            {Array.from({ length: (totalMinutes / 15) }).map((_, i) => (
+                                <div
+                                    key={`subgrid-${i}`}
+                                    className="absolute top-0 bottom-0 border-r border-zinc-800/10"
+                                    style={{ left: i * 15 * pixelsPerMinute }}
                                 />
                             ))}
                         </div>
@@ -674,124 +775,213 @@ function DailyView({
                     {/* 2. Live "Now" Line */}
                     {isTodayView && nowOffset >= 0 && nowOffset <= totalMinutes && (
                         <div
-                            className="absolute top-0 bottom-0 border-l-[2px] border-red-500 z-20 pointer-events-none flex flex-col items-center"
-                            style={{ left: 140 + (nowOffset * pixelsPerMinute) }}
+                            className="absolute top-0 bottom-0 border-l-[2px] border-red-500/80 z-30 pointer-events-none"
+                            style={{ left: 200 + (nowOffset * pixelsPerMinute) }}
                         >
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500 -mt-1.5 shadow-[0_0_8px_2px_rgba(239,68,68,0.6)] animate-pulse" />
-                            <div className="bg-red-500 text-black text-[9px] font-bold px-1 rounded mt-1">Now</div>
+                            <div className="bg-red-500 text-black text-[9px] font-bold px-1 rounded absolute -top-1 -left-4">Now</div>
                         </div>
                     )}
 
-                    {/* 3. Crosshair (Visible on Group Hover) */}
-                    <div className="absolute top-0 bottom-0 w-px bg-cyan-500/50 z-10 hidden group-hover/view:block pointer-events-none translate-x-[var(--mouse-x)]"
-                        style={{
-                            // Logic for crosshair following mouse would require mouse tracking on the container.
-                            // For simplicity in React without heavy listeners, we can rely on hover of specific columns or just omit for now if complexity is high.
-                            // Let's omit the dynamic CSS var tracking for V1 stability.
-                            display: 'none'
-                        }}
-                    />
-
-                    {/* 4. Swimlanes */}
-                    <div className="flex flex-col w-full z-10 relative">
+                    {/* 3. Stacked Rows */}
+                    <div className="relative z-10 flex flex-col">
                         {sortedExperienceIds.map(expId => {
                             const exp = expMap[expId];
                             const events = grouped[expId] || [];
-                            const totalCap = events.reduce((sum, e) => sum + e.max_capacity, 0);
-                            const totalPax = events.reduce((sum, e) => sum + (e.booked_count || 0), 0);
-                            const occupancy = totalCap > 0 ? Math.round((totalPax / totalCap) * 100) : 0;
+
+                            // Sort events by time
+                            events.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+
+                            if (events.length === 0) return null; // Hide empty groups? Or show empty row? Let's hide for "Stacked" feel.
 
                             return (
-                                <div key={expId} className="flex border-b border-zinc-800 min-h-[80px] hover:bg-white/[0.02] transition-colors group/row">
-                                    {/* KPI Header */}
-                                    <div className="sticky left-0 w-[140px] bg-[#0b1115] border-r border-zinc-800 p-3 flex flex-col justify-center shrink-0 z-20 group-hover/row:bg-zinc-900/80 transition-colors">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="font-black text-white text-lg tracking-tight">{exp.short_code}</span>
-                                            {occupancy > 90 && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="High Occupancy" />}
-                                        </div>
-                                        <div className="text-[10px] text-zinc-500 font-medium">
-                                            {events.length} Trips
-                                        </div>
-                                        <div className={cn("text-[10px] font-bold mt-0.5", occupancy > 80 ? "text-amber-400" : "text-zinc-400")}>
-                                            {occupancy}% Cap
+                                <div key={expId} className="flex flex-col">
+                                    {/* Group Header Row */}
+                                    <div className="sticky left-0 bg-[#0b1115] border-b border-zinc-800 p-2 pl-4 flex items-center justify-between z-20 w-[200px] border-r border-zinc-800/50">
+                                        <div className="flex flex-col">
+                                            <span className="text-lg font-black text-white tracking-tight">{exp.short_code}</span>
+                                            <span className="text-[10px] text-zinc-500 uppercase font-bold">{events.length} Trips</span>
                                         </div>
                                     </div>
 
-                                    {/* Timeline Track */}
-                                    {/* 
-                                         Click to Create: We need to capture clicks on this track, calculate time, and trigger create.
-                                         The track is `totalMinutes * pixelsPerMinute` wide.
-                                     */}
-                                    <div
-                                        className="relative flex-1 h-full"
-                                        onClick={(e) => {
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            const x = e.clientX - rect.left;
-                                            const minutesClicked = x / pixelsPerMinute;
-                                            const timeClicked = addMinutes(startOfDay(currentDate), startHour * 60 + minutesClicked);
-                                            console.log("Create Schedule at:", format(timeClicked, "HH:mm"));
-                                            // Future: onEventClick(null, {date: timeClicked, expId})
-                                        }}
-                                    >
-                                        {events.map(event => {
-                                            // Calculate Position and Width
-                                            const startTime = new Date(`${event.start_date}T${event.start_time}`);
-                                            const startOffset = getMinutesFromStart(startTime);
-                                            // Duration: Default to 60 if missing? Or calculate from end_time?
-                                            // Availabilities usually have start/end. If not, assume 2 hours?
-                                            let duration = 120; // Default
-                                            if (event.end_time) {
-                                                const endTime = new Date(`${event.start_date}T${event.end_time}`);
-                                                // Handle crossing midnight?
-                                                duration = differenceInMinutes(endTime, startTime);
-                                            } else if (event.duration_minutes) {
-                                                duration = event.duration_minutes;
-                                            }
+                                    {/* Event Rows */}
+                                    {events.map((event, idx) => {
+                                        // Safe Parsing for Start/End
+                                        let startTimeStr = event.start_time;
+                                        const startDateStr = event.start_date;
+                                        const isAllDay = event.duration_type === 'all_day';
 
-                                            const width = Math.max(duration * pixelsPerMinute, 40); // Min width for visibility
+                                        // ALL DAY LOGIC: Force start time if missing
+                                        if (isAllDay && !startTimeStr) {
+                                            startTimeStr = "00:00:00";
+                                        }
 
+                                        if (!startTimeStr || !startDateStr) {
+                                            console.log(`[DEBUG] INVALID EVENT (ID: ${event.id}):`, JSON.stringify(event, null, 2));
                                             return (
-                                                <div
-                                                    key={event.id}
-                                                    className="absolute top-2 bottom-2 rounded-md shadow-md overflow-hidden bg-cyan-600/90 hover:bg-cyan-500 hover:ring-1 hover:ring-white border border-white/10 cursor-pointer transition-all hover:z-50 group/chip"
-                                                    style={{
-                                                        left: startOffset * pixelsPerMinute,
-                                                        width: width - 4 // Gap
-                                                    }}
+                                                <div key={event.id} className="flex border-b border-zinc-900 min-h-[50px] bg-red-900/20 items-center px-4">
+                                                    <span className="text-red-500 font-mono text-xs">INVALID DATA: ID {event.id} Missing Time</span>
+                                                </div>
+                                            );
+                                        }
+
+                                        const startDateTime = new Date(`${startDateStr}T${startTimeStr}`);
+                                        if (isNaN(startDateTime.getTime())) {
+                                            return (
+                                                <div key={event.id} className="flex border-b border-zinc-900 min-h-[50px] bg-red-900/20 items-center px-4">
+                                                    <span className="text-red-500 font-mono text-xs">INVALID TIME FORMAT: {startTimeStr}</span>
+                                                </div>
+                                            );
+                                        }
+
+                                        const startOffset = getMinutesFromStart(startDateTime);
+
+                                        // Duration Logic
+                                        let duration = 120; // fallback
+
+                                        if (isAllDay) {
+                                            duration = 1440; // 24 Hours
+                                        }
+                                        // 1. Explicit hours_long from DB (if available)
+                                        else if (event.hours_long) {
+                                            duration = event.hours_long * 60;
+                                        }
+                                        // 2. Calculated from End Time
+                                        else if (event.end_time) {
+                                            const endDateTime = new Date(`${startDateStr}T${event.end_time}`);
+                                            if (!isNaN(endDateTime.getTime())) {
+                                                duration = differenceInMinutes(endDateTime, startDateTime);
+                                            }
+                                        }
+                                        // 3. Explicit duration_minutes field (if available)
+                                        else if ((event as any).duration_minutes) {
+                                            duration = Number((event as any).duration_minutes);
+                                        }
+
+                                        // Width calculation
+                                        const width = Math.max(duration * pixelsPerMinute, 50);
+
+                                        return (
+                                            <div key={event.id} className="flex border-b border-zinc-900/50 min-h-[60px] relative items-center group/row hover:bg-white/[0.02] transition-colors">
+                                                {/* Sticky Left Label (Time?) - Optional */}
+                                                <div className="sticky left-0 w-[200px] h-full border-r border-zinc-800/50 bg-[#0b1115] z-20 shrink-0 flex items-center justify-end pr-4">
+                                                    <span className="text-xs font-mono text-zinc-600 group-hover/row:text-zinc-400 transition-colors">
+                                                        {format(startDateTime, "h:mm a")}
+                                                    </span>
+                                                </div>
+
+                                                {/* Timeline Content Area */}
+                                                <div className="relative flex-1 h-full"
                                                     onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onEventClick?.(event, e);
+                                                        // Click to Create Logic (Mapped to grid)
+                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                        const x = e.clientX - rect.left;
+                                                        const minutesClicked = x / pixelsPerMinute;
+                                                        const timeClicked = addMinutes(startOfDay(currentDate), startHour * 60 + minutesClicked);
+                                                        console.log("Create Schedule at:", format(timeClicked, "HH:mm"));
                                                     }}
                                                 >
-                                                    {/* Chip Content - Simplified for timeline */}
-                                                    <div className="h-full px-2 py-1 flex flex-col justify-center">
-                                                        {/* Line 1: Code */}
-                                                        <div className="items-center gap-1 hidden sm:flex">
-                                                            <span className="font-bold text-white text-xs truncate">{exp.short_code}</span>
-                                                        </div>
-
-                                                        {/* Show Only if Wide Enough */}
-                                                        {width > 60 && (
-                                                            <div className="text-[10px] text-white/90 font-medium truncate">
-                                                                {event.booked_count}/{event.max_capacity}
-                                                            </div>
-                                                        )}
+                                                    {/* Chip Wrapper (Flow Positioned) */}
+                                                    <div
+                                                        className="h-full relative z-10"
+                                                        style={{
+                                                            marginLeft: Math.max(0, startOffset * pixelsPerMinute),
+                                                            width: width
+                                                        }}
+                                                    >
+                                                        <EventChip
+                                                            abbr={exp.short_code || "EXP"}
+                                                            time={startDateTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                                            bookedCount={event.booked_count || 0}
+                                                            maxCapacity={event.max_capacity}
+                                                            bookingRecordsCount={event.booking_records_count || 0}
+                                                            resources={[event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ")}
+                                                            onClick={(e) => {
+                                                                e?.stopPropagation();
+                                                                if (onEventClick && e) onEventClick(event, e);
+                                                            }}
+                                                            note={event.private_announcement}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )
-                                        })}
-                                    </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            )
+                            );
                         })}
                     </div>
-
                 </div>
             </div>
         </div>
     );
 }
 
+// -- SUB COMPONENTS --
+
+function CustomSelect({
+    value,
+    options,
+    onChange,
+    className
+}: {
+    value: number | string,
+    options: { label: string, value: number | string }[],
+    onChange: (value: any) => void,
+    className?: string
+}) {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Click outside handler
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedLabel = options.find(o => o.value === value)?.label || value;
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={cn(
+                    "flex items-center justify-between gap-2 bg-zinc-900/50 border border-zinc-800 text-white text-lg font-bold py-1.5 px-3 rounded-lg hover:border-zinc-700 transition-all min-w-[fit-content]",
+                    className
+                )}
+            >
+                <span>{selectedLabel}</span>
+                <ChevronDown size={16} className={cn("transition-transform duration-200", isOpen && "rotate-180")} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                    {options.map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => {
+                                onChange(opt.value);
+                                setIsOpen(false);
+                            }}
+                            className={cn(
+                                "w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 transition-colors",
+                                value === opt.value ? "text-white font-medium bg-zinc-800/50" : "text-zinc-400"
+                            )}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// EventChip Component - Used across all calendar views
 function EventChip({
     abbr,
     time,
@@ -799,17 +989,17 @@ function EventChip({
     maxCapacity,
     bookingRecordsCount,
     resources,
-    note,
-    onClick
+    onClick,
+    note
 }: {
-    abbr: string,
-    time: string,
-    bookedCount: number,
-    maxCapacity: number,
-    bookingRecordsCount: number,
-    resources: string,
-    note?: string,
-    onClick?: (e: React.MouseEvent) => void
+    abbr: string;
+    time: string;
+    bookedCount: number;
+    maxCapacity: number;
+    bookingRecordsCount: number;
+    resources?: string;
+    onClick?: (e?: React.MouseEvent) => void;
+    note?: string;
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const openCount = maxCapacity - bookedCount;
@@ -819,7 +1009,7 @@ function EventChip({
 
     return (
         <div
-            className="mb-1 p-1.5 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-1 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500 overflow-hidden ring-1 ring-white/10"
+            className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500 overflow-hidden ring-1 ring-white/10"
             onClick={(e) => {
                 e.stopPropagation();
                 onClick?.(e);
@@ -870,69 +1060,6 @@ function EventChip({
                             {resources}
                         </div>
                     )}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function CustomSelect({
-    value,
-    options,
-    onChange,
-    className
-}: {
-    value: number | string,
-    options: { label: string, value: number | string }[],
-    onChange: (value: any) => void,
-    className?: string
-}) {
-    const [isOpen, setIsOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    // Click outside handler
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const selectedLabel = options.find(o => o.value === value)?.label || value;
-
-    return (
-        <div className="relative" ref={containerRef}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={cn(
-                    "flex items-center justify-between gap-2 bg-zinc-900/50 border border-zinc-800 text-white text-lg font-bold py-1.5 px-3 rounded-lg hover:border-zinc-700 transition-all min-w-[fit-content]",
-                    className
-                )}
-            >
-                <span className="truncate">{selectedLabel}</span>
-                <ChevronDown className={cn("w-4 h-4 text-zinc-500 stroke-[3] transition-transform duration-200", isOpen && "rotate-180")} />
-            </button>
-
-            {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-full min-w-[120px] max-h-[300px] overflow-y-auto bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 scrollbar-thin scrollbar-thumb-zinc-800">
-                    {options.map((opt) => (
-                        <div
-                            key={opt.value}
-                            onClick={() => {
-                                onChange(opt.value);
-                                setIsOpen(false);
-                            }}
-                            className={cn(
-                                "px-3 py-2 text-sm font-bold cursor-pointer transition-colors border-b border-zinc-900 last:border-0",
-                                opt.value === value ? "bg-zinc-900 text-cyan-500" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                            )}
-                        >
-                            {opt.label}
-                        </div>
-                    ))}
                 </div>
             )}
         </div>
