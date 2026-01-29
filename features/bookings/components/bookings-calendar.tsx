@@ -30,7 +30,7 @@ import {
 export function BookingsCalendar({
     onEventClick
 }: {
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void
+    onEventClick?: (availability: Availability, rect: DOMRect) => void
 }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
@@ -489,7 +489,7 @@ function MonthView({
 }: {
     currentDate: Date,
     availabilities: Availability[],
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
+    onEventClick?: (availability: Availability, rect: DOMRect) => void,
     expMap: Record<string, { name: string, short_code: string }>
 }) {
     const year = currentDate.getFullYear();
@@ -541,9 +541,9 @@ function MonthView({
                                                         maxCapacity={event.max_capacity}
                                                         bookingRecordsCount={event.booking_records_count || 0}
                                                         resources={[event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ")}
-                                                        onClick={(e) => {
+                                                        onClick={(e, rect) => {
                                                             e?.stopPropagation();
-                                                            if (onEventClick && e) onEventClick(event, e);
+                                                            if (onEventClick) onEventClick(event, rect);
                                                         }}
                                                         note={event.private_announcement}
                                                     />
@@ -568,7 +568,7 @@ function WeekView({
 }: {
     currentDate: Date,
     availabilities: Availability[],
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void
+    onEventClick?: (availability: Availability, rect: DOMRect) => void
 }) {
     const start = startOfWeek(currentDate);
     const end = endOfWeek(currentDate);
@@ -635,9 +635,9 @@ function WeekView({
                                             maxCapacity={event.max_capacity}
                                             bookingRecordsCount={event.booking_records_count || 0}
                                             resources={[event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ")}
-                                            onClick={(e) => {
+                                            onClick={(e, rect) => {
                                                 e?.stopPropagation();
-                                                if (onEventClick && e) onEventClick(event, e);
+                                                if (onEventClick) onEventClick(event, rect);
                                             }}
                                             note={event.private_announcement}
                                         />
@@ -662,7 +662,7 @@ function DailyView({
 }: {
     currentDate: Date,
     availabilities: Availability[],
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
+    onEventClick?: (availability: Availability, rect: DOMRect) => void,
     pixelsPerMinute: number,
     setPixelsPerMinute: (ppm: number) => void,
     expMap: Record<string, { name: string, short_code: string }>
@@ -953,9 +953,9 @@ function DailyView({
                                                             maxCapacity={event.max_capacity}
                                                             bookingRecordsCount={event.booking_records_count || 0}
                                                             resources={[event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ")}
-                                                            onClick={(e) => {
+                                                            onClick={(e, rect) => {
                                                                 e?.stopPropagation();
-                                                                if (onEventClick && e) onEventClick(event, e);
+                                                                if (onEventClick) onEventClick(event, rect);
                                                             }}
                                                             note={event.private_announcement}
                                                         />
@@ -1056,9 +1056,10 @@ function EventChip({
     maxCapacity: number;
     bookingRecordsCount: number;
     resources?: string;
-    onClick?: (e?: React.MouseEvent) => void;
+    onClick?: (e: React.MouseEvent, rect: DOMRect) => void;
     note?: string;
 }) {
+    const chipRef = React.useRef<HTMLDivElement>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const openCount = maxCapacity - bookedCount;
 
@@ -1067,10 +1068,13 @@ function EventChip({
 
     return (
         <div
+            ref={chipRef}
             className="group mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-700/90 hover:bg-cyan-400 overflow-hidden ring-1 ring-white/10"
             onClick={(e) => {
                 e.stopPropagation();
-                onClick?.(e);
+                if (chipRef.current) {
+                    onClick?.(e, chipRef.current.getBoundingClientRect());
+                }
             }}
         >
             {/* Header / Line 1: Code Only + Toggle */}

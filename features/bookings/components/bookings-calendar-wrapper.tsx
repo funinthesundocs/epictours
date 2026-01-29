@@ -30,15 +30,13 @@ export function BookingsCalendarWrapper() {
     const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
 
     // Handle click on availability chip
-    const handleEventClick = useCallback((availability: Availability, event: React.MouseEvent) => {
-        event.stopPropagation();
+    const handleEventClick = useCallback((availability: Availability, rect: DOMRect) => {
         setSelectedAvailability(availability);
 
-        // Position menu near the click
-        const rect = (event.target as HTMLElement).getBoundingClientRect();
+        // Position menu extending from the top-right of the clicked chip
         setActionMenuPosition({
-            x: Math.min(rect.right + 10, window.innerWidth - 300),
-            y: Math.min(rect.top, window.innerHeight - 300)
+            x: Math.min(rect.right + 8, window.innerWidth - 300),
+            y: rect.top
         });
     }, []);
 
