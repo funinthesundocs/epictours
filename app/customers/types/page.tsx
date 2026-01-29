@@ -79,7 +79,7 @@ export default function CustomerTypesPage() {
                     Loading...
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                     <CustomerTypesTable
                         data={data}
                         onEdit={handleEdit}

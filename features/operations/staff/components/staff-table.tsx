@@ -105,7 +105,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
         <>
             <div className="h-full overflow-auto relative">
                 <table className="w-full text-left hidden md:table">
-                    <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                    <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                         <tr>
                             <th className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none" onClick={() => handleSort('name')}>
                                 <div className="flex items-center gap-2">Name <SortIcon column="name" /></div>

@@ -437,12 +437,12 @@ export function ActivityFeed() {
             </div>
 
             {/* Table Container (Matching CustomersPage Structure) */}
-            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                 <div className={cn("h-full", loading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
                     <div className="h-full overflow-auto relative">
                         {/* Desktop Table */}
                         <table className="w-full text-left hidden md:table">
-                            <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                            <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                                 <tr>
                                     <th className="px-6 py-4">What Changed</th>
                                     <th className="px-6 py-4">User</th>

@@ -32,7 +32,7 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
     return (
         <div className="h-full overflow-auto relative">
             <table className="w-full text-left hidden md:table">
-                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
                         <th className="px-6 py-4 font-medium">Notes</th>

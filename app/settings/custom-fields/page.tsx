@@ -158,7 +158,7 @@ export default function CustomFieldsPage() {
                 </div>
 
                 {/* Table Area */}
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-full text-zinc-500 animate-pulse">
                             Loading fields...

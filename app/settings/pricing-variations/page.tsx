@@ -108,7 +108,7 @@ export default function PricingVariationsPage() {
                     <Loader2 className="animate-spin text-cyan-400" size={32} />
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                     <PricingVariationsTable
                         data={variations}
                         onEdit={handleEdit}

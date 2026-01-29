@@ -70,9 +70,9 @@ export function Sidebar() {
                         {!isCollapsed && (
                             <Link href="/" className="overflow-hidden whitespace-nowrap hover:opacity-80 transition-opacity">
                                 <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                                    Epic<span className="text-cyan-400">.ai</span>
+                                    EpicDash<span className="text-cyan-400">.ai</span>
                                 </h1>
-                                <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">Business OS</p>
+                                <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">Custom OS</p>
                             </Link>
                         )}
                         {/* Collapse Toggle */}
