@@ -501,7 +501,7 @@ function MonthView({
 
     return (
         <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
-            <table className="w-full border-separate border-spacing-0">
+            <table className="w-full table-fixed border-separate border-spacing-0">
                 <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (

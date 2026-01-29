@@ -66,7 +66,7 @@ export default function CustomerTypesPage() {
             action={
                 <button
                     onClick={handleCreate}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                 >
                     <Plus size={16} strokeWidth={3} />
                     <span>New Type</span>

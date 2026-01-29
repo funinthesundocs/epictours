@@ -170,7 +170,7 @@ export function BulkActionToolbar({
                         <button
                             onClick={() => setIsConfirmOpen(true)}
                             disabled={isLoading}
-                            className="px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+                            className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
                         >
                             {isLoading && <Loader2 className="animate-spin" size={16} />}
                             Apply to {selectedCount} items

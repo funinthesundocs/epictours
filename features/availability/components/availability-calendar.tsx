@@ -566,7 +566,7 @@ function MonthView({
 
     return (
         <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
-            <table className="w-full border-separate border-spacing-0">
+            <table className="w-full table-fixed border-separate border-spacing-0">
                 <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
@@ -680,14 +680,14 @@ function ToolbarButton({
             onClick={onClick}
             disabled={disabled}
             className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
+                "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border border-transparent hover:border-zinc-700",
                 primary
-                    ? "bg-cyan-400 text-black border-cyan-400 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    ? "bg-cyan-400 text-black hover:bg-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     : active
-                        ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-400/50"
+                        ? "bg-cyan-400/20 text-cyan-400 shadow-sm"
                         : danger
-                            ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
-                            : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800",
+                            ? "text-zinc-500 hover:text-red-400 hover:bg-red-400/10"
+                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50",
                 disabled && "opacity-50 cursor-not-allowed pointer-events-none grayscale",
                 className
             )}>

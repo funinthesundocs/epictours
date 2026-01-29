@@ -353,7 +353,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {initialData ? "Update" : "Create"}

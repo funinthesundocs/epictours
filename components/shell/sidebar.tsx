@@ -58,7 +58,7 @@ export function Sidebar() {
 
             {/* Sidebar Container */}
             <aside className={cn(
-                "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-zinc-950",
+                "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-[#010a0a]",
                 isMobileOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0",
                 isCollapsed ? "lg:w-[80px]" : "lg:w-[240px]"
             )}>

@@ -368,7 +368,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
                             isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                     "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >

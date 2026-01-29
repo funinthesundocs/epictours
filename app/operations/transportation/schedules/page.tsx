@@ -86,7 +86,7 @@ export default function SchedulesPage() {
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
                     Create Schedule
@@ -113,7 +113,7 @@ export default function SchedulesPage() {
                         <Loader2 className="animate-spin text-cyan-400" size={32} />
                     </div>
                 ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                         <SchedulesTable
                             data={filteredSchedules}
                             onEdit={handleEdit}

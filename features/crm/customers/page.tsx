@@ -143,7 +143,7 @@ export function CustomersPage() {
                     <div className="flex items-center gap-3 self-end md:self-auto">
                         <button
                             onClick={handleAddNew}
-                            className="h-10 px-4 bg-cyan-400 hover:bg-cyan-300 text-white font-semibold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center gap-2"
+                            className="h-10 px-4 bg-cyan-400 hover:bg-cyan-300 text-black font-semibold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center gap-2"
                         >
                             <Plus size={16} />
                             Add Customer
@@ -174,7 +174,7 @@ export function CustomersPage() {
                     {error}
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                     <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
                         <CustomerTable
                             data={data}

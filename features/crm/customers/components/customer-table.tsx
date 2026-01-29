@@ -166,7 +166,7 @@ export function CustomerTable({ data, onEdit, onDelete, sortConfig, onSort, visi
             >
                 {/* Sticky Header Row with Glassy Background */}
                 <div
-                    className="grid bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold border-b border-white/5 sticky top-0 z-20"
+                    className="grid bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold border-b border-white/5 sticky top-0 z-20"
                     style={{ gridTemplateColumns }}
                 >
                     {visibleColumnConfigs.map((col) => {
@@ -180,7 +180,7 @@ export function CustomerTable({ data, onEdit, onDelete, sortConfig, onSort, visi
                                 key={col.key}
                                 className={cn(
                                     "px-4 py-3 cursor-pointer hover:bg-[#0b1115] transition-colors group select-none flex items-center gap-2",
-                                    isActive ? "text-cyan-400" : "text-zinc-400"
+                                    isActive ? "text-cyan-400" : "text-white"
                                 )}
                                 onClick={() => onSort && onSort(col.sortKey || col.key)}
                             >

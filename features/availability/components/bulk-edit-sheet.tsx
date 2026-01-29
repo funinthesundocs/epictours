@@ -1723,7 +1723,7 @@ export function BulkEditSheet({
                                             (!canApply) ? "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5" :
                                                 selectedUpdateTypes.includes('delete')
                                                     ? "bg-red-500 hover:bg-red-400 text-white"
-                                                    : "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                                    : "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                                     )}
                                 >
                                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> :

@@ -1296,11 +1296,11 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                         form="custom-field-form"
                         disabled={isSubmitting || !form.formState.isDirty}
                         className={cn(
-                            "bg-cyan-400 hover:bg-cyan-400 text-white font-bold min-w-[120px]",
+                            "bg-cyan-400 hover:bg-cyan-300 text-black font-bold min-w-[120px]",
                             isSubmitting
                                 ? "bg-cyan-400/50 text-white cursor-not-allowed"
                                 : form.formState.isDirty
-                                    ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                    ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                                     : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >
