@@ -17,6 +17,7 @@ interface BookingItem {
     amount_paid: number;
     total_amount: number;
     voucher_numbers?: string;
+    confirmation_number?: string;
     created_at: string;
 }
 
@@ -49,7 +50,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 .from('bookings' as any)
                 .select(`
                     id, status, pax_count, pax_breakdown, payment_status, 
-                    amount_paid, total_amount, voucher_numbers, created_at,
+                    amount_paid, total_amount, voucher_numbers, confirmation_number, created_at,
                     customers(name, phone)
                 `)
                 .eq('availability_id', availability.id)
@@ -67,6 +68,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     amount_paid: b.amount_paid || 0,
                     total_amount: b.total_amount || 0,
                     voucher_numbers: b.voucher_numbers || "",
+                    confirmation_number: b.confirmation_number || "",
                     created_at: b.created_at
                 }));
                 setBookings(flat);
@@ -81,10 +83,11 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     const activeBookings = bookings.filter(b => b.status !== 'cancelled');
     const cancelledBookings = bookings.filter(b => b.status === 'cancelled');
 
-    // Filter by search query
+    // Filter by search query (includes confirmation number)
     const filteredActive = activeBookings.filter(b =>
         b.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (b.voucher_numbers && b.voucher_numbers.includes(searchQuery))
+        (b.voucher_numbers && b.voucher_numbers.includes(searchQuery)) ||
+        (b.confirmation_number && b.confirmation_number.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const totalBooked = activeBookings.reduce((sum, b) => sum + b.pax_count, 0);
@@ -183,6 +186,9 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                                 <div>
                                                     <div className="text-white font-medium text-base">{booking.customer_name}</div>
                                                     <div className="text-zinc-500 text-sm mt-0.5">
+                                                        {booking.confirmation_number && (
+                                                            <span className="text-cyan-400 font-mono mr-2">{booking.confirmation_number}</span>
+                                                        )}
                                                         {booking.pax_count} Pax
                                                         {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
                                                     </div>

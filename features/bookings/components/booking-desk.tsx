@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Trash2, Loader2, Save } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { format, startOfDay, endOfDay } from "date-fns";
 
 interface BookingDeskProps {
     isOpen: boolean;
@@ -64,6 +65,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
     });
     const [grandTotal, setGrandTotal] = useState(0);
     const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
+    const [confirmationNumber, setConfirmationNumber] = useState<string | null>(null);
 
     // Snapshot Helper
     const getSnapshot = () => JSON.stringify({
@@ -115,6 +117,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             setNotes("");
             setPaxCounts({});
             setOptionValues({});
+            setConfirmationNumber(null);
         }
         setIsSaving(false);
         // Default Schedule
@@ -180,6 +183,11 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                 } else if (bookingData) {
                     const booking = bookingData as any; // Type cast for flexibility
                     console.log("DEBUG: Loaded booking data:", booking);
+
+                    // Load confirmation number if exists
+                    if (booking.confirmation_number) {
+                        setConfirmationNumber(booking.confirmation_number);
+                    }
 
                     let waitingForPaxMap = false;
 
@@ -354,10 +362,51 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     .eq('id', editingBookingId);
                 error = result.error;
             } else {
-                // INSERT new booking
+                // INSERT new booking - Generate confirmation number
                 console.log("DEBUG: Creating new booking");
-                const result = await supabase.from('bookings' as any).insert(bookingData);
+
+                // Generate confirmation number: EXP-MMDDYY-SEQ
+                const expCode = currentAvailability.experience_short_code || 'EXP';
+                const today = new Date();
+                const dateStr = format(today, 'MMddyy');
+
+                // Count existing bookings for this experience created today
+                const { count } = await supabase
+                    .from('bookings' as any)
+                    .select('id', { count: 'exact', head: true })
+                    .gte('created_at', startOfDay(today).toISOString())
+                    .lt('created_at', endOfDay(today).toISOString())
+                    .eq('availability_id', currentAvailability.id);
+
+                // Actually we need to count ALL bookings for this experience on this day
+                // First get all availabilities for this experience
+                const { data: expAvails } = await supabase
+                    .from('availabilities' as any)
+                    .select('id')
+                    .eq('experience_id', currentAvailability.experience_id);
+
+                const availIds = expAvails?.map((a: any) => a.id) || [];
+
+                // Count bookings across all availabilities for this experience today
+                const { count: dailyCount } = await supabase
+                    .from('bookings' as any)
+                    .select('id', { count: 'exact', head: true })
+                    .in('availability_id', availIds)
+                    .gte('created_at', startOfDay(today).toISOString())
+                    .lt('created_at', endOfDay(today).toISOString());
+
+                const seq = (dailyCount || 0) + 1;
+                const newConfirmationNumber = `${expCode}-${dateStr}-${seq}`;
+
+                const result = await supabase.from('bookings' as any).insert({
+                    ...bookingData,
+                    confirmation_number: newConfirmationNumber
+                });
                 error = result.error;
+
+                if (!error) {
+                    setConfirmationNumber(newConfirmationNumber);
+                }
             }
 
             if (error) throw error;
@@ -448,7 +497,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             onClose={onClose}
             title={isEditMode ? "Edit Booking" : "Booking Desk"}
             description={isEditMode
-                ? `Editing booking for ${selectedCustomer?.name || 'Customer'}`
+                ? `Editing booking for ${selectedCustomer?.name || 'Customer'}${confirmationNumber ? ` • ${confirmationNumber}` : ''}`
                 : `Create a new booking for ${(() => {
                     const [y, m, d] = currentAvailability.start_date.split('-');
                     return `${m}-${d}-${y}`;
