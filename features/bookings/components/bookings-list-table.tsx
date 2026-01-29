@@ -233,7 +233,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-cyan-500" size={32} />
+                <Loader2 className="animate-spin text-cyan-400" size={32} />
             </div>
         );
     }
@@ -288,7 +288,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                             .map((booking) => (
                                 <tr
                                     key={booking.id}
-                                    className="hover:bg-cyan-500/5 transition-colors cursor-pointer group"
+                                    className="hover:bg-cyan-400/5 transition-colors cursor-pointer group"
                                     onClick={() => onBookingClick?.(booking.id)}
                                 >
                                     {/* Exp */}

@@ -138,7 +138,7 @@ function Calendar({
                 day_button: cn(
                     "h-8 w-8 p-0 font-normal hover:bg-zinc-800/80 rounded-md transition-colors text-zinc-300 hover:text-white flex items-center justify-center"
                 ),
-                selected: "bg-cyan-500 text-black hover:bg-cyan-400 hover:text-black focus:bg-cyan-500 focus:text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]",
+                selected: "bg-cyan-400 text-black hover:bg-cyan-400 hover:text-black focus:bg-cyan-400 focus:text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]",
                 today: "bg-zinc-800 text-zinc-50 font-semibold rounded-md",
                 outside: "text-zinc-600 opacity-50",
                 disabled: "!text-zinc-700 !opacity-30 cursor-not-allowed pointer-events-none",

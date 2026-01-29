@@ -108,7 +108,7 @@ export function AvailabilityListTable({
                                         checked={allSelected}
                                         ref={(el) => { if (el) el.indeterminate = someSelected; }}
                                         onChange={handleSelectAll}
-                                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
+                                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-400 focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer"
                                     />
                                 </th>
                             )}
@@ -140,7 +140,7 @@ export function AvailabilityListTable({
                                             type="checkbox"
                                             checked={selectedIds.has(item.id)}
                                             onChange={(e) => handleSelectItem(item.id, e as unknown as React.MouseEvent)}
-                                            className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
+                                            className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-400 focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer"
                                         />
                                     </td>
                                 )}
@@ -160,7 +160,7 @@ export function AvailabilityListTable({
                                 <td className="px-6 py-4 align-middle">
                                     <div className="flex flex-col">
                                         <span className="font-semibold text-white flex items-center gap-2">
-                                            <Calendar size={14} className="text-cyan-500" />
+                                            <Calendar size={14} className="text-cyan-400" />
                                             {(() => {
                                                 const [y, m, d] = item.start_date.split('-');
                                                 return `${m}-${d}-${y}`;
@@ -181,7 +181,7 @@ export function AvailabilityListTable({
                                         <span className="text-zinc-400 italic flex items-center gap-2"><Clock size={14} /> All Day</span>
                                     ) : (
                                         <span className="font-medium text-white flex items-center gap-2">
-                                            <Clock size={14} className="text-cyan-500" />
+                                            <Clock size={14} className="text-cyan-400" />
                                             {new Date(`1970-01-01T${item.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </span>
                                     )}

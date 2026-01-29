@@ -44,7 +44,7 @@ export function ColumnThree({
                     {/* Email Entire Tour */}
                     <button
                         onClick={onEmailTour}
-                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-500/30 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-400/30 transition-all text-left"
                     >
                         <div className="bg-zinc-800 p-2 rounded-full">
                             <Mail size={16} className="text-zinc-400" />
@@ -58,7 +58,7 @@ export function ColumnThree({
                     {/* SMS Entire Tour */}
                     <button
                         onClick={onSmsTour}
-                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-500/30 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-400/30 transition-all text-left"
                     >
                         <div className="bg-zinc-800 p-2 rounded-full">
                             <MessageSquare size={16} className="text-zinc-400" />

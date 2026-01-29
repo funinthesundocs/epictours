@@ -3,7 +3,7 @@ import { CustomerStatus } from "../types";
 
 const statusStyles: Record<string, string> = {
     "Customer": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    "Lead": "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    "Lead": "bg-cyan-400/10 text-cyan-400 border-cyan-400/20",
     "Refund": "bg-orange-500/10 text-orange-400 border-orange-500/20",
     "Problem": "bg-red-500/10 text-red-400 border-red-500/20",
 };

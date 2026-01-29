@@ -22,7 +22,7 @@ interface ColumnTwoProps {
     setOptionValues: (values: Record<string, any>) => void;
 }
 
-const inputStyles = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none transition-colors placeholder:text-zinc-600";
+const inputStyles = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-400/50 focus:outline-none transition-colors placeholder:text-zinc-600";
 
 export function ColumnTwo({
     availability,
@@ -114,8 +114,8 @@ export function ColumnTwo({
                     />
 
                     {currentValue && pickupDetails && (
-                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                            <div className="mt-0.5 text-cyan-500 flex-shrink-0">
+                        <div className="p-3 bg-cyan-950/20 border border-cyan-400/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                            <div className="mt-0.5 text-cyan-400 flex-shrink-0">
                                 <MapPin size={16} />
                             </div>
                             <div className="space-y-1 min-w-0">
@@ -191,14 +191,14 @@ export function ColumnTwo({
                                     className={cn(
                                         "flex items-center gap-3 px-3 py-2 rounded-lg border text-left text-sm transition-colors",
                                         isSelected
-                                            ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
+                                            ? "bg-cyan-400/10 border-cyan-400/50 text-cyan-400"
                                             : "bg-zinc-900/80 border-white/10 text-zinc-300 hover:border-white/20"
                                     )}
                                 >
                                     <div className={cn(
                                         "w-4 h-4 border flex items-center justify-center flex-shrink-0",
                                         isMulti ? "rounded" : "rounded-full",
-                                        isSelected ? "border-cyan-500 bg-cyan-500" : "border-white/20"
+                                        isSelected ? "border-cyan-400 bg-cyan-400" : "border-white/20"
                                     )}>
                                         {isSelected && (
                                             <div className={cn(
@@ -283,7 +283,7 @@ export function ColumnTwo({
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
             {/* Header */}
             <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
-                <Settings size={16} className="text-cyan-500" />
+                <Settings size={16} className="text-cyan-400" />
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Options & Notes</span>
             </div>
 
@@ -345,7 +345,7 @@ export function ColumnTwo({
                         if (opt.type === 'header') {
                             return (
                                 <div key={optId} className="pt-4 pb-2">
-                                    <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-500/30 pb-1 mb-1">
+                                    <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-400/30 pb-1 mb-1">
                                         {opt.label}
                                     </h4>
                                     {opt.description && (
@@ -365,7 +365,7 @@ export function ColumnTwo({
                                         <div className="text-sm font-medium text-white flex items-center gap-2">
                                             {opt.label || "Unnamed Option"}
                                             {opt.required && (
-                                                <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">Required</span>
+                                                <span className="text-[10px] text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">Required</span>
                                             )}
                                         </div>
                                         {opt.description && (

@@ -47,7 +47,7 @@ export function ColumnOne() {
             {/* Sticky Header */}
             <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 px-6 py-4">
-                    <CalendarDays size={16} className="text-cyan-500" />
+                    <CalendarDays size={16} className="text-cyan-400" />
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Schedule</span>
                 </div>
             </div>
@@ -77,7 +77,7 @@ export function ColumnOne() {
                                     className={cn(
                                         "flex-1 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all",
                                         !isRepeating
-                                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                                            ? "bg-cyan-400/20 border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
                                             : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
                                     )}
                                 >
@@ -94,7 +94,7 @@ export function ColumnOne() {
                                     className={cn(
                                         "flex-1 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all flex items-center justify-center gap-2",
                                         isRepeating
-                                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                                            ? "bg-cyan-400/20 border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
                                             : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
                                     )}
                                 >
@@ -117,7 +117,7 @@ export function ColumnOne() {
                                                 className={cn(
                                                     "w-9 h-9 rounded-lg border text-xs font-bold transition-all",
                                                     repeatDays?.includes(day.key)
-                                                        ? "bg-cyan-500 border-cyan-400 text-black shadow-lg shadow-cyan-500/20"
+                                                        ? "bg-cyan-400 border-cyan-400 text-black shadow-lg shadow-cyan-400/20"
                                                         : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
                                                 )}
                                             >
@@ -173,7 +173,7 @@ export function ColumnOne() {
                                         type="number"
                                         step="0.5"
                                         {...register("hours_long")}
-                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors"
                                         placeholder="e.g., 2.5"
                                     />
                                 </div>

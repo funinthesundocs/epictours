@@ -282,7 +282,7 @@ export function BookingsCalendar({
                                         newDate.setFullYear(val);
                                         setCurrentDate(newDate);
                                     }}
-                                    className="w-[90px] text-cyan-500"
+                                    className="w-[90px] text-cyan-400"
                                 />
                             </div>
 
@@ -306,7 +306,7 @@ export function BookingsCalendar({
                             <div
                                 className={cn(
                                     "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                    isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
+                                    isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20"
                                 )}
                                 onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
                             >
@@ -342,21 +342,21 @@ export function BookingsCalendar({
                         <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
                             <button
                                 onClick={() => setViewMode('month')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
                                 title="Month View"
                             >
                                 <Grid size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('week')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
                                 title="Week View"
                             >
                                 <Columns size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('day')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
                                 title="Day View"
                             >
                                 <Clock size={16} />
@@ -415,13 +415,13 @@ export function BookingsCalendar({
                                         <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">From</span>
                                         <CustomSelect value={listStartDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listStartDate); d.setMonth(val); setListStartDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listStartDate.getDate()} options={Array.from({ length: new Date(listStartDate.getFullYear(), listStartDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listStartDate); d.setDate(val); setListStartDate(d); }} className="w-[60px] text-xs" />
-                                        <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-cyan-500" />
+                                        <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-cyan-400" />
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">To</span>
                                         <CustomSelect value={listEndDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listEndDate); d.setMonth(val); setListEndDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listEndDate.getDate()} options={Array.from({ length: new Date(listEndDate.getFullYear(), listEndDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listEndDate); d.setDate(val); setListEndDate(d); }} className="w-[60px] text-xs" />
-                                        <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-cyan-500" />
+                                        <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-cyan-400" />
                                     </div>
                                 </div>
                                 {/* Search Bar - 25% larger */}
@@ -433,7 +433,7 @@ export function BookingsCalendar({
                                             value={listSearchQuery}
                                             onChange={(e) => setListSearchQuery(e.target.value)}
                                             placeholder="Search customer, experience, status..."
-                                            className="w-full h-8 bg-[#0b1115] border border-white/10 rounded-lg pl-8 pr-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                                            className="w-full h-8 bg-[#0b1115] border border-white/10 rounded-lg pl-8 pr-3 text-sm text-white focus:outline-none focus:border-cyan-400/50 transition-colors placeholder:text-zinc-600"
                                         />
                                     </div>
                                     {listSearchQuery && (
@@ -449,7 +449,7 @@ export function BookingsCalendar({
                             {/* RIGHT: Filter + View Buttons */}
                             <div className="flex items-center gap-2">
                                 <div className="relative w-[180px]" ref={expPickerRef}>
-                                    <div className={cn("w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700", isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
+                                    <div className={cn("w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700", isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
                                         <span className="font-semibold text-xs truncate">{selectedExpName}</span>
                                         <ChevronDown className={cn("w-3 h-3 text-zinc-500 transition-transform shrink-0 ml-1", isExpPickerOpen && "rotate-180")} />
                                     </div>
@@ -468,7 +468,7 @@ export function BookingsCalendar({
                                     <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Month View"><Grid size={14} /></button>
                                     <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Week View"><Columns size={14} /></button>
                                     <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Day View"><Clock size={14} /></button>
-                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-cyan-500/20 text-cyan-400 shadow-sm")} title="List View"><List size={14} /></button>
+                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-cyan-400/20 text-cyan-400 shadow-sm")} title="List View"><List size={14} /></button>
                                 </div>
                             </div>
                         </div>
@@ -500,9 +500,9 @@ function MonthView({
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
     return (
-        <div className="h-full overflow-auto rounded-xl relative bg-[#0b1115]">
+        <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
             <table className="w-full border-separate border-spacing-0">
-                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
                             <th key={day} className={cn(
@@ -527,11 +527,11 @@ function MonthView({
                                 return (
                                     <td key={colIndex} className={cn(
                                         "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-white/5",
-                                        (!isValidDay || isToday) ? "bg-white/5" : "hover:bg-white/5"
+                                        (!isValidDay || isToday) ? "bg-zinc-900/40" : "hover:bg-zinc-900/40"
                                     )} style={{ minHeight: '160px', height: '160px' }}>
                                         {isValidDay && (
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
-                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-cyan-500 text-black shadow-glow" : "text-zinc-500")}>{dayNumber}</span>
+                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-cyan-400 text-black shadow-glow" : "text-zinc-500")}>{dayNumber}</span>
                                                 {daysEvents.map((event) => (
                                                     <EventChip
                                                         key={event.id}
@@ -591,7 +591,7 @@ function WeekView({
                     return (
                         <div key={day.toString()} className={cn(
                             "flex-1 min-w-[220px] p-2 text-center transition-colors border-b border-white/5",
-                            isDayToday ? "bg-cyan-950/20 border-t-2 border-cyan-500" : "bg-white/5 backdrop-blur-sm"
+                            isDayToday ? "bg-cyan-950/20 border-t-2 border-cyan-400" : "bg-white/5 backdrop-blur-sm"
                         )}>
                             <div className="text-zinc-500 text-sm font-bold uppercase tracking-wider">{format(day, 'EEE')}</div>
                             <div className={cn("text-3xl font-black mt-0 tracking-tight", isDayToday ? "text-cyan-400" : "text-white")}>
@@ -1063,11 +1063,11 @@ function EventChip({
     const openCount = maxCapacity - bookedCount;
 
     // Uniform text class
-    const textClass = "font-bold text-white text-xs leading-tight";
+    const textClass = "font-bold text-white group-hover:text-[#010e0f] text-xs leading-tight";
 
     return (
         <div
-            className="mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-600/90 hover:bg-cyan-500 overflow-hidden ring-1 ring-white/10"
+            className="group mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-700/90 hover:bg-cyan-400 overflow-hidden ring-1 ring-white/10"
             onClick={(e) => {
                 e.stopPropagation();
                 onClick?.(e);

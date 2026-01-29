@@ -23,7 +23,7 @@ export default function Home() {
                         Customize Layout
                     </button>
                     <NewBookingMenu onSelectAvailability={() => { }}>
-                        <button className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-semibold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                        <button className="px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-black font-semibold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(6,182,212,0.3)]">
                             Create Booking
                         </button>
                     </NewBookingMenu>
@@ -38,10 +38,10 @@ export default function Home() {
                     { label: "Pending Bookings", value: "24", sub: "Action required", icon: Ticket },
                     { label: "Waitlist", value: "+573", sub: "Since last hour", icon: Users },
                 ].map((stat, i) => (
-                    <div key={i} className="glass-card p-6 rounded-xl hover:border-cyan-500/30 transition-colors group">
+                    <div key={i} className="glass-card p-6 rounded-xl hover:border-cyan-400/30 transition-colors group">
                         <div className="flex items-center justify-between mb-4">
                             <span className="text-sm font-medium text-zinc-400">{stat.label}</span>
-                            <stat.icon size={18} className="text-cyan-500 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] transition-all" />
+                            <stat.icon size={18} className="text-cyan-400 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] transition-all" />
                         </div>
                         <div className="space-y-1">
                             <span className="text-2xl font-bold text-white">{stat.value}</span>

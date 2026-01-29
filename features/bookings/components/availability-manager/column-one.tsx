@@ -142,7 +142,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                 {/* Quick Settings Header - Sticky */}
                 <div className="px-6 py-3 border-b border-white/5 bg-black/40 backdrop-blur-sm sticky top-0 z-10 w-full mb-6 relative">
                     <div className="text-xl font-medium text-zinc-400 flex items-center gap-2">
-                        <Settings size={20} className="text-cyan-500" />
+                        <Settings size={20} className="text-cyan-400" />
                         Quick Settings
                     </div>
                 </div>
@@ -161,7 +161,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                         <Switch
                             checked={onlineStatus === "open"}
                             onCheckedChange={(checked) => setOnlineStatus(checked ? "open" : "closed")}
-                            className="data-[state=checked]:bg-cyan-500"
+                            className="data-[state=checked]:bg-cyan-400"
                         />
                     </div>
 
@@ -173,7 +173,7 @@ export function ColumnOne({ availability, onStateChange, saveRef }: ColumnOnePro
                         <Textarea
                             value={headline}
                             onChange={(e) => setHeadline(e.target.value)}
-                            className="bg-zinc-900/80 border-white/10 text-white placeholder:text-zinc-600 focus-visible:border-cyan-500/50 min-h-[80px] text-base"
+                            className="bg-zinc-900/80 border-white/10 text-white placeholder:text-zinc-600 focus-visible:border-cyan-400/50 min-h-[80px] text-base"
                             placeholder="Internal note for staff..."
                         />
                     </div>

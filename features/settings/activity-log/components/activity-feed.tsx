@@ -393,7 +393,7 @@ export function ActivityFeed() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search table, action, record..."
-                            className="w-full h-10 bg-[#0b1115] border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600"
+                            className="w-full h-10 bg-[#0b1115] border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-cyan-400/50 transition-colors placeholder:text-zinc-600"
                         />
                     </div>
 

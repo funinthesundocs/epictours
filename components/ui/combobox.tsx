@@ -121,7 +121,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                     onFocus={() => !disabled && setIsOpen(true)}
                     disabled={disabled}
                     className={cn(
-                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-zinc-600",
+                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-400/50 transition-colors placeholder:text-zinc-600",
                         selectedOption?.icon ? "pl-10" : "pl-4",
                         inputClassName,
                         disabled && "opacity-50 cursor-not-allowed"
@@ -151,7 +151,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors group
-                                        ${isSelected ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
+                                        ${isSelected ? "bg-cyan-400/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
                                     `}
                                 >
                                     <span className="flex items-center gap-2">

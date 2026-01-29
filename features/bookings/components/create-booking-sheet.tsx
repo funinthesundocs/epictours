@@ -91,7 +91,7 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
             <div className="p-6 h-full flex flex-col bg-transparent">
                 <div className="text-sm text-zinc-400 mb-6 p-4 bg-white/5 rounded border border-zinc-800">
                     <div className="font-bold text-white mb-2 text-base flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-cyan-500" />
+                        <CalendarIcon className="w-4 h-4 text-cyan-400" />
                         {availability.start_date} @ {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
                     </div>
                     <div className="flex flex-col gap-1 pl-6">
@@ -105,12 +105,12 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                     {/* Customer Selection */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-white flex items-center gap-2">
-                            <User size={16} className="text-cyan-500" />
+                            <User size={16} className="text-cyan-400" />
                             Customer
                         </label>
                         <select
                             {...register("customer_id")}
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none appearance-none"
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none appearance-none"
                         >
                             <option value="">Select customer...</option>
                             {customers.map(c => (
@@ -123,14 +123,14 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                     {/* Pax Count */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-white flex items-center gap-2">
-                            <Users size={16} className="text-cyan-500" />
+                            <Users size={16} className="text-cyan-400" />
                             Passengers
                         </label>
                         <div className="flex items-center gap-4">
                             <input
                                 type="number"
                                 {...register("pax_count", { valueAsNumber: true })}
-                                className="w-24 bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+                                className="w-24 bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
                                 min={1}
                             />
                             <div className="text-xs text-zinc-500">
@@ -145,7 +145,7 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                         <label className="text-sm font-medium text-white">Internal Notes</label>
                         <textarea
                             {...register("notes")}
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none h-[100px]"
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none h-[100px]"
                             placeholder="Internal notes..."
                         />
                     </div>
@@ -159,8 +159,8 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                         disabled={isLoading || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isLoading ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                            isLoading ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-600 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                     "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >

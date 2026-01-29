@@ -131,7 +131,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                 placeholder="Search passengers..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-black/50 border border-white/10 rounded-md pl-9 pr-3 h-8 text-xs text-white focus:outline-none focus:border-cyan-500/50 placeholder:text-zinc-600 transition-all hover:border-white/20"
+                                className="w-full bg-black/50 border border-white/10 rounded-md pl-9 pr-3 h-8 text-xs text-white focus:outline-none focus:border-cyan-400/50 placeholder:text-zinc-600 transition-all hover:border-white/20"
                             />
                         </div>
                         <button
@@ -177,7 +177,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                         <button
                                             key={booking.id}
                                             onClick={() => onBookingClick(booking.id)}
-                                            className="w-full p-3 bg-zinc-900/80 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-all text-left"
+                                            className="w-full p-3 bg-zinc-900/80 rounded-lg border border-white/10 hover:border-cyan-400/30 transition-all text-left"
                                         >
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>

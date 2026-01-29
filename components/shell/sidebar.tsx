@@ -183,19 +183,19 @@ export function Sidebar() {
                         {isCollapsed ? (
                             <>
                                 {/* Collapsed: Profile avatar and gear below */}
-                                <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                                <div className="w-9 h-9 rounded-full bg-cyan-400 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
                                 <button
                                     onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                                     className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                                     title="Settings"
                                 >
-                                    <Settings size={36} className="text-cyan-500" />
+                                    <Settings size={36} className="text-cyan-400" />
                                 </button>
                             </>
                         ) : (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
+                                    <div className="w-9 h-9 rounded-full bg-cyan-400 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
                                     <div className="text-base overflow-hidden whitespace-nowrap">
                                         <p className="font-medium text-white">Admin</p>
                                         <p className="text-sm text-cyan-400">Online</p>
@@ -207,7 +207,7 @@ export function Sidebar() {
                                     className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                                     title="Settings"
                                 >
-                                    <Settings size={36} className="text-cyan-500" />
+                                    <Settings size={36} className="text-cyan-400" />
                                 </button>
                             </div>
                         )}
@@ -306,7 +306,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                             className={cn(
                                 "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 group relative",
                                 isActive || isChildActive
-                                    ? "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
+                                    ? "bg-cyan-400/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
                                     : "text-zinc-500 hover:text-white hover:bg-white/10"
                             )}
                         >
@@ -387,7 +387,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
             className={cn(
                 "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                 isActive
-                    ? "bg-cyan-500/10 text-cyan-400 font-medium shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                    ? "bg-cyan-400/10 text-cyan-400 font-medium shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                     : "text-zinc-400 hover:text-white hover:bg-white/5"
             )}
             style={{ paddingLeft: `${12 + (depth * 12)}px` }}

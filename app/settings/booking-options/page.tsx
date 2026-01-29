@@ -107,7 +107,7 @@ export default function BookingOptionsPage() {
             action={
                 <Button
                     onClick={handleCreate}
-                    className="bg-cyan-500 hover:bg-cyan-400 text-white font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
+                    className="bg-cyan-400 hover:bg-cyan-400 text-white font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
                 >
                     <Plus className="mr-2 h-4 w-4" /> New Booking Option
                 </Button>
@@ -122,7 +122,7 @@ export default function BookingOptionsPage() {
                             placeholder="Search schedules..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 bg-[#0f172a]/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20"
+                            className="pl-10 bg-[#0f172a]/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
                         />
                     </div>
                 </div>

@@ -532,8 +532,8 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     disabled={isSaving || !canSave || !isDirty}
                     className={cn(
                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                        isSaving ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                            (canSave && isDirty) ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]" : // Cyan-600 for booking desk distinction or keep 500? Using 600 as per original but standard is 500. Let's use 500 to match others.
+                        isSaving ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                            (canSave && isDirty) ? "bg-cyan-600 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]" : // Cyan-600 for booking desk distinction or keep 500? Using 600 as per original but standard is 500. Let's use 500 to match others.
                                 "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                     )}
                 >

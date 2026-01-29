@@ -8,7 +8,7 @@ export default function ActivityLogPage() {
             <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
                             <Activity size={20} />
                         </div>
                         <div>

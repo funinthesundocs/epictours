@@ -202,12 +202,12 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
         <div className="flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5">
-            <Icon size={16} className="text-cyan-500" />
+            <Icon size={16} className="text-cyan-400" />
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
     // Updated to match Input component (bg-zinc-900/80)
-    const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors text-sm shadow-sm";
+    const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors text-sm shadow-sm";
     const labelClasses = "text-xs font-medium text-zinc-400 uppercase tracking-wider ml-1";
 
     const eventTypeOptions = ["Tour", "Activity", "Transport", "Event"];
@@ -220,7 +220,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === id
-                    ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
+                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
                     : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
             )}
         >
@@ -286,13 +286,13 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
                                             </div>
                                             {showEventTypePicker && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
                                                     {eventTypeOptions.map(type => (
                                                         <div
                                                             key={type}
                                                             className={cn(
                                                                 "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                eventTypeValue === type ? "bg-cyan-500/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                                eventTypeValue === type ? "bg-cyan-400/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
                                                             )}
                                                             onMouseDown={(e) => {
                                                                 e.preventDefault(); // Prevent blur
@@ -456,8 +456,8 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                         disabled={isSubmitting || !formState.isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                formState.isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                                formState.isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                     "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >

@@ -56,7 +56,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                             href={point.map_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-medium border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-400/10 text-cyan-400 rounded-full text-xs font-medium border border-cyan-400/20 hover:bg-cyan-400/20 transition-colors"
                                         >
                                             View Map <ExternalLink size={12} />
                                         </a>
@@ -70,7 +70,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                             <span>{point.instructions.substring(0, 30)}...</span>
                                             <button
                                                 onClick={(e) => toggleExpand(point.id, e)}
-                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400/20 transition-colors"
                                             >
                                                 <Plus size={10} />
                                             </button>
@@ -152,7 +152,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                             href={point.map_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-medium border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-400/10 text-cyan-400 rounded-full text-xs font-medium border border-cyan-400/20 hover:bg-cyan-400/20 transition-colors"
                                         >
                                             View Map <ExternalLink size={12} />
                                         </a>
@@ -168,7 +168,7 @@ export function PickupPointsTable({ data, onEdit, onDelete }: PickupTableProps) 
                                             <span>{point.instructions.substring(0, 30)}...</span>
                                             <button
                                                 onClick={(e) => toggleExpand(point.id, e)}
-                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400/20 transition-colors"
                                             >
                                                 <Plus size={10} />
                                             </button>

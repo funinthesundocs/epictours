@@ -112,7 +112,7 @@ export function BulkActionToolbar({
 
     return (
         <>
-            <div className="flex items-center justify-between px-4 py-3 bg-cyan-950/30 border border-cyan-500/20 rounded-lg mb-2.5">
+            <div className="flex items-center justify-between px-4 py-3 bg-cyan-950/30 border border-cyan-400/20 rounded-lg mb-2.5">
                 <div className="flex items-center gap-6">
                     {/* Selection Counter */}
                     <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export function BulkActionToolbar({
                         {/* Update (Full Edit) Action - First */}
                         <button
                             onClick={() => setIsBulkEditOpen(true)}
-                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-cyan-500 text-white hover:bg-cyan-400 transition-colors font-bold"
+                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-cyan-400 text-white hover:bg-cyan-400 transition-colors font-bold"
                         >
                             <Edit size={16} />
                             Update
@@ -170,7 +170,7 @@ export function BulkActionToolbar({
                         <button
                             onClick={() => setIsConfirmOpen(true)}
                             disabled={isLoading}
-                            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+                            className="px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
                         >
                             {isLoading && <Loader2 className="animate-spin" size={16} />}
                             Apply to {selectedCount} items

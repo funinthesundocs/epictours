@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowLeft } from "lucide-react";
 export default function NotFound() {
     return (
         <div className="h-full flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
-            <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+            <div className="w-16 h-16 rounded-full bg-cyan-400/10 flex items-center justify-center border border-cyan-400/20 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
                 <AlertTriangle size={32} className="text-cyan-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">Module Not Found</h2>

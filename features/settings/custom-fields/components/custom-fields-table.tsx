@@ -120,8 +120,8 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                             key={opt.id}
                                             onClick={() => onFilterChange(opt.id)}
                                             className={cn(
-                                                "text-xs focus:bg-cyan-500/10 focus:text-cyan-400 cursor-pointer",
-                                                activeFilter === opt.id && "bg-cyan-500/10 text-cyan-400"
+                                                "text-xs focus:bg-cyan-400/10 focus:text-cyan-400 cursor-pointer",
+                                                activeFilter === opt.id && "bg-cyan-400/10 text-cyan-400"
                                             )}
                                         >
                                             {opt.label}
@@ -268,7 +268,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 <TooltipProvider>
                                     <Tooltip delayDuration={0}>
                                         <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="h-8 text-zinc-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg px-2">
+                                            <Button variant="ghost" size="sm" className="h-8 text-zinc-400 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-lg px-2">
                                                 <Eye size={16} />
                                                 <span className="ml-2 text-xs">Preview</span>
                                             </Button>
@@ -322,7 +322,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 {/* Label */}
                                 <td className="px-6 py-4 font-medium text-white align-middle">
                                     <div className="flex items-center gap-3 pt-2">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                        <div className="w-8 h-8 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
                                             <Icon size={16} />
                                         </div>
                                         <div className="flex flex-col">
@@ -332,7 +332,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                                         <span>{field.label.substring(0, 30)}...</span>
                                                         <button
                                                             onClick={(e) => toggleExpand(field.id, e)}
-                                                            className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                                            className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400/20 transition-colors"
                                                         >
                                                             <Plus size={10} />
                                                         </button>
@@ -436,7 +436,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                         <div key={field.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
                             {/* Header: Type Icon + Actions */}
                             <div className="flex items-start justify-between gap-4">
-                                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                <div className="w-10 h-10 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
                                     <Icon size={20} />
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">

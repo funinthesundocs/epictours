@@ -68,7 +68,7 @@ export function LoginPage() {
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
                                     placeholder="Enter your username"
                                     required
                                 />
@@ -86,7 +86,7 @@ export function LoginPage() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
                                     placeholder="Enter your password"
                                     required
                                 />
@@ -116,7 +116,7 @@ export function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-gradient-to-r from-cyan-400 to-cyan-600 hover:from-cyan-400 hover:to-cyan-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-cyan-400/20 hover:shadow-cyan-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">

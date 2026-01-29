@@ -52,7 +52,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-500/50 transition-colors group ${className || "py-2.5"}`}
+                className={`w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 text-left flex items-center justify-between text-white focus:outline-none focus:border-cyan-400/50 transition-colors group ${className || "py-2.5"}`}
             >
                 <span className={`flex items-center gap-2 ${value ? "text-white" : "text-zinc-500"}`}>
                     {selectedOption?.icon}
@@ -78,7 +78,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                                     type="button"
                                     onClick={() => handleSelect(option.value)}
                                     className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors group
-                            ${isSelected ? "bg-cyan-500/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
+                            ${isSelected ? "bg-cyan-400/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
                         `}
                                 >
                                     <span className="flex items-center gap-2">

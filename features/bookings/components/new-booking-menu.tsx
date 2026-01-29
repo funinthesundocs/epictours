@@ -172,7 +172,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
 
                 {isInitializing ? (
                     <div className="h-[300px] flex flex-col items-center justify-center text-zinc-500 gap-3">
-                        <Loader2 className="animate-spin text-cyan-500" size={24} />
+                        <Loader2 className="animate-spin text-cyan-400" size={24} />
                         <span className="text-xs font-medium uppercase tracking-wider">Loading...</span>
                     </div>
                 ) : (
@@ -210,7 +210,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                     !selectedExperienceId && "opacity-20 pointer-events-none filter blur-[1px]"
                                 )}
                                 classNames={{
-                                    selected: "border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
+                                    selected: "border-2 border-cyan-400 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
                                     today: "bg-zinc-800 text-white rounded-md",
                                 }}
                             />
@@ -230,7 +230,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                             <div className="w-full max-h-[300px] flex flex-col">
                                 <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
                                     <h3 className="font-bold text-white flex items-center gap-2">
-                                        <CalendarDays size={16} className="text-cyan-500" />
+                                        <CalendarDays size={16} className="text-cyan-400" />
                                         {date ? format(date, "MMMM d, yyyy") : "Select a Date"}
                                     </h3>
                                 </div>
@@ -263,11 +263,11 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                                 </div>
                                                 <div className="flex items-center gap-4 text-xs text-zinc-400">
                                                     <div className="flex items-center gap-1.5">
-                                                        <Clock size={12} className="text-zinc-600 group-hover/item:text-cyan-500/70" />
+                                                        <Clock size={12} className="text-zinc-600 group-hover/item:text-cyan-400/70" />
                                                         <span>{avail.start_time ? format(new Date(`2000-01-01T${avail.start_time}`), "h:mm a") : "All Day"}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <Users size={12} className="text-zinc-600 group-hover/item:text-cyan-500/70" />
+                                                        <Users size={12} className="text-zinc-600 group-hover/item:text-cyan-400/70" />
                                                         <span className={cn((avail.booked_count || 0) > 0 && "text-cyan-400 font-medium")}>
                                                             {Math.max(0, avail.max_capacity - (avail.booked_count || 0))} / {avail.max_capacity} pax
                                                         </span>

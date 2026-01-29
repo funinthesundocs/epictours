@@ -34,7 +34,7 @@ export function DatePicker({
             <PopoverTrigger asChild>
                 <button
                     className={cn(
-                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-500/50",
+                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-400/50",
                         !value && "text-zinc-500",
                         value && "text-white",
                         className
@@ -60,7 +60,7 @@ export function DatePicker({
                     initialFocus
                     className="rounded-md border-zinc-800"
                     classNames={{
-                        selected: "border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
+                        selected: "border-2 border-cyan-400 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
                         today: "bg-zinc-800 text-white rounded-md",
                     }}
                 />

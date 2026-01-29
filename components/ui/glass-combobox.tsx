@@ -95,7 +95,7 @@ export function GlassCombobox({
                                         }}
                                         className={cn(
                                             "cursor-pointer transition-colors px-2 py-2 text-sm",
-                                            "text-white data-[selected=true]:bg-cyan-500 data-[selected=true]:text-black"
+                                            "text-white data-[selected=true]:bg-cyan-400 data-[selected=true]:text-black"
                                         )}
                                     >
                                         <Check

@@ -92,7 +92,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
             className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300 select-none"
         >
             {/* Field Container */}
-            <div className="flex-1 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-500/30 relative">
+            <div className="flex-1 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-400/30 relative">
                 {/* Mobile Delete Button - Top Right */}
                 <Button
                     type="button"
@@ -170,7 +170,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                 variant="ghost"
                 size="sm"
                 onClick={() => insert(index + 1, { pickup_point_id: "", pickup_time: "" })}
-                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
+                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
             >
                 <Plus size={16} />
             </Button>
@@ -362,7 +362,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
         </div>
     );
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:outline-none transition-colors";
+    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors";
 
     // Custom Fields "Input" style equivalent
     const rowInputClasses = "w-full bg-transparent border-none text-white text-sm focus:ring-0 placeholder:text-zinc-600 h-full py-2 px-3";
@@ -414,7 +414,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                         {/* Sticky Header */}
                         <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                             <div className="flex items-center gap-2 px-6 py-4">
-                                <Route size={16} className="text-cyan-500" />
+                                <Route size={16} className="text-cyan-400" />
                                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Route Stops</span>
                             </div>
                         </div>
@@ -452,7 +452,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                     <button
                                         type="button"
                                         onClick={() => append({ pickup_point_id: "", pickup_time: "" })}
-                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-2"
+                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2"
                                     >
                                         <Plus size={24} className="opacity-50" />
                                         <span className="text-sm font-medium">Add First Stop</span>
@@ -470,11 +470,11 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                         form="schedule-form"
                         disabled={isSubmitting || !form.formState.isDirty}
                         className={cn(
-                            "bg-cyan-500 hover:bg-cyan-400 text-white font-bold min-w-[120px]",
+                            "bg-cyan-400 hover:bg-cyan-400 text-white font-bold min-w-[120px]",
                             isSubmitting
-                                ? "bg-cyan-500/50 text-white cursor-not-allowed"
+                                ? "bg-cyan-400/50 text-white cursor-not-allowed"
                                 : form.formState.isDirty
-                                    ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                    ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                                     : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >

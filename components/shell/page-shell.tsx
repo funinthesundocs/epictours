@@ -42,10 +42,10 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
             {stats && stats.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
                     {stats.map((stat, i) => (
-                        <div key={i} className="glass-card p-4 rounded-xl border border-white/5 hover:border-cyan-500/30 transition-colors">
+                        <div key={i} className="glass-card p-4 rounded-xl border border-white/5 hover:border-cyan-400/30 transition-colors">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-semibold text-zinc-500 uppercase">{stat.label}</span>
-                                {stat.icon && <stat.icon size={16} className="text-cyan-500" />}
+                                {stat.icon && <stat.icon size={16} className="text-cyan-400" />}
                             </div>
                             <div className="flex items-end justify-between">
                                 <span className="text-xl font-bold text-white">{stat.value}</span>

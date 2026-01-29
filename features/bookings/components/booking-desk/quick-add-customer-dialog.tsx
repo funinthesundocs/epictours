@@ -134,7 +134,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-500"
+                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
                             placeholder="John Doe"
                         />
                     </div>
@@ -149,7 +149,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-500"
+                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
                             placeholder="john@example.com"
                         />
                     </div>
@@ -164,7 +164,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-500"
+                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
                             placeholder="+1 (555) 000-0000"
                         />
                     </div>
@@ -183,7 +183,7 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                     <Button
                         onClick={handleSave}
                         disabled={isLoading}
-                        className="bg-cyan-600 hover:bg-cyan-500 text-white"
+                        className="bg-cyan-600 hover:bg-cyan-400 text-white"
                     >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {customerToEdit ? "Update Customer" : "Save Customer"}

@@ -182,7 +182,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
         <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
-            <Icon size={16} className="text-cyan-500" />
+            <Icon size={16} className="text-cyan-400" />
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
@@ -265,7 +265,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                 <div className="space-y-2">
                                     {fields.map((field, index) => (
                                         <div key={field.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
-                                            <div className="flex-1 flex items-center pr-2 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-500/30">
+                                            <div className="flex-1 flex items-center pr-2 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-400/30">
                                                 {/* App Name */}
                                                 <div className="w-[40%] min-w-[120px] border-r border-white/5 h-full relative">
                                                     <Controller
@@ -325,7 +325,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => append({ app: "", handle: "" })}
-                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-8 w-8 p-0 rounded-lg transition-colors shrink-0"
+                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-8 w-8 p-0 rounded-lg transition-colors shrink-0"
                                             >
                                                 <Plus size={16} />
                                             </Button>
@@ -353,7 +353,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {initialData ? "Update" : "Create"}

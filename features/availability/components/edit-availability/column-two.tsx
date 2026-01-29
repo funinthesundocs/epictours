@@ -41,7 +41,7 @@ export function ColumnTwo({
             {/* Sticky Header */}
             <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 px-6 py-4">
-                    <Users size={16} className="text-cyan-500" />
+                    <Users size={16} className="text-cyan-400" />
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Capacity & Resources</span>
                 </div>
             </div>
@@ -58,7 +58,7 @@ export function ColumnTwo({
                             <input
                                 type="number"
                                 {...register("max_capacity")}
-                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors"
                                 placeholder="0"
                             />
                         </div>

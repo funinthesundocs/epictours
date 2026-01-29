@@ -80,7 +80,7 @@ export function TimePicker({
             <PopoverTrigger asChild>
                 <button
                     className={cn(
-                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-500/50",
+                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-400/50",
                         !value && "text-zinc-500",
                         value && "text-white",
                         className
@@ -108,7 +108,7 @@ export function TimePicker({
                                     className={cn(
                                         "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentHour === h
-                                            ? "bg-cyan-500 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                                             : "text-zinc-300 hover:text-white"
                                     )}
                                 >
@@ -131,7 +131,7 @@ export function TimePicker({
                                     className={cn(
                                         "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentMinute === m
-                                            ? "bg-cyan-500 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                                             : "text-zinc-300 hover:text-white"
                                     )}
                                 >
@@ -159,7 +159,7 @@ export function TimePicker({
                                     className={cn(
                                         "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentPeriod === p
-                                            ? "bg-cyan-500 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                                             : "text-zinc-300 hover:text-white"
                                     )}
                                 >

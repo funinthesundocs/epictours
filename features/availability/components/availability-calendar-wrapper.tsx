@@ -81,7 +81,7 @@ export function AvailabilityCalendarWrapper({ experiences }: AvailabilityCalenda
             action={
                 <button
                     onClick={handleHeaderCreate}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white text-sm font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-black text-sm font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                 >
                     <Plus size={16} />
                     Create Availability

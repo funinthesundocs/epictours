@@ -73,7 +73,7 @@ export function ColumnOne({
             <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                 {/* Title Row */}
                 <div className="flex items-center gap-2 px-6 py-4">
-                    <Users size={16} className="text-cyan-500" />
+                    <Users size={16} className="text-cyan-400" />
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Customer & Pax</span>
                 </div>
 
@@ -130,16 +130,16 @@ export function ColumnOne({
                     {isEditMode && onAvailabilityChange && (
                         <div className="space-y-2">
                             <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                                <Calendar size={18} className="text-cyan-500" />
+                                <Calendar size={18} className="text-cyan-400" />
                                 Reschedule
                             </label>
                             <NewBookingMenu
                                 onSelectAvailability={onAvailabilityChange}
                                 defaultExperienceId={availability.experience_id}
                             >
-                                <button className="w-full flex items-center justify-between p-3 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-cyan-500/50 hover:bg-zinc-900 transition-all group group/btn">
+                                <button className="w-full flex items-center justify-between p-3 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-cyan-400/50 hover:bg-zinc-900 transition-all group group/btn">
                                     <div className="flex items-center gap-3">
-                                        <div className="bg-cyan-500/10 p-2 rounded-md group-hover/btn:bg-cyan-500/20 text-cyan-400">
+                                        <div className="bg-cyan-400/10 p-2 rounded-md group-hover/btn:bg-cyan-400/20 text-cyan-400">
                                             <Calendar size={16} />
                                         </div>
                                         <div className="flex flex-col items-start gap-0.5">
@@ -154,7 +154,7 @@ export function ColumnOne({
                                             </span>
                                         </div>
                                     </div>
-                                    <Edit2 size={16} className="text-zinc-600 group-hover/btn:text-cyan-500 transition-colors" />
+                                    <Edit2 size={16} className="text-zinc-600 group-hover/btn:text-cyan-400 transition-colors" />
                                 </button>
                             </NewBookingMenu>
                         </div>
@@ -164,7 +164,7 @@ export function ColumnOne({
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                                <User size={18} className="text-cyan-500" />
+                                <User size={18} className="text-cyan-400" />
                                 Customer
                             </label>
                         </div>
@@ -184,7 +184,7 @@ export function ColumnOne({
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className="shrink-0 bg-transparent border-white/10 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/50"
+                                    className="shrink-0 bg-transparent border-white/10 text-zinc-400 hover:text-cyan-400 hover:border-cyan-400/50"
                                     onClick={() => {
                                         setCustomerToEdit(selectedCustomer);
                                         setShowAddCustomer(true);
@@ -196,7 +196,7 @@ export function ColumnOne({
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="shrink-0 bg-transparent border-white/10 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/50"
+                                className="shrink-0 bg-transparent border-white/10 text-zinc-400 hover:text-cyan-400 hover:border-cyan-400/50"
                                 onClick={() => {
                                     setCustomerToEdit(null);
                                     setShowAddCustomer(true);
@@ -218,7 +218,7 @@ export function ColumnOne({
                     {/* Pricing Schedule Selector */}
                     <div className="space-y-2">
                         <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                            <Calendar size={18} className="text-cyan-500" />
+                            <Calendar size={18} className="text-cyan-400" />
                             Pricing Schedule
                         </label>
                         <Combobox
@@ -235,7 +235,7 @@ export function ColumnOne({
                     {/* Rate Tier Select */}
                     <div className="space-y-2">
                         <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                            <Search size={18} className="text-cyan-500" />
+                            <Search size={18} className="text-cyan-400" />
                             Rate Tier
                         </label>
                         <Combobox
@@ -254,7 +254,7 @@ export function ColumnOne({
                     {/* Pax Selector */}
                     <div className="space-y-4">
                         <label className="text-base font-medium text-zinc-400 flex items-center gap-2">
-                            <Users size={18} className="text-cyan-500" />
+                            <Users size={18} className="text-cyan-400" />
                             Passengers
                         </label>
 

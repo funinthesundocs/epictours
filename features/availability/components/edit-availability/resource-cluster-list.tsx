@@ -201,7 +201,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                     <DialogTrigger asChild>
                         <button
                             type="button"
-                            className="w-full py-3 border-2 border-dashed border-white/10 rounded-lg text-zinc-400 hover:text-white hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 font-medium text-sm"
+                            className="w-full py-3 border-2 border-dashed border-white/10 rounded-lg text-zinc-400 hover:text-white hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all flex items-center justify-center gap-2 font-medium text-sm"
                         >
                             <Plus size={16} />
                             Add Vehicle Cluster
@@ -260,7 +260,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 type="button"
                                 onClick={handleAdd}
                                 disabled={!newCluster.vehicle_id || !newCluster.driver_id}
-                                className="w-full bg-cyan-500 text-black font-bold py-2.5 rounded-lg hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                className="w-full bg-cyan-400 text-black font-bold py-2.5 rounded-lg hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                             >
                                 Add Cluster
                             </button>

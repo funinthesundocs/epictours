@@ -38,7 +38,7 @@ function FieldSelector({ availableFields, currentFields, onSelect, onCancel }: F
                     onChange={onSelect}
                     options={options}
                     placeholder="Search fields to add..."
-                    inputClassName="bg-[#1a1f2e] border-cyan-500/30 text-zinc-200 placeholder:text-zinc-500 h-11"
+                    inputClassName="bg-[#1a1f2e] border-cyan-400/30 text-zinc-200 placeholder:text-zinc-500 h-11"
                 />
             </div>
             <button
@@ -124,14 +124,14 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
         const options = fieldDef?.options || [];
         return (
             <div className="relative group/preview">
-                <div className={cn(inputClasses, "justify-between cursor-default group-hover/preview:border-cyan-500/30 transition-colors")}>
+                <div className={cn(inputClasses, "justify-between cursor-default group-hover/preview:border-cyan-400/30 transition-colors")}>
                     <span className="text-zinc-500 text-xs">Select option...</span>
                     <ChevronDown size={14} className="text-zinc-600" />
                 </div>
                 {options.length > 0 && (
-                    <div className="absolute top-full left-0 mt-1 w-full bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl z-30 hidden group-hover/preview:block py-1">
+                    <div className="absolute top-full left-0 mt-1 w-full bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl z-30 hidden group-hover/preview:block py-1">
                         {options.slice(0, 3).map((o: any) => (
-                            <div key={o.value} className="px-3 py-1.5 text-xs text-zinc-300 hover:bg-cyan-500/10 hover:text-cyan-400">
+                            <div key={o.value} className="px-3 py-1.5 text-xs text-zinc-300 hover:bg-cyan-400/10 hover:text-cyan-400">
                                 {o.label}
                             </div>
                         ))}
@@ -176,7 +176,7 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
 
     if (type === 'header') {
         return (
-            <div className="border-b border-cyan-500/30 pb-1">
+            <div className="border-b border-cyan-400/30 pb-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">{fieldDef?.label || 'Section'}</span>
             </div>
         );
@@ -287,7 +287,7 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                                 <Switch
                                     checked={!item.is_public}
                                     onCheckedChange={(val) => onTogglePublic(!val)}
-                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-400"
                                 />
                             </div>
 
@@ -299,7 +299,7 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                                 <Switch
                                     checked={item.required}
                                     onCheckedChange={onToggleRequired}
-                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-500"
+                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-400"
                                 />
                             </div>
                         </div>
@@ -325,7 +325,7 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                     variant="ghost"
                     size="sm"
                     onClick={onInsert}
-                    className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
+                    className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
                 >
                     <Plus size={16} />
                 </Button>
@@ -618,7 +618,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             className={cn(
                 "shrink-0 px-6 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                 activeTab === id
-                    ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
+                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
                     : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
             )}
         >
@@ -707,9 +707,9 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                                 <button
                                     type="button"
                                     onClick={() => setInsertIndex(-1)}
-                                    className="w-full py-8 border border-dashed border-white/10 rounded-xl text-zinc-500 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                                    className="w-full py-8 border border-dashed border-white/10 rounded-xl text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2 group"
                                 >
-                                    <div className="p-3 rounded-full bg-white/5 group-hover:bg-cyan-500/10 transition-colors">
+                                    <div className="p-3 rounded-full bg-white/5 group-hover:bg-cyan-400/10 transition-colors">
                                         <Plus size={24} className="opacity-50 group-hover:opacity-100" />
                                     </div>
                                     <span className="text-sm font-medium">Add First Option</span>
@@ -789,7 +789,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                         >
                             <div className={cn(
                                 "w-4 h-4 rounded border flex items-center justify-center transition-colors",
-                                saveToAll ? "bg-cyan-500 border-cyan-500 text-black" : "border-zinc-600 bg-transparent group-hover:border-zinc-500"
+                                saveToAll ? "bg-cyan-400 border-cyan-400 text-black" : "border-zinc-600 bg-transparent group-hover:border-zinc-500"
                             )}>
                                 {saveToAll && <Check size={12} strokeWidth={3} />}
                             </div>
@@ -803,8 +803,8 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                             disabled={isSubmitting || !isDirty}
                             className={cn(
                                 "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                                isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                    isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                                    isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                         "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                             )}
                         >

@@ -90,7 +90,7 @@ export default function VendorsPage() {
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
                     Add Vendor
@@ -108,7 +108,7 @@ export default function VendorsPage() {
                         placeholder="Search by name, email, or phone..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-400/50 focus:outline-none transition-colors"
                     />
                 </div>
 

@@ -205,7 +205,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
         <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
-            <Icon size={16} className="text-cyan-500" />
+            <Icon size={16} className="text-cyan-400" />
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
         </div>
     );
@@ -389,8 +389,8 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     disabled={isSubmitting || !isDirty}
                     className={cn(
                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                        isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                            isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                        isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                            isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                 "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                     )}
                 >

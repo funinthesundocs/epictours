@@ -217,7 +217,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             className={cn(
                 "flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
                 activeTab === variationName
-                    ? "border-cyan-500 text-cyan-400 bg-cyan-500/5"
+                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
                     : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
             )}
         >
@@ -236,7 +236,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         }
     };
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors";
+    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors";
 
     return (
         <SidePanel
@@ -363,14 +363,14 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
 
                                                         {/* Dropdown Options */}
                                                         {openDropdownIndex === item.index && (
-                                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-500/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
                                                                 {customerTypes.map(type => (
                                                                     <div
                                                                         key={type.id}
                                                                         className={cn(
                                                                             "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
                                                                             watch(`rates.${item.index}.customer_type_id`) === type.id
-                                                                                ? "bg-cyan-500/10 text-cyan-400"
+                                                                                ? "bg-cyan-400/10 text-cyan-400"
                                                                                 : "text-zinc-300 hover:bg-white/5 hover:text-white"
                                                                         )}
                                                                         onClick={(e) => {
@@ -457,7 +457,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => insert(item.index + 1, { tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 h-10 w-10 p-0 shrink-0"
+                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
                                             >
                                                 <Plus size={16} />
                                             </Button>
@@ -470,7 +470,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                     <button
                                         type="button"
                                         onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-2"
+                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2"
                                     >
                                         <Plus size={24} className="opacity-50" />
                                         <span className="text-sm font-medium">Add First Rate</span>
@@ -488,7 +488,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                             type="checkbox"
                             checked={copyToAll}
                             onChange={(e) => setCopyToAll(e.target.checked)}
-                            className="w-4 h-4 rounded border-white/20 bg-black/30 text-cyan-500 focus:ring-cyan-500/50 focus:ring-offset-0 cursor-pointer"
+                            className="w-4 h-4 rounded border-white/20 bg-black/30 text-cyan-400 focus:ring-cyan-400/50 focus:ring-offset-0 cursor-pointer"
                         />
                         <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">
                             Apply to all variations
@@ -501,8 +501,8 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                             disabled={isSubmitting || !isDirty}
                             className={cn(
                                 "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                                isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                    isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                                isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                                    isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                         "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                             )}
                         >

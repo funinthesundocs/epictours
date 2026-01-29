@@ -766,7 +766,7 @@ export function BulkEditSheet({
         switch (type) {
             case 'date_range':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Calendar size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -798,7 +798,7 @@ export function BulkEditSheet({
                 );
             case 'status':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Power size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -820,7 +820,7 @@ export function BulkEditSheet({
                 );
             case 'time_range':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Clock size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -852,7 +852,7 @@ export function BulkEditSheet({
                 );
             case 'day_of_week':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <CalendarDays size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -874,7 +874,7 @@ export function BulkEditSheet({
                                             setFilterValues(prev => ({ ...prev, day_of_week: [...current, idx] }));
                                         }
                                     }}
-                                    className={cn("px-2.5 py-1 rounded text-xs font-medium transition-colors", filterValues.day_of_week.includes(idx) ? "bg-cyan-500 text-black" : "bg-black/50 text-zinc-400 hover:bg-white/10")}
+                                    className={cn("px-2.5 py-1 rounded text-xs font-medium transition-colors", filterValues.day_of_week.includes(idx) ? "bg-cyan-400 text-black" : "bg-black/50 text-zinc-400 hover:bg-white/10")}
                                 >
                                     {day}
                                 </button>
@@ -884,7 +884,7 @@ export function BulkEditSheet({
                 );
             case 'has_bookings':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <UserCheck size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -906,7 +906,7 @@ export function BulkEditSheet({
                 );
             case 'ending_between':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Clock size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -938,7 +938,7 @@ export function BulkEditSheet({
                 );
             case 'duration':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Clock size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -951,18 +951,18 @@ export function BulkEditSheet({
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
                                 <label className="block text-xs text-zinc-400 mb-1">Min</label>
-                                <input type="number" step="0.5" min="0" value={filterValues.duration_min} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
+                                <input type="number" step="0.5" min="0" value={filterValues.duration_min} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
                             </div>
                             <div>
                                 <label className="block text-xs text-zinc-400 mb-1">Max</label>
-                                <input type="number" step="0.5" min="0" value={filterValues.duration_max} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer" placeholder="24" />
+                                <input type="number" step="0.5" min="0" value={filterValues.duration_max} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="24" />
                             </div>
                         </div>
                     </div>
                 );
             case 'notes':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <MessageSquare size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -973,13 +973,13 @@ export function BulkEditSheet({
                             </button>
                         </div>
                         <div className="px-3 pb-3">
-                            <input type="text" value={filterValues.notes} onChange={(e) => setFilterValues(prev => ({ ...prev, notes: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer" placeholder="Search notes..." />
+                            <input type="text" value={filterValues.notes} onChange={(e) => setFilterValues(prev => ({ ...prev, notes: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="Search notes..." />
                         </div>
                     </div>
                 );
             case 'capacity':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Users size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -992,18 +992,18 @@ export function BulkEditSheet({
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
                                 <label className="block text-xs text-zinc-400 mb-1">Min</label>
-                                <input type="number" min="0" value={filterValues.capacity_min} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
+                                <input type="number" min="0" value={filterValues.capacity_min} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
                             </div>
                             <div>
                                 <label className="block text-xs text-zinc-400 mb-1">Max</label>
-                                <input type="number" min="0" value={filterValues.capacity_max} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors appearance-none cursor-pointer" placeholder="100" />
+                                <input type="number" min="0" value={filterValues.capacity_max} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="100" />
                             </div>
                         </div>
                     </div>
                 );
             case 'customer_type':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Users size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1025,7 +1025,7 @@ export function BulkEditSheet({
                 );
             case 'pickup_route':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <MapPin size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1047,7 +1047,7 @@ export function BulkEditSheet({
                 );
             case 'crew':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Users size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1060,7 +1060,7 @@ export function BulkEditSheet({
                         <div className="px-3 pb-3 max-h-[150px] overflow-y-auto">
                             {staff.map(s => (
                                 <label key={s.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/5 px-1 rounded">
-                                    <input type="checkbox" checked={filterValues.crew_ids.includes(s.id)} onChange={(e) => { if (e.target.checked) { setFilterValues(prev => ({ ...prev, crew_ids: [...prev.crew_ids, s.id] })); } else { setFilterValues(prev => ({ ...prev, crew_ids: prev.crew_ids.filter(id => id !== s.id) })); } }} className="rounded border-white/20 bg-black text-cyan-500 focus:ring-cyan-500" />
+                                    <input type="checkbox" checked={filterValues.crew_ids.includes(s.id)} onChange={(e) => { if (e.target.checked) { setFilterValues(prev => ({ ...prev, crew_ids: [...prev.crew_ids, s.id] })); } else { setFilterValues(prev => ({ ...prev, crew_ids: prev.crew_ids.filter(id => id !== s.id) })); } }} className="rounded border-white/20 bg-black text-cyan-400 focus:ring-cyan-400" />
                                     <span className="text-xs text-zinc-300">{s.name}</span>
                                     {s.role?.name && <span className="text-xs text-zinc-500">({s.role.name})</span>}
                                 </label>
@@ -1071,7 +1071,7 @@ export function BulkEditSheet({
                 );
             case 'vehicle_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <Bus size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1093,7 +1093,7 @@ export function BulkEditSheet({
                 );
             case 'pricing_schedule_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <DollarSign size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1115,7 +1115,7 @@ export function BulkEditSheet({
                 );
             case 'booking_option_schedule_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-500/20 border border-cyan-500/50">
+                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
                         <div className="px-3 py-2 flex items-center gap-3">
                             <DollarSign size={16} className="text-cyan-400" />
                             <div className="flex-1 min-w-0">
@@ -1163,7 +1163,7 @@ export function BulkEditSheet({
                             <div className="flex flex-col bg-transparent order-2 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">2</span>
+                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">2</span>
                                         Change
                                     </div>
                                     <p className="text-xs text-zinc-500 mt-1">
@@ -1178,7 +1178,7 @@ export function BulkEditSheet({
                                         return (
                                             <div
                                                 key={type}
-                                                className="w-full text-left px-3 py-3 rounded-lg mb-1 bg-cyan-500/20 border border-cyan-500/50 flex items-center gap-3"
+                                                className="w-full text-left px-3 py-3 rounded-lg mb-1 bg-cyan-400/20 border border-cyan-400/50 flex items-center gap-3"
                                             >
                                                 <option.icon size={18} className="text-cyan-400" />
                                                 <div className="flex-1 min-w-0">
@@ -1208,7 +1208,7 @@ export function BulkEditSheet({
                                                     }
                                                     setIsFieldDropdownOpen(!isFieldDropdownOpen);
                                                 }}
-                                                className="w-full text-left px-3 py-3 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-500/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
+                                                className="w-full text-left px-3 py-3 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-400/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
                                             >
                                                 <Plus size={18} />
                                                 <span className="text-sm">Add field to update</span>
@@ -1252,7 +1252,7 @@ export function BulkEditSheet({
                             <div className="flex flex-col bg-transparent order-1 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">1</span>
+                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">1</span>
                                         For These <span className="text-cyan-400">{showDateRangeSelector ? filteredIds.size : effectiveIds.size}</span> Availabilities
                                     </div>
                                     <p className="text-xs text-zinc-500 mt-1">
@@ -1383,7 +1383,7 @@ export function BulkEditSheet({
                                                                 }
                                                                 setIsFilterDropdownOpen(!isFilterDropdownOpen);
                                                             }}
-                                                            className="w-full text-left px-3 py-2 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-500/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
+                                                            className="w-full text-left px-3 py-2 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-400/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
                                                         >
                                                             <Plus size={16} />
                                                             <span className="text-sm">Add filter</span>
@@ -1460,7 +1460,7 @@ export function BulkEditSheet({
                                                                 }
                                                                 setIsFilterDropdownOpen(!isFilterDropdownOpen);
                                                             }}
-                                                            className="w-full text-left px-3 py-2 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-500/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
+                                                            className="w-full text-left px-3 py-2 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-400/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
                                                         >
                                                             <Plus size={16} />
                                                             <span className="text-sm">Add filter</span>
@@ -1498,7 +1498,7 @@ export function BulkEditSheet({
                             <div className="flex flex-col bg-transparent order-3 min-h-0">
                                 <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
                                     <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-500 text-black flex items-center justify-center text-xs font-black">3</span>
+                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">3</span>
                                         To
                                     </div>
                                     <p className="text-xs text-zinc-500 mt-1">Set new value</p>
@@ -1548,7 +1548,7 @@ export function BulkEditSheet({
                                                                 <Switch
                                                                     checked={values.online_booking_status === "open"}
                                                                     onCheckedChange={(checked) => setValues(prev => ({ ...prev, online_booking_status: checked ? "open" : "closed" }))}
-                                                                    className="data-[state=checked]:bg-cyan-500"
+                                                                    className="data-[state=checked]:bg-cyan-400"
                                                                 />
                                                             </div>
                                                         )}
@@ -1559,7 +1559,7 @@ export function BulkEditSheet({
                                                                 type="number"
                                                                 value={values.max_capacity}
                                                                 onChange={(e) => setValues(prev => ({ ...prev, max_capacity: Number(e.target.value) }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
                                                                 placeholder="Enter capacity"
                                                             />
                                                         )}
@@ -1580,7 +1580,7 @@ export function BulkEditSheet({
                                                                 value={values.hours_long}
                                                                 onChange={(e) => setValues(prev => ({ ...prev, hours_long: Number(e.target.value) }))}
                                                                 step="0.5"
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
                                                                 placeholder="Enter hours"
                                                             />
                                                         )}
@@ -1648,7 +1648,7 @@ export function BulkEditSheet({
                                                                             className={cn(
                                                                                 "flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all capitalize",
                                                                                 values.staff_mode === mode
-                                                                                    ? "bg-cyan-500/20 border-cyan-500 text-cyan-400"
+                                                                                    ? "bg-cyan-400/20 border-cyan-400 text-cyan-400"
                                                                                     : "bg-black/30 border-white/10 text-zinc-400"
                                                                             )}
                                                                         >
@@ -1664,7 +1664,7 @@ export function BulkEditSheet({
                                                                             className={cn(
                                                                                 "px-3 py-2 rounded-lg border text-sm font-medium transition-all",
                                                                                 values.staff_ids.includes(member.id)
-                                                                                    ? "bg-cyan-500/20 border-cyan-500 text-cyan-400"
+                                                                                    ? "bg-cyan-400/20 border-cyan-400 text-cyan-400"
                                                                                     : "bg-black/30 border-white/10 text-zinc-400"
                                                                             )}
                                                                         >
@@ -1684,7 +1684,7 @@ export function BulkEditSheet({
                                                                 value={values.private_announcement}
                                                                 onChange={(e) => setValues(prev => ({ ...prev, private_announcement: e.target.value }))}
                                                                 rows={4}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white resize-none focus:border-cyan-500/50 focus:outline-none"
+                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white resize-none focus:border-cyan-400/50 focus:outline-none"
                                                                 placeholder="Internal notes..."
                                                             />
                                                         )}
@@ -1719,11 +1719,11 @@ export function BulkEditSheet({
                                     disabled={isSubmitting || !canApply}
                                     className={cn(
                                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                                        (isSubmitting) ? "bg-cyan-500/50 text-white cursor-not-allowed" :
+                                        (isSubmitting) ? "bg-cyan-400/50 text-white cursor-not-allowed" :
                                             (!canApply) ? "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5" :
                                                 selectedUpdateTypes.includes('delete')
                                                     ? "bg-red-500 hover:bg-red-400 text-white"
-                                                    : "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                                                    : "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                                     )}
                                 >
                                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> :

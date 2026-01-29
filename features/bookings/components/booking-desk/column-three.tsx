@@ -102,7 +102,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-200">
             {/* Header */}
             <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
-                <Receipt size={16} className="text-cyan-500" />
+                <Receipt size={16} className="text-cyan-400" />
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Payment</span>
             </div>
 
@@ -149,7 +149,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     !isAddingPromo && (
                                         <button
                                             onClick={() => { setIsAddingPromo(true); setTempPromo(""); }}
-                                            className="text-cyan-500/80 hover:text-cyan-400 text-xs flex items-center gap-1 transition-colors"
+                                            className="text-cyan-400/80 hover:text-cyan-400 text-xs flex items-center gap-1 transition-colors"
                                         >
                                             <Tag size={12} /> Add Promo Code
                                         </button>
@@ -165,11 +165,11 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                             value={tempPromo}
                                             onChange={(e) => setTempPromo(e.target.value)}
                                             placeholder="Enter code..."
-                                            className="bg-zinc-900/80 border border-cyan-500/50 rounded px-2 py-1 text-xs text-white outline-none w-32 uppercase"
+                                            className="bg-zinc-900/80 border border-cyan-400/50 rounded px-2 py-1 text-xs text-white outline-none w-32 uppercase"
                                             onKeyDown={(e) => e.key === 'Enter' && savePromo()}
                                             onBlur={savePromo}
                                         />
-                                        <button onClick={savePromo} className="text-cyan-400 bg-cyan-950/50 p-1 rounded hover:bg-cyan-500/20"><Check size={12} /></button>
+                                        <button onClick={savePromo} className="text-cyan-400 bg-cyan-950/50 p-1 rounded hover:bg-cyan-400/20"><Check size={12} /></button>
                                         <button onClick={() => setIsAddingPromo(false)} className="text-zinc-500 hover:text-white p-1"><X size={12} /></button>
                                     </div>
                                 )}
@@ -198,7 +198,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                 onChange={(e) => setTempOverride(e.target.value)}
                                                 onBlur={saveOverride}
                                                 onKeyDown={(e) => e.key === 'Enter' && saveOverride()}
-                                                className="bg-zinc-900/80 border border-cyan-500 rounded px-2 py-1 text-white font-mono w-24 text-right text-lg outline-none"
+                                                className="bg-zinc-900/80 border border-cyan-400 rounded px-2 py-1 text-white font-mono w-24 text-right text-lg outline-none"
                                             />
                                         </div>
                                     ) : (
@@ -219,7 +219,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     )}
                                 </div>
                                 {storedOverride !== undefined && (
-                                    <div className="text-right text-[10px] text-cyan-500 italic">
+                                    <div className="text-right text-[10px] text-cyan-400 italic">
                                         Manual override active
                                     </div>
                                 )}
@@ -275,13 +275,13 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                 setPaymentState({ ...paymentState, amount: Number(val.toFixed(2)) });
                                             }
                                         }}
-                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg pl-6 pr-3 py-2 text-white font-mono focus:border-cyan-500/50 outline-none text-sm"
+                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg pl-6 pr-3 py-2 text-white font-mono focus:border-cyan-400/50 outline-none text-sm"
                                         placeholder="0.00"
                                         step="0.01"
                                     />
                                 </div>
-                                <div className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                                    <span className="text-xs font-medium text-cyan-500/70 uppercase">Balance</span>
+                                <div className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-cyan-400/10 border border-cyan-400/20">
+                                    <span className="text-xs font-medium text-cyan-400/70 uppercase">Balance</span>
                                     <span className="text-sm font-mono font-bold text-cyan-400">${formatCurrency(grandTotal - (paymentState.amount || 0))}</span>
                                 </div>
                             </div>
@@ -307,7 +307,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                 {paymentState.method === 'credit_card' && (
                                     <div className="space-y-4">
                                         <div className="p-3 bg-zinc-900/80 border border-white/10 rounded-lg flex items-center gap-3">
-                                            <CreditCard size={16} className="text-cyan-500" />
+                                            <CreditCard size={16} className="text-cyan-400" />
                                             <input type="text" placeholder="Card Number" className="bg-transparent border-none outline-none text-white text-sm flex-1 placeholder:text-zinc-600 font-mono" />
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
@@ -374,7 +374,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     <div className="text-[10px] text-zinc-500">Send automatic receipt</div>
                                 </div>
                                 <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
-                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-500 rounded-full" />
+                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-400 rounded-full" />
                                 </div>
                             </div>
 
@@ -387,7 +387,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     <div className="text-[10px] text-zinc-500">Text notifications</div>
                                 </div>
                                 <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
-                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-500 rounded-full" />
+                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-400 rounded-full" />
                                 </div>
                             </div>
                         </div>
@@ -407,7 +407,7 @@ function StatusTile({ active, onClick, label }: any) {
             className={cn(
                 "flex items-center justify-center py-3 px-4 rounded-xl border transition-all duration-200",
                 active
-                    ? "bg-cyan-950/30 border-cyan-500/50 ring-1 ring-cyan-500/20 text-white"
+                    ? "bg-cyan-950/30 border-cyan-400/50 ring-1 ring-cyan-400/20 text-white"
                     : "bg-black/20 border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400"
             )}
         >

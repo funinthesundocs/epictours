@@ -30,7 +30,7 @@ export default function CalendarsPage() {
         >
             {isLoading ? (
                 <div className="flex h-[600px] items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
+                    <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
                 </div>
             ) : (
                 <div className="h-[800px]">

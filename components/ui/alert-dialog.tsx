@@ -54,7 +54,7 @@ export function AlertDialog({
             {/* Modal */}
             <div className="relative w-full max-w-sm bg-[#09090b] border border-white/10 rounded-xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-full shrink-0 ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-cyan-500/10 text-cyan-500'}`}>
+                    <div className={`p-3 rounded-full shrink-0 ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-cyan-400/10 text-cyan-400'}`}>
                         <AlertTriangle size={24} />
                     </div>
                     <div className="space-y-1">
@@ -83,7 +83,7 @@ export function AlertDialog({
                         className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50
                             ${isDestructive
                                 ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-red-500/20'
-                                : 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 ring-1 ring-cyan-500/20'
+                                : 'bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400/20 ring-1 ring-cyan-400/20'
                             }`}
                     >
                         {isLoading && <Loader2 size={14} className="animate-spin" />}

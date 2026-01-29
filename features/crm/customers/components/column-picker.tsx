@@ -139,7 +139,7 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset }: ColumnPicker
                                 <div className={cn(
                                     "w-4 h-4 rounded border flex items-center justify-center transition-colors",
                                     visibleColumns.includes(column.key)
-                                        ? "bg-cyan-500 border-cyan-500"
+                                        ? "bg-cyan-400 border-cyan-400"
                                         : "border-white/20"
                                 )}>
                                     {visibleColumns.includes(column.key) && (

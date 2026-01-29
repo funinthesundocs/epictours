@@ -120,7 +120,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                     <Textarea
                                         {...register("description")}
                                         placeholder="Enter details about this role's responsibilities..."
-                                        className="min-h-[120px] bg-[#0b1115] border-white/10 focus:border-cyan-500/50"
+                                        className="min-h-[120px] bg-[#0b1115] border-white/10 focus:border-cyan-400/50"
                                     />
                                 </div>
                             </div>
@@ -134,8 +134,8 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
+                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-cyan-400 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
                                     "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
                         )}
                     >

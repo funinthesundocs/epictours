@@ -314,7 +314,7 @@ export function AvailabilityCalendar({
                                 newDate.setFullYear(val);
                                 onDateChange(newDate);
                             }}
-                            className="w-[90px] text-cyan-500"
+                            className="w-[90px] text-cyan-400"
                         />
                     </div>
 
@@ -343,7 +343,7 @@ export function AvailabilityCalendar({
                         <div
                             className={cn(
                                 "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                isExpPickerOpen && "border-cyan-500/50 bg-zinc-900 ring-1 ring-cyan-500/20"
+                                isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20"
                             )}
                             onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
                         >
@@ -382,7 +382,7 @@ export function AvailabilityCalendar({
                             onClick={() => setViewMode('calendar')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'calendar' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'calendar' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                             )}
                             title="Calendar View"
                         >
@@ -392,7 +392,7 @@ export function AvailabilityCalendar({
                             onClick={() => setViewMode('list')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'list' ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'list' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                             )}
                             title="List View"
                         >
@@ -565,9 +565,9 @@ function MonthView({
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
     return (
-        <div className="h-full overflow-auto rounded-xl relative bg-[#0b1115]">
+        <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
             <table className="w-full border-separate border-spacing-0">
-                <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
                             <th key={day} className={cn(
@@ -596,7 +596,7 @@ function MonthView({
                                 return (
                                     <td key={colIndex} className={cn(
                                         "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-white/5",
-                                        (!isValidDay || isToday) ? "bg-white/5" : "hover:bg-white/5"
+                                        (!isValidDay || isToday) ? "bg-zinc-900/40" : "hover:bg-zinc-900/40"
                                     )} style={{ minHeight: '160px', height: '160px' }}
                                         onClick={() => {
                                             if (isValidDay && cellDateString) {
@@ -608,7 +608,7 @@ function MonthView({
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
                                                 <span className={cn(
                                                     "text-base font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
-                                                    isToday ? "bg-cyan-500 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300"
+                                                    isToday ? "bg-cyan-400 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300"
                                                 )}>{dayNumber}</span>
 
                                                 {daysEvents.map((event) => (
@@ -682,9 +682,9 @@ function ToolbarButton({
             className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border",
                 primary
-                    ? "bg-cyan-500 text-black border-cyan-400 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    ? "bg-cyan-400 text-black border-cyan-400 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     : active
-                        ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-500/50"
+                        ? "bg-zinc-800 text-white border-zinc-700 shadow-lg ring-1 ring-cyan-400/50"
                         : danger
                             ? "bg-black text-zinc-400 border-zinc-900 hover:bg-red-950/20 hover:text-red-500 hover:border-red-900/50"
                             : "bg-black text-zinc-400 border-zinc-900 hover:bg-zinc-900 hover:text-white hover:border-zinc-800",
@@ -721,21 +721,21 @@ function EventChip({
     onClick?: (e?: React.MouseEvent) => void
 }) {
     const style = selected
-        ? "bg-cyan-500 border-2 border-white/80 shadow-[0_0_15px_rgba(6,182,212,0.6)] saturate-150 scale-[1.02] z-10"
-        : "bg-cyan-600/90 hover:bg-cyan-500";
+        ? "bg-cyan-400 border-2 border-white/80 shadow-[0_0_15px_rgba(6,182,212,0.6)] saturate-150 scale-[1.02] z-10"
+        : "bg-cyan-700/90 hover:bg-cyan-400";
 
     return (
         <div
-            className={cn("mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none", style)}
+            className={cn("group mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none", style)}
             onClick={onClick}
             onMouseDown={onMouseDown}
             onMouseEnter={onMouseEnter}
         >
-            <span className="font-bold text-white text-xs leading-tight">{abbr}</span>
-            <span className="text-white font-bold text-xs leading-tight">Start: {time}</span>
-            <span className="text-white font-bold text-xs leading-tight">{bookings}</span>
-            <span className="text-white font-bold text-xs leading-tight">{cap}</span>
-            {note && <span className="text-white font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
+            <span className="font-bold text-white group-hover:text-[#010e0f] text-xs leading-tight">{abbr}</span>
+            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">Start: {time}</span>
+            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">{bookings}</span>
+            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">{cap}</span>
+            {note && <span className="text-white group-hover:text-[#010e0f] font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
         </div>
     );
 }
