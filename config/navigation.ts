@@ -30,17 +30,30 @@ import {
     Settings,
     List
 } from "lucide-react";
+import type { ModuleCode, PermissionAction } from "@/features/auth/types";
 
 export interface NavigationItem {
     title: string;
     href: string;
     icon: any;
     children?: NavigationItem[];
+    // Permission requirements
+    requiredModule?: ModuleCode;
+    requiredPermission?: {
+        resource: string;
+        action: PermissionAction;
+    };
+    // If true, only platform admins can see this
+    platformAdminOnly?: boolean;
+    // If true, only tenant admins can see this
+    tenantAdminOnly?: boolean;
 }
 
 export interface NavSection {
     title?: string; // If present, this is a Collapsible Heading
     items: NavigationItem[];
+    // If defined, this entire section requires the module
+    requiredModule?: ModuleCode;
 }
 
 export const navigation: NavSection[] = [
@@ -59,89 +72,106 @@ export const navigation: NavSection[] = [
             {
                 title: "All Customers",
                 href: "/crm/customers",
-                icon: Users
+                icon: Users,
+                requiredModule: "crm"
             }
         ]
     },
     {
         title: "Operations",
+        requiredModule: "bookings",
         items: [
-
             {
                 title: "Availabilities",
                 href: "/operations/availability",
-                icon: Calendar
+                icon: Calendar,
+                requiredModule: "bookings"
             },
             {
                 title: "Bookings",
                 href: "/operations/bookings",
-                icon: CalendarRange
+                icon: CalendarRange,
+                requiredModule: "bookings"
             },
             {
                 title: "Transportation",
                 href: "/operations/transportation",
                 icon: Bus,
+                requiredModule: "transportation",
                 children: [
-                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus },
-                    { title: "Vendors", href: "/operations/transportation/vendors", icon: Handshake },
-                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin },
-                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2 },
-                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock }
+                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus, requiredModule: "transportation" },
+                    { title: "Vendors", href: "/operations/transportation/vendors", icon: Handshake, requiredModule: "transportation" },
+                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin, requiredModule: "transportation" },
+                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2, requiredModule: "transportation" },
+                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock, requiredModule: "transportation" }
                 ]
             },
-
-
         ]
     },
     {
-        title: "Communication", // Changed from "Communications" to "Communication"
+        title: "Communication",
+        requiredModule: "communications",
         items: [
-            { title: "Phone System", href: "/comms/phone", icon: Phone },
-            { title: "AI Agents", href: "/comms/ai-agents", icon: Bot },
-            { title: "Live Agents", href: "/comms/live-agents", icon: Headset },
-            { title: "HighLevel", href: "/comms/highlevel", icon: Layers },
+            { title: "Phone System", href: "/comms/phone", icon: Phone, requiredModule: "communications" },
+            { title: "AI Agents", href: "/comms/ai-agents", icon: Bot, requiredModule: "communications" },
+            { title: "Live Agents", href: "/comms/live-agents", icon: Headset, requiredModule: "communications" },
+            { title: "HighLevel", href: "/comms/highlevel", icon: Layers, requiredModule: "communications" },
         ]
     },
     {
         title: "Visibility",
+        requiredModule: "visibility",
         items: [
-            { title: "OTA Manager", href: "/visibility/ota", icon: CloudCog },
-            { title: "Website Manager", href: "/visibility/website", icon: Globe },
-            { title: "Social Media", href: "/visibility/social", icon: Share2 },
-            { title: "Blog Manager", href: "/visibility/blog", icon: PenTool },
+            { title: "OTA Manager", href: "/visibility/ota", icon: CloudCog, requiredModule: "visibility" },
+            { title: "Website Manager", href: "/visibility/website", icon: Globe, requiredModule: "visibility" },
+            { title: "Social Media", href: "/visibility/social", icon: Share2, requiredModule: "visibility" },
+            { title: "Blog Manager", href: "/visibility/blog", icon: PenTool, requiredModule: "visibility" },
         ]
     },
     {
         title: "Finance",
+        requiredModule: "finance",
         items: [
-
-            { title: "Billing", href: "/finance/billing", icon: Receipt },
-            { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark },
-            { title: "Partners", href: "/finance/partners", icon: Handshake },
-            { title: "Reports", href: "/finance/reports", icon: PieChart },
+            { title: "Billing", href: "/finance/billing", icon: Receipt, requiredModule: "finance" },
+            { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark, requiredModule: "finance" },
+            { title: "Partners", href: "/finance/partners", icon: Handshake, requiredModule: "finance" },
+            { title: "Reports", href: "/finance/reports", icon: PieChart, requiredModule: "finance" },
         ]
     },
     {
         title: "Settings",
+        requiredModule: "settings",
         items: [
-
             {
                 title: "Users",
                 href: "/settings/users",
                 icon: UserCog,
+                tenantAdminOnly: true,
                 children: [
                     { title: "Staff", href: "/operations/staff", icon: Users },
-                    { title: "Roles", href: "/settings/users/roles", icon: Shield }
+                    { title: "Permission Groups", href: "/settings/users/roles", icon: Shield, tenantAdminOnly: true }
                 ]
             },
-            { title: "Permissions", href: "/settings/permissions", icon: Shield },
-            { title: "Experiences", href: "/operations/tours", icon: Map },
+            { title: "Permissions", href: "/settings/permissions", icon: Shield, tenantAdminOnly: true },
+            { title: "Experiences", href: "/operations/tours", icon: Map, requiredModule: "bookings" },
             { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
-            { title: "Booking Options", href: "/settings/booking-options", icon: List },
-            { title: "Customer Types", href: "/customers/types", icon: Users },
-            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins },
-            { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers },
+            { title: "Booking Options", href: "/settings/booking-options", icon: List, requiredModule: "bookings" },
+            { title: "Customer Types", href: "/customers/types", icon: Users, requiredModule: "crm" },
+            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins, requiredModule: "finance" },
+            { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers, requiredModule: "finance" },
             { title: "Activity Log", href: "/settings/activity-log", icon: Activity },
+        ]
+    },
+    {
+        title: "Platform Admin",
+        items: [
+            {
+                title: "Organizations",
+                href: "/admin/tenants",
+                icon: Building2,
+                platformAdminOnly: true
+            },
         ]
     }
 ];
+

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Info, Handshake, Phone, Mail, FileText, MapPin, Contact, MessageCircle } from "lucide-react";
+import { Save, Loader2, Info, Handshake, Phone, Mail, FileText, MapPin, Contact, MessageCircle, UserPlus, KeyRound, Eye, EyeOff, Copy, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Combobox } from "@/components/ui/combobox";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
+import { toast } from "sonner";
 
 // Brand icons for messaging apps
 import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine } from "react-icons/fa";
@@ -97,7 +98,19 @@ const VendorSchema = z.object({
     ein_number: z.string().optional(),
     preferred_messaging_app: z.string().optional().nullable(),
     messaging_handle: z.string().optional().nullable(),
+    // User account fields
+    create_user_account: z.boolean(),
+    temp_password: z.string().optional(),
 });
+
+function generatePassword(): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+}
 
 type VendorFormData = z.infer<typeof VendorSchema>;
 
@@ -110,6 +123,8 @@ interface AddVendorSheetProps {
 
 export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddVendorSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [vendorContactRoleId, setVendorContactRoleId] = useState<string | null>(null);
 
     const formatPhoneNumber = (value: string) => {
         const numbers = value.replace(/\D/g, "");
@@ -138,15 +153,31 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             email: "",
             ein_number: "",
             preferred_messaging_app: "",
-            messaging_handle: ""
+            messaging_handle: "",
+            create_user_account: false,
+            temp_password: "",
         }
     });
+
+    // Fetch Vendor Contact role on mount
+    useEffect(() => {
+        const fetchVendorRole = async () => {
+            const { data } = await supabase
+                .from("roles")
+                .select("id")
+                .eq("name", "Vendor Contact")
+                .single();
+            if (data) {
+                setVendorContactRoleId(data.id);
+            }
+        };
+        fetchVendorRole();
+    }, []);
 
     // Reset when opening/changing mode
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
-                // Edit Mode
                 reset({
                     name: initialData.name,
                     address: initialData.address || "",
@@ -157,10 +188,12 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     email: initialData.email || "",
                     ein_number: initialData.ein_number || "",
                     preferred_messaging_app: initialData.preferred_messaging_app || "",
-                    messaging_handle: initialData.messaging_handle || ""
+                    messaging_handle: initialData.messaging_handle || "",
+                    create_user_account: false,
+                    temp_password: "",
                 });
             } else {
-                // New Mode
+                const pw = generatePassword();
                 reset({
                     name: "",
                     address: "",
@@ -171,7 +204,9 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     email: "",
                     ein_number: "",
                     preferred_messaging_app: "",
-                    messaging_handle: ""
+                    messaging_handle: "",
+                    create_user_account: false,
+                    temp_password: pw,
                 });
             }
         }
@@ -180,33 +215,81 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
     const onSubmit = async (data: VendorFormData) => {
         setIsSubmitting(true);
         try {
-            // Strip formatting from phone before saving
-            const payload = {
-                ...data,
+            // Strip formatting and create payload
+            const payload: Record<string, any> = {
+                name: data.name,
+                address: data.address || null,
+                city: data.city || null,
+                state: data.state || null,
+                zip_code: data.zip_code || null,
                 phone: data.phone?.replace(/\D/g, "") || null,
+                email: data.email || null,
+                ein_number: data.ein_number || null,
                 preferred_messaging_app: data.preferred_messaging_app || null,
                 messaging_handle: data.messaging_handle || null
             };
 
+            // Create user account if requested
+            if (data.create_user_account && data.email && data.temp_password) {
+                // Check if user already exists
+                const { data: existingUser } = await supabase
+                    .from("users")
+                    .select("id")
+                    .eq("email", data.email)
+                    .single();
+
+                if (existingUser) {
+                    payload.user_id = existingUser.id;
+                    toast.info("Linked to existing user account");
+                } else {
+                    // Create new user
+                    const { data: newUser, error: userError } = await supabase
+                        .from("users")
+                        .insert([{
+                            email: data.email,
+                            name: data.name,
+                            password_hash: data.temp_password,
+                            temp_password: true,
+                        }])
+                        .select()
+                        .single();
+
+                    if (userError) throw userError;
+
+                    payload.user_id = newUser.id;
+
+                    // Assign Vendor Contact role if available
+                    if (vendorContactRoleId && newUser.id) {
+                        await supabase
+                            .from("user_roles")
+                            .insert([{
+                                user_id: newUser.id,
+                                role_id: vendorContactRoleId,
+                            }])
+                            .single();
+                    }
+
+                    toast.success("User account created with Vendor Contact role");
+                }
+            }
+
             if (initialData?.id) {
-                // Update
                 const { error } = await supabase
                     .from("vendors")
                     .update(payload)
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
-                // Create
                 const { error } = await supabase
                     .from("vendors")
-                    .insert([payload]);
+                    .insert([payload] as any);
                 if (error) throw error;
             }
             onSuccess();
             onClose();
         } catch (err) {
             console.error("Error saving vendor:", err);
-            alert("Failed to save vendor.");
+            toast.error("Failed to save vendor.");
         } finally {
             setIsSubmitting(false);
         }
@@ -358,6 +441,85 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                             </div>
                         </div>
                     </div>
+
+                    {/* User Account Section - Only for new vendors */}
+                    {!initialData && (
+                        <div>
+                            <SectionHeader icon={UserPlus} title="User Account (Optional)" />
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                    <div>
+                                        <p className="font-medium text-white">Create Login Account</p>
+                                        <p className="text-sm text-zinc-400">Allow this vendor contact to log in to the portal</p>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            {...register("create_user_account")}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                    </label>
+                                </div>
+
+                                {watch("create_user_account") && (
+                                    <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/30 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <KeyRound size={16} className="text-cyan-400" />
+                                                <span className="text-sm font-medium text-white">Temporary Password</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setValue("temp_password", generatePassword(), { shouldDirty: true })}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title="Generate new password"
+                                                >
+                                                    <RefreshCw size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(watch("temp_password") || "");
+                                                        toast.success("Password copied!");
+                                                    }}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title="Copy password"
+                                                >
+                                                    <Copy size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title={showPassword ? "Hide password" : "Show password"}
+                                                >
+                                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <Input
+                                                {...register("temp_password")}
+                                                type={showPassword ? "text" : "password"}
+                                                className="font-mono text-sm bg-[#0b1115] border-white/10"
+                                                readOnly
+                                            />
+                                        </div>
+                                        <p className="text-xs text-cyan-300/70">
+                                            ⚠️ Share this password securely. User will be prompted to change it on first login.
+                                        </p>
+                                        {!watch("email") && (
+                                            <p className="text-xs text-amber-400">
+                                                ⚠️ Email address is required to create a user account.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Fixed Footer */}

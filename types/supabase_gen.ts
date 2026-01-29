@@ -28,6 +28,7 @@ export type Database = {
           status: string | null
           tags: string[] | null
           total_value: string | null
+          tenant_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -42,6 +43,7 @@ export type Database = {
           status?: string | null
           tags?: string[] | null
           total_value?: string | null
+          tenant_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -56,6 +58,7 @@ export type Database = {
           status?: string | null
           tags?: string[] | null
           total_value?: string | null
+          tenant_id?: string | null
         }
         Relationships: []
       }
@@ -81,6 +84,7 @@ export type Database = {
           transport_details: string | null
           waiver_link: string | null
           what_to_bring: string[] | null
+          tenant_id: string | null
         }
         Insert: {
           cancellation_policy?: string | null
@@ -103,6 +107,7 @@ export type Database = {
           transport_details?: string | null
           waiver_link?: string | null
           what_to_bring?: string[] | null
+          tenant_id?: string | null
         }
         Update: {
           cancellation_policy?: string | null
@@ -125,6 +130,7 @@ export type Database = {
           transport_details?: string | null
           waiver_link?: string | null
           what_to_bring?: string[] | null
+          tenant_id?: string | null
         }
         Relationships: []
       }
@@ -137,6 +143,7 @@ export type Database = {
           name: string
           phone: string | null
           pickup_point_id: string | null
+          tenant_id: string | null
         }
         Insert: {
           address?: string | null
@@ -146,6 +153,7 @@ export type Database = {
           name: string
           phone?: string | null
           pickup_point_id?: string | null
+          tenant_id?: string | null
         }
         Update: {
           address?: string | null
@@ -155,6 +163,7 @@ export type Database = {
           name?: string
           phone?: string | null
           pickup_point_id?: string | null
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -173,6 +182,7 @@ export type Database = {
           instructions: string | null
           map_link: string | null
           name: string
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -180,6 +190,7 @@ export type Database = {
           instructions?: string | null
           map_link?: string | null
           name: string
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -187,6 +198,7 @@ export type Database = {
           instructions?: string | null
           map_link?: string | null
           name?: string
+          tenant_id?: string | null
         }
         Relationships: []
       }
@@ -238,18 +250,21 @@ export type Database = {
           id: string
           name: string
           start_time: string | null
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
           start_time?: string | null
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
           start_time?: string | null
+          tenant_id?: string | null
         }
         Relationships: []
       }
@@ -267,6 +282,7 @@ export type Database = {
           rate_per_hour: number | null
           status: string
           vin_number: string | null
+          tenant_id: string | null
         }
         Insert: {
           capacity?: number
@@ -281,6 +297,7 @@ export type Database = {
           rate_per_hour?: number | null
           status?: string
           vin_number?: string | null
+          tenant_id?: string | null
         }
         Update: {
           capacity?: number
@@ -295,6 +312,7 @@ export type Database = {
           rate_per_hour?: number | null
           status?: string
           vin_number?: string | null
+          tenant_id?: string | null
         }
         Relationships: []
       }
@@ -309,6 +327,7 @@ export type Database = {
           new_data: Json | null
           created_at: string | null
           metadata: Json | null
+          tenant_id: string | null
         }
         Insert: {
           id?: string
@@ -354,6 +373,7 @@ export type Database = {
           city: string | null
           state: string | null
           zip_code: string | null
+          tenant_id: string | null
         }
         Insert: {
           id?: string
@@ -380,6 +400,391 @@ export type Database = {
           zip_code?: string | null
         }
         Relationships: []
+      }
+      tenants: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_at: string | null
+          settings: Json | null
+          is_active: boolean | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string | null
+          settings?: Json | null
+          is_active?: boolean | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string | null
+          settings?: Json | null
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      modules: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          description: string | null
+          is_active: boolean | null
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          description?: string | null
+          is_active?: boolean | null
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          description?: string | null
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      module_resources: {
+        Row: {
+          id: string
+          module_id: string
+          resource_code: string
+          resource_name: string
+          default_actions: string[] | null
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          resource_code: string
+          resource_name: string
+          default_actions?: string[] | null
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          resource_code?: string
+          resource_name?: string
+          default_actions?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_resources_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tenant_subscriptions: {
+        Row: {
+          id: string
+          tenant_id: string
+          module_id: string
+          starts_at: string | null
+          expires_at: string | null
+          status: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          module_id: string
+          starts_at?: string | null
+          expires_at?: string | null
+          status?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          module_id?: string
+          starts_at?: string | null
+          expires_at?: string | null
+          status?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      users: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          avatar_url: string | null
+          platform_role: string | null
+          tenant_id: string | null
+          is_tenant_admin: boolean | null
+          password_hash: string | null
+          temp_password: boolean | null
+          supabase_auth_id: string | null
+          created_at: string | null
+          last_login_at: string | null
+          is_active: boolean | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          avatar_url?: string | null
+          platform_role?: string | null
+          tenant_id?: string | null
+          is_tenant_admin?: boolean | null
+          password_hash?: string | null
+          temp_password?: boolean | null
+          supabase_auth_id?: string | null
+          created_at?: string | null
+          last_login_at?: string | null
+          is_active?: boolean | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          avatar_url?: string | null
+          platform_role?: string | null
+          tenant_id?: string | null
+          is_tenant_admin?: boolean | null
+          password_hash?: string | null
+          temp_password?: boolean | null
+          supabase_auth_id?: string | null
+          created_at?: string | null
+          last_login_at?: string | null
+          is_active?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      roles: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          color: string | null
+          is_default: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          color?: string | null
+          is_default?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          color?: string | null
+          is_default?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      role_permissions: {
+        Row: {
+          id: string
+          role_id: string
+          module_code: string
+          resource_type: string
+          can_create: boolean | null
+          can_read: boolean | null
+          can_update: boolean | null
+          can_delete: boolean | null
+          scope: Json | null
+        }
+        Insert: {
+          id?: string
+          role_id: string
+          module_code: string
+          resource_type: string
+          can_create?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
+          can_delete?: boolean | null
+          scope?: Json | null
+        }
+        Update: {
+          id?: string
+          role_id?: string
+          module_code?: string
+          resource_type?: string
+          can_create?: boolean | null
+          can_read?: boolean | null
+          can_update?: boolean | null
+          can_delete?: boolean | null
+          scope?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role_id: string
+          assigned_at: string | null
+          assigned_by: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role_id: string
+          assigned_at?: string | null
+          assigned_by?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role_id?: string
+          assigned_at?: string | null
+          assigned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      staff: {
+        Row: {
+          id: string
+          name: string
+          position_id: string | null
+          phone: string | null
+          messaging_app: string | null
+          email: string | null
+          notes: string | null
+          created_at: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          position_id?: string | null
+          phone?: string | null
+          messaging_app?: string | null
+          email?: string | null
+          notes?: string | null
+          created_at?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          position_id?: string | null
+          phone?: string | null
+          messaging_app?: string | null
+          email?: string | null
+          notes?: string | null
+          created_at?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "staff_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      staff_positions: {
+        Row: {
+          id: string
+          name: string
+          created_at: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_positions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

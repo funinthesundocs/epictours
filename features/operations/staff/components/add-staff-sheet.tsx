@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Save, Loader2, Info, User, Contact, Phone, MessageCircle, Mail, FileText, BadgeCheck, Plus, Trash2 } from "lucide-react";
+import { Save, Loader2, Info, User, Contact, Phone, MessageCircle, Mail, FileText, BadgeCheck, Plus, Trash2, KeyRound, UserPlus, Eye, EyeOff, Copy, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Brand icons for messaging apps
 import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine, FaApple } from "react-icons/fa";
@@ -20,16 +22,27 @@ import { SiSignal } from "react-icons/si";
 // Zod Schema
 const StaffSchema = z.object({
     name: z.string().min(2, "Name is required"),
-    role_id: z.string().min(1, "Role is required"),
+    position_id: z.string().min(1, "Position is required"),
     phone: z.string().optional().nullable(),
-    // messaging_app is now just for storage, form uses messaging_apps array
     messaging_apps: z.array(z.object({
         app: z.string().min(1, "App required"),
         handle: z.string().min(1, "Handle required")
     })).optional(),
     email: z.string().email("Invalid email").optional().or(z.literal("")),
     notes: z.string().optional().nullable(),
+    // User account fields
+    create_user_account: z.boolean(),
+    temp_password: z.string().optional(),
 });
+
+function generatePassword(): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+}
 
 type StaffFormData = z.infer<typeof StaffSchema>;
 
@@ -53,7 +66,8 @@ const APP_OPTIONS = [
 
 export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddStaffSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
+    const [positions, setPositions] = useState<{ value: string; label: string; default_role_id: string | null }[]>([]);
+    const [showPassword, setShowPassword] = useState(false);
 
     const formatPhoneNumber = (value: string) => {
         const numbers = value.replace(/\D/g, "");
@@ -75,11 +89,13 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
         resolver: zodResolver(StaffSchema),
         defaultValues: {
             name: "",
-            role_id: "",
+            position_id: "",
             phone: "",
             messaging_apps: [],
             email: "",
-            notes: ""
+            notes: "",
+            create_user_account: false,
+            temp_password: "",
         }
     });
 
@@ -88,15 +104,28 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
         name: "messaging_apps"
     });
 
-    // Fetch Roles on mount
+    // Fetch Positions with their default_role_id on mount
     useEffect(() => {
-        const fetchRoles = async () => {
-            const { data } = await supabase.from("roles").select("id, name").order("name");
+        const fetchPositions = async () => {
+            const { data } = await supabase
+                .from("staff_positions")
+                .select("id, name, default_role_id")
+                .order("name");
             if (data) {
-                setRoles(data.map(r => ({ value: r.id, label: r.name })));
+                // Type assertion since default_role_id may not exist pre-migration
+                const positionsWithRoles = data as unknown as Array<{
+                    id: string;
+                    name: string;
+                    default_role_id: string | null;
+                }>;
+                setPositions(positionsWithRoles.map(r => ({
+                    value: r.id,
+                    label: r.name,
+                    default_role_id: r.default_role_id
+                })));
             }
         };
-        fetchRoles();
+        fetchPositions();
     }, []);
 
     // Reset when opening/changing mode
@@ -115,27 +144,31 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     console.warn("Failed to parse messaging apps", e);
                 }
 
-                // Ensure at least one empty row if none exist
                 if (parsedApps.length === 0) {
                     parsedApps = [{ app: "", handle: "" }];
                 }
 
                 reset({
                     name: initialData.name,
-                    role_id: initialData.role_id || "",
+                    position_id: initialData.position_id || "",
                     phone: formatPhoneNumber(initialData.phone || ""),
                     messaging_apps: parsedApps,
                     email: initialData.email || "",
                     notes: initialData.notes || "",
+                    create_user_account: false,
+                    temp_password: "",
                 });
             } else {
+                const pw = generatePassword();
                 reset({
                     name: "",
-                    role_id: "",
+                    position_id: "",
                     phone: "",
-                    messaging_apps: [{ app: "", handle: "" }], // Default to one empty row
+                    messaging_apps: [{ app: "", handle: "" }],
                     email: "",
                     notes: "",
+                    create_user_account: false,
+                    temp_password: pw,
                 });
             }
         }
@@ -147,34 +180,105 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             // Filter out empty rows before saving
             const validApps = data.messaging_apps?.filter(a => a.app && a.handle) || [];
 
-            const payload = {
+            const payload: Record<string, any> = {
                 name: data.name,
-                role_id: data.role_id,
+                position_id: data.position_id,
                 phone: data.phone?.replace(/\D/g, "") || null,
                 messaging_app: validApps.length > 0 ? JSON.stringify(validApps) : null,
                 email: data.email || null,
                 notes: data.notes || null,
             };
 
+            // Create user account if requested
+            if (data.create_user_account && data.email && data.temp_password) {
+                // Check if user already exists
+                const { data: existingUser } = await supabase
+                    .from("users")
+                    .select("id")
+                    .eq("email", data.email)
+                    .single();
+
+                if (existingUser) {
+                    // Link to existing user
+                    payload.user_id = existingUser.id;
+                    toast.info("Linked to existing user account");
+                } else {
+                    // Create new user
+                    const { data: newUser, error: userError } = await supabase
+                        .from("users")
+                        .insert([{
+                            email: data.email,
+                            name: data.name,
+                            password_hash: data.temp_password, // In production, hash this
+                            temp_password: true,
+                        }])
+                        .select()
+                        .single();
+
+                    if (userError) throw userError;
+
+                    payload.user_id = newUser.id;
+
+                    // Check if position has custom permissions
+                    const selectedPosition = positions.find(p => p.value === data.position_id);
+                    const positionId = selectedPosition?.value;
+
+                    // First, check for position-specific permissions (use type assertion for untyped table)
+                    const { data: positionPerms } = positionId
+                        ? await (supabase as any)
+                            .from("position_permissions")
+                            .select("*")
+                            .eq("position_id", positionId)
+                        : { data: null };
+
+                    if (positionPerms && positionPerms.length > 0) {
+                        // Position has custom permissions - assign the group role but permissions
+                        // are determined by position (handled in auth context)
+                        const roleId = selectedPosition?.default_role_id;
+                        if (roleId && newUser.id) {
+                            await supabase
+                                .from("user_roles")
+                                .insert([{
+                                    user_id: newUser.id,
+                                    role_id: roleId,
+                                }])
+                                .single();
+                        }
+                        toast.success("User account created with position-specific permissions");
+                    } else {
+                        // Fall back to group permissions
+                        const roleId = selectedPosition?.default_role_id;
+                        if (roleId && newUser.id) {
+                            await supabase
+                                .from("user_roles")
+                                .insert([{
+                                    user_id: newUser.id,
+                                    role_id: roleId,
+                                }])
+                                .single();
+                        }
+                        toast.success("User account created with group permissions");
+                    }
+                }
+            }
+
             if (initialData?.id) {
-                // Update
                 const { error } = await supabase
                     .from("staff")
                     .update(payload)
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
-                // Create
                 const { error } = await supabase
                     .from("staff")
-                    .insert([payload]);
+                    .insert([payload] as any);
                 if (error) throw error;
             }
             onSuccess();
             onClose();
         } catch (err) {
             console.error("Error saving staff:", err);
-            alert("Failed to save staff member.");
+            toast.error("Failed to save staff member.");
         } finally {
             setIsSubmitting(false);
         }
@@ -214,15 +318,15 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                             <div className="space-y-2">
                                 <Label className="text-zinc-300 flex items-center gap-2">
                                     <BadgeCheck size={16} className="text-zinc-500" />
-                                    Role
+                                    Position
                                 </Label>
                                 <Combobox
-                                    options={roles}
-                                    value={watch('role_id')}
-                                    onChange={(val) => setValue('role_id', val, { shouldValidate: true })}
-                                    placeholder="Select Role..."
+                                    options={positions}
+                                    value={watch('position_id')}
+                                    onChange={(val) => setValue('position_id', val, { shouldValidate: true })}
+                                    placeholder="Select Position..."
                                 />
-                                {errors.role_id && <p className="text-xs text-red-500">{errors.role_id.message}</p>}
+                                {errors.position_id && <p className="text-xs text-red-500">{errors.position_id.message}</p>}
                             </div>
                         </div>
                     </div>
@@ -347,6 +451,87 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                             </div>
                         </div>
                     </div>
+
+                    {/* User Account Section - Only for new staff */}
+                    {!initialData && (
+                        <div>
+                            <SectionHeader icon={UserPlus} title="User Account (Optional)" />
+                            <div className="space-y-4">
+                                {/* Toggle */}
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                    <div>
+                                        <p className="font-medium text-white">Create Login Account</p>
+                                        <p className="text-sm text-zinc-400">Allow this staff member to log in to the system</p>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            {...register("create_user_account")}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                    </label>
+                                </div>
+
+                                {/* Password section - shows when toggle is on */}
+                                {watch("create_user_account") && (
+                                    <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/30 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <KeyRound size={16} className="text-cyan-400" />
+                                                <span className="text-sm font-medium text-white">Temporary Password</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setValue("temp_password", generatePassword(), { shouldDirty: true })}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title="Generate new password"
+                                                >
+                                                    <RefreshCw size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(watch("temp_password") || "");
+                                                        toast.success("Password copied!");
+                                                    }}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title="Copy password"
+                                                >
+                                                    <Copy size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    title={showPassword ? "Hide password" : "Show password"}
+                                                >
+                                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <Input
+                                                {...register("temp_password")}
+                                                type={showPassword ? "text" : "password"}
+                                                className="font-mono text-sm bg-[#0b1115] border-white/10"
+                                                readOnly
+                                            />
+                                        </div>
+                                        <p className="text-xs text-cyan-300/70">
+                                            ⚠️ Share this password securely. User will be prompted to change it on first login.
+                                        </p>
+                                        {!watch("email") && (
+                                            <p className="text-xs text-amber-400">
+                                                ⚠️ Email address is required to create a user account.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">

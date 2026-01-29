@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 interface Staff {
     id: string;
     name: string;
-    role?: { name: string };
+    position?: { name: string };
     phone: string;
     messaging_app: string;
     email: string;
@@ -23,7 +23,7 @@ interface StaffTableProps {
 }
 
 type SortConfig = {
-    key: keyof Staff | 'role';
+    key: keyof Staff | 'position';
     direction: 'asc' | 'desc';
 } | null;
 
@@ -61,7 +61,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
     const [sortConfig, setSortConfig] = useState<SortConfig>(null);
     const [deletingItem, setDeletingItem] = useState<Staff | null>(null);
 
-    const handleSort = (key: keyof Staff | 'role') => {
+    const handleSort = (key: keyof Staff | 'position') => {
         let direction: 'asc' | 'desc' = 'asc';
         if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
             direction = 'desc';
@@ -75,9 +75,9 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
         let valA: string = "";
         let valB: string = "";
 
-        if (sortConfig.key === 'role') {
-            valA = (a.role?.name || "").toLowerCase();
-            valB = (b.role?.name || "").toLowerCase();
+        if (sortConfig.key === 'position') {
+            valA = (a.position?.name || "").toLowerCase();
+            valB = (b.position?.name || "").toLowerCase();
         } else {
             valA = (String(a[sortConfig.key] || "")).toLowerCase();
             valB = (String(b[sortConfig.key] || "")).toLowerCase();
@@ -88,7 +88,7 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
         return 0;
     });
 
-    const SortIcon = ({ column }: { column: keyof Staff | 'role' }) => {
+    const SortIcon = ({ column }: { column: keyof Staff | 'position' }) => {
         if (sortConfig?.key !== column) return <ArrowUpDown size={12} className="opacity-30" />;
         return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-cyan-400" /> : <ArrowDown size={12} className="text-cyan-400" />;
     };
@@ -110,8 +110,8 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                             <th className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none" onClick={() => handleSort('name')}>
                                 <div className="flex items-center gap-2">Name <SortIcon column="name" /></div>
                             </th>
-                            <th className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none" onClick={() => handleSort('role')}>
-                                <div className="flex items-center gap-2">Role <SortIcon column="role" /></div>
+                            <th className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none" onClick={() => handleSort('position')}>
+                                <div className="flex items-center gap-2">Position <SortIcon column="position" /></div>
                             </th>
                             <th className="px-6 py-4">Contact</th>
                             <th className="px-6 py-4">Notes</th>
@@ -126,9 +126,9 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                                     {staff.name}
                                 </td>
                                 <td className="px-6 py-4 align-middle">
-                                    {staff.role?.name ? (
+                                    {staff.position?.name ? (
                                         <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
-                                            {staff.role.name}
+                                            {staff.position.name}
                                         </span>
                                     ) : (
                                         <span className="text-zinc-500 italic">-</span>
@@ -206,9 +206,9 @@ export function StaffTable({ data, onEdit, onDelete, onCompensation }: StaffTabl
                             <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
                                 <div>
                                     <h3 className="text-lg font-bold text-white leading-tight">{staff.name}</h3>
-                                    {staff.role?.name && (
+                                    {staff.position?.name && (
                                         <span className="px-2 py-0.5 rounded text-xs border border-zinc-700 bg-zinc-800 text-zinc-300">
-                                            {staff.role.name}
+                                            {staff.position.name}
                                         </span>
                                     )}
                                 </div>

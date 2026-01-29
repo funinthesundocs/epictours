@@ -27,7 +27,7 @@ export default function StaffPage() {
         try {
             const { data, error } = await supabase
                 .from("staff")
-                .select("*, role:roles(name)")
+                .select("*, position:staff_positions(name)")
                 .order("name");
 
             if (error) throw error;

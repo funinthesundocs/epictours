@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navigation, type NavSection } from "@/config/navigation";
+import { type NavSection } from "@/config/navigation";
+import { useFilteredNavigation } from "@/features/auth/use-filtered-navigation";
+import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Minus, Plus } from "lucide-react";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,16 +15,29 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export function Sidebar() {
     const pathname = usePathname();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const { isCollapsed, toggleCollapse, zoom, zoomIn, zoomOut } = useSidebar();
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const { isCollapsed, toggleCollapse } = useSidebar();
 
-    // Get Settings section from navigation
+    // Auto-open Settings panel if on a settings page
+    const [isSettingsOpen, setIsSettingsOpen] = useState(() =>
+        pathname.startsWith('/settings')
+    );
+    // Auto-open Platform Admin panel if on an admin page
+    const [isPlatformAdminOpen, setIsPlatformAdminOpen] = useState(() =>
+        pathname.startsWith('/admin')
+    );
+    const { isPlatformAdmin } = useAuth();
+
+    // Get filtered navigation based on user permissions
+    const navigation = useFilteredNavigation();
+
+    // Get Settings and Platform Admin sections from filtered navigation
     const settingsSection = navigation.find(section => section.title === "Settings");
+    const platformAdminSection = navigation.find(section => section.title === "Platform Admin");
 
     // Accordion State
     const [openSection, setOpenSection] = useState<string | null>(() => {
         // Find which section should be open based on current path
-        const activeSection = navigation.find(section =>
+        const activeSection = navigation.find((section: NavSection) =>
             section.title &&
             section.items.some(item =>
                 pathname === item.href ||
@@ -89,8 +104,8 @@ export function Sidebar() {
                     {/* Navigation Items */}
                     <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800">
                         {navigation.map((section, idx) => {
-                            // Skip Settings section - it will be shown in the slide-up panel
-                            if (section.title === "Settings") return null;
+                            // Skip Settings and Platform Admin sections - they have their own panels
+                            if (section.title === "Settings" || section.title === "Platform Admin") return null;
 
                             // Section Header Logic
                             // Navigation Items
@@ -127,70 +142,41 @@ export function Sidebar() {
                         })}
                     </div>
 
-                    {/* Zoom Controls */}
-                    <div className={cn(
-                        "border-t border-white/10 bg-zinc-900/80 shrink-0",
-                        isCollapsed ? "px-2 py-3 flex flex-col items-center gap-1" : "px-4 py-3"
-                    )}>
-                        {isCollapsed ? (
-                            <div className="flex flex-col items-center gap-1">
-                                <button
-                                    onClick={zoomIn}
-                                    disabled={zoom >= 150}
-                                    className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                    title="Zoom In"
-                                >
-                                    <Plus size={14} />
-                                </button>
-                                <span className="text-[10px] text-cyan-400 font-bold">{zoom}%</span>
-                                <button
-                                    onClick={zoomOut}
-                                    disabled={zoom <= 50}
-                                    className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                    title="Zoom Out"
-                                >
-                                    <Minus size={14} />
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-center gap-4">
-                                <span className="text-lg text-white font-medium">Zoom</span>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={zoomOut}
-                                        disabled={zoom <= 50}
-                                        className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                        title="Zoom Out"
-                                    >
-                                        <Minus size={14} />
-                                    </button>
-                                    <span className="text-lg text-cyan-400 font-bold w-14 text-center">{zoom}%</span>
-                                    <button
-                                        onClick={zoomIn}
-                                        disabled={zoom >= 150}
-                                        className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                        title="Zoom In"
-                                    >
-                                        <Plus size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
                     {/* User Profile Footer */}
                     <div className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}>
                         {isCollapsed ? (
                             <>
-                                {/* Collapsed: Profile avatar and gear below */}
-                                <div className="w-9 h-9 rounded-full bg-cyan-400 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
-                                <button
-                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                                    title="Settings"
-                                >
-                                    <Settings size={36} className="text-cyan-400" />
-                                </button>
+                                {/* Collapsed: Profile avatar and icons below */}
+                                <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                                <div className="flex items-center gap-1">
+                                    {/* Platform Admin Icon - Only for platform admins */}
+                                    {isPlatformAdmin() && (
+                                        <button
+                                            onClick={() => { setIsPlatformAdminOpen(!isPlatformAdminOpen); setIsSettingsOpen(false); }}
+                                            className={cn(
+                                                "p-2 rounded-lg transition-colors",
+                                                isPlatformAdminOpen
+                                                    ? "bg-white/20 text-cyan-400"
+                                                    : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                            )}
+                                            title="Platform Admin"
+                                        >
+                                            <Shield size={18} />
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsPlatformAdminOpen(false); }}
+                                        className={cn(
+                                            "p-2 rounded-lg transition-colors",
+                                            isSettingsOpen
+                                                ? "bg-white/20 text-cyan-400"
+                                                : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                        )}
+                                        title="Settings"
+                                    >
+                                        <Settings size={18} />
+                                    </button>
+                                </div>
                             </>
                         ) : (
                             <div className="flex items-center justify-between">
@@ -201,14 +187,36 @@ export function Sidebar() {
                                         <p className="text-sm text-cyan-400">Online</p>
                                     </div>
                                 </div>
-                                {/* Settings Gear Icon */}
-                                <button
-                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                                    className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                                    title="Settings"
-                                >
-                                    <Settings size={36} className="text-cyan-400" />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    {/* Platform Admin Icon - Only for platform admins */}
+                                    {isPlatformAdmin() && (
+                                        <button
+                                            onClick={() => { setIsPlatformAdminOpen(!isPlatformAdminOpen); setIsSettingsOpen(false); }}
+                                            className={cn(
+                                                "p-2 rounded-lg transition-colors",
+                                                isPlatformAdminOpen
+                                                    ? "bg-white/20 text-cyan-400"
+                                                    : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                            )}
+                                            title="Platform Admin"
+                                        >
+                                            <Shield size={18} />
+                                        </button>
+                                    )}
+                                    {/* Settings Gear Icon */}
+                                    <button
+                                        onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsPlatformAdminOpen(false); }}
+                                        className={cn(
+                                            "p-2 rounded-lg transition-colors",
+                                            isSettingsOpen
+                                                ? "bg-white/20 text-cyan-400"
+                                                : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                        )}
+                                        title="Settings"
+                                    >
+                                        <Settings size={18} />
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -266,8 +274,78 @@ export function Sidebar() {
                                                 pathname={pathname}
                                                 isCollapsed={isCollapsed}
                                                 onMobileItemClick={() => {
-                                                    setIsSettingsOpen(false);
-                                                    setIsMobileOpen(false);
+                                                    // Only close panels on mobile
+                                                    if (isMobileOpen) {
+                                                        setIsSettingsOpen(false);
+                                                        setIsMobileOpen(false);
+                                                    }
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Platform Admin Slide-Up Panel */}
+                    <AnimatePresence>
+                        {isPlatformAdminOpen && (
+                            <>
+                                {/* Glass backdrop overlay */}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-zinc-950/10 backdrop-blur-sm"
+                                    onClick={() => setIsPlatformAdminOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                                    className={cn(
+                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        isCollapsed && "items-center"
+                                    )}
+                                >
+                                    {/* Platform Admin Header */}
+                                    <div className={cn(
+                                        "shrink-0 px-4 py-3 bg-white/10 border-b border-white/10 flex items-center justify-between w-full",
+                                        isCollapsed && "justify-center px-2"
+                                    )}>
+                                        {!isCollapsed && (
+                                            <div className="flex items-center gap-2">
+                                                <Shield size={18} className="text-cyan-400" />
+                                                <h3 className="text-lg font-semibold text-white">Platform Admin</h3>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => setIsPlatformAdminOpen(false)}
+                                            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+
+                                    {/* Platform Admin content */}
+                                    <div className={cn(
+                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-zinc-800",
+                                        isCollapsed && "px-1.5 flex flex-col items-center"
+                                    )}>
+                                        {platformAdminSection?.items.map((item) => (
+                                            <NavItem
+                                                key={item.href}
+                                                item={item}
+                                                pathname={pathname}
+                                                isCollapsed={isCollapsed}
+                                                onMobileItemClick={() => {
+                                                    // Only close panels on mobile
+                                                    if (isMobileOpen) {
+                                                        setIsPlatformAdminOpen(false);
+                                                        setIsMobileOpen(false);
+                                                    }
                                                 }}
                                             />
                                         ))}
