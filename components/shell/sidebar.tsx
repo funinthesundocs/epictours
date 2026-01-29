@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { navigation, type NavSection } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X } from "lucide-react";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Minus, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export function Sidebar() {
     const pathname = usePathname();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const { isCollapsed, toggleCollapse } = useSidebar();
+    const { isCollapsed, toggleCollapse, zoom, zoomIn, zoomOut } = useSidebar();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Get Settings section from navigation
@@ -127,6 +127,57 @@ export function Sidebar() {
                         })}
                     </div>
 
+                    {/* Zoom Controls */}
+                    <div className={cn(
+                        "border-t border-white/10 bg-zinc-900/80 shrink-0",
+                        isCollapsed ? "px-2 py-3 flex flex-col items-center gap-1" : "px-4 py-3"
+                    )}>
+                        {isCollapsed ? (
+                            <div className="flex flex-col items-center gap-1">
+                                <button
+                                    onClick={zoomIn}
+                                    disabled={zoom >= 150}
+                                    className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    title="Zoom In"
+                                >
+                                    <Plus size={14} />
+                                </button>
+                                <span className="text-[10px] text-cyan-400 font-bold">{zoom}%</span>
+                                <button
+                                    onClick={zoomOut}
+                                    disabled={zoom <= 50}
+                                    className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    title="Zoom Out"
+                                >
+                                    <Minus size={14} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center gap-4">
+                                <span className="text-lg text-white font-medium">Zoom</span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={zoomOut}
+                                        disabled={zoom <= 50}
+                                        className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        title="Zoom Out"
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <span className="text-lg text-cyan-400 font-bold w-14 text-center">{zoom}%</span>
+                                    <button
+                                        onClick={zoomIn}
+                                        disabled={zoom >= 150}
+                                        className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        title="Zoom In"
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     {/* User Profile Footer */}
                     <div className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}>
                         {isCollapsed ? (
@@ -138,7 +189,7 @@ export function Sidebar() {
                                     className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                                     title="Settings"
                                 >
-                                    <Settings size={18} />
+                                    <Settings size={36} className="text-cyan-500" />
                                 </button>
                             </>
                         ) : (
@@ -156,7 +207,7 @@ export function Sidebar() {
                                     className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                                     title="Settings"
                                 >
-                                    <Settings size={18} />
+                                    <Settings size={36} className="text-cyan-500" />
                                 </button>
                             </div>
                         )}

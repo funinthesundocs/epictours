@@ -279,48 +279,46 @@ export function AvailabilityCalendar({
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
-                    {/* Date Display with Year Dropdown */}
-                    <div className="flex items-center gap-3">
-                        <span className="text-4xl font-black text-white tracking-tighter">
-                            {monthNames[currentDate.getMonth()]}
-                        </span>
+                    {/* Date Selectors - Month / Day / Year */}
+                    <div className="flex items-center gap-2">
+                        {/* Month Selector */}
+                        <CustomSelect
+                            value={currentDate.getMonth()}
+                            options={monthNames.map((m, i) => ({ label: m, value: i }))}
+                            onChange={(val) => {
+                                const newDate = new Date(currentDate);
+                                newDate.setMonth(val);
+                                onDateChange(newDate);
+                            }}
+                            className="w-[90px]"
+                        />
+
+                        {/* Day Selector */}
+                        <CustomSelect
+                            value={currentDate.getDate()}
+                            options={Array.from({ length: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))}
+                            onChange={(val) => {
+                                const newDate = new Date(currentDate);
+                                newDate.setDate(val);
+                                onDateChange(newDate);
+                            }}
+                            className="w-[70px]"
+                        />
 
                         {/* Year Selector */}
-                        <div className="relative" ref={yearPickerRef}>
-                            <button
-                                onClick={() => setIsYearPickerOpen(!isYearPickerOpen)}
-                                title="Change Year"
-                                className="text-4xl font-black text-cyan-500 tracking-tighter flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                                {currentDate.getFullYear().toString().slice(-2)}
-                                <ChevronDown className="w-5 h-5 stroke-[4] mt-1 text-cyan-500" />
-                            </button>
-
-                            {/* Year Dropdown */}
-                            {isYearPickerOpen && (
-                                <div className="absolute top-full left-0 mt-2 w-[100px] bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                    <div className="max-h-[240px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
-                                        {years.map((year) => (
-                                            <div
-                                                key={year}
-                                                className={cn(
-                                                    "px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors border-b border-zinc-900 last:border-0",
-                                                    currentDate.getFullYear() === year
-                                                        ? "bg-cyan-950/30 text-cyan-400"
-                                                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                                                )}
-                                                onClick={() => handleYearSelect(year)}
-                                            >
-                                                {year}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <CustomSelect
+                            value={currentDate.getFullYear()}
+                            options={years.map((y) => ({ label: y.toString(), value: y }))}
+                            onChange={(val) => {
+                                const newDate = new Date(currentDate);
+                                newDate.setFullYear(val);
+                                onDateChange(newDate);
+                            }}
+                            className="w-[90px] text-cyan-500"
+                        />
                     </div>
 
-                    {/* Navigation Buttons (Only allow month nav in calendar mode or if list respects month) */}
+                    {/* Navigation Buttons */}
                     <div className="flex gap-1">
                         <button
                             onClick={handlePrevMonth}
@@ -747,3 +745,66 @@ function hourToPx(start: number, end: number) {
     return true;
 }
 
+// CustomSelect Component - Reusable dropdown for date selection (matches bookings calendar)
+function CustomSelect({
+    value,
+    options,
+    onChange,
+    className
+}: {
+    value: number | string,
+    options: { label: string, value: number | string }[],
+    onChange: (value: any) => void,
+    className?: string
+}) {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Click outside handler
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedLabel = options.find(o => o.value === value)?.label || value;
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={cn(
+                    "flex items-center justify-between gap-2 bg-zinc-900/50 border border-zinc-800 text-white text-lg font-bold py-1.5 px-3 rounded-lg hover:border-zinc-700 transition-all min-w-[fit-content]",
+                    className
+                )}
+            >
+                <span>{selectedLabel}</span>
+                <ChevronDown size={16} className={cn("transition-transform duration-200", isOpen && "rotate-180")} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                    {options.map((opt) => (
+                        <button
+                            key={opt.value}
+                            onClick={() => {
+                                onChange(opt.value);
+                                setIsOpen(false);
+                            }}
+                            className={cn(
+                                "w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 transition-colors",
+                                value === opt.value ? "text-white font-medium bg-zinc-800/50" : "text-zinc-400"
+                            )}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}

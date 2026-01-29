@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 
 // Inner component to consume the context
 function PageLayoutContent({ children }: { children: ReactNode }) {
-    const { isCollapsed } = useSidebar();
+    const { isCollapsed, zoom } = useSidebar();
     const { isAuthenticated, isLoading } = useAuth();
     const pathname = usePathname();
 
@@ -46,7 +46,10 @@ function PageLayoutContent({ children }: { children: ReactNode }) {
                     isCollapsed ? "lg:ml-[80px]" : "lg:ml-[240px]"
                 )}
             >
-                <div className="w-full space-y-6">
+                <div
+                    className="w-full space-y-6"
+                    style={{ zoom: zoom / 100 }}
+                >
                     {children}
                 </div>
             </main>
