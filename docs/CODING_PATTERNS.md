@@ -393,3 +393,41 @@
     5.  **Reusability**:
         *   Define a standard `inputStyles` constant at the top of the file to ensure all inputs in the form share the exact class string.
         *   `const inputStyles = "w-full bg-zinc-900/80 ...";`
+
+## 14. UI Scaling & Zoom
+*   **Context**: The application features a global "Zoom" setting (80% - 120%) controllable from the Sidebar.
+*   **State Access**:
+    *   Use the `useSidebar` hook to access the current zoom level.
+    *   `const { zoom } = useSidebar();`
+*   **Portals & Modals (Critical)**:
+    *   **Problem**: Radix UI `Dialog`, `Popover`, `Tooltip`, and `Select` render in React Portals (detached from the main app root). They do **NOT** inherit the global zoom from the main container automatically.
+    *   **Solution**: You MUST manually apply the zoom style to the `Content` component of any portal-based element.
+    *   **Pattern**:
+        ```tsx
+        const { zoom } = useSidebar();
+        // ...
+        <DialogContent style={{ zoom: zoom / 100 }}>
+        // or
+        <PopoverContent style={{ zoom: zoom / 100 }}>
+        ```
+*   **Manual Positioning Math**:
+    *   **Context**: When implementing custom context menus or drag-and-drop overlays where you calculate `top/left` manually based on `getBoundingClientRect()`.
+    *   **Rule**: Coordinates from `getBoundingClientRect` (and `e.clientX`) are in **Visual Viewport** pixels. CSS styles, however, are interpreted in **Layout Viewport** pixels, which are affected by the `zoom` property on the container.
+    *   **Formula**: `Adjusted Position = Screen Coordinate / (Zoom / 100)`
+    *   **Example**:
+        ```typescript
+        const { zoom } = useSidebar();
+        const scale = zoom / 100;
+        
+        // 1. Get Visual Coordinates
+        const rect = triggerElement.getBoundingClientRect();
+        
+        // 2. Scale back to CSS Coordinates for positioning
+        const cssLeft = rect.left / scale;
+        const cssTop = rect.bottom / scale;
+        
+        // 3. Apply
+        setMenuPosition({ x: cssLeft, y: cssTop });
+        ```
+*   **Collision Detection**:
+    *   Perform collision checks against `window.innerWidth` / `window.innerHeight` using the **Visual Coordinates** (unscaled) *before* converting them to CSS positions.

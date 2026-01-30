@@ -117,21 +117,21 @@ export function AvailabilityActionMenu({
             {/* Actions */}
             <div className="py-1">
                 <button
-                    onClick={() => { onNewBooking(); onClose(); }}
+                    onClick={() => { onNewBooking(); }}
                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
                 >
                     <Plus size={18} className="text-cyan-400" />
                     <span className="text-white font-medium">New Booking</span>
                 </button>
                 <button
-                    onClick={() => { onActionsSettings(); onClose(); }}
+                    onClick={() => { onActionsSettings(); }}
                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
                 >
                     <Settings size={18} className="text-zinc-400" />
                     <span className="text-white font-medium">Actions & Settings</span>
                 </button>
                 <button
-                    onClick={() => { onManifest(); onClose(); }}
+                    onClick={() => { onManifest(); }}
                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
                 >
                     <FileText size={18} className="text-zinc-400" />

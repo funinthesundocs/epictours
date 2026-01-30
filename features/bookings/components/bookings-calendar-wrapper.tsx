@@ -54,14 +54,17 @@ export function BookingsCalendarWrapper() {
             setSelectedAvailability(availability);
         }
         setIsBookingDeskOpen(true);
+        setActionMenuTriggerRect(null);
     }, []);
 
     const handleActionsSettings = useCallback(() => {
         setIsManagerOpen(true);
+        setActionMenuTriggerRect(null);
     }, []);
 
     const handleManifest = useCallback(() => {
         setIsManifestOpen(true);
+        setActionMenuTriggerRect(null);
     }, []);
 
     // Handle booking edit from manager panel or list view
