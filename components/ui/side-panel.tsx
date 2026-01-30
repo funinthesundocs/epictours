@@ -41,8 +41,8 @@ export function SidePanel({
     // Standard: Fixed right, explicit width
     // Full Content: Fixed right, top, bottom. Left depends on sidebar.
     const positionClassName = isFullContent
-        ? `fixed right-0 top-0 bottom-0 z-50 flex flex-col bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
-        : `fixed right-0 top-0 z-50 h-full w-full ${width} bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
+        ? `fixed right-0 top-0 bottom-0 z-[100] flex flex-col bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
+        : `fixed right-0 top-0 z-[100] h-full w-full ${width} bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
 
     // Inline styles for dynamic values
     const panelStyle = isFullContent
@@ -79,7 +79,7 @@ export function SidePanel({
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={onClose}
-                            className="fixed right-0 top-0 bottom-0 z-40 bg-zinc-950/60 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
+                            className="fixed right-0 top-0 bottom-0 z-[90] bg-zinc-950/60 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
                             style={{ left: sidebarWidth }}
                         />
                     )}

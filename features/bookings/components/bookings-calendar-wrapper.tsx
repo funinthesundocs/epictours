@@ -10,6 +10,7 @@ import { Availability } from "@/features/availability/components/availability-li
 import { NewBookingMenu } from "./new-booking-menu";
 import { PageShell } from "@/components/shell/page-shell";
 import { Plus } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export function BookingsCalendarWrapper() {
     // Calendar refresh
@@ -62,11 +63,55 @@ export function BookingsCalendarWrapper() {
         setIsManifestOpen(true);
     }, []);
 
-    // Handle booking edit from manager panel
-    const handleBookingEdit = useCallback((bookingId: string) => {
+    // Handle booking edit from manager panel or list view
+    const handleBookingEdit = useCallback(async (bookingId: string) => {
+        console.log("DEBUG: handleBookingEdit called with bookingId:", bookingId);
+
+        // Fetch the booking to get its availability
+        const { data: booking, error } = await supabase
+            .from('bookings' as any)
+            .select(`
+                availability_id,
+                availabilities!inner(
+                    id, start_date, start_time, max_capacity, experience_id,
+                    pricing_schedule_id, booking_option_schedule_id, transportation_route_id,
+                    driver_id, guide_id, vehicle_id, private_announcement, public_announcement,
+                    experiences!inner(id, name, short_code)
+                )
+            `)
+            .eq('id', bookingId)
+            .single();
+
+        console.log("DEBUG: Fetched booking:", booking, "Error:", error);
+
+        if (booking?.availabilities) {
+            const avail = booking.availabilities as any;
+            console.log("DEBUG: Setting availability:", avail);
+            // Construct availability object that matches the expected shape
+            setSelectedAvailability({
+                id: avail.id,
+                start_date: avail.start_date,
+                start_time: avail.start_time,
+                max_capacity: avail.max_capacity,
+                experience_id: avail.experience_id,
+                experience_name: avail.experiences?.name || '',
+                experience_short_code: avail.experiences?.short_code || '',
+                pricing_schedule_id: avail.pricing_schedule_id,
+                booking_option_schedule_id: avail.booking_option_schedule_id,
+                transportation_route_id: avail.transportation_route_id,
+                driver_id: avail.driver_id,
+                guide_id: avail.guide_id,
+                vehicle_id: avail.vehicle_id,
+                private_announcement: avail.private_announcement,
+                public_announcement: avail.public_announcement,
+                booking_records_count: 0
+            } as Availability);
+        }
+
         setEditingBookingId(bookingId);
-        setIsManagerOpen(false); // Close manager
+        setIsManagerOpen(false); // Close manager if open
         setIsBookingDeskOpen(true); // Open booking desk in edit mode
+        console.log("DEBUG: Opening booking desk with bookingId:", bookingId);
     }, []);
 
     // Handle successful save
@@ -98,6 +143,7 @@ export function BookingsCalendarWrapper() {
         >
             <BookingsCalendar
                 onEventClick={handleEventClick}
+                onBookingEdit={handleBookingEdit}
                 key={refreshTrigger}
             />
 

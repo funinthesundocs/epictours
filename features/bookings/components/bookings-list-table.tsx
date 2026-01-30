@@ -23,6 +23,7 @@ interface Booking {
     amount_paid: number;
     total_amount: number;
     voucher_numbers?: string;
+    confirmation_number?: string;
     notes?: string;
     // Resolved pickup details
     pickup_details?: string;
@@ -147,7 +148,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                     .from('bookings' as any)
                     .select(`
                         id, status, pax_count, pax_breakdown, option_values, 
-                        payment_status, amount_paid, total_amount, voucher_numbers, notes,
+                        payment_status, amount_paid, total_amount, voucher_numbers, confirmation_number, notes,
                         customers!inner(name, email, phone),
                         availabilities!inner(
                             start_date, 
@@ -174,6 +175,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                         amount_paid: b.amount_paid || 0,
                         total_amount: b.total_amount || 0,
                         voucher_numbers: b.voucher_numbers || "",
+                        confirmation_number: b.confirmation_number || "",
                         notes: b.notes || "",
                         customer_name: b.customers?.name || "Unknown",
                         customer_email: b.customers?.email || "",
@@ -252,6 +254,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                 <table className="w-full text-left text-sm whitespace-nowrap">
                     <thead className="bg-white/5 text-zinc-400 font-bold uppercase text-xs tracking-wider border-b border-white/5">
                         <tr>
+                            <th className="px-6 py-4">Confirmation</th>
                             <th className="px-6 py-4">Exp</th>
                             <th className="px-6 py-4">Date</th>
                             <th className="px-6 py-4">Pickup Details</th>
@@ -280,6 +283,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                     booking.status.toLowerCase().includes(q) ||
                                     booking.id.toLowerCase().includes(q) ||
                                     (booking.voucher_numbers || "").toLowerCase().includes(q) ||
+                                    (booking.confirmation_number || "").toLowerCase().includes(q) ||
                                     (booking.notes || "").toLowerCase().includes(q) ||
                                     booking.start_date.includes(q) ||
                                     pickupDetails.includes(q)
@@ -291,13 +295,18 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                     className="hover:bg-cyan-400/5 transition-colors cursor-pointer group"
                                     onClick={() => onBookingClick?.(booking.id)}
                                 >
+                                    {/* Confirmation Number */}
+                                    <td className="px-6 py-4 text-white text-sm">
+                                        {booking.confirmation_number || "-"}
+                                    </td>
+
                                     {/* Exp */}
-                                    <td className="px-6 py-4 font-mono text-cyan-400 font-bold">
+                                    <td className="px-6 py-4 text-white text-sm">
                                         {booking.experience_short_code}
                                     </td>
 
                                     {/* Date */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-white text-sm">
                                         {(() => {
                                             const [y, m, d] = booking.start_date.split('-');
                                             return `${m}-${d}-${y}`;
@@ -305,55 +314,52 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                     </td>
 
                                     {/* Pickup Details */}
-                                    <td className="px-6 py-4 text-white font-medium">
+                                    <td className="px-6 py-4 text-white text-sm">
                                         {resolvePickupDetails(booking)}
                                     </td>
 
                                     {/* Customer */}
-                                    <td className="px-6 py-4 font-bold text-white">
+                                    <td className="px-6 py-4 text-white text-sm">
                                         {booking.customer_name}
                                     </td>
 
                                     {/* Pax - Just the total number */}
-                                    <td className="px-6 py-4 text-center font-medium">
+                                    <td className="px-6 py-4 text-white text-sm text-center">
                                         {booking.pax_count}
                                     </td>
 
                                     {/* Phone */}
-                                    <td className="px-6 py-4 font-mono text-xs">
+                                    <td className="px-6 py-4 text-white text-sm">
                                         {formatPhoneNumber(booking.customer_phone)}
                                     </td>
 
                                     {/* Email */}
-                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.customer_email}>
+                                    <td className="px-6 py-4 text-white text-sm max-w-[150px] truncate" title={booking.customer_email}>
                                         {booking.customer_email || "-"}
                                     </td>
 
                                     {/* Voucher Numbers */}
-                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[120px] truncate" title={booking.voucher_numbers}>
+                                    <td className="px-6 py-4 text-white text-sm max-w-[120px] truncate" title={booking.voucher_numbers}>
                                         {booking.voucher_numbers || "-"}
                                     </td>
 
                                     {/* Booking Notes */}
-                                    <td className="px-6 py-4 text-xs text-zinc-400 max-w-[150px] truncate" title={booking.notes}>
+                                    <td className="px-6 py-4 text-white text-sm max-w-[150px] truncate" title={booking.notes}>
                                         {booking.notes || "-"}
                                     </td>
 
                                     {/* Total */}
-                                    <td className="px-6 py-4 text-right font-mono text-white font-bold">
+                                    <td className="px-6 py-4 text-white text-sm text-right">
                                         ${booking.total_amount.toFixed(2)}
                                     </td>
 
                                     {/* Paid */}
-                                    <td className="px-6 py-4 text-right font-mono text-emerald-400">
+                                    <td className="px-6 py-4 text-white text-sm text-right">
                                         ${booking.amount_paid.toFixed(2)}
                                     </td>
 
                                     {/* Due */}
-                                    <td className={cn(
-                                        "px-6 py-4 text-right font-mono font-bold",
-                                        (booking.total_amount - booking.amount_paid) > 0 ? "text-red-400" : "text-zinc-500"
-                                    )}>
+                                    <td className="px-6 py-4 text-white text-sm text-right">
                                         ${(booking.total_amount - booking.amount_paid).toFixed(2)}
                                     </td>
                                 </tr>

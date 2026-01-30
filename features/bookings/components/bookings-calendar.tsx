@@ -28,9 +28,11 @@ import {
 } from "date-fns";
 
 export function BookingsCalendar({
-    onEventClick
+    onEventClick,
+    onBookingEdit
 }: {
-    onEventClick?: (availability: Availability, rect: DOMRect) => void
+    onEventClick?: (availability: Availability, rect: DOMRect) => void,
+    onBookingEdit?: (bookingId: string) => void
 }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
@@ -473,7 +475,7 @@ export function BookingsCalendar({
                             </div>
                         </div>
                         {/* Table */}
-                        <BookingsListTable startDate={listStartDate} endDate={listEndDate} searchQuery={listSearchQuery} onBookingClick={() => { }} />
+                        <BookingsListTable startDate={listStartDate} endDate={listEndDate} searchQuery={listSearchQuery} onBookingClick={onBookingEdit} />
                     </div>
                 )}
             </div>
