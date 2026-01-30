@@ -6,8 +6,8 @@ import { type NavSection } from "@/config/navigation";
 import { useFilteredNavigation } from "@/features/auth/use-filtered-navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minus, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export function Sidebar() {
     const pathname = usePathname();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const { isCollapsed, toggleCollapse } = useSidebar();
+    const { isCollapsed, toggleCollapse, zoom, zoomIn, zoomOut, setZoom } = useSidebar();
 
     // Auto-open Settings panel if on a settings page
     const [isSettingsOpen, setIsSettingsOpen] = useState(() =>
@@ -25,7 +25,24 @@ export function Sidebar() {
     const [isPlatformAdminOpen, setIsPlatformAdminOpen] = useState(() =>
         pathname.startsWith('/admin')
     );
+    const [isZoomSliderOpen, setIsZoomSliderOpen] = useState(false);
     const { isPlatformAdmin } = useAuth();
+
+    // Ref for zoom slider click-outside detection
+    const zoomSliderRef = useRef<HTMLDivElement>(null);
+
+    // Close zoom slider when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (zoomSliderRef.current && !zoomSliderRef.current.contains(event.target as Node)) {
+                setIsZoomSliderOpen(false);
+            }
+        };
+        if (isZoomSliderOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isZoomSliderOpen]);
 
     // Get filtered navigation based on user permissions
     const navigation = useFilteredNavigation();
@@ -72,16 +89,21 @@ export function Sidebar() {
             )}
 
             {/* Sidebar Container */}
-            <aside className={cn(
-                "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-[#010a0a]",
-                isMobileOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0",
-                isCollapsed ? "lg:w-[80px]" : "lg:w-[240px]"
-            )}>
+            <aside
+                className={cn(
+                    "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-[#010a0a]",
+                    isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+                )}
+                style={{ width: "var(--sidebar-width)" }}
+            >
                 {/* Content Container */}
                 <div className="h-full w-full flex flex-col overflow-hidden relative">
 
                     {/* Header / Logo Area */}
-                    <div className="relative h-[73px] flex items-center justify-between px-4 border-b border-white/10 shrink-0">
+                    <div
+                        className="relative flex items-center justify-between px-4 border-b border-white/10 shrink-0"
+                        style={{ zoom: zoom / 100, height: `${73}px` }}
+                    >
                         {!isCollapsed && (
                             <Link href="/" className="overflow-hidden whitespace-nowrap hover:opacity-80 transition-opacity">
                                 <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
@@ -102,7 +124,10 @@ export function Sidebar() {
                     </div>
 
                     {/* Navigation Items */}
-                    <div className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                    <div
+                        className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800"
+                        style={{ zoom: zoom / 100 }}
+                    >
                         {navigation.map((section, idx) => {
                             // Skip Settings and Platform Admin sections - they have their own panels
                             if (section.title === "Settings" || section.title === "Platform Admin") return null;
@@ -142,14 +167,103 @@ export function Sidebar() {
                         })}
                     </div>
 
+                    {/* Zoom Controls */}
+                    <div
+                        ref={zoomSliderRef}
+                        className={cn(
+                            "border-t border-white/10 bg-zinc-900/80 shrink-0 relative",
+                            isCollapsed ? "flex flex-col" : "flex"
+                        )}
+                        style={{ zoom: zoom / 100 }}
+                    >
+                        {/* Slider Popup */}
+                        <AnimatePresence>
+                            {isZoomSliderOpen && !isCollapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute bottom-full left-0 right-0 bg-zinc-900 border border-white/10 rounded-t-lg shadow-xl p-3"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[10px] text-zinc-500 font-bold">50%</span>
+                                        <input
+                                            type="range"
+                                            min="50"
+                                            max="150"
+                                            step="10"
+                                            value={zoom}
+                                            onChange={(e) => setZoom(parseInt(e.target.value))}
+                                            className="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(6,182,212,0.5)] [&::-webkit-slider-thumb]:cursor-pointer"
+                                        />
+                                        <span className="text-[10px] text-zinc-500 font-bold">150%</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {isCollapsed ? (
+                            <>
+                                <button
+                                    onClick={zoomIn}
+                                    disabled={zoom >= 150}
+                                    className="py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-b border-white/10"
+                                >
+                                    <Plus size={12} />
+                                </button>
+                                <button
+                                    onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
+                                    className="py-1 flex items-center justify-center border-b border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
+                                >
+                                    <span className="text-[9px] text-cyan-400 font-bold">{zoom}%</span>
+                                </button>
+                                <button
+                                    onClick={zoomOut}
+                                    disabled={zoom <= 50}
+                                    className="py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    <Minus size={12} />
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={zoomOut}
+                                    disabled={zoom <= 50}
+                                    className="w-1/4 py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-r border-white/10"
+                                >
+                                    <Minus size={12} />
+                                </button>
+                                <button
+                                    onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
+                                    className="w-1/2 py-1.5 flex items-center justify-center gap-2 border-r border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
+                                >
+                                    <span className="text-xs text-zinc-500 font-medium">Zoom</span>
+                                    <span className="text-xs text-cyan-400 font-bold">{zoom}%</span>
+                                </button>
+                                <button
+                                    onClick={zoomIn}
+                                    disabled={zoom >= 150}
+                                    className="w-1/4 py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    <Plus size={12} />
+                                </button>
+                            </>
+                        )}
+                    </div>
+
                     {/* User Profile Footer */}
-                    <div className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}>
+                    <div
+                        className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}
+                        style={{ zoom: zoom / 100 }}
+                    >
                         {isCollapsed ? (
                             <>
                                 {/* Collapsed: Profile avatar and icons below */}
                                 <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
                                 <div className="flex items-center gap-1">
-                                    {/* Platform Admin Icon - Only for platform admins */}
+                                    {/* Platform Admin Icon */}
                                     {isPlatformAdmin() && (
                                         <button
                                             onClick={() => { setIsPlatformAdminOpen(!isPlatformAdminOpen); setIsSettingsOpen(false); }}
@@ -161,7 +275,7 @@ export function Sidebar() {
                                             )}
                                             title="Platform Admin"
                                         >
-                                            <Shield size={18} />
+                                            <Shield size={24} />
                                         </button>
                                     )}
                                     <button
@@ -170,11 +284,11 @@ export function Sidebar() {
                                             "p-2 rounded-lg transition-colors",
                                             isSettingsOpen
                                                 ? "bg-white/20 text-cyan-400"
-                                                : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                                : "text-cyan-400 hover:text-cyan-300 hover:bg-white/10"
                                         )}
                                         title="Settings"
                                     >
-                                        <Settings size={18} />
+                                        <Settings size={24} />
                                     </button>
                                 </div>
                             </>
@@ -188,7 +302,7 @@ export function Sidebar() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    {/* Platform Admin Icon - Only for platform admins */}
+                                    {/* Platform Admin Icon */}
                                     {isPlatformAdmin() && (
                                         <button
                                             onClick={() => { setIsPlatformAdminOpen(!isPlatformAdminOpen); setIsSettingsOpen(false); }}
@@ -200,21 +314,21 @@ export function Sidebar() {
                                             )}
                                             title="Platform Admin"
                                         >
-                                            <Shield size={18} />
+                                            <Shield size={24} />
                                         </button>
                                     )}
-                                    {/* Settings Gear Icon */}
+                                    {/* Settings Gear Icon - Always Cyan */}
                                     <button
                                         onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsPlatformAdminOpen(false); }}
                                         className={cn(
                                             "p-2 rounded-lg transition-colors",
                                             isSettingsOpen
                                                 ? "bg-white/20 text-cyan-400"
-                                                : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                                : "text-cyan-400 hover:text-cyan-300 hover:bg-white/10"
                                         )}
                                         title="Settings"
                                     >
-                                        <Settings size={18} />
+                                        <Settings size={24} />
                                     </button>
                                 </div>
                             </div>
@@ -242,6 +356,7 @@ export function Sidebar() {
                                         "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
                                         isCollapsed && "items-center"
                                     )}
+                                    style={{ zoom: zoom / 100 }}
                                 >
                                     {/* Settings Header */}
                                     <div className={cn(
@@ -309,6 +424,7 @@ export function Sidebar() {
                                         "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
                                         isCollapsed && "items-center"
                                     )}
+                                    style={{ zoom: zoom / 100 }}
                                 >
                                     {/* Platform Admin Header */}
                                     <div className={cn(

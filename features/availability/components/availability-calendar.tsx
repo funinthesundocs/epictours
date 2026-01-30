@@ -273,9 +273,12 @@ export function AvailabilityCalendar({
     const years = Array.from({ length: 8 }, (_, i) => currentYear - 2 + i);
 
     return (
-        <div className="w-full h-[calc(100dvh_-_9rem)] font-sans flex flex-col">
+        <div
+            className="w-full font-sans flex flex-col"
+            style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 9rem)' }}
+        >
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-30">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-40">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -564,8 +567,28 @@ function MonthView({
     const today = new Date();
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
+    // Auto-scroll to today's row
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const todayRowRef = useRef<HTMLTableRowElement>(null);
+
+    useEffect(() => {
+        if (isCurrentMonth && todayRowRef.current && scrollContainerRef.current) {
+            // Scroll to make today's row visible (with some offset from the top)
+            const rowTop = todayRowRef.current.offsetTop;
+            scrollContainerRef.current.scrollTo({
+                top: rowTop, // Scroll so today's row is at the top
+                behavior: 'smooth'
+            });
+        }
+    }, [isCurrentMonth, month, year]);
+
+    // Calculate which row contains today
+    const todayRowIndex = isCurrentMonth
+        ? Math.floor((firstDayIndex + today.getDate() - 1) / 7)
+        : -1;
+
     return (
-        <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
+        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
             <table className="w-full table-fixed border-separate border-spacing-0">
                 <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
@@ -580,7 +603,7 @@ function MonthView({
                 </thead>
                 <tbody>
                     {Array.from({ length: Math.ceil((firstDayIndex + daysInMonth) / 7) }).map((_, rowIndex) => (
-                        <tr key={rowIndex}>
+                        <tr key={rowIndex} ref={rowIndex === todayRowIndex ? todayRowRef : undefined}>
                             {Array.from({ length: 7 }).map((_, colIndex) => {
                                 const i = rowIndex * 7 + colIndex;
                                 const dayNumber = i - firstDayIndex + 1;

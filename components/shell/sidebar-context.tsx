@@ -10,6 +10,7 @@ interface SidebarContextType {
     zoom: number;
     zoomIn: () => void;
     zoomOut: () => void;
+    setZoom: (val: number) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -31,6 +32,26 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
             setZoom(Number(savedZoom));
         }
     }, []);
+
+    // Set CSS custom property for fixed element positioning adjustment
+    useEffect(() => {
+        // Calculate the bottom offset needed for fixed elements when zoomed
+        // At 100% zoom, offset is 0. At 150% zoom, offset adjusts for the extra height
+        const zoomFactor = zoom / 100;
+        const viewportHeight = window.innerHeight;
+        const zoomedHeight = viewportHeight * zoomFactor;
+        const bottomOffset = zoomedHeight - viewportHeight;
+
+        document.documentElement.style.setProperty('--zoom-bottom-offset', `${bottomOffset}px`);
+        document.documentElement.style.setProperty('--zoom-factor', `${zoomFactor}`);
+    }, [zoom]);
+
+    // Set Sidebar Width CSS Variable (Centralized source of truth)
+    useEffect(() => {
+        const baseWidth = isCollapsed ? 80 : 240;
+        const scaledWidth = baseWidth * (zoom / 100);
+        document.documentElement.style.setProperty('--sidebar-width', `${scaledWidth}px`);
+    }, [zoom, isCollapsed]);
 
     const toggleCollapse = () => {
         const newState = !isCollapsed;
@@ -59,8 +80,76 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
         });
     };
 
+    const setZoomValue = (val: number) => {
+        const clamped = Math.min(150, Math.max(50, val));
+        setZoom(clamped);
+        localStorage.setItem("app-zoom", String(clamped));
+        // Mark that zoom was changed for resize refresh
+        sessionStorage.setItem("zoom-changed", "true");
+    };
+
+    // Detect resize and refresh page if zoom was recently changed
+    useEffect(() => {
+        let resizeTimeout: NodeJS.Timeout;
+
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const zoomChanged = sessionStorage.getItem("zoom-changed");
+                if (zoomChanged === "true") {
+                    sessionStorage.removeItem("zoom-changed");
+                    window.location.reload();
+                }
+            }, 250);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(resizeTimeout);
+        };
+    }, []);
+
+    // Override Browser Zoom Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === '=' || e.key === '+') {
+                    e.preventDefault();
+                    zoomIn();
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    zoomOut();
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    setZoomValue(100);
+                }
+            }
+        };
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    zoomIn();
+                } else {
+                    zoomOut();
+                }
+            }
+        };
+
+        // Note: wheel event with preventDefault needs { passive: false }
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('wheel', handleWheel, { passive: false });
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('wheel', handleWheel);
+        };
+    }, [zoom]); // Re-bind if zoom logic needs fresh closure, though functional updates should be fine. Keep safe.
+
     return (
-        <SidebarContext.Provider value={{ isCollapsed, toggleCollapse, setCollapsed, zoom, zoomIn, zoomOut }}>
+        <SidebarContext.Provider value={{ isCollapsed, toggleCollapse, setCollapsed, zoom, zoomIn, zoomOut, setZoom: setZoomValue }}>
             {children}
         </SidebarContext.Provider>
     );

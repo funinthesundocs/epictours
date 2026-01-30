@@ -28,9 +28,11 @@ import {
 } from "date-fns";
 
 export function BookingsCalendar({
-    onEventClick
+    onEventClick,
+    selectedAvailabilityId
 }: {
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void
+    onEventClick?: (availability: Availability, event: React.MouseEvent) => void;
+    selectedAvailabilityId?: string | null;
 }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
@@ -238,9 +240,12 @@ export function BookingsCalendar({
 
 
     return (
-        <div className="w-full min-h-0 flex-1 font-sans flex flex-col">
+        <div
+            className="w-full font-sans flex flex-col"
+            style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 9rem)' }}
+        >
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-[60]">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-40">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -384,6 +389,7 @@ export function BookingsCalendar({
                         availabilities={filteredAvailabilities}
                         onEventClick={onEventClick}
                         expMap={expMap}
+                        selectedAvailabilityId={selectedAvailabilityId}
                     />
                 )}
                 {viewMode === 'week' && (
@@ -391,6 +397,7 @@ export function BookingsCalendar({
                         currentDate={currentDate}
                         availabilities={filteredAvailabilities}
                         onEventClick={onEventClick}
+                        selectedAvailabilityId={selectedAvailabilityId}
                     />
                 )}
                 {viewMode === 'day' && (
@@ -401,6 +408,7 @@ export function BookingsCalendar({
                         pixelsPerMinute={pixelsPerMinute}
                         setPixelsPerMinute={setPixelsPerMinute}
                         expMap={expMap}
+                        selectedAvailabilityId={selectedAvailabilityId}
                     />
                 )}
                 {viewMode === 'list' && (
@@ -485,12 +493,14 @@ function MonthView({
     currentDate,
     availabilities,
     onEventClick,
-    expMap
+    expMap,
+    selectedAvailabilityId
 }: {
     currentDate: Date,
     availabilities: Availability[],
     onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
-    expMap: Record<string, { name: string, short_code: string }>
+    expMap: Record<string, { name: string, short_code: string }>,
+    selectedAvailabilityId?: string | null
 }) {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -499,8 +509,28 @@ function MonthView({
     const today = new Date();
     const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
 
+    // Auto-scroll to today's row
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const todayRowRef = useRef<HTMLTableRowElement>(null);
+
+    useEffect(() => {
+        if (isCurrentMonth && todayRowRef.current && scrollContainerRef.current) {
+            // Scroll to make today's row visible (with some offset from the top)
+            const rowTop = todayRowRef.current.offsetTop;
+            scrollContainerRef.current.scrollTo({
+                top: rowTop, // Scroll so today's row is at the top
+                behavior: 'smooth'
+            });
+        }
+    }, [isCurrentMonth, month, year]);
+
+    // Calculate which row contains today
+    const todayRowIndex = isCurrentMonth
+        ? Math.floor((firstDayIndex + today.getDate() - 1) / 7)
+        : -1;
+
     return (
-        <div className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
+        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
             <table className="w-full table-fixed border-separate border-spacing-0">
                 <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
                     <tr>
@@ -515,7 +545,7 @@ function MonthView({
                 </thead>
                 <tbody>
                     {Array.from({ length: Math.ceil((firstDayIndex + daysInMonth) / 7) }).map((_, rowIndex) => (
-                        <tr key={rowIndex}>
+                        <tr key={rowIndex} ref={rowIndex === todayRowIndex ? todayRowRef : undefined}>
                             {Array.from({ length: 7 }).map((_, colIndex) => {
                                 const i = rowIndex * 7 + colIndex;
                                 const dayNumber = i - firstDayIndex + 1;
@@ -546,6 +576,7 @@ function MonthView({
                                                             if (onEventClick && e) onEventClick(event, e);
                                                         }}
                                                         note={event.private_announcement}
+                                                        isSelected={selectedAvailabilityId === event.id}
                                                     />
                                                 ))}
                                             </div>
@@ -564,11 +595,13 @@ function MonthView({
 function WeekView({
     currentDate,
     availabilities,
-    onEventClick
+    onEventClick,
+    selectedAvailabilityId
 }: {
     currentDate: Date,
     availabilities: Availability[],
-    onEventClick?: (availability: Availability, event: React.MouseEvent) => void
+    onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
+    selectedAvailabilityId?: string | null
 }) {
     const start = startOfWeek(currentDate);
     const end = endOfWeek(currentDate);
@@ -640,6 +673,7 @@ function WeekView({
                                                 if (onEventClick && e) onEventClick(event, e);
                                             }}
                                             note={event.private_announcement}
+                                            isSelected={selectedAvailabilityId === event.id}
                                         />
                                     ))}
                                 </div>
@@ -658,14 +692,16 @@ function DailyView({
     onEventClick,
     pixelsPerMinute,
     setPixelsPerMinute,
-    expMap
+    expMap,
+    selectedAvailabilityId
 }: {
     currentDate: Date,
     availabilities: Availability[],
     onEventClick?: (availability: Availability, event: React.MouseEvent) => void,
     pixelsPerMinute: number,
     setPixelsPerMinute: (ppm: number) => void,
-    expMap: Record<string, { name: string, short_code: string }>
+    expMap: Record<string, { name: string, short_code: string }>,
+    selectedAvailabilityId?: string | null
 }) {
     // 1. Group by Experience
     const sortedExperienceIds = Object.keys(expMap).sort((a, b) =>
@@ -958,6 +994,7 @@ function DailyView({
                                                                 if (onEventClick && e) onEventClick(event, e);
                                                             }}
                                                             note={event.private_announcement}
+                                                            isSelected={selectedAvailabilityId === event.id}
                                                         />
                                                     </div>
                                                 </div>
@@ -1048,7 +1085,8 @@ function EventChip({
     bookingRecordsCount,
     resources,
     onClick,
-    note
+    note,
+    isSelected
 }: {
     abbr: string;
     time: string;
@@ -1058,16 +1096,20 @@ function EventChip({
     resources?: string;
     onClick?: (e?: React.MouseEvent) => void;
     note?: string;
+    isSelected?: boolean;
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const openCount = maxCapacity - bookedCount;
 
     // Uniform text class
-    const textClass = "font-bold text-white group-hover:text-[#010e0f] text-xs leading-tight";
+    const textClass = `font-bold text-xs leading-tight pointer-events-none ${isSelected ? 'text-black' : 'text-white group-hover/chip:text-[#010e0f]'}`;
 
     return (
         <div
-            className="group mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none bg-cyan-700/90 hover:bg-cyan-400 overflow-hidden ring-1 ring-white/10"
+            className={cn(
+                "group/chip mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none overflow-hidden ring-1 ring-white/10",
+                isSelected ? "bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-[1.02] z-10" : "bg-cyan-700/90 hover:bg-cyan-400"
+            )}
             onClick={(e) => {
                 e.stopPropagation();
                 onClick?.(e);
@@ -1096,7 +1138,7 @@ function EventChip({
 
             {/* Line 3: Private Note (Always visible if present) */}
             {note && (
-                <div className={cn(textClass, "text-white/90 truncate w-full")}>
+                <div className={cn(textClass, isSelected ? "text-black" : "text-white/90", "truncate w-full")}>
                     {note}
                 </div>
             )}

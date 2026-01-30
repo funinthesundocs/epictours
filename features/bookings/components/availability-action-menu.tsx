@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Plus, Settings, FileText, Users } from "lucide-react";
 import { Availability } from "@/features/availability/components/availability-list-table";
 
 interface AvailabilityActionMenuProps {
     availability: Availability;
-    position: { x: number; y: number };
+    triggerRect: DOMRect;
+    zoom: number;
     onClose: () => void;
     onNewBooking: () => void;
     onActionsSettings: () => void;
@@ -15,13 +16,56 @@ interface AvailabilityActionMenuProps {
 
 export function AvailabilityActionMenu({
     availability,
-    position,
+    triggerRect,
+    zoom,
     onClose,
     onNewBooking,
     onActionsSettings,
     onManifest
 }: AvailabilityActionMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null);
+    const [menuPosition, setMenuPosition] = useState<{ x: number, y: number } | null>(null);
+
+    // Calculate position on mount/resize
+    useEffect(() => {
+        if (!menuRef.current || !triggerRect) return;
+
+        const menu = menuRef.current;
+        const width = menu.offsetWidth;
+        const height = menu.offsetHeight;
+        const zoomFactor = zoom / 100;
+
+        // Work in Visual/Viewport Pixels for collision detection
+        const menuVisualWidth = width * zoomFactor;
+        const menuVisualHeight = height * zoomFactor;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Horizontal: Default to right of trigger (Visual)
+        let visualX = triggerRect.right;
+
+        // Right Collision Check
+        if (visualX + menuVisualWidth > viewportWidth) {
+            // Flip to Left (Visual position: Left edge of trigger - menu visual width)
+            visualX = triggerRect.left - menuVisualWidth;
+        }
+
+        // Vertical: Default to top of trigger (Visual)
+        let visualY = triggerRect.top;
+
+        // Bottom Collision Check
+        if (visualY + menuVisualHeight > viewportHeight) {
+            // Align bottom with trigger bottom (Visual)
+            visualY = triggerRect.bottom - menuVisualHeight;
+        }
+
+        // Convert Visual Coordinates back to CSS Style Coordinates (Scaled)
+        setMenuPosition({
+            x: visualX / zoomFactor,
+            y: visualY / zoomFactor
+        });
+
+    }, [triggerRect, zoom]);
 
     // Close on click outside
     useEffect(() => {
@@ -48,8 +92,10 @@ export function AvailabilityActionMenu({
             ref={menuRef}
             className="fixed z-50 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden min-w-[280px]"
             style={{
-                left: position.x,
-                top: position.y,
+                left: menuPosition?.x ?? 0,
+                top: menuPosition?.y ?? 0,
+                opacity: menuPosition ? 1 : 0, // Hide until positioned
+                pointerEvents: menuPosition ? "auto" : "none",
             }}
         >
             {/* Header with Experience Info */}

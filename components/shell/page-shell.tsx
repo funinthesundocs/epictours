@@ -16,12 +16,13 @@ interface PageShellProps {
     children?: React.ReactNode;
     action?: React.ReactNode;
     className?: string; // Root container override
+    style?: React.CSSProperties; // Inline styles for root container
     contentClassName?: string; // Content wrapper override
 }
 
-export function PageShell({ title, description, icon: Icon, stats, children, action, className, contentClassName }: PageShellProps) {
+export function PageShell({ title, description, icon: Icon, stats, children, action, className, style, contentClassName }: PageShellProps) {
     return (
-        <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)}>
+        <div className={cn("space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500", className)} style={style}>
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 shrink-0">
                 <div className="flex items-start gap-4">

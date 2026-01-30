@@ -126,7 +126,10 @@ export function CustomersPage() {
     };
 
     return (
-        <div className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div
+            className="flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
+        >
             {/* Header */}
             <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

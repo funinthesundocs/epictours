@@ -8,14 +8,15 @@ import {
     DialogContent,
     DialogTrigger,
     DialogTitle,
+    DialogDescription
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { Loader2, CalendarDays, Clock, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { useSidebar } from "@/components/shell/sidebar-context";
 import { Combobox } from "@/components/ui/combobox";
+import { useSidebar } from "@/components/shell/sidebar-context";
 
 interface NewBookingMenuProps {
     children: React.ReactNode;
@@ -24,7 +25,7 @@ interface NewBookingMenuProps {
 }
 
 export function NewBookingMenu({ children, onSelectAvailability, defaultExperienceId }: NewBookingMenuProps) {
-    const { isCollapsed } = useSidebar();
+    const { zoom } = useSidebar();
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [availabilities, setAvailabilities] = useState<Availability[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -150,18 +151,12 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                 {children}
             </DialogTrigger>
             <DialogContent
-                portal={true}
-                overlayClassName="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
-                overlayStyle={{ left: isCollapsed ? "80px" : "240px" }}
-                className="fixed top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 max-w-none w-[300px] p-0 bg-[#0a0a0a] border-zinc-800 gap-0 overflow-hidden shadow-2xl transition-[left] duration-300 ease-in-out"
-                style={{
-                    left: `calc(50% + ${isCollapsed ? 40 : 120}px)`
-                }}
                 showCloseButton={false}
+                className="z-[9999] w-[350px] p-0 bg-[#0a0a0a] border-zinc-800 gap-0 overflow-hidden shadow-2xl"
+                style={{ zoom: zoom / 100 }}
             >
-                <div className="sr-only">
-                    <DialogTitle>Select Booking Date</DialogTitle>
-                </div>
+                <DialogTitle className="sr-only">New Booking</DialogTitle>
+                <DialogDescription className="sr-only">Select a date and availability to create a new booking.</DialogDescription>
 
                 <button
                     onClick={() => setIsOpen(false)}
@@ -181,12 +176,13 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                         {/* Experience Selector */}
                         <div className="p-4 border-b border-zinc-800 bg-zinc-900/30">
 
-                            <div className="w-full max-w-[240px]">
+                            <div className="w-full max-w-[280px]">
                                 <Combobox
                                     value={selectedExperienceId}
                                     onChange={setSelectedExperienceId}
                                     options={experiences.map(e => ({ value: e.id, label: e.name }))}
                                     placeholder="Select Experience..."
+                                    inputClassName="placeholder:text-zinc-400"
                                 />
                             </div>
                         </div>

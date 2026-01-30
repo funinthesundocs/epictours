@@ -8,10 +8,12 @@ import { AvailabilityManager } from "./availability-manager";
 import { ManifestPanel } from "./manifest-panel";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { NewBookingMenu } from "./new-booking-menu";
+import { useSidebar } from "@/components/shell/sidebar-context";
 import { PageShell } from "@/components/shell/page-shell";
 import { Plus } from "lucide-react";
 
 export function BookingsCalendarWrapper() {
+    const { zoom } = useSidebar();
     // Calendar refresh
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -19,7 +21,7 @@ export function BookingsCalendarWrapper() {
     const [selectedAvailability, setSelectedAvailability] = useState<Availability | null>(null);
 
     // Action Menu State
-    const [actionMenuPosition, setActionMenuPosition] = useState<{ x: number; y: number } | null>(null);
+    const [actionMenuTriggerRect, setActionMenuTriggerRect] = useState<DOMRect | null>(null);
 
     // Panel States
     const [isBookingDeskOpen, setIsBookingDeskOpen] = useState(false);
@@ -34,17 +36,15 @@ export function BookingsCalendarWrapper() {
         event.stopPropagation();
         setSelectedAvailability(availability);
 
-        // Position menu near the click
-        const rect = (event.target as HTMLElement).getBoundingClientRect();
-        setActionMenuPosition({
-            x: Math.min(rect.right + 10, window.innerWidth - 300),
-            y: Math.min(rect.top, window.innerHeight - 300)
-        });
+        // Capture trigger rect for the menu to position itself
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        setActionMenuTriggerRect(rect);
     }, []);
 
     // Close action menu
     const closeActionMenu = useCallback(() => {
-        setActionMenuPosition(null);
+        setActionMenuTriggerRect(null);
+        setSelectedAvailability(null);
     }, []);
 
     // Action handlers
@@ -101,13 +101,15 @@ export function BookingsCalendarWrapper() {
             <BookingsCalendar
                 onEventClick={handleEventClick}
                 key={refreshTrigger}
+                selectedAvailabilityId={selectedAvailability?.id}
             />
 
             {/* Action Menu Popover */}
-            {actionMenuPosition && selectedAvailability && (
+            {actionMenuTriggerRect && selectedAvailability && (
                 <AvailabilityActionMenu
                     availability={selectedAvailability}
-                    position={actionMenuPosition}
+                    triggerRect={actionMenuTriggerRect}
+                    zoom={zoom}
                     onClose={closeActionMenu}
                     onNewBooking={() => handleNewBooking(selectedAvailability)}
                     onActionsSettings={handleActionsSettings}

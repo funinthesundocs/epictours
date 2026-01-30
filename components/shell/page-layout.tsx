@@ -41,10 +41,8 @@ function PageLayoutContent({ children }: { children: ReactNode }) {
         <>
             <Sidebar />
             <main
-                className={cn(
-                    "min-h-screen p-4 lg:p-8 transition-all duration-300 ease-in-out",
-                    isCollapsed ? "lg:ml-[80px]" : "lg:ml-[240px]"
-                )}
+                className="min-h-screen p-4 lg:p-8 transition-all duration-300 ease-in-out"
+                style={{ marginLeft: "var(--sidebar-width)" }}
             >
                 <div
                     className="w-full space-y-6"

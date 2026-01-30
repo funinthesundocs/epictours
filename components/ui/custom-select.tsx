@@ -68,7 +68,7 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 5 }}
-                        className="absolute z-50 w-full mt-1 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden"
+                        className="absolute z-[70] w-full mt-1 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden"
                     >
                         {normalizedOptions.map((option) => {
                             const isSelected = value === option.value;

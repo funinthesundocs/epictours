@@ -131,7 +131,8 @@ export default function CustomFieldsPage() {
             title="Custom Fields"
             description="Manage custom data types for your organization."
             icon={Settings}
-            className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col"
+            className="flex flex-col"
+            style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
             action={
                 <Button

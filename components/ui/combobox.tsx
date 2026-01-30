@@ -139,7 +139,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                         initial={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
-                        className={`absolute z-50 w-full left-0 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto
+                        className={`absolute z-[70] w-full left-0 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto
                             ${position === 'bottom' ? "mt-1 top-full" : "mb-1 bottom-full"}
                         `}
                     >

@@ -34,19 +34,19 @@ export function SidePanel({
     // Check if we are in "full-content" mode
     const isFullContent = width === "full-content";
 
-    // Dynamic styles
-    const sidebarWidth = isCollapsed ? "80px" : "240px";
+    // Dynamic styles - use base sidebar width for backdrop, zoomed width for panel positioning
+    // const zoomedSidebarWidth = isCollapsed ? `${80 * zoom / 100}px` : `${240 * zoom / 100}px`;
 
     // Position classes
     // Standard: Fixed right, explicit width
     // Full Content: Fixed right, top, bottom. Left depends on sidebar.
     const positionClassName = isFullContent
-        ? `fixed right-0 top-0 bottom-0 z-50 flex flex-col bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
-        : `fixed right-0 top-0 z-50 h-full w-full ${width} bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
+        ? `fixed right-0 top-0 bottom-0 z-[60] flex flex-col bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
+        : `fixed right-0 top-0 z-[60] h-full w-full ${width} bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
 
     // Inline styles for dynamic values
     const panelStyle = isFullContent
-        ? { left: sidebarWidth, width: "auto", backdropFilter: "blur(20px)" }
+        ? { left: "var(--sidebar-width)", width: "auto", backdropFilter: "blur(20px)" }
         : { backdropFilter: "blur(20px)" };
 
     // Close on Escape key
@@ -72,17 +72,14 @@ export function SidePanel({
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop - Only show if NOT full content mode */}
-                    {!isFullContent && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={onClose}
-                            className="fixed right-0 top-0 bottom-0 z-40 bg-zinc-950/60 backdrop-blur-sm transition-[left] duration-300 ease-in-out"
-                            style={{ left: sidebarWidth }}
-                        />
-                    )}
+                    {/* Backdrop - Cover entire screen, sidebar overlaps with higher z-index (50) */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="fixed inset-0 z-[40] bg-zinc-950/60 backdrop-blur-sm"
+                    />
 
                     {/* Panel */}
                     <motion.div

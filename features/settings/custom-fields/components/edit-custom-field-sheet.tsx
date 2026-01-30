@@ -167,12 +167,11 @@ function SortableOptionItem({
                                     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
                                     setValue(`options.${index}.value`, slug, { shouldDirty: true });
                                     // If this was default, update default value too? Not necessary as value changes
-                                    if (isDefault) {
-                                        // Wait effectively handled by form state if we used component state, but here we might need to be careful?
-                                        // Actually form state 'default_value' is a string. If we change the value here, we should update default_value?
-                                        // Complex to sync. Let's assume user re-clicks default if needed or simple slug update works if bound by ref (it's not).
-                                        // Simple approch: Just let value update. If slug changes, default_value might point to old slug.
-                                        // Fixing:
+                                    // Actually form state 'default_value' is a string. If we change the value here, we should update default_value?
+                                    // Complex to sync. Let's assume user re-clicks default if needed or simple slug update works if bound by ref (it's not).
+                                    // Simple approch: Just let value update. If slug changes, default_value might point to old slug.
+                                    // Fixing:
+                                    if (fieldValue === slug) { // Only update if the current default_value matches the old slug
                                         setValue('default_value', slug, { shouldDirty: true });
                                     }
                                 }
@@ -450,7 +449,9 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
 
             {/* Side Panel */}
-            <div className="fixed inset-y-0 right-0 w-full md:w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
+            <div
+                className="fixed inset-y-0 right-0 w-full md:w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300"
+            >
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/5 bg-transparent">

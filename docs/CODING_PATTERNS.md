@@ -12,6 +12,12 @@
 ## 1. UI Standards
 
 ### Save/Update Buttons
+*   **Primary Action Buttons** (Create, Save, Update, Add):
+    *   **Background**: `bg-cyan-400` (hover: `hover:bg-cyan-300`)
+    *   **Text**: `text-black` — Always use black text on cyan background
+    *   **Shadow**: `shadow-[0_0_15px_rgba(6,182,212,0.4)]`
+    *   **Disabled State**: `bg-zinc-800 text-zinc-500 cursor-not-allowed`
+    *   **Full Class**: `bg-cyan-400 hover:bg-cyan-300 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]`
 
 ### 1.2 Deletion & Confirmation Protocol
 *   **Strict Rule**: Never use browser native `window.confirm()`.
@@ -35,7 +41,7 @@
     *   **Footer Rules**:
         *   **Position**: Sticky at bottom (`mt-auto`).
         *   **Style**: `bg-zinc-950/40 backdrop-blur-md` with `border-t border-white/10`.
-        *   **Buttons**: Primary Action Button must use **White Text** (`text-white`) on Cyan background. Never use black text.
+        *   **Buttons**: Primary Action Button must use **Black Text** (`text-black`) on `bg-cyan-400` background. Never use white text on cyan.
     *   **Snippet**:
         ```tsx
         <SidePanel contentClassName="p-0 overflow-hidden flex flex-col" ...>
@@ -44,7 +50,7 @@
                     {/* Content */}
                 </div>
                 <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
-                    <Button type="submit" className="text-white ...">Save</Button>
+                    <Button type="submit" className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]">Save</Button>
                 </div>
             </form>
         </SidePanel>
