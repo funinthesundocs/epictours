@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ interface InviteFormData {
 
 export function PartnerInviteSheet({ isOpen, onClose, onInvite, availableRoles }: PartnerInviteSheetProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<InviteFormData>({
+    const { register, handleSubmit, reset, watch, getValues, formState: { errors } } = useForm<InviteFormData>({
         defaultValues: {
             relationship_type: 'partner'
         }
@@ -73,7 +73,7 @@ export function PartnerInviteSheet({ isOpen, onClose, onInvite, availableRoles }
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 p-6 space-y-6">
+                        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 p-6 space-y-6 overflow-y-auto">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-muted-foreground">Email Address</label>
                                 <input
@@ -85,31 +85,67 @@ export function PartnerInviteSheet({ isOpen, onClose, onInvite, availableRoles }
                                 {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <label className="text-sm font-medium text-muted-foreground">Relationship Type</label>
-                                <select
-                                    {...register("relationship_type")}
-                                    className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground focus:border-ring focus:outline-none"
-                                >
-                                    <option value="partner">Partner</option>
-                                    <option value="affiliate">Affiliate</option>
-                                </select>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {['partner', 'affiliate'].map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => reset({ ...getValues(), relationship_type: type as 'partner' | 'affiliate' })}
+                                            className={cn(
+                                                "flex items-center justify-center p-3 rounded-lg border transition-colors capitalize",
+                                                watch("relationship_type") === type
+                                                    ? "bg-primary/10 border-primary/50 text-foreground font-medium"
+                                                    : "bg-muted/30 border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
+                                            )}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
                                 <p className="text-xs text-muted-foreground">
                                     Partners typically have more access than Affiliates.
                                 </p>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <label className="text-sm font-medium text-muted-foreground">Permission Group (Role)</label>
-                                <select
-                                    {...register("permission_group_id", { required: "Role is required" })}
-                                    className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground focus:border-ring focus:outline-none"
-                                >
-                                    <option value="">Select a role...</option>
-                                    {availableRoles.map(role => (
-                                        <option key={role.id} value={role.id}>{role.name}</option>
-                                    ))}
-                                </select>
+                                <div className="space-y-2">
+                                    {availableRoles.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground p-4 bg-muted/40 rounded-lg text-center">
+                                            No roles available.
+                                        </p>
+                                    ) : (
+                                        <div className="grid gap-2">
+                                            {availableRoles.map(role => (
+                                                <button
+                                                    key={role.id}
+                                                    type="button"
+                                                    onClick={() => reset({ ...getValues(), permission_group_id: role.id })}
+                                                    className={cn(
+                                                        "w-full flex items-center justify-between p-3 rounded-lg border transition-colors text-left",
+                                                        watch("permission_group_id") === role.id
+                                                            ? "bg-primary/10 border-primary/50 text-foreground"
+                                                            : "bg-muted/30 border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
+                                                    )}
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium">{role.name}</span>
+                                                        {role.description && (
+                                                            <span className="text-xs text-muted-foreground line-clamp-1">{role.description}</span>
+                                                        )}
+                                                    </div>
+                                                    {watch("permission_group_id") === role.id && (
+                                                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground shrink-0">
+                                                            <Check size={12} strokeWidth={3} />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                                 {errors.permission_group_id && <p className="text-sm text-destructive">{errors.permission_group_id.message}</p>}
                             </div>
                         </form>
