@@ -47,17 +47,26 @@ interface StaffPositionFormSheetProps {
     onEditParentGroup?: (groupId: string) => void;
 }
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 // Color options for position badges
 const POSITION_COLORS = [
-    { name: "Cyan", value: "#06b6d4" },
-    { name: "Blue", value: "#3b82f6" },
-    { name: "Purple", value: "#8b5cf6" },
-    { name: "Pink", value: "#ec4899" },
     { name: "Red", value: "#ef4444" },
     { name: "Orange", value: "#f97316" },
+    { name: "Amber", value: "#f59e0b" },
     { name: "Yellow", value: "#eab308" },
     { name: "Green", value: "#22c55e" },
+    { name: "Emerald", value: "#10b981" },
     { name: "Teal", value: "#14b8a6" },
+    { name: "Cyan", value: "#06b6d4" },
+    { name: "Sky", value: "#0ea5e9" },
+    { name: "Blue", value: "#3b82f6" },
+    { name: "Indigo", value: "#6366f1" },
+    { name: "Violet", value: "#8b5cf6" },
+    { name: "Purple", value: "#a855f7" },
+    { name: "Fuchsia", value: "#d946ef" },
+    { name: "Pink", value: "#ec4899" },
+    { name: "Rose", value: "#f43f5e" },
 ];
 
 interface PermissionGroupOption {
@@ -394,34 +403,47 @@ export function StaffPositionFormSheet({
                         <div className="space-y-2">
                             <Label>Position Color</Label>
                             <div className="flex flex-wrap gap-2">
-                                {POSITION_COLORS.map(color => (
-                                    <button
-                                        key={color.value}
-                                        type="button"
-                                        onClick={() => setSelectedColor(color.value)}
-                                        className={cn(
-                                            "w-8 h-8 rounded-full border-2 transition-all",
-                                            selectedColor === color.value
-                                                ? "border-white scale-110"
-                                                : "border-transparent hover:scale-105"
-                                        )}
-                                        style={{ backgroundColor: color.value }}
-                                        title={color.name}
-                                    />
-                                ))}
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedColor(null)}
-                                    className={cn(
-                                        "w-8 h-8 rounded-full border-2 bg-muted transition-all flex items-center justify-center text-xs text-muted-foreground",
-                                        selectedColor === null
-                                            ? "border-white scale-110"
-                                            : "border-transparent hover:scale-105"
-                                    )}
-                                    title="Default"
-                                >
-                                    ∅
-                                </button>
+                                <TooltipProvider>
+                                    {POSITION_COLORS.map(color => (
+                                        <Tooltip key={color.value}>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedColor(color.value)}
+                                                    className={cn(
+                                                        "w-6 h-6 rounded-full border-2 transition-all",
+                                                        selectedColor === color.value
+                                                            ? "border-black dark:border-white scale-110 shadow-lg"
+                                                            : "border-transparent hover:scale-105"
+                                                    )}
+                                                    style={{ backgroundColor: color.value }}
+                                                />
+                                            </TooltipTrigger>
+                                            <TooltipContent className="capitalize">
+                                                {color.name}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    ))}
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedColor(null)}
+                                                className={cn(
+                                                    "w-6 h-6 rounded-full border-2 bg-muted transition-all flex items-center justify-center text-xs text-muted-foreground",
+                                                    selectedColor === null
+                                                        ? "border-black dark:border-white scale-110 shadow-lg"
+                                                        : "border-transparent hover:scale-105"
+                                                )}
+                                            >
+                                                ∅
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Default
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                         </div>
 

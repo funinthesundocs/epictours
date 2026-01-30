@@ -72,7 +72,7 @@ export function RecentActivity() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full text-zinc-500 gap-2">
+            <div className="flex items-center justify-center h-full text-muted-foreground gap-2">
                 <Loader2 size={16} className="animate-spin" />
                 Loading...
             </div>
@@ -81,7 +81,7 @@ export function RecentActivity() {
 
     if (logs.length === 0) {
         return (
-            <div className="flex items-center justify-center h-full text-zinc-500">
+            <div className="flex items-center justify-center h-full text-muted-foreground">
                 No recent activity
             </div>
         );
@@ -91,25 +91,25 @@ export function RecentActivity() {
         <div className="flex flex-col h-full min-h-0">
             <div className="flex-1 min-h-0 space-y-2 overflow-y-auto">
                 {logs.map((log) => (
-                    <div key={log.id} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                    <div key={log.id} className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                             <ActionIcon action={log.action} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white truncate">
-                                <span className="text-zinc-400">{getContentType(log.table_name)}</span>
+                            <p className="text-sm text-foreground truncate">
+                                <span className="text-muted-foreground">{getContentType(log.table_name)}</span>
                                 {' '}
                                 <span className="font-medium">{getRecordName(log)}</span>
                                 {' '}
                                 <span className={
-                                    log.action === 'INSERT' ? 'text-emerald-400' :
-                                        log.action === 'UPDATE' ? 'text-cyan-400' :
-                                            'text-red-400'
+                                    log.action === 'INSERT' ? 'text-emerald-500 dark:text-emerald-400' :
+                                        log.action === 'UPDATE' ? 'text-cyan-500 dark:text-cyan-400' :
+                                            'text-red-500 dark:text-red-400'
                                 }>
                                     {getActionText(log.action)}
                                 </span>
                             </p>
-                            <p className="text-xs text-zinc-500 truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                                 {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })} by admin
                             </p>
                         </div>

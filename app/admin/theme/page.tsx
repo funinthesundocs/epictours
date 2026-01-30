@@ -26,6 +26,25 @@ const SECONDARY_OPTIONS = [
     { name: "Stone", class: "bg-stone-500", hex: "#78716c", light: "#e7e5e4", dark: "#292524" }, // Light: Stone-200, Dark: Stone-800
 ];
 
+const PRIMARY_OPTIONS = [
+    { name: "Red", class: "bg-red-500", hex: "#ef4444" },
+    { name: "Orange", class: "bg-orange-500", hex: "#f97316" },
+    { name: "Amber", class: "bg-amber-500", hex: "#f59e0b" },
+    { name: "Yellow", class: "bg-yellow-500", hex: "#eab308" },
+    { name: "Green", class: "bg-green-500", hex: "#22c55e" },
+    { name: "Emerald", class: "bg-emerald-500", hex: "#10b981" },
+    { name: "Teal", class: "bg-teal-500", hex: "#14b8a6" },
+    { name: "Cyan", class: "bg-cyan-500", hex: "#06b6d4" },
+    { name: "Sky", class: "bg-sky-500", hex: "#0ea5e9" },
+    { name: "Blue", class: "bg-blue-500", hex: "#3b82f6" },
+    { name: "Indigo", class: "bg-indigo-500", hex: "#6366f1" },
+    { name: "Violet", class: "bg-violet-500", hex: "#8b5cf6" },
+    { name: "Purple", class: "bg-purple-500", hex: "#a855f7" },
+    { name: "Fuchsia", class: "bg-fuchsia-500", hex: "#d946ef" },
+    { name: "Pink", class: "bg-pink-500", hex: "#ec4899" },
+    { name: "Rose", class: "bg-rose-500", hex: "#f43f5e" },
+];
+
 export default function ThemePage() {
     const { setTheme, resolvedTheme } = useTheme();
     const [date, setDate] = useState<Date | undefined>(new Date());
@@ -46,6 +65,83 @@ export default function ThemePage() {
     // Theme Interaction State
     const [activePrimary, setActivePrimary] = useState<string | null>(null);
     const [activeSecondary, setActiveSecondary] = useState<string | null>(null);
+
+    // Automatic Secondary Logic
+    const handlePrimaryChange = (hex: string) => {
+        setActivePrimary(hex);
+
+        const primaryColor = PRIMARY_OPTIONS.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+        if (!primaryColor) return;
+
+        const name = primaryColor.name;
+        let targetSecondaryName = null;
+
+        // Rules:
+        // Stone -> Red, Orange, Amber, Yellow, Rose
+        if (['Red', 'Orange', 'Amber', 'Yellow', 'Rose'].includes(name)) {
+            targetSecondaryName = "Stone";
+        }
+        // Neutral -> Green, Emerald, Pink, Fuchsia
+        else if (['Green', 'Emerald', 'Pink', 'Fuchsia'].includes(name)) {
+            targetSecondaryName = "Neutral";
+        }
+        // Zinc -> Teal, Cyan, Sky
+        else if (['Teal', 'Cyan', 'Sky'].includes(name)) {
+            targetSecondaryName = "Zinc";
+        }
+        // Gray -> Blue, Purple
+        else if (['Blue', 'Purple'].includes(name)) {
+            targetSecondaryName = "Gray";
+        }
+        // Slate -> Indigo, Violet (Indego corrected)
+        else if (['Indigo', 'Violet'].includes(name)) {
+            targetSecondaryName = "Slate";
+        }
+
+        if (targetSecondaryName) {
+            const secondaryHex = SECONDARY_OPTIONS.find(s => s.name === targetSecondaryName)?.hex;
+            if (secondaryHex) {
+                setActiveSecondary(secondaryHex);
+            }
+        }
+    };
+
+    // Initialize State from current CSS variables on mount
+    useEffect(() => {
+        const root = document.documentElement;
+        const computedStyle = getComputedStyle(root);
+
+        // Helper to normalize color strings (handle spaces, cases)
+        const normalizeColor = (c: string) => c ? c.trim().toLowerCase() : '';
+
+        // 1. Get Primary
+        // Try inline style first (most reliable for custom set), then computed
+        const currentPrimary = root.style.getPropertyValue('--primary') || computedStyle.getPropertyValue('--primary');
+        if (currentPrimary) {
+            // Find match in options
+            const match = PRIMARY_OPTIONS.find(c => normalizeColor(c.hex) === normalizeColor(currentPrimary));
+            if (match) {
+                setActivePrimary(match.hex);
+            }
+        }
+
+        // 2. Get Secondary
+        const currentSecondary = root.style.getPropertyValue('--secondary') || computedStyle.getPropertyValue('--secondary');
+        if (currentSecondary) {
+            // Secondary in Dark mode might be the "Dark" value (e.g. Slate-800) not the hex (Slate-500)
+            // We need to check against hex, light, AND dark values to find the "Option"
+            const match = SECONDARY_OPTIONS.find(opt =>
+                normalizeColor(opt.hex) === normalizeColor(currentSecondary) ||
+                normalizeColor(opt.light) === normalizeColor(currentSecondary) ||
+                normalizeColor(opt.dark) === normalizeColor(currentSecondary)
+            );
+
+            if (match) {
+                setActiveSecondary(match.hex); // Always set active state to the "Metadata Hex" (500 weight)
+            }
+        }
+
+    }, []); // Run only on mount
 
     // Apply Theme Changes
     useEffect(() => {
@@ -188,25 +284,8 @@ export default function ThemePage() {
                             {/* PRIMARY SECTION */}
                             <PaletteSection
                                 title="Primary"
-                                colors={[
-                                    { name: "Red", class: "bg-red-500", hex: "#ef4444" },
-                                    { name: "Orange", class: "bg-orange-500", hex: "#f97316" },
-                                    { name: "Amber", class: "bg-amber-500", hex: "#f59e0b" },
-                                    { name: "Yellow", class: "bg-yellow-500", hex: "#eab308" },
-                                    { name: "Green", class: "bg-green-500", hex: "#22c55e" },
-                                    { name: "Emerald", class: "bg-emerald-500", hex: "#10b981" },
-                                    { name: "Teal", class: "bg-teal-500", hex: "#14b8a6" },
-                                    { name: "Cyan", class: "bg-cyan-500", hex: "#06b6d4" },
-                                    { name: "Sky", class: "bg-sky-500", hex: "#0ea5e9" },
-                                    { name: "Blue", class: "bg-blue-500", hex: "#3b82f6" },
-                                    { name: "Indigo", class: "bg-indigo-500", hex: "#6366f1" },
-                                    { name: "Violet", class: "bg-violet-500", hex: "#8b5cf6" },
-                                    { name: "Purple", class: "bg-purple-500", hex: "#a855f7" },
-                                    { name: "Fuchsia", class: "bg-fuchsia-500", hex: "#d946ef" },
-                                    { name: "Pink", class: "bg-pink-500", hex: "#ec4899" },
-                                    { name: "Rose", class: "bg-rose-500", hex: "#f43f5e" },
-                                ]}
-                                onColorSelect={setActivePrimary}
+                                colors={PRIMARY_OPTIONS}
+                                onColorSelect={handlePrimaryChange}
                                 activeHex={activePrimary}
                                 alwaysOpen={true}
                                 showHex={false}
@@ -216,15 +295,7 @@ export default function ThemePage() {
                             {/* SECONDARY SECTION */}
                             {/* SECONDARY SECTION */}
                             {/* SECONDARY SECTION */}
-                            <PaletteSection
-                                title="Secondary / Neutral"
-                                colors={SECONDARY_OPTIONS}
-                                onColorSelect={setActiveSecondary}
-                                activeHex={activeSecondary}
-                                alwaysOpen={true}
-                                showHex={false}
-                                showClass={false}
-                            />
+                            {/* SECONDARY SECTION (Hidden / Automated) */}
 
                             <PaletteSection
                                 title="Semantic"

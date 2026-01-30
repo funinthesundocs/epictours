@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type NavSection } from "@/config/navigation";
 import { useFilteredNavigation } from "@/features/auth/use-filtered-navigation";
+import { useTheme } from "next-themes";
 import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minus, Plus } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minus, Plus, Sun, Moon, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -571,20 +573,105 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
 
     // Expanded Mode: Standard Link
     return (
-        <Link
-            href={item.href}
-            className={cn(
-                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-all duration-200",
-                isActive
-                    ? "bg-primary/10 text-primary font-medium shadow-[0_0_15px_color-mix(in_srgb,var(--primary),transparent_85%)]"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+        <div className="relative group/item">
+            <Link
+                href={item.href}
+                className={cn(
+                    "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-all duration-200",
+                    isActive
+                        ? "bg-primary/10 text-primary font-medium shadow-[0_0_15px_color-mix(in_srgb,var(--primary),transparent_85%)]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+                style={{ paddingLeft: `${12 + (depth * 12)}px` }}
+                onClick={() => onMobileItemClick?.()}
+            >
+                <Icon size={18} className={cn("transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                <span className="truncate">{item.title}</span>
+            </Link>
+
+            {/* Special Case: Style Manager Theme Toggle */}
+            {item.title === "Style Manager" && !isCollapsed && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <ThemeToggle />
+                </div>
             )}
-            style={{ paddingLeft: `${12 + (depth * 12)}px` }}
-            onClick={() => onMobileItemClick?.()}
-        >
-            <Icon size={18} className={cn("transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-            <span className="truncate">{item.title}</span>
-        </Link>
+        </div>
+    );
+}
+
+function ThemeToggle() {
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const [targetMode, setTargetMode] = useState<'light' | 'dark' | null>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const handleThemeSwitch = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // precise sequence
+        const nextTheme = theme === 'dark' ? 'light' : 'dark';
+        setTargetMode(nextTheme);
+        setIsTransitioning(true);
+        setShowOverlay(true);
+
+        // 1. Switch Theme (hidden behind overlay) - 100ms delay to ensure overlay is rendered
+        setTimeout(() => {
+            setTheme(nextTheme);
+        }, 100);
+
+        // 2. Start Fade Out - after 1000ms (1s total "loading" time)
+        setTimeout(() => {
+            setShowOverlay(false);
+        }, 1100);
+
+        // 3. Unmount Overlay - after fade finishes (300ms fade)
+        setTimeout(() => {
+            setIsTransitioning(false);
+        }, 1400);
+    };
+
+    if (!mounted) return null;
+
+    return (
+        <>
+            <button
+                onClick={handleThemeSwitch}
+                disabled={isTransitioning}
+                className="p-1.5 rounded-md bg-background border border-border shadow-sm hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+            >
+                {theme === 'dark' ? <Moon size={12} /> : <Sun size={12} />}
+            </button>
+
+            {/* Full Screen Loading Overlay */}
+            {isTransitioning && createPortal(
+                <div
+                    className={cn(
+                        "fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center transition-opacity duration-300",
+                        showOverlay ? "opacity-100" : "opacity-0"
+                    )}
+                >
+                    <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                            <Loader2 className="w-16 h-16 text-primary animate-spin relative z-10" />
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-white/60 bg-clip-text text-transparent">
+                                Please wait
+                            </h2>
+                            <p className="text-sm text-muted-foreground">Switching to {targetMode === 'light' ? 'Light' : 'Dark'} Mode...</p>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 }
 
