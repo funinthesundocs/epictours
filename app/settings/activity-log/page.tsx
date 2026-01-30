@@ -15,8 +15,8 @@ export default function ActivityLogPage() {
                             <Activity size={20} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-white">Activity Log</h1>
-                            <p className="text-zinc-400 text-sm">View the history of all data changes and user actions.</p>
+                            <h1 className="text-2xl font-bold text-foreground">Activity Log</h1>
+                            <p className="text-muted-foreground text-sm">View the history of all data changes and user actions.</p>
                         </div>
                     </div>
                 </div>

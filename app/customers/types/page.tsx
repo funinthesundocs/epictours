@@ -17,7 +17,7 @@ export default function CustomerTypesPage() {
     const loadData = async () => {
         setIsLoading(true);
         const { data: result, error } = await supabase
-            .from("customer_types")
+            .from("customer_types" as any)
             .select("*")
             .order("name", { ascending: true });
 
@@ -43,7 +43,7 @@ export default function CustomerTypesPage() {
 
     const handleDelete = async (id: string) => {
         const { error } = await supabase
-            .from("customer_types")
+            .from("customer_types" as any)
             .delete()
             .eq("id", id);
 
@@ -67,7 +67,7 @@ export default function CustomerTypesPage() {
             action={
                 <button
                     onClick={handleCreate}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm transition-colors shadow-glow"
                 >
                     <Plus size={16} strokeWidth={3} />
                     <span>New Type</span>
@@ -75,12 +75,12 @@ export default function CustomerTypesPage() {
             }
         >
             {isLoading ? (
-                <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
-                    <Loader2 size={24} className="animate-spin" />
+                <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
+                    <Loader2 size={24} className="animate-spin text-primary" />
                     Loading...
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     <CustomerTypesTable
                         data={data}
                         onEdit={handleEdit}

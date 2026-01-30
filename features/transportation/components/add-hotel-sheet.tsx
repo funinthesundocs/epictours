@@ -113,20 +113,20 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                            <Building2 size={16} className="text-zinc-500" />
+                        <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <Building2 size={16} className="text-muted-foreground" />
                             Hotel Name <RequiredIndicator />
                         </label>
                         <Input
                             {...register("name")}
                             placeholder="e.g. Hilton Hawaiian Village"
                         />
-                        {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                            <Phone size={16} className="text-zinc-500" />
+                        <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <Phone size={16} className="text-muted-foreground" />
                             Contact Phone
                         </label>
                         <Input
@@ -136,8 +136,8 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                            <MapPin size={16} className="text-zinc-500" />
+                        <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <MapPin size={16} className="text-muted-foreground" />
                             Assigned Pickup Point <RequiredIndicator />
                         </label>
                         <Combobox
@@ -146,20 +146,20 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                             onChange={(val) => setValue("pickup_point_id", val, { shouldValidate: true })}
                             placeholder="Select a pickup location..."
                         />
-                        {errors.pickup_point_id && <p className="text-xs text-red-400">{errors.pickup_point_id.message}</p>}
-                        <p className="text-xs text-zinc-500">Guests at this hotel will be directed to this pickup point.</p>
+                        {errors.pickup_point_id && <p className="text-xs text-destructive">{errors.pickup_point_id.message}</p>}
+                        <p className="text-xs text-muted-foreground">Guests at this hotel will be directed to this pickup point.</p>
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-card">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

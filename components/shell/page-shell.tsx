@@ -27,13 +27,13 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 shrink-0">
                 <div className="flex items-start gap-4">
                     {Icon && (
-                        <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-cyan-400">
+                        <div className="p-3 rounded-xl bg-muted/40 border border-border text-primary">
                             <Icon size={32} />
                         </div>
                     )}
                     <div>
-                        <h1 className="text-2xl font-bold text-white tracking-tight">{title}</h1>
-                        <p className="text-zinc-400 text-sm mt-1">{description}</p>
+                        <h1 className="text-2xl font-bold text-foreground tracking-tight">{title}</h1>
+                        <p className="text-muted-foreground text-sm mt-1">{description}</p>
                     </div>
                 </div>
                 {action && <div className="self-end md:self-auto">{action}</div>}
@@ -43,14 +43,14 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
             {stats && stats.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
                     {stats.map((stat, i) => (
-                        <div key={i} className="glass-card p-4 rounded-xl border border-white/5 hover:border-cyan-400/30 transition-colors">
+                        <div key={i} className="glass-card p-4 rounded-xl border border-border hover:border-primary/30 transition-colors bg-card/40">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold text-zinc-500 uppercase">{stat.label}</span>
-                                {stat.icon && <stat.icon size={16} className="text-cyan-400" />}
+                                <span className="text-xs font-semibold text-muted-foreground uppercase">{stat.label}</span>
+                                {stat.icon && <stat.icon size={16} className="text-primary" />}
                             </div>
                             <div className="flex items-end justify-between">
-                                <span className="text-xl font-bold text-white">{stat.value}</span>
-                                {stat.trend && <span className="text-xs text-emerald-400">{stat.trend}</span>}
+                                <span className="text-xl font-bold text-foreground">{stat.value}</span>
+                                {stat.trend && <span className="text-xs text-emerald-500">{stat.trend}</span>}
                             </div>
                         </div>
                     ))}
@@ -63,10 +63,10 @@ export function PageShell({ title, description, icon: Icon, stats, children, act
                     {children}
                 </div>
             ) : (
-                <div className="min-h-[400px] border border-white/5 relative flex items-center justify-center opacity-20 pointer-events-none">
+                <div className="min-h-[400px] border border-border relative flex items-center justify-center opacity-20 pointer-events-none">
                     <div className="text-center">
-                        <h3 className="text-4xl font-bold text-zinc-800 uppercase tracking-widest">{title}</h3>
-                        <p className="text-sm text-zinc-700 font-mono mt-2">MODULE::INITIALIZED</p>
+                        <h3 className="text-4xl font-bold text-muted-foreground uppercase tracking-widest">{title}</h3>
+                        <p className="text-sm text-muted-foreground font-mono mt-2">MODULE::INITIALIZED</p>
                     </div>
                 </div>
             )}

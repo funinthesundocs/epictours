@@ -85,15 +85,27 @@ export function EditAvailabilitySheet({
     const [assignments, setAssignments] = useState<Assignment[]>([]);
 
     const methods = useForm<AvailabilityFormData>({
-        resolver: zodResolver(AvailabilitySchema),
+        resolver: zodResolver(AvailabilitySchema) as any,
         defaultValues: {
+            id: undefined,
+            experience_id: null,
+            start_date: "",
             is_repeating: false,
-            duration_type: "time_range",
-            max_capacity: 0,
-            online_booking_status: "open",
             repeat_days: [],
-            staff_ids: [],
+            end_date: null,
+            duration_type: "time_range",
+            start_time: null,
+            hours_long: null,
+            max_capacity: 0,
+            booking_option_schedule_id: null,
             booking_option_variation: "retail",
+            pricing_schedule_id: null,
+            pricing_tier_id: null,
+            transportation_route_id: null,
+            vehicle_id: null,
+            staff_ids: [],
+            private_announcement: null,
+            online_booking_status: "open",
         }
     });
 
@@ -324,10 +336,10 @@ export function EditAvailabilitySheet({
                     <div className="flex-1 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-64">
-                                <Loader2 className="animate-spin text-cyan-400" size={32} />
+                                <Loader2 className="animate-spin text-primary" size={32} />
                             </div>
                         ) : (
-                            <div className="flex-1 grid grid-cols-[25fr_37.5fr_37.5fr] min-h-0 divide-x divide-white/10 bg-transparent">
+                            <div className="flex-1 grid grid-cols-[25fr_37.5fr_37.5fr] min-h-0 divide-x divide-border bg-transparent">
                                 {/* COLUMN 1: Schedule */}
                                 <div className="h-full overflow-hidden">
                                     <ColumnOne />
@@ -357,12 +369,12 @@ export function EditAvailabilitySheet({
                     </div>
 
                     {/* Footer */}
-                    <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-white/10 bg-zinc-950/40 backdrop-blur-md">
+                    <div className="shrink-0 flex justify-end items-center gap-4 px-6 py-4 border-t border-border bg-background/80 backdrop-blur-md">
                         {isEditMode && onDelete && (
                             <button
                                 type="button"
                                 onClick={() => setIsDeleteDialogOpen(true)}
-                                className="mr-auto px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
+                                className="mr-auto px-4 py-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-lg transition-colors flex items-center gap-2"
                             >
                                 <Trash2 size={16} />
                                 Delete
@@ -378,9 +390,9 @@ export function EditAvailabilitySheet({
                                     disabled={isSubmitting || isLoading || !hasChanges}
                                     className={cn(
                                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                                        (isSubmitting || isLoading) ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                            hasChanges ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                                        (isSubmitting || isLoading) ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                            hasChanges ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow" :
+                                                "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                                     )}
                                 >
                                     {(isSubmitting || isLoading) ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

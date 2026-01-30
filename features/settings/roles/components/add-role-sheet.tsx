@@ -277,7 +277,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                 <Textarea
                                     {...register("description")}
                                     placeholder="Describe this group's access level..."
-                                    className="min-h-[80px] bg-[#0b1115] border-white/10 focus:border-cyan-500/50"
+                                    className="min-h-[80px] bg-muted/50 border-border focus:border-primary/50"
                                 />
                             </div>
                         </div>
@@ -286,7 +286,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label className="text-lg">Permissions</Label>
-                                <span className="text-xs text-zinc-500">
+                                <span className="text-xs text-muted-foreground">
                                     Click module headers to expand
                                 </span>
                             </div>
@@ -295,7 +295,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                 {getRegisteredModules().map((module: ModuleDefinition) => (
                                     <div
                                         key={module.code}
-                                        className="border border-white/10 rounded-lg overflow-hidden"
+                                        className="border border-border rounded-lg overflow-hidden"
                                     >
                                         {/* Module Header */}
                                         <div
@@ -306,18 +306,18 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                             className={cn(
                                                 "w-full flex items-center justify-between p-3 transition-colors cursor-pointer",
                                                 hasAnyPermission(module.code)
-                                                    ? "bg-cyan-500/10"
-                                                    : "bg-white/5 hover:bg-white/10"
+                                                    ? "bg-primary/10"
+                                                    : "bg-muted hover:bg-muted/80"
                                             )}
                                         >
                                             <div className="flex items-center gap-3">
                                                 {expandedModules.has(module.code)
-                                                    ? <ChevronDown size={16} className="text-zinc-400" />
-                                                    : <ChevronRight size={16} className="text-zinc-400" />
+                                                    ? <ChevronDown size={16} className="text-muted-foreground" />
+                                                    : <ChevronRight size={16} className="text-muted-foreground" />
                                                 }
-                                                <span className="font-medium text-white">{module.name}</span>
+                                                <span className="font-medium text-foreground">{module.name}</span>
                                                 {hasAnyPermission(module.code) && (
-                                                    <span className="px-2 py-0.5 text-xs bg-cyan-500/20 text-cyan-400 rounded">
+                                                    <span className="px-2 py-0.5 text-xs bg-primary/20 text-primary rounded">
                                                         Active
                                                     </span>
                                                 )}
@@ -326,14 +326,14 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleAllForModule(module.code, true); }}
-                                                    className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                                    className="px-2 py-1 text-xs bg-muted hover:bg-muted/80 rounded text-muted-foreground hover:text-foreground transition-colors"
                                                 >
                                                     All
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleAllForModule(module.code, false); }}
-                                                    className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                                    className="px-2 py-1 text-xs bg-muted hover:bg-muted/80 rounded text-muted-foreground hover:text-foreground transition-colors"
                                                 >
                                                     None
                                                 </button>
@@ -342,10 +342,10 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
 
                                         {/* Resources */}
                                         {expandedModules.has(module.code) && (
-                                            <div className="border-t border-white/10">
+                                            <div className="border-t border-border">
                                                 <table className="w-full">
                                                     <thead>
-                                                        <tr className="text-xs text-zinc-500 uppercase">
+                                                        <tr className="text-xs text-muted-foreground uppercase">
                                                             <th className="text-left p-3">Resource</th>
                                                             <th className="text-center p-2 w-16">Create</th>
                                                             <th className="text-center p-2 w-16">Read</th>
@@ -361,8 +361,8 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                                             const allEnabled = perm && perm.can_create && perm.can_read && perm.can_update && perm.can_delete;
 
                                                             return (
-                                                                <tr key={resource.code} className="border-t border-white/5 hover:bg-white/5">
-                                                                    <td className="p-3 text-sm text-zinc-300">{resource.name}</td>
+                                                                <tr key={resource.code} className="border-t border-border hover:bg-muted/50">
+                                                                    <td className="p-3 text-sm text-foreground">{resource.name}</td>
                                                                     {['can_create', 'can_read', 'can_update', 'can_delete'].map(action => (
                                                                         <td key={action} className="text-center p-2">
                                                                             <button
@@ -371,8 +371,8 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                                                                 className={cn(
                                                                                     "w-6 h-6 rounded border-2 flex items-center justify-center transition-colors",
                                                                                     perm?.[action as keyof Permission]
-                                                                                        ? "bg-cyan-500 border-cyan-500"
-                                                                                        : "border-zinc-600 hover:border-zinc-400"
+                                                                                        ? "bg-primary border-primary"
+                                                                                        : "border-input hover:border-accent-foreground"
                                                                                 )}
                                                                             >
                                                                                 {perm?.[action as keyof Permission] && (
@@ -390,8 +390,8 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                                                                             className={cn(
                                                                                 "w-6 h-6 rounded border-2 flex items-center justify-center transition-colors",
                                                                                 allEnabled
-                                                                                    ? "bg-cyan-500 border-cyan-500"
-                                                                                    : "border-zinc-600 hover:border-zinc-400"
+                                                                                    ? "bg-primary border-primary"
+                                                                                    : "border-input hover:border-accent-foreground"
                                                                             )}
                                                                         >
                                                                             {allEnabled && (
@@ -415,15 +415,15 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !hasChanges}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-500/50 text-white cursor-not-allowed" :
-                                hasChanges ? "bg-cyan-500 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-white cursor-not-allowed" :
+                                hasChanges ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

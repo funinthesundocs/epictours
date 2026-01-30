@@ -130,16 +130,16 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed right-0 top-0 z-50 h-full w-full max-w-lg bg-zinc-950 border-l border-white/10 shadow-2xl flex flex-col"
+                        className="fixed right-0 top-0 z-50 h-full w-full max-w-lg bg-background border-l border-border shadow-2xl flex flex-col"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                            <h2 className="text-lg font-semibold text-white">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                            <h2 className="text-lg font-semibold text-foreground">
                                 {isEditing ? "Edit Organization" : "Create Organization"}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -147,14 +147,14 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
 
                         {/* Tabs (only for editing) */}
                         {isEditing && (
-                            <div className="flex border-b border-white/10">
+                            <div className="flex border-b border-border">
                                 <button
                                     onClick={() => setActiveTab('details')}
                                     className={cn(
                                         "flex-1 py-3 text-sm font-medium transition-colors",
                                         activeTab === 'details'
-                                            ? "text-cyan-400 border-b-2 border-cyan-400"
-                                            : "text-zinc-400 hover:text-white"
+                                            ? "text-primary border-b-2 border-primary"
+                                            : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     Details
@@ -164,8 +164,8 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                     className={cn(
                                         "flex-1 py-3 text-sm font-medium transition-colors",
                                         activeTab === 'subscriptions'
-                                            ? "text-cyan-400 border-b-2 border-cyan-400"
-                                            : "text-zinc-400 hover:text-white"
+                                            ? "text-primary border-b-2 border-primary"
+                                            : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     Subscriptions
@@ -179,11 +179,11 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                 <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-6">
                                     {/* Name */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Organization Name</label>
+                                        <label className="text-sm font-medium text-muted-foreground">Organization Name</label>
                                         <input
                                             {...register("name")}
                                             onChange={handleNameChange}
-                                            className="w-full bg-[#0b1115] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                            className="w-full bg-muted/50 border border-input rounded-lg px-4 py-2.5 text-foreground focus:border-primary/50 focus:outline-none transition-colors"
                                             placeholder="Acme Tours Inc."
                                         />
                                         {errors.name && (
@@ -193,11 +193,11 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
 
                                     {/* Slug */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">URL Slug</label>
+                                        <label className="text-sm font-medium text-muted-foreground">URL Slug</label>
                                         <input
                                             {...register("slug")}
                                             className={cn(
-                                                "w-full bg-[#0b1115] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors font-mono",
+                                                "w-full bg-muted/50 border border-input rounded-lg px-4 py-2.5 text-foreground focus:border-primary/50 focus:outline-none transition-colors font-mono",
                                                 isEditing && "opacity-50"
                                             )}
                                             placeholder="acme-tours"
@@ -206,14 +206,14 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                         {errors.slug && (
                                             <p className="text-sm text-red-400">{errors.slug.message}</p>
                                         )}
-                                        <p className="text-xs text-zinc-500">Used for unique tenant identification</p>
+                                        <p className="text-xs text-muted-foreground">Used for unique tenant identification</p>
                                     </div>
 
                                     {/* Active Toggle */}
-                                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                                         <div>
-                                            <p className="font-medium text-white">Active Status</p>
-                                            <p className="text-sm text-zinc-400">Inactive tenants cannot access the system</p>
+                                            <p className="font-medium text-foreground">Active Status</p>
+                                            <p className="text-sm text-muted-foreground">Inactive tenants cannot access the system</p>
                                         </div>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
@@ -221,27 +221,27 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                                 {...register("is_active")}
                                                 className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                            <div className="w-11 h-6 bg-input peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                         </label>
                                     </div>
 
                                     {/* Stats (editing only) */}
                                     {isEditing && initialData && (
                                         <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                                                <p className="text-2xl font-bold text-white">{initialData.user_count || 0}</p>
-                                                <p className="text-sm text-zinc-400">Users</p>
+                                            <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                                <p className="text-2xl font-bold text-foreground">{initialData.user_count || 0}</p>
+                                                <p className="text-sm text-muted-foreground">Users</p>
                                             </div>
-                                            <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                                                <p className="text-2xl font-bold text-white">{subscriptions.filter(s => s.is_active).length}</p>
-                                                <p className="text-sm text-zinc-400">Active Modules</p>
+                                            <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                                <p className="text-2xl font-bold text-foreground">{subscriptions.filter(s => s.is_active).length}</p>
+                                                <p className="text-sm text-muted-foreground">Active Modules</p>
                                             </div>
                                         </div>
                                     )}
                                 </form>
                             ) : (
                                 <div className="p-6 space-y-4">
-                                    <p className="text-sm text-zinc-400">
+                                    <p className="text-sm text-muted-foreground">
                                         Toggle modules to enable or disable them for this organization.
                                     </p>
 
@@ -256,14 +256,14 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                                     className={cn(
                                                         "flex items-center justify-between p-4 rounded-lg border transition-colors",
                                                         active
-                                                            ? "bg-cyan-500/10 border-cyan-500/30"
-                                                            : "bg-white/5 border-white/10"
+                                                            ? "bg-primary/10 border-primary/30"
+                                                            : "bg-muted/50 border-border"
                                                     )}
                                                 >
                                                     <div>
-                                                        <p className="font-medium text-white">{module.name}</p>
+                                                        <p className="font-medium text-foreground">{module.name}</p>
                                                         {module.description && (
-                                                            <p className="text-sm text-zinc-400">{module.description}</p>
+                                                            <p className="text-sm text-muted-foreground">{module.description}</p>
                                                         )}
                                                         {expiry && (
                                                             <div className="flex items-center gap-1 mt-1 text-xs text-amber-400">
@@ -277,8 +277,8 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
                                                         className={cn(
                                                             "w-10 h-10 rounded-lg flex items-center justify-center transition-colors",
                                                             active
-                                                                ? "bg-cyan-500 text-white"
-                                                                : "bg-white/10 text-zinc-400 hover:bg-white/20"
+                                                                ? "bg-primary text-primary-foreground"
+                                                                : "bg-muted text-muted-foreground hover:bg-zinc-300 dark:hover:bg-white/20"
                                                         )}
                                                     >
                                                         <Check size={18} />
@@ -293,18 +293,18 @@ export function TenantFormSheet({ isOpen, onClose, onSubmit, initialData }: Tena
 
                         {/* Footer */}
                         {activeTab === 'details' && (
-                            <div className="px-6 py-4 border-t border-white/10 flex items-center justify-end gap-3">
+                            <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleSubmit(onFormSubmit)}
                                     disabled={isSubmitting || (!isDirty && isEditing)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold rounded-lg transition-colors"
                                 >
                                     {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                                     {isEditing ? "Save Changes" : "Create Organization"}

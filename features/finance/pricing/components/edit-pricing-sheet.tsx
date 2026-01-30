@@ -217,8 +217,8 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             className={cn(
                 "flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0",
                 activeTab === variationName
-                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
+                    ? "border-primary text-primary bg-primary/5"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80"
             )}
         >
             <span>{variationName} Rates</span>
@@ -236,7 +236,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
         }
     };
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors";
+    const inputClasses = "w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-primary/50 focus:outline-none transition-colors";
 
     return (
         <SidePanel
@@ -250,7 +250,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="pt-0 h-full flex flex-col">
 
                 {/* Header Fields (Always Visible) */}
-                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5 bg-[#0b1115]">
+                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-border bg-card">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Schedule Name *</Label>
@@ -265,14 +265,14 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 </div>
 
                 {/* Dynamic Tabs Header */}
-                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10">
+                <div className="flex items-center border-b border-border mb-0 sticky top-0 bg-card z-10">
                     {isLoadingVariations ? (
                         <div className="flex items-center justify-center py-3 w-full px-6">
-                            <Loader2 className="animate-spin text-zinc-500" size={16} />
-                            <span className="ml-2 text-zinc-500 text-sm">Loading variations...</span>
+                            <Loader2 className="animate-spin text-muted-foreground" size={16} />
+                            <span className="ml-2 text-muted-foreground text-sm">Loading variations...</span>
                         </div>
                     ) : pricingVariations.length === 0 ? (
-                        <div className="py-3 text-zinc-500 text-sm w-full text-center px-6">
+                        <div className="py-3 text-muted-foreground text-sm w-full text-center px-6">
                             No pricing variations configured. Add some in Settings → Pricing Variations.
                         </div>
                     ) : (
@@ -281,7 +281,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                             <button
                                 type="button"
                                 onClick={() => scrollTabs('left')}
-                                className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-r border-white/10"
+                                className="shrink-0 p-3 text-muted-foreground hover:text-primary hover:bg-muted transition-colors border-r border-border"
                             >
                                 <ChevronLeft size={18} />
                             </button>
@@ -301,7 +301,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                             <button
                                 type="button"
                                 onClick={() => scrollTabs('right')}
-                                className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-l border-white/10"
+                                className="shrink-0 p-3 text-muted-foreground hover:text-primary hover:bg-muted transition-colors border-l border-border"
                             >
                                 <ChevronRight size={18} />
                             </button>
@@ -316,7 +316,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
 
 
                             {currentTabFields.length === 0 && (
-                                <div className="text-center py-12 border border-dashed border-white/10 rounded-xl text-zinc-500">
+                                <div className="text-center py-12 border border-dashed border-border rounded-xl text-muted-foreground">
                                     <p>No rates configured for {activeTab}.</p>
                                 </div>
                             )}
@@ -330,7 +330,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                     return (
                                         <div key={item.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
                                             {/* Field Container */}
-                                            <div className="flex-1 bg-white/5 px-4 py-3 rounded-xl border border-white/5 relative">
+                                            <div className="flex-1 bg-card/40 px-4 py-3 rounded-xl border border-border relative">
                                                 {/* Hidden Tier Field - uses activeTab dynamically */}
                                                 <input type="hidden" {...register(`rates.${item.index}.tier`)} value={activeTab} />
 
@@ -338,7 +338,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                 <button
                                                     type="button"
                                                     onClick={() => remove(item.index)}
-                                                    className="md:hidden absolute top-2 right-2 p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    className="md:hidden absolute top-2 right-2 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -347,7 +347,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                 <div className="flex flex-col md:grid md:grid-cols-12 gap-3">
                                                     {/* Row 1 (Mobile) / Col 1-4 (Desktop): Customer Type */}
                                                     <div className="md:col-span-4 space-y-1 relative pr-10 md:pr-0">
-                                                        <Label className="text-xs text-zinc-400">Customer Type</Label>
+                                                        <Label className="text-xs text-muted-foreground">Customer Type</Label>
                                                         <div
                                                             className={cn(inputClasses, "cursor-pointer flex items-center justify-between pr-3")}
                                                             onClick={(e) => {
@@ -355,23 +355,23 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                                 setOpenDropdownIndex(openDropdownIndex === item.index ? null : item.index);
                                                             }}
                                                         >
-                                                            <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-zinc-600")}>
+                                                            <span className={cn(!watch(`rates.${item.index}.customer_type_id`) && "text-muted-foreground")}>
                                                                 {customerTypes.find(t => t.id === watch(`rates.${item.index}.customer_type_id`))?.name || "Select Type..."}
                                                             </span>
-                                                            <ChevronDown size={14} className="text-zinc-500" />
+                                                            <ChevronDown size={14} className="text-muted-foreground" />
                                                         </div>
 
                                                         {/* Dropdown Options */}
                                                         {openDropdownIndex === item.index && (
-                                                            <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                            <div className="absolute top-full left-0 w-full mt-1 bg-popover border border-primary/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-border">
                                                                 {customerTypes.map(type => (
                                                                     <div
                                                                         key={type.id}
                                                                         className={cn(
                                                                             "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
                                                                             watch(`rates.${item.index}.customer_type_id`) === type.id
-                                                                                ? "bg-cyan-400/10 text-cyan-400"
-                                                                                : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                                                ? "bg-primary/10 text-primary"
+                                                                                : "text-foreground hover:bg-muted"
                                                                         )}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
@@ -388,7 +388,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                         <input type="hidden" {...register(`rates.${item.index}.customer_type_id`)} />
 
                                                         {errors.rates?.[item.index]?.customer_type_id && (
-                                                            <p className="text-xs text-red-500">Required</p>
+                                                            <p className="text-xs text-destructive">Required</p>
                                                         )}
                                                     </div>
 
@@ -396,9 +396,9 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                     <div className="grid grid-cols-2 md:contents gap-2">
                                                         {/* Price */}
                                                         <div className="col-span-1 md:col-span-2 space-y-1">
-                                                            <Label className="text-xs text-zinc-400">Price ($)</Label>
+                                                            <Label className="text-xs text-muted-foreground">Price ($)</Label>
                                                             <div className="relative">
-                                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                                                 <input
                                                                     type="number" step="0.01"
                                                                     {...register(`rates.${item.index}.price`)}
@@ -420,9 +420,9 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
 
                                                         {/* Tax */}
                                                         <div className="col-span-1 md:col-span-2 space-y-1">
-                                                            <Label className="text-xs text-zinc-400">Tax (%)</Label>
+                                                            <Label className="text-xs text-muted-foreground">Tax (%)</Label>
                                                             <div className="relative">
-                                                                <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                                                <Percent size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                                                 <input
                                                                     type="number" step="0.01"
                                                                     {...register(`rates.${item.index}.tax_percentage`)}
@@ -436,14 +436,14 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                     {/* Row 3 (Mobile) / Col 9-12 (Desktop): Total + Delete (desktop only) */}
                                                     <div className="md:col-span-4 flex items-center justify-between gap-2 pt-2 md:pt-0">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs text-zinc-400">Total:</span>
-                                                            <span className="text-lg font-semibold text-cyan-400">${total.toFixed(2)}</span>
+                                                            <span className="text-xs text-muted-foreground">Total:</span>
+                                                            <span className="text-lg font-semibold text-primary">${total.toFixed(2)}</span>
                                                         </div>
                                                         {/* Desktop Delete Button */}
                                                         <button
                                                             type="button"
                                                             onClick={() => remove(item.index)}
-                                                            className="hidden md:block p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                            className="hidden md:block p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                                                         >
                                                             <Trash2 size={16} />
                                                         </button>
@@ -457,7 +457,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => insert(item.index + 1, { tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
+                                                className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-10 w-10 p-0 shrink-0"
                                             >
                                                 <Plus size={16} />
                                             </Button>
@@ -470,7 +470,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                                     <button
                                         type="button"
                                         onClick={() => append({ tier: activeTab, customer_type_id: "", price: 0, tax_percentage: 0 })}
-                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2"
+                                        className="w-full py-4 border border-dashed border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2"
                                     >
                                         <Plus size={24} className="opacity-50" />
                                         <span className="text-sm font-medium">Add First Rate</span>
@@ -481,16 +481,16 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                     )}
                 </div>
 
-                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/80 backdrop-blur-md">
                     {/* Copy to All Checkbox */}
                     <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                             type="checkbox"
                             checked={copyToAll}
                             onChange={(e) => setCopyToAll(e.target.checked)}
-                            className="w-4 h-4 rounded border-white/20 bg-black/30 text-cyan-400 focus:ring-cyan-400/50 focus:ring-offset-0 cursor-pointer"
+                            className="w-4 h-4 rounded border-border bg-muted/50 text-primary focus:ring-primary/50 focus:ring-offset-0 cursor-pointer"
                         />
-                        <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                             Apply to all variations
                         </span>
                     </label>
@@ -501,9 +501,9 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                             disabled={isSubmitting || !isDirty}
                             className={cn(
                                 "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                                isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                    isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                        "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                                isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                    isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_15px_rgba(var(--color-primary),0.4)]" :
+                                        "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                             )}
                         >
                             {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

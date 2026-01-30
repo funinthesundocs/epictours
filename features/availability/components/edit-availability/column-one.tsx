@@ -19,7 +19,7 @@ const DAYS_OF_WEEK = [
 ];
 
 const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-    <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4 mt-2">
+    <div className="flex items-center gap-2 text-primary border-b border-border pb-2 mb-4 mt-2">
         <Icon size={16} />
         <h3 className="text-xs font-bold uppercase tracking-wider">{title}</h3>
     </div>
@@ -45,10 +45,10 @@ export function ColumnOne() {
     return (
         <div className="flex flex-col h-full bg-transparent">
             {/* Sticky Header */}
-            <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
+            <div className="shrink-0 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 px-6 py-4">
-                    <CalendarDays size={16} className="text-cyan-400" />
-                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Schedule</span>
+                    <CalendarDays size={16} className="text-primary" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Schedule</span>
                 </div>
             </div>
 
@@ -58,18 +58,18 @@ export function ColumnOne() {
                     {/* Schedule Section */}
                     <div className="space-y-5">
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Start Date</label>
                             <DatePicker
                                 value={watch("start_date") ? new Date(watch("start_date") + "T00:00:00") : undefined}
                                 onChange={(date) => setValue("start_date", date ? format(date, "yyyy-MM-dd") : "", { shouldValidate: true })}
                                 placeholder="Select start date"
-                                className="bg-zinc-900/80"
+                                className="bg-muted/50"
                             />
                             {errors.start_date && <p className="text-red-400 text-xs mt-1">{errors.start_date?.message as string}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Repeat?</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Repeat?</label>
                             <div className="flex gap-2">
                                 <button
                                     type="button"
@@ -77,8 +77,8 @@ export function ColumnOne() {
                                     className={cn(
                                         "flex-1 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all",
                                         !isRepeating
-                                            ? "bg-cyan-400/20 border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-                                            : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
+                                            ? "bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                                     )}
                                 >
                                     Don't Repeat
@@ -94,8 +94,8 @@ export function ColumnOne() {
                                     className={cn(
                                         "flex-1 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all flex items-center justify-center gap-2",
                                         isRepeating
-                                            ? "bg-cyan-400/20 border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-                                            : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
+                                            ? "bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary),0.1)]"
+                                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                                     )}
                                 >
                                     <Repeat size={14} />
@@ -107,7 +107,7 @@ export function ColumnOne() {
                         {isRepeating && (
                             <>
                                 <div>
-                                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Repeat On</label>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Repeat On</label>
                                     <div className="flex gap-1.5">
                                         {DAYS_OF_WEEK.map(day => (
                                             <button
@@ -117,8 +117,8 @@ export function ColumnOne() {
                                                 className={cn(
                                                     "w-9 h-9 rounded-lg border text-xs font-bold transition-all",
                                                     repeatDays?.includes(day.key)
-                                                        ? "bg-cyan-400 border-cyan-400 text-black shadow-lg shadow-cyan-400/20"
-                                                        : "bg-zinc-900/80 border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-900"
+                                                        ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                        : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                                                 )}
                                             >
                                                 {day.label}
@@ -128,12 +128,12 @@ export function ColumnOne() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">End Date</label>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">End Date</label>
                                     <DatePicker
                                         value={watch("end_date") ? new Date(watch("end_date") + "T00:00:00") : undefined}
                                         onChange={(date) => setValue("end_date", date ? format(date, "yyyy-MM-dd") : "", { shouldValidate: true })}
                                         placeholder="Select end date"
-                                        className="bg-zinc-900/80"
+                                        className="bg-muted/50"
                                     />
                                 </div>
                             </>
@@ -147,7 +147,7 @@ export function ColumnOne() {
 
 
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Duration Type</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Duration Type</label>
                             <CustomSelect
                                 value={durationType}
                                 onChange={(val) => setValue("duration_type", val)}
@@ -161,19 +161,19 @@ export function ColumnOne() {
                         {durationType === "time_range" && (
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Start Time</label>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Start Time</label>
                                     <TimePicker
                                         value={watch("start_time")}
                                         onChange={(time) => setValue("start_time", time)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Hours Long</label>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Hours Long</label>
                                     <input
                                         type="number"
                                         step="0.5"
                                         {...register("hours_long")}
-                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors"
+                                        className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-primary/50 focus:outline-none transition-colors"
                                         placeholder="e.g., 2.5"
                                     />
                                 </div>

@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 import { Combobox } from "@/components/ui/combobox";
 import { useSidebar } from "@/components/shell/sidebar-context";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface NewBookingMenuProps {
     children: React.ReactNode;
@@ -152,7 +153,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
             </DialogTrigger>
             <DialogContent
                 showCloseButton={false}
-                className="z-[9999] w-[350px] p-0 bg-[#0a0a0a] border-zinc-800 gap-0 overflow-hidden shadow-2xl"
+                className="z-[9999] w-[350px] p-0 bg-popover border-border gap-0 overflow-hidden shadow-2xl"
                 style={{ zoom: zoom / 100 }}
             >
                 <DialogTitle className="sr-only">New Booking</DialogTitle>
@@ -160,21 +161,18 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
 
                 <button
                     onClick={() => setIsOpen(false)}
-                    className="absolute top-3 right-3 p-1 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors z-[60]"
+                    className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-[60]"
                 >
                     <X size={16} />
                 </button>
 
                 {isInitializing ? (
-                    <div className="h-[300px] flex flex-col items-center justify-center text-zinc-500 gap-3">
-                        <Loader2 className="animate-spin text-cyan-400" size={24} />
-                        <span className="text-xs font-medium uppercase tracking-wider">Loading...</span>
-                    </div>
+                    <LoadingState className="h-[300px]" />
                 ) : (
-                    <div className="flex flex-col divide-y divide-zinc-800">
+                    <div className="flex flex-col divide-y divide-border">
 
                         {/* Experience Selector */}
-                        <div className="p-4 border-b border-zinc-800 bg-zinc-900/30">
+                        <div className="p-4 border-b border-border bg-muted/30">
 
                             <div className="w-full max-w-[280px]">
                                 <Combobox
@@ -182,7 +180,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                     onChange={setSelectedExperienceId}
                                     options={experiences.map(e => ({ value: e.id, label: e.name }))}
                                     placeholder="Select Experience..."
-                                    inputClassName="placeholder:text-zinc-400"
+                                    inputClassName="placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -199,22 +197,22 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                     hasAvailability: (date) => availableIsoDates.has(format(date, "yyyy-MM-dd"))
                                 }}
                                 modifiersClassNames={{
-                                    hasAvailability: "bg-cyan-900/50 !text-cyan-400 !font-bold rounded-md border-2 border-[#0a0a0a]"
+                                    hasAvailability: "bg-primary/20 !text-primary !font-bold rounded-md border-2 border-background"
                                 }}
                                 className={cn(
                                     "rounded-md border-0 transition-opacity duration-200",
                                     !selectedExperienceId && "opacity-20 pointer-events-none filter blur-[1px]"
                                 )}
                                 classNames={{
-                                    selected: "border-2 border-cyan-400 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
-                                    today: "bg-zinc-800 text-white rounded-md",
+                                    selected: "border-2 border-primary text-primary bg-transparent hover:text-primary/80 focus:text-primary shadow-none font-bold rounded-md",
+                                    today: "bg-muted text-foreground rounded-md",
                                 }}
                             />
 
                             {/* Prompt Overlay */}
                             {!selectedExperienceId && (
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                    <div className="text-sm font-bold text-zinc-400 bg-zinc-900/90 px-4 py-2 rounded-full border border-zinc-800 shadow-xl backdrop-blur-sm">
+                                    <div className="text-sm font-bold text-muted-foreground bg-muted/90 px-4 py-2 rounded-full border border-border shadow-xl backdrop-blur-sm">
                                         Please select an experience
                                     </div>
                                 </div>
@@ -224,19 +222,16 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                         {/* Availabilities List Section */}
                         {selectedExperienceId && (
                             <div className="w-full max-h-[300px] flex flex-col">
-                                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
-                                    <h3 className="font-bold text-white flex items-center gap-2">
-                                        <CalendarDays size={16} className="text-cyan-400" />
+                                <div className="p-4 border-b border-border bg-muted/50">
+                                    <h3 className="font-bold text-foreground flex items-center gap-2">
+                                        <CalendarDays size={16} className="text-primary" />
                                         {date ? format(date, "MMMM d, yyyy") : "Select a Date"}
                                     </h3>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar min-h-[200px]">
                                     {isLoading ? (
-                                        <div className="h-full flex items-center justify-center text-zinc-500 gap-2">
-                                            <Loader2 className="animate-spin" size={16} />
-                                            <span>Loading...</span>
-                                        </div>
+                                        <LoadingState className="h-full" />
                                     ) : availabilities.length > 0 ? (
                                         availabilities.map((avail) => (
                                             <button
@@ -245,26 +240,26 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                                     onSelectAvailability(avail);
                                                     setIsOpen(false);
                                                 }}
-                                                className="w-full text-left p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-800 hover:border-zinc-700 transition-all group group/item"
+                                                className="w-full text-left p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted hover:border-muted-foreground/30 transition-all group group/item"
                                             >
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <span className="font-bold text-sm text-white group-hover/item:text-cyan-400 transition-colors">
+                                                    <span className="font-bold text-sm text-foreground group-hover/item:text-primary transition-colors">
                                                         {avail.experience_name || "Unknown Experience"}
                                                     </span>
                                                     {avail.experience_short_code && (
-                                                        <span className="text-[10px] font-black uppercase tracking-wider bg-white/5 text-zinc-500 px-1.5 py-0.5 rounded">
+                                                        <span className="text-[10px] font-black uppercase tracking-wider bg-background text-muted-foreground px-1.5 py-0.5 rounded">
                                                             {avail.experience_short_code}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-4 text-xs text-zinc-400">
+                                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                                     <div className="flex items-center gap-1.5">
-                                                        <Clock size={12} className="text-zinc-600 group-hover/item:text-cyan-400/70" />
+                                                        <Clock size={12} className="text-muted-foreground group-hover/item:text-primary/70" />
                                                         <span>{avail.start_time ? format(new Date(`2000-01-01T${avail.start_time}`), "h:mm a") : "All Day"}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <Users size={12} className="text-zinc-600 group-hover/item:text-cyan-400/70" />
-                                                        <span className={cn((avail.booked_count || 0) > 0 && "text-cyan-400 font-medium")}>
+                                                        <Users size={12} className="text-muted-foreground group-hover/item:text-primary/70" />
+                                                        <span className={cn((avail.booked_count || 0) > 0 && "text-primary font-medium")}>
                                                             {Math.max(0, avail.max_capacity - (avail.booked_count || 0))} / {avail.max_capacity} pax
                                                         </span>
                                                     </div>
@@ -272,7 +267,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                                             </button>
                                         ))
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-zinc-600 p-8 text-center">
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                                             <CalendarDays size={32} className="mb-2 opacity-20" />
                                             <p className="text-sm">No availabilities scheduled for this date.</p>
                                         </div>
@@ -283,7 +278,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
 
                         {/* Empty State Prompt if no experience selected */}
                         {!selectedExperienceId && (
-                            <div className="h-[200px] flex flex-col items-center justify-center text-zinc-600 p-8 text-center bg-zinc-950/50">
+                            <div className="h-[200px] flex flex-col items-center justify-center text-muted-foreground p-8 text-center bg-muted/10">
                                 <Clock size={32} className="mb-2 opacity-20" />
                                 <p className="text-sm">Select an experience to see availability.</p>
                             </div>

@@ -77,7 +77,7 @@ export default function UsersPage() {
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
                     Invite User
@@ -90,22 +90,22 @@ export default function UsersPage() {
             <div className="h-full flex flex-col space-y-4">
                 {/* Search Bar */}
                 <div className="relative w-full max-w-md shrink-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                     <input
                         type="text"
                         placeholder="Search users..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                        className="w-full bg-muted/50 border border-border rounded-lg pl-10 pr-4 py-2 text-foreground focus:border-primary/50 focus:outline-none transition-colors placeholder:text-muted-foreground"
                     />
                 </div>
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-cyan-400" size={32} />
+                        <Loader2 className="animate-spin text-primary" size={32} />
                     </div>
                 ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#0b1115]">
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                         <UsersTable
                             data={filteredUsers}
                             onEdit={handleEdit}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { supabase } from "@/lib/supabase";
 
 interface Booking {
@@ -234,25 +235,23 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-cyan-400" size={32} />
-            </div>
+            <LoadingState className="h-64" />
         );
     }
 
     if (bookings.length === 0) {
         return (
-            <div className="flex items-center justify-center h-64 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+            <div className="flex items-center justify-center h-64 text-muted-foreground bg-muted/50 border border-dashed border-border rounded-xl">
                 No bookings found for this period.
             </div>
         );
     }
 
     return (
-        <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0b1115]">
+        <div className="rounded-xl border border-border overflow-hidden bg-card">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="bg-white/5 text-zinc-400 font-bold uppercase text-xs tracking-wider border-b border-white/5">
+                    <thead className="bg-muted/50 text-foreground font-bold uppercase text-xs tracking-wider border-b border-border">
                         <tr>
                             <th className="px-6 py-4">Confirmation</th>
                             <th className="px-6 py-4">Exp</th>
@@ -269,7 +268,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                             <th className="px-6 py-4 text-right">Due</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800 text-zinc-300">
+                    <tbody className="divide-y divide-border text-muted-foreground">
                         {bookings
                             .filter((booking) => {
                                 if (!searchQuery.trim()) return true;
@@ -292,21 +291,21 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                             .map((booking) => (
                                 <tr
                                     key={booking.id}
-                                    className="hover:bg-cyan-400/5 transition-colors cursor-pointer group"
+                                    className="hover:bg-muted transition-colors cursor-pointer group"
                                     onClick={() => onBookingClick?.(booking.id)}
                                 >
                                     {/* Confirmation Number */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {booking.confirmation_number || "-"}
                                     </td>
 
                                     {/* Exp */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {booking.experience_short_code}
                                     </td>
 
                                     {/* Date */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {(() => {
                                             const [y, m, d] = booking.start_date.split('-');
                                             return `${m}-${d}-${y}`;
@@ -314,52 +313,52 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                     </td>
 
                                     {/* Pickup Details */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {resolvePickupDetails(booking)}
                                     </td>
 
                                     {/* Customer */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {booking.customer_name}
                                     </td>
 
                                     {/* Pax - Just the total number */}
-                                    <td className="px-6 py-4 text-white text-sm text-center">
+                                    <td className="px-6 py-4 text-foreground text-sm text-center">
                                         {booking.pax_count}
                                     </td>
 
                                     {/* Phone */}
-                                    <td className="px-6 py-4 text-white text-sm">
+                                    <td className="px-6 py-4 text-foreground text-sm">
                                         {formatPhoneNumber(booking.customer_phone)}
                                     </td>
 
                                     {/* Email */}
-                                    <td className="px-6 py-4 text-white text-sm max-w-[150px] truncate" title={booking.customer_email}>
+                                    <td className="px-6 py-4 text-foreground text-sm max-w-[150px] truncate" title={booking.customer_email}>
                                         {booking.customer_email || "-"}
                                     </td>
 
                                     {/* Voucher Numbers */}
-                                    <td className="px-6 py-4 text-white text-sm max-w-[120px] truncate" title={booking.voucher_numbers}>
+                                    <td className="px-6 py-4 text-foreground text-sm max-w-[120px] truncate" title={booking.voucher_numbers}>
                                         {booking.voucher_numbers || "-"}
                                     </td>
 
                                     {/* Booking Notes */}
-                                    <td className="px-6 py-4 text-white text-sm max-w-[150px] truncate" title={booking.notes}>
+                                    <td className="px-6 py-4 text-foreground text-sm max-w-[150px] truncate" title={booking.notes}>
                                         {booking.notes || "-"}
                                     </td>
 
                                     {/* Total */}
-                                    <td className="px-6 py-4 text-white text-sm text-right">
+                                    <td className="px-6 py-4 text-foreground text-sm text-right">
                                         ${booking.total_amount.toFixed(2)}
                                     </td>
 
                                     {/* Paid */}
-                                    <td className="px-6 py-4 text-white text-sm text-right">
+                                    <td className="px-6 py-4 text-foreground text-sm text-right">
                                         ${booking.amount_paid.toFixed(2)}
                                     </td>
 
                                     {/* Due */}
-                                    <td className="px-6 py-4 text-white text-sm text-right">
+                                    <td className="px-6 py-4 text-foreground text-sm text-right">
                                         ${(booking.total_amount - booking.amount_paid).toFixed(2)}
                                     </td>
                                 </tr>

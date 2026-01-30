@@ -43,7 +43,7 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
             const fetchComp = async () => {
                 setIsLoading(true);
                 const { data } = await supabase
-                    .from("staff_compensation")
+                    .from("staff_compensation" as any)
                     .select("*")
                     .eq("staff_id", staffId)
                     .single();
@@ -119,7 +119,7 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
+        <div className="flex items-center gap-2 text-primary border-b border-border pb-2 mb-6 mt-2">
             <Icon size={18} />
             <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
         </div>
@@ -129,8 +129,8 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
         <div className="space-y-2">
             <Label>{label}</Label>
             <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
-                <Input type="number" step="0.01" {...register(name)} className="pl-6 font-mono text-white" placeholder="0.00" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input type="number" step="0.01" {...register(name)} className="pl-6 font-mono" placeholder="0.00" />
             </div>
         </div>
     );
@@ -139,8 +139,8 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
         <div className="space-y-2">
             <Label>{label}</Label>
             <div className="relative">
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">%</span>
-                <Input type="number" step="0.01" {...register(name)} className="pr-6 font-mono text-white" placeholder="0.00" />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                <Input type="number" step="0.01" {...register(name)} className="pr-6 font-mono" placeholder="0.00" />
             </div>
         </div>
     );
@@ -156,7 +156,7 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
         >
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-cyan-400" size={32} />
+                    <Loader2 className="animate-spin text-primary" size={32} />
                 </div>
             ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
@@ -184,11 +184,11 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
                         </div>
                     </div>
 
-                    <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                    <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background">
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                             Save Rates

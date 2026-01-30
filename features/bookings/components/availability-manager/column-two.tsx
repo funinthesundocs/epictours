@@ -110,7 +110,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-zinc-500" size={24} />
+                <Loader2 className="animate-spin text-muted-foreground" size={24} />
             </div>
         );
     }
@@ -118,28 +118,28 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     return (
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
             {/* Fixed Header */}
-            <div className="shrink-0 flex flex-col gap-1.5 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full">
+            <div className="shrink-0 flex flex-col gap-1.5 px-6 py-4 bg-background/95 backdrop-blur border-b border-border sticky top-0 z-10 w-full supports-[backdrop-filter]:bg-background/60">
                 <div className="flex items-center justify-between w-full gap-4">
                     <div className="flex items-center gap-2 shrink-0">
-                        <Ticket size={16} className="text-cyan-400" />
-                        <span className="text-base font-bold text-white uppercase tracking-wider">Bookings ({bookings.length})</span>
+                        <Ticket size={16} className="text-primary" />
+                        <span className="text-base font-bold text-foreground uppercase tracking-wider">Bookings ({bookings.length})</span>
                     </div>
 
                     {/* Search & Manifest Controls */}
                     <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                         <div className="relative w-full max-w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search passengers..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-black/50 border border-white/10 rounded-md pl-9 pr-3 h-8 text-xs text-white focus:outline-none focus:border-cyan-400/50 placeholder:text-zinc-600 transition-all hover:border-white/20"
+                                className="w-full bg-muted/50 border border-border rounded-md pl-9 pr-3 h-8 text-xs text-foreground focus:outline-none focus:border-primary/50 placeholder:text-muted-foreground transition-all hover:border-sidebar-accent"
                             />
                         </div>
                         <button
                             onClick={onManifestClick}
-                            className="h-8 px-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-md text-sm font-medium text-zinc-300 hover:text-white transition-colors whitespace-nowrap flex items-center gap-2"
+                            className="h-8 px-3 bg-muted hover:bg-muted/80 border border-border rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-2"
                         >
                             <FileText size={16} />
                             Manifest
@@ -150,13 +150,13 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-0 custom-scrollbar">
                 {/* Stats Header */}
-                <div className="px-6 py-3 border-b border-white/5 bg-black/40 backdrop-blur-sm sticky top-0 z-10 w-full">
-                    <div className="flex items-center gap-3 flex-wrap text-base text-zinc-400">
-                        <span className="text-zinc-300 font-medium">{totalBooked} booked</span>
-                        <span className="text-zinc-600">|</span>
-                        <span className="text-zinc-400">{remaining} available</span>
-                        <span className="text-zinc-600">|</span>
-                        <span className="text-zinc-500">{getPaxSummary()}</span>
+                <div className="px-6 py-3 border-b border-border bg-muted/30 backdrop-blur-sm sticky top-0 z-10 w-full">
+                    <div className="flex items-center gap-3 flex-wrap text-base text-muted-foreground">
+                        <span className="text-foreground font-medium">{totalBooked} booked</span>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-muted-foreground">{remaining} available</span>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-muted-foreground">{getPaxSummary()}</span>
                     </div>
                 </div>
 
@@ -165,7 +165,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     <div className="space-y-2">
                         <button
                             onClick={() => setActiveExpanded(!activeExpanded)}
-                            className="w-full text-left flex items-center gap-2 text-zinc-400 text-base font-medium hover:text-white transition-colors"
+                            className="w-full text-left flex items-center gap-2 text-muted-foreground text-base font-medium hover:text-foreground transition-colors"
                         >
                             <ChevronDown size={18} className={cn("transition-transform", !activeExpanded && "-rotate-90")} />
                             {filteredActive.length} active booking{filteredActive.length !== 1 ? 's' : ''}
@@ -174,20 +174,20 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                         {activeExpanded && (
                             <div className="space-y-2">
                                 {filteredActive.length === 0 ? (
-                                    <div className="text-zinc-600 text-sm py-4">No active bookings</div>
+                                    <div className="text-muted-foreground text-sm py-4">No active bookings</div>
                                 ) : (
                                     filteredActive.map((booking) => (
                                         <button
                                             key={booking.id}
                                             onClick={() => onBookingClick(booking.id)}
-                                            className="w-full p-3 bg-zinc-900/80 rounded-lg border border-white/10 hover:border-cyan-400/30 transition-all text-left"
+                                            className="w-full p-3 bg-card rounded-lg border border-border hover:border-primary/50 transition-all text-left shadow-sm"
                                         >
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>
-                                                    <div className="text-white font-medium text-base">{booking.customer_name}</div>
-                                                    <div className="text-zinc-500 text-sm mt-0.5">
+                                                    <div className="text-foreground font-medium text-base">{booking.customer_name}</div>
+                                                    <div className="text-muted-foreground text-sm mt-0.5">
                                                         {booking.confirmation_number && (
-                                                            <span className="text-cyan-400 font-mono mr-2">{booking.confirmation_number}</span>
+                                                            <span className="text-primary font-mono mr-2">{booking.confirmation_number}</span>
                                                         )}
                                                         {booking.pax_count} Pax
                                                         {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
@@ -196,10 +196,10 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                                 <span className={cn(
                                                     "px-2 py-0.5 rounded text-sm font-medium",
                                                     booking.payment_status === 'paid'
-                                                        ? "bg-emerald-500/20 text-emerald-400"
+                                                        ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                                                         : booking.payment_status === 'partial'
-                                                            ? "bg-amber-500/20 text-amber-400"
-                                                            : "bg-zinc-800 text-zinc-400"
+                                                            ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                                                            : "bg-muted text-muted-foreground"
                                                 )}>
                                                     {booking.payment_status === 'paid' ? 'Paid' :
                                                         booking.payment_status === 'partial' ? 'Partial' : 'Unpaid'}
@@ -217,7 +217,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                         <div className="space-y-2 opacity-60">
                             <button
                                 onClick={() => setCancelledExpanded(!cancelledExpanded)}
-                                className="w-full text-left flex items-center gap-2 text-zinc-500 text-sm font-medium hover:text-zinc-400 transition-colors"
+                                className="w-full text-left flex items-center gap-2 text-muted-foreground text-sm font-medium hover:text-foreground transition-colors"
                             >
                                 <ChevronDown size={16} className={cn("transition-transform", !cancelledExpanded && "-rotate-90")} />
                                 {cancelledBookings.length} cancelled
@@ -229,10 +229,10 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                         <button
                                             key={booking.id}
                                             onClick={() => onBookingClick(booking.id)}
-                                            className="w-full p-3 bg-zinc-900/40 rounded-lg border border-white/5 text-left"
+                                            className="w-full p-3 bg-muted/30 rounded-lg border border-border text-left"
                                         >
-                                            <div className="text-zinc-500 text-sm line-through">{booking.customer_name}</div>
-                                            <div className="text-zinc-600 text-xs">{booking.pax_count} Pax</div>
+                                            <div className="text-muted-foreground text-sm line-through">{booking.customer_name}</div>
+                                            <div className="text-muted-foreground/70 text-xs">{booking.pax_count} Pax</div>
                                         </button>
                                     ))}
                                 </div>

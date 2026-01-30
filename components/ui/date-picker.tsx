@@ -34,18 +34,18 @@ export function DatePicker({
             <PopoverTrigger asChild>
                 <button
                     className={cn(
-                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-400/50",
-                        !value && "text-zinc-500",
-                        value && "text-white",
+                        "w-full flex items-center justify-between bg-muted/50 border border-input rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-input focus:outline-none focus:border-primary/50",
+                        !value && "text-muted-foreground",
+                        value && "text-foreground",
                         className
                     )}
                 >
                     <span>{value ? format(value, "MMM d, yyyy") : placeholder}</span>
-                    <CalendarIcon className="h-4 w-4 text-zinc-500" />
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                 </button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-auto p-0 bg-zinc-900/95 backdrop-blur-xl border-zinc-800"
+                className="w-auto p-0 bg-popover/95 backdrop-blur-xl border-border"
                 align="start"
             >
                 <Calendar
@@ -58,10 +58,10 @@ export function DatePicker({
                     onClose={() => setOpen(false)}
                     disabled={false}
                     initialFocus
-                    className="rounded-md border-zinc-800"
+                    className="rounded-md border-border"
                     classNames={{
-                        selected: "border-2 border-cyan-400 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold rounded-md",
-                        today: "bg-zinc-800 text-white rounded-md",
+                        selected: "border-2 border-primary text-primary bg-transparent hover:text-primary focus:text-primary shadow-none font-bold rounded-md",
+                        today: "bg-muted text-foreground rounded-md",
                     }}
                 />
             </PopoverContent>

@@ -28,7 +28,8 @@ import {
     LayoutTemplate,
     Coins,
     Settings,
-    List
+    List,
+    Palette
 } from "lucide-react";
 import type { ModuleCode, PermissionAction } from "@/features/auth/types";
 
@@ -152,7 +153,7 @@ export const navigation: NavSection[] = [
                     { title: "Permission Groups", href: "/settings/users/roles", icon: Shield, tenantAdminOnly: true }
                 ]
             },
-            { title: "Permissions", href: "/settings/permissions", icon: Shield, tenantAdminOnly: true },
+
             { title: "Experiences", href: "/operations/tours", icon: Map, requiredModule: "bookings" },
             { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
             { title: "Booking Options", href: "/settings/booking-options", icon: List, requiredModule: "bookings" },
@@ -169,6 +170,12 @@ export const navigation: NavSection[] = [
                 title: "Organizations",
                 href: "/admin/tenants",
                 icon: Building2,
+                platformAdminOnly: true
+            },
+            {
+                title: "Style Manager",
+                href: "/admin/theme",
+                icon: Palette,
                 platformAdminOnly: true
             },
         ]

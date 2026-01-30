@@ -22,7 +22,7 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
 
     if (data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground bg-muted/50 rounded-xl border border-border">
                 <Search size={48} className="mb-4 opacity-20" />
                 <p>No pricing schedules found.</p>
             </div>
@@ -32,44 +32,44 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
     return (
         <div className="h-full overflow-auto relative">
             <table className="w-full text-left hidden md:table">
-                <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-muted/50 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Schedule Name</th>
                         <th className="px-6 py-4 font-medium">Notes</th>
                         <th className="px-6 py-4 font-medium w-[150px]">Created</th>
-                        <th className="px-6 py-4 font-medium w-[100px] border-l border-white/10"></th>
+                        <th className="px-6 py-4 font-medium w-[100px] border-l border-border"></th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-zinc-300">
+                <tbody className="divide-y divide-border text-muted-foreground">
                     {data.map((schedule) => (
-                        <tr key={schedule.id} className="hover:bg-white/5 transition-colors group">
+                        <tr key={schedule.id} className="hover:bg-muted/50 transition-colors group">
                             {/* Name */}
-                            <td className="px-6 py-4 font-medium text-white">
+                            <td className="px-6 py-4 font-medium text-foreground">
                                 {schedule.name}
                             </td>
 
                             {/* Notes */}
-                            <td className="px-6 py-4 text-zinc-400 max-w-md truncate">
+                            <td className="px-6 py-4 text-muted-foreground max-w-md truncate">
                                 {schedule.notes || <span className="opacity-30 italic">No notes</span>}
                             </td>
 
                             {/* Created At */}
-                            <td className="px-6 py-4 text-zinc-400">
+                            <td className="px-6 py-4 text-muted-foreground">
                                 {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </td>
 
                             {/* Actions - Last Column */}
-                            <td className="px-6 py-4 border-l border-white/10">
+                            <td className="px-6 py-4 border-l border-border">
                                 <div className="flex items-center gap-2 justify-end">
                                     <button
                                         onClick={() => onEdit(schedule)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeleteId(schedule.id)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -83,20 +83,20 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4 p-4">
                 {data.map((schedule) => (
-                    <div key={schedule.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                    <div key={schedule.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
                         {/* Header: Name + Actions */}
-                        <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                            <h3 className="text-lg font-bold text-white leading-tight">{schedule.name}</h3>
+                        <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
+                            <h3 className="text-lg font-bold text-foreground leading-tight">{schedule.name}</h3>
                             <div className="flex items-center gap-1 shrink-0">
                                 <button
                                     onClick={() => onEdit(schedule)}
-                                    className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                    className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                 >
                                     <Edit2 size={16} />
                                 </button>
                                 <button
                                     onClick={() => setDeleteId(schedule.id)}
-                                    className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                    className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                 >
                                     <Trash2 size={16} />
                                 </button>
@@ -106,9 +106,9 @@ export function PricingSchedulesTable({ data, onEdit, onDelete }: PricingSchedul
                         {/* Body */}
                         <div className="space-y-3">
                             {schedule.notes && (
-                                <div className="text-zinc-400">{schedule.notes}</div>
+                                <div className="text-muted-foreground">{schedule.notes}</div>
                             )}
-                            <div className="flex justify-end text-zinc-400">
+                            <div className="flex justify-end text-muted-foreground">
                                 {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </div>
                         </div>

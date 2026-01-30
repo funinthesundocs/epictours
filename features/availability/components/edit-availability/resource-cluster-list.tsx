@@ -79,18 +79,18 @@ function SortableItem({
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-start gap-3 bg-zinc-900/80 border border-white/10 rounded-lg p-3 group mb-2"
+            className="flex items-start gap-3 bg-muted/30 border border-border rounded-lg p-3 group mb-2"
         >
-            <button {...attributes} {...listeners} type="button" className="mt-1 text-zinc-500 hover:text-white cursor-grab active:cursor-grabbing">
+            <button {...attributes} {...listeners} type="button" className="mt-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
                 <GripVertical size={16} />
             </button>
 
             <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                    <Bus size={14} className="text-cyan-400" />
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                    <Bus size={14} className="text-primary" />
                     {vehicleName}
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-400">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><Truck size={12} /> {routeName}</span>
                     <span className="flex items-center gap-1"><User size={12} /> {driverName} (Driver)</span>
                     {assignment.guide_id && (
@@ -102,7 +102,7 @@ function SortableItem({
             <button
                 type="button"
                 onClick={() => onDelete(assignment.id)}
-                className="text-zinc-500 hover:text-red-400 transition-colors"
+                className="text-muted-foreground hover:text-destructive transition-colors"
             >
                 <Trash2 size={16} />
             </button>
@@ -158,14 +158,14 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
     const capacityDiff = totalClusterCapacity - maxCapacity;
 
     // Display Logic
-    let diffColor = "text-cyan-400"; // Zero (Teal)
+    let diffColor = "text-primary"; // Zero (Teal)
     let diffText = "0";
 
     if (capacityDiff > 0) {
         diffColor = "text-green-500";
         diffText = `+${capacityDiff}`;
     } else if (capacityDiff < 0) {
-        diffColor = "text-red-500";
+        diffColor = "text-destructive";
         diffText = `${capacityDiff}`;
     }
 
@@ -201,7 +201,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                     <DialogTrigger asChild>
                         <button
                             type="button"
-                            className="w-full py-3 border-2 border-dashed border-white/10 rounded-lg text-zinc-400 hover:text-white hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all flex items-center justify-center gap-2 font-medium text-sm"
+                            className="w-full py-3 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium text-sm"
                         >
                             <Plus size={16} />
                             Add Vehicle Cluster
@@ -209,15 +209,15 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                     </DialogTrigger>
                     <DialogContent
                         portal={false}
-                        overlayClassName="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm"
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-[#0b1115] border-white/10 text-white sm:max-w-[425px] shadow-2xl"
+                        overlayClassName="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-popover border-border text-foreground sm:max-w-[425px] shadow-2xl"
                     >
                         <DialogHeader>
                             <DialogTitle>Add Vehicle Cluster</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-zinc-500 uppercase">Vehicle (Required)</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Vehicle (Required)</label>
                                 <CustomSelect
                                     value={newCluster.vehicle_id}
                                     onChange={(val) => setNewCluster({ ...newCluster, vehicle_id: val })}
@@ -227,7 +227,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-zinc-500 uppercase">Route</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Route</label>
                                 <CustomSelect
                                     value={newCluster.transportation_route_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, transportation_route_id: val })}
@@ -237,7 +237,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-zinc-500 uppercase">Driver (Required)</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Driver (Required)</label>
                                 <CustomSelect
                                     value={newCluster.driver_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, driver_id: val })}
@@ -247,7 +247,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-zinc-500 uppercase">Guide (Optional)</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Guide (Optional)</label>
                                 <CustomSelect
                                     value={newCluster.guide_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, guide_id: val })}
@@ -260,7 +260,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 type="button"
                                 onClick={handleAdd}
                                 disabled={!newCluster.vehicle_id || !newCluster.driver_id}
-                                className="w-full bg-cyan-400 text-black font-bold py-2.5 rounded-lg hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                className="w-full bg-primary text-primary-foreground font-bold py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                             >
                                 Add Cluster
                             </button>
@@ -270,7 +270,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
 
                 {/* Capacity Difference Indicator */}
                 <div className="flex items-center justify-between px-2">
-                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Capacity Diff</span>
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Capacity Diff</span>
                     <span className={cn("text-sm font-bold font-mono", diffColor)}>
                         {diffText}
                     </span>

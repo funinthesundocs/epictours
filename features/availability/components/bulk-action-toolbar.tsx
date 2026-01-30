@@ -94,14 +94,14 @@ export function BulkActionToolbar({
 
     if (selectedCount === 0) {
         return (
-            <div className="flex items-center justify-between px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg mb-2.5">
+            <div className="flex items-center justify-between px-4 py-3 bg-muted/50 border border-border rounded-lg mb-2.5">
                 <div className="flex items-center gap-3">
-                    <CheckSquare size={18} className="text-zinc-500" />
-                    <span className="text-sm text-zinc-400">Select items to update</span>
+                    <CheckSquare size={18} className="text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Select items to update</span>
                 </div>
                 <button
                     onClick={onExitBulkMode}
-                    className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                     title="Exit Select Mode"
                 >
                     <X size={18} />
@@ -112,27 +112,27 @@ export function BulkActionToolbar({
 
     return (
         <>
-            <div className="flex items-center justify-between px-4 py-3 bg-cyan-950/30 border border-cyan-400/20 rounded-lg mb-2.5">
+            <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border border-primary/20 rounded-lg mb-2.5">
                 <div className="flex items-center gap-6">
                     {/* Selection Counter */}
                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-cyan-400">{selectedCount}</span>
-                        <span className="text-sm text-zinc-400">selected</span>
+                        <span className="text-2xl font-bold text-primary">{selectedCount}</span>
+                        <span className="text-sm text-muted-foreground">selected</span>
                         <button
                             onClick={onClearSelection}
-                            className="ml-2 text-xs text-zinc-500 hover:text-white"
+                            className="ml-2 text-xs text-muted-foreground hover:text-foreground"
                         >
                             Clear
                         </button>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2 border-l border-zinc-700 pl-6">
+                    <div className="flex items-center gap-2 border-l border-border pl-6">
 
                         {/* Update (Full Edit) Action - First */}
                         <button
                             onClick={() => setIsBulkEditOpen(true)}
-                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-cyan-400 text-white hover:bg-cyan-400 transition-colors font-bold"
+                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold"
                         >
                             <Edit size={16} />
                             Update
@@ -143,7 +143,7 @@ export function BulkActionToolbar({
                             <button
                                 onClick={onDuplicate}
                                 disabled={selectedCount === 0}
-                                className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                                className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
                             >
                                 <CopyCheck size={16} />
                                 Duplicate
@@ -156,7 +156,7 @@ export function BulkActionToolbar({
                                 setActiveAction('delete');
                                 setIsConfirmOpen(true);
                             }}
-                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+                            className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
                         >
                             <Trash2 size={16} />
                             Delete
@@ -170,7 +170,7 @@ export function BulkActionToolbar({
                         <button
                             onClick={() => setIsConfirmOpen(true)}
                             disabled={isLoading}
-                            className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+                            className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
                         >
                             {isLoading && <Loader2 className="animate-spin" size={16} />}
                             Apply to {selectedCount} items
@@ -178,7 +178,7 @@ export function BulkActionToolbar({
                     )}
                     <button
                         onClick={onExitBulkMode}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                         title="Exit Select Mode"
                     >
                         <X size={18} />

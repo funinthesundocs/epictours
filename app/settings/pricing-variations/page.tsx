@@ -94,7 +94,7 @@ export default function PricingVariationsPage() {
             action={
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm transition-colors shadow-glow"
                 >
                     <Plus size={16} />
                     New Variation
@@ -106,10 +106,10 @@ export default function PricingVariationsPage() {
         >
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-cyan-400" size={32} />
+                    <Loader2 className="animate-spin text-primary" size={32} />
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     <PricingVariationsTable
                         data={variations}
                         onEdit={handleEdit}

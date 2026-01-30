@@ -39,17 +39,17 @@ export function CustomerActions({ customer, onEdit, onDelete }: CustomerActionsP
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
+                className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"
             >
                 <MoreHorizontal size={18} />
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-[#0b1115] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute right-0 top-full mt-2 w-48 bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     <div className="p-1">
                         <button
                             onClick={handleEdit}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:text-white hover:bg-white/10 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors text-left"
                         >
                             <Edit size={14} />
                             Edit Profile

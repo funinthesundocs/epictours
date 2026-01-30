@@ -766,11 +766,11 @@ export function BulkEditSheet({
         switch (type) {
             case 'date_range':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Calendar size={16} className="text-cyan-400" />
+                            <Calendar size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Date Range</div>
+                                <div className="text-sm font-medium text-primary">Date Range</div>
                             </div>
                             <button onClick={() => removeFilter('date_range')} className="p-1 hover:bg-white/10 rounded transition-colors">
                                 <X size={14} className="text-zinc-400 hover:text-white" />
@@ -798,14 +798,14 @@ export function BulkEditSheet({
                 );
             case 'status':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Power size={16} className="text-cyan-400" />
+                            <Power size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Booking Status</div>
+                                <div className="text-sm font-medium text-primary">Booking Status</div>
                             </div>
-                            <button onClick={() => removeFilter('status')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('status')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -820,19 +820,19 @@ export function BulkEditSheet({
                 );
             case 'time_range':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Clock size={16} className="text-cyan-400" />
+                            <Clock size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Starting Between</div>
+                                <div className="text-sm font-medium text-primary">Starting Between</div>
                             </div>
-                            <button onClick={() => removeFilter('time_range')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('time_range')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">From</label>
+                                <label className="block text-xs text-muted-foreground mb-1">From</label>
                                 <TimePicker
                                     value={filterValues.time_start}
                                     onChange={(time) => setFilterValues(prev => ({ ...prev, time_start: time }))}
@@ -840,7 +840,7 @@ export function BulkEditSheet({
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">To</label>
+                                <label className="block text-xs text-muted-foreground mb-1">To</label>
                                 <TimePicker
                                     value={filterValues.time_end}
                                     onChange={(time) => setFilterValues(prev => ({ ...prev, time_end: time }))}
@@ -852,14 +852,14 @@ export function BulkEditSheet({
                 );
             case 'day_of_week':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <CalendarDays size={16} className="text-cyan-400" />
+                            <CalendarDays size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Day of Week</div>
+                                <div className="text-sm font-medium text-primary">Day of Week</div>
                             </div>
-                            <button onClick={() => removeFilter('day_of_week')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('day_of_week')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 flex flex-wrap gap-1">
@@ -874,7 +874,7 @@ export function BulkEditSheet({
                                             setFilterValues(prev => ({ ...prev, day_of_week: [...current, idx] }));
                                         }
                                     }}
-                                    className={cn("px-2.5 py-1 rounded text-xs font-medium transition-colors", filterValues.day_of_week.includes(idx) ? "bg-cyan-400 text-black" : "bg-black/50 text-zinc-400 hover:bg-white/10")}
+                                    className={cn("px-2.5 py-1 rounded text-xs font-medium transition-colors", filterValues.day_of_week.includes(idx) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80")}
                                 >
                                     {day}
                                 </button>
@@ -884,14 +884,14 @@ export function BulkEditSheet({
                 );
             case 'has_bookings':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <UserCheck size={16} className="text-cyan-400" />
+                            <UserCheck size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Has Bookings</div>
+                                <div className="text-sm font-medium text-primary">Has Bookings</div>
                             </div>
-                            <button onClick={() => removeFilter('has_bookings')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('has_bookings')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -906,19 +906,19 @@ export function BulkEditSheet({
                 );
             case 'ending_between':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Clock size={16} className="text-cyan-400" />
+                            <Clock size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Ending Between</div>
+                                <div className="text-sm font-medium text-primary">Ending Between</div>
                             </div>
-                            <button onClick={() => removeFilter('ending_between')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('ending_between')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">From</label>
+                                <label className="block text-xs text-muted-foreground mb-1">From</label>
                                 <TimePicker
                                     value={filterValues.ending_time_start}
                                     onChange={(time) => setFilterValues(prev => ({ ...prev, ending_time_start: time }))}
@@ -926,7 +926,7 @@ export function BulkEditSheet({
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">To</label>
+                                <label className="block text-xs text-muted-foreground mb-1">To</label>
                                 <TimePicker
                                     value={filterValues.ending_time_end}
                                     onChange={(time) => setFilterValues(prev => ({ ...prev, ending_time_end: time }))}
@@ -938,79 +938,79 @@ export function BulkEditSheet({
                 );
             case 'duration':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Clock size={16} className="text-cyan-400" />
+                            <Clock size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Length in Hours</div>
+                                <div className="text-sm font-medium text-primary">Length in Hours</div>
                             </div>
-                            <button onClick={() => removeFilter('duration')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('duration')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Min</label>
-                                <input type="number" step="0.5" min="0" value={filterValues.duration_min} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
+                                <label className="block text-xs text-muted-foreground mb-1">Min</label>
+                                <input type="number" step="0.5" min="0" value={filterValues.duration_min} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_min: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Max</label>
-                                <input type="number" step="0.5" min="0" value={filterValues.duration_max} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="24" />
+                                <label className="block text-xs text-muted-foreground mb-1">Max</label>
+                                <input type="number" step="0.5" min="0" value={filterValues.duration_max} onChange={(e) => setFilterValues(prev => ({ ...prev, duration_max: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer" placeholder="24" />
                             </div>
                         </div>
                     </div>
                 );
             case 'notes':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <MessageSquare size={16} className="text-cyan-400" />
+                            <MessageSquare size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Internal Notes</div>
+                                <div className="text-sm font-medium text-primary">Internal Notes</div>
                             </div>
-                            <button onClick={() => removeFilter('notes')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('notes')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
-                            <input type="text" value={filterValues.notes} onChange={(e) => setFilterValues(prev => ({ ...prev, notes: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="Search notes..." />
+                            <input type="text" value={filterValues.notes} onChange={(e) => setFilterValues(prev => ({ ...prev, notes: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer" placeholder="Search notes..." />
                         </div>
                     </div>
                 );
             case 'capacity':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Users size={16} className="text-cyan-400" />
+                            <Users size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Total Capacity</div>
+                                <div className="text-sm font-medium text-primary">Total Capacity</div>
                             </div>
-                            <button onClick={() => removeFilter('capacity')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('capacity')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Min</label>
-                                <input type="number" min="0" value={filterValues.capacity_min} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_min: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
+                                <label className="block text-xs text-muted-foreground mb-1">Min</label>
+                                <input type="number" min="0" value={filterValues.capacity_min} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_min: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer" placeholder="0" />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Max</label>
-                                <input type="number" min="0" value={filterValues.capacity_max} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_max: e.target.value }))} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-400/50 transition-colors appearance-none cursor-pointer" placeholder="100" />
+                                <label className="block text-xs text-muted-foreground mb-1">Max</label>
+                                <input type="number" min="0" value={filterValues.capacity_max} onChange={(e) => setFilterValues(prev => ({ ...prev, capacity_max: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer" placeholder="100" />
                             </div>
                         </div>
                     </div>
                 );
             case 'customer_type':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Users size={16} className="text-cyan-400" />
+                            <Users size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Customer Type</div>
+                                <div className="text-sm font-medium text-primary">Customer Type</div>
                             </div>
-                            <button onClick={() => removeFilter('customer_type')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('customer_type')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -1025,14 +1025,14 @@ export function BulkEditSheet({
                 );
             case 'pickup_route':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <MapPin size={16} className="text-cyan-400" />
+                            <MapPin size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Route Schedule</div>
+                                <div className="text-sm font-medium text-primary">Route Schedule</div>
                             </div>
-                            <button onClick={() => removeFilter('pickup_route')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('pickup_route')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -1047,38 +1047,38 @@ export function BulkEditSheet({
                 );
             case 'crew':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Users size={16} className="text-cyan-400" />
+                            <Users size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Assigned Staff</div>
+                                <div className="text-sm font-medium text-primary">Assigned Staff</div>
                             </div>
-                            <button onClick={() => removeFilter('crew')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('crew')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3 max-h-[150px] overflow-y-auto">
                             {staff.map(s => (
-                                <label key={s.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/5 px-1 rounded">
-                                    <input type="checkbox" checked={filterValues.crew_ids.includes(s.id)} onChange={(e) => { if (e.target.checked) { setFilterValues(prev => ({ ...prev, crew_ids: [...prev.crew_ids, s.id] })); } else { setFilterValues(prev => ({ ...prev, crew_ids: prev.crew_ids.filter(id => id !== s.id) })); } }} className="rounded border-white/20 bg-black text-cyan-400 focus:ring-cyan-400" />
-                                    <span className="text-xs text-zinc-300">{s.name}</span>
-                                    {s.role?.name && <span className="text-xs text-zinc-500">({s.role.name})</span>}
+                                <label key={s.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-muted/5 px-1 rounded">
+                                    <input type="checkbox" checked={filterValues.crew_ids.includes(s.id)} onChange={(e) => { if (e.target.checked) { setFilterValues(prev => ({ ...prev, crew_ids: [...prev.crew_ids, s.id] })); } else { setFilterValues(prev => ({ ...prev, crew_ids: prev.crew_ids.filter(id => id !== s.id) })); } }} className="rounded border-border bg-background text-primary focus:ring-primary" />
+                                    <span className="text-xs text-foreground">{s.name}</span>
+                                    {s.role?.name && <span className="text-xs text-muted-foreground">({s.role.name})</span>}
                                 </label>
                             ))}
-                            {staff.length === 0 && <div className="text-xs text-zinc-500 py-2">No staff found</div>}
+                            {staff.length === 0 && <div className="text-xs text-muted-foreground py-2">No staff found</div>}
                         </div>
                     </div>
                 );
             case 'vehicle_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <Bus size={16} className="text-cyan-400" />
+                            <Bus size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Vehicle</div>
+                                <div className="text-sm font-medium text-primary">Vehicle</div>
                             </div>
-                            <button onClick={() => removeFilter('vehicle_id')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('vehicle_id')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -1093,14 +1093,14 @@ export function BulkEditSheet({
                 );
             case 'pricing_schedule_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <DollarSign size={16} className="text-cyan-400" />
+                            <DollarSign size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Pricing Schedule</div>
+                                <div className="text-sm font-medium text-primary">Pricing Schedule</div>
                             </div>
-                            <button onClick={() => removeFilter('pricing_schedule_id')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('pricing_schedule_id')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -1115,14 +1115,14 @@ export function BulkEditSheet({
                 );
             case 'booking_option_schedule_id':
                 return (
-                    <div className="w-full rounded-lg mb-2 bg-cyan-400/20 border border-cyan-400/50">
+                    <div className="w-full rounded-lg mb-2 bg-primary/10 border border-primary/20">
                         <div className="px-3 py-2 flex items-center gap-3">
-                            <DollarSign size={16} className="text-cyan-400" />
+                            <DollarSign size={16} className="text-primary" />
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-cyan-400">Booking Options</div>
+                                <div className="text-sm font-medium text-primary">Booking Options</div>
                             </div>
-                            <button onClick={() => removeFilter('booking_option_schedule_id')} className="p-1 hover:bg-white/10 rounded transition-colors">
-                                <X size={14} className="text-zinc-400 hover:text-white" />
+                            <button onClick={() => removeFilter('booking_option_schedule_id')} className="p-1 hover:bg-muted/50 rounded transition-colors">
+                                <X size={14} className="text-muted-foreground hover:text-foreground" />
                             </button>
                         </div>
                         <div className="px-3 pb-3">
@@ -1157,16 +1157,16 @@ export function BulkEditSheet({
                 ) : (
                     <>
                         {/* Three Column Layout */}
-                        <div className="flex-1 overflow-hidden grid grid-cols-3 divide-x divide-white/10">
+                        <div className="flex-1 overflow-hidden grid grid-cols-3 divide-x divide-border">
 
                             {/* Column 2: Change (What to update) */}
                             <div className="flex flex-col bg-transparent order-2 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">2</span>
+                                <div className="px-4 py-3 border-b border-border bg-muted/50 backdrop-blur-md">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-wider">
+                                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-black">2</span>
                                         Change
                                     </div>
-                                    <p className="text-xs text-zinc-500 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         {selectedUpdateTypes.length === 0 ? "Select fields to update" : `${selectedUpdateTypes.length} field(s) selected`}
                                     </p>
                                 </div>
@@ -1178,18 +1178,18 @@ export function BulkEditSheet({
                                         return (
                                             <div
                                                 key={type}
-                                                className="w-full text-left px-3 py-3 rounded-lg mb-1 bg-cyan-400/20 border border-cyan-400/50 flex items-center gap-3"
+                                                className="w-full text-left px-3 py-3 rounded-lg mb-1 bg-primary/10 border border-primary/20 flex items-center gap-3"
                                             >
-                                                <option.icon size={18} className="text-cyan-400" />
+                                                <option.icon size={18} className="text-primary" />
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-medium text-cyan-400">{option.label}</div>
-                                                    <div className="text-xs text-zinc-500 truncate">{option.description}</div>
+                                                    <div className="text-sm font-medium text-primary">{option.label}</div>
+                                                    <div className="text-xs text-muted-foreground truncate">{option.description}</div>
                                                 </div>
                                                 <button
                                                     onClick={() => removeUpdateType(type)}
-                                                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                    className="p-1 hover:bg-muted/50 rounded transition-colors"
                                                 >
-                                                    <X size={14} className="text-zinc-400 hover:text-white" />
+                                                    <X size={14} className="text-muted-foreground hover:text-foreground" />
                                                 </button>
                                             </div>
                                         );
@@ -1208,7 +1208,7 @@ export function BulkEditSheet({
                                                     }
                                                     setIsFieldDropdownOpen(!isFieldDropdownOpen);
                                                 }}
-                                                className="w-full text-left px-3 py-3 rounded-lg border border-dashed border-zinc-700 hover:border-cyan-400/50 hover:bg-white/5 transition-all flex items-center gap-3 text-zinc-400 hover:text-cyan-400"
+                                                className="w-full text-left px-3 py-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-all flex items-center gap-3 text-muted-foreground hover:text-primary"
                                             >
                                                 <Plus size={18} />
                                                 <span className="text-sm">Add field to update</span>
@@ -1240,7 +1240,7 @@ export function BulkEditSheet({
 
                                     {/* Empty state */}
                                     {selectedUpdateTypes.length === 0 && (
-                                        <div className="text-center py-8 text-zinc-500">
+                                        <div className="text-center py-8 text-muted-foreground">
                                             <Filter size={32} className="mx-auto mb-2 opacity-50" />
                                             <p className="text-sm">Click "Add field" to select what to update</p>
                                         </div>
@@ -1250,12 +1250,12 @@ export function BulkEditSheet({
 
                             {/* Column 1: For these availabilities (Selection Info) */}
                             <div className="flex flex-col bg-transparent order-1 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">1</span>
-                                        For These <span className="text-cyan-400">{showDateRangeSelector ? filteredIds.size : effectiveIds.size}</span> Availabilities
+                                <div className="px-4 py-3 border-b border-border bg-muted/50 backdrop-blur-md">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-wider">
+                                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-black">1</span>
+                                        For These <span className="text-primary">{showDateRangeSelector ? filteredIds.size : effectiveIds.size}</span> Availabilities
                                     </div>
-                                    <p className="text-xs text-zinc-500 mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         Selected filters are cumulative
                                     </p>
                                 </div>
@@ -1266,9 +1266,9 @@ export function BulkEditSheet({
                                         <div className="space-y-4">
 
                                             {/* Date Range Picker */}
-                                            <div className="bg-white/5 rounded-lg p-4">
-                                                <div className="text-sm font-medium text-white mb-1">Date Range</div>
-                                                <p className="text-xs text-zinc-500 italic mb-3">Selecting a date range is required</p>
+                                            <div className="bg-muted/30 rounded-lg p-4">
+                                                <div className="text-sm font-medium text-foreground mb-1">Date Range</div>
+                                                <p className="text-xs text-muted-foreground italic mb-3">Selecting a date range is required</p>
                                                 <div className="space-y-3">
                                                     {/* Preset Buttons */}
                                                     <div className="flex flex-wrap gap-1.5">
@@ -1319,7 +1319,7 @@ export function BulkEditSheet({
                                                                 setDateRangeStart(startOfYear.toISOString().split('T')[0]);
                                                                 setDateRangeEnd(endOfYear.toISOString().split('T')[0]);
                                                             }}
-                                                            className="px-2.5 py-1 text-xs font-medium rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+                                                            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
                                                         >
                                                             This Year
                                                         </button>
@@ -1496,12 +1496,12 @@ export function BulkEditSheet({
 
                             {/* Column 3: To (New Value) */}
                             <div className="flex flex-col bg-transparent order-3 min-h-0">
-                                <div className="px-4 py-3 border-b border-white/10 bg-white/5 backdrop-blur-md">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wider">
-                                        <span className="w-6 h-6 rounded-full bg-cyan-400 text-black flex items-center justify-center text-xs font-black">3</span>
+                                <div className="px-4 py-3 border-b border-border bg-muted/50 backdrop-blur-md">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-foreground uppercase tracking-wider">
+                                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-black">3</span>
                                         To
                                     </div>
-                                    <p className="text-xs text-zinc-500 mt-1">Set new value</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Set new value</p>
                                 </div>
                                 <div ref={toScrollRef} className="flex-1 overflow-y-auto p-4">
                                     {selectedUpdateTypes.length === 0 ? (
@@ -1519,36 +1519,36 @@ export function BulkEditSheet({
                                                 if (!option) return null;
 
                                                 return (
-                                                    <div key={type} className="bg-white/5 rounded-lg p-4">
+                                                    <div key={type} className="bg-muted/30 rounded-lg p-4">
                                                         {/* Header - hide for online_booking_status */}
                                                         {type !== 'online_booking_status' && (
                                                             <div className="flex items-center gap-2 mb-3">
-                                                                <option.icon size={16} className="text-cyan-400" />
+                                                                <option.icon size={16} className="text-primary" />
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-sm font-medium text-white">{option.label}</span>
-                                                                    <span className="text-xs text-zinc-500">Currently: {getCurrentValueDisplay(type)}</span>
+                                                                    <span className="text-sm font-medium text-foreground">{option.label}</span>
+                                                                    <span className="text-xs text-muted-foreground">Currently: {getCurrentValueDisplay(type)}</span>
                                                                 </div>
                                                             </div>
                                                         )}
 
                                                         {/* Status */}
                                                         {type === 'online_booking_status' && (
-                                                            <div className="flex items-center justify-between p-3 bg-black/20 border border-white/5 rounded-lg">
+                                                            <div className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-lg">
                                                                 <div className="space-y-0.5">
                                                                     <div className="flex items-center gap-2">
-                                                                        <Power size={16} className="text-cyan-400" />
-                                                                        <Label className="text-sm text-zinc-400">
+                                                                        <Power size={16} className="text-primary" />
+                                                                        <Label className="text-sm text-muted-foreground">
                                                                             Online Booking
                                                                         </Label>
                                                                     </div>
-                                                                    <div className="text-sm text-zinc-500">
+                                                                    <div className="text-sm text-muted-foreground">
                                                                         {values.online_booking_status === "open" ? "Available for online booking" : "Not available online"}
                                                                     </div>
                                                                 </div>
                                                                 <Switch
                                                                     checked={values.online_booking_status === "open"}
                                                                     onCheckedChange={(checked) => setValues(prev => ({ ...prev, online_booking_status: checked ? "open" : "closed" }))}
-                                                                    className="data-[state=checked]:bg-cyan-400"
+                                                                    className="data-[state=checked]:bg-primary"
                                                                 />
                                                             </div>
                                                         )}
@@ -1559,7 +1559,7 @@ export function BulkEditSheet({
                                                                 type="number"
                                                                 value={values.max_capacity}
                                                                 onChange={(e) => setValues(prev => ({ ...prev, max_capacity: Number(e.target.value) }))}
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
+                                                                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none"
                                                                 placeholder="Enter capacity"
                                                             />
                                                         )}
@@ -1580,7 +1580,7 @@ export function BulkEditSheet({
                                                                 value={values.hours_long}
                                                                 onChange={(e) => setValues(prev => ({ ...prev, hours_long: Number(e.target.value) }))}
                                                                 step="0.5"
-                                                                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
+                                                                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none"
                                                                 placeholder="Enter hours"
                                                             />
                                                         )}

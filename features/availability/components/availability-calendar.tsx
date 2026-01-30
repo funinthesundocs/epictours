@@ -278,7 +278,7 @@ export function AvailabilityCalendar({
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 9rem)' }}
         >
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-40">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 sticky top-0 z-40">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -317,7 +317,7 @@ export function AvailabilityCalendar({
                                 newDate.setFullYear(val);
                                 onDateChange(newDate);
                             }}
-                            className="w-[90px] text-cyan-400"
+                            className="w-[90px] text-primary"
                         />
                     </div>
 
@@ -325,13 +325,13 @@ export function AvailabilityCalendar({
                     <div className="flex gap-1">
                         <button
                             onClick={handlePrevMonth}
-                            className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95"
+                            className="w-8 h-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:border-sidebar-accent flex items-center justify-center transition-all active:scale-95"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             onClick={handleNextMonth}
-                            className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95"
+                            className="w-8 h-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:border-sidebar-accent flex items-center justify-center transition-all active:scale-95"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
@@ -345,26 +345,26 @@ export function AvailabilityCalendar({
                     <div className="relative w-[220px] mr-2" ref={expPickerRef}>
                         <div
                             className={cn(
-                                "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20"
+                                "w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground cursor-pointer flex items-center justify-between transition-all hover:bg-muted hover:border-sidebar-accent",
+                                isExpPickerOpen && "border-primary/50 bg-muted ring-1 ring-primary/20"
                             )}
                             onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
                         >
                             <span className="font-semibold text-sm truncate">{selectedExperience}</span>
-                            <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
+                            <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
                         </div>
 
                         {/* Dropdown Menu */}
                         {isExpPickerOpen && (
-                            <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute top-full left-0 w-full mt-2 bg-popover border border-border rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                                 {experiences.map((exp) => (
                                     <div
                                         key={exp.id}
                                         className={cn(
-                                            "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
+                                            "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-border last:border-0",
                                             selectedExperience === exp.name
-                                                ? "bg-cyan-900/20 text-cyan-400"
-                                                : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                                ? "bg-primary/20 text-primary"
+                                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                         )}
                                         onClick={() => {
                                             onExperienceChange(exp.name);
@@ -380,12 +380,12 @@ export function AvailabilityCalendar({
                     </div>
 
                     {/* View Toggle */}
-                    <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
+                    <div className="flex items-center bg-muted p-1 rounded-lg border border-border mr-2">
                         <button
                             onClick={() => setViewMode('calendar')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'calendar' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'calendar' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                             )}
                             title="Calendar View"
                         >
@@ -395,7 +395,7 @@ export function AvailabilityCalendar({
                             onClick={() => setViewMode('list')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'list' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'list' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                             )}
                             title="List View"
                         >
@@ -403,9 +403,7 @@ export function AvailabilityCalendar({
                         </button>
                     </div>
 
-                    <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
-                    <div className="w-px h-8 bg-zinc-900 mx-2"></div>
 
                     <ToolbarButton
                         icon={MousePointer2}
@@ -431,8 +429,8 @@ export function AvailabilityCalendar({
 
             {/* CONTENT AREA */}
             <div className={cn(
-                "flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative",
-                viewMode === 'list' && "bg-transparent border-0 shadow-none overflow-visible"
+                "flex-1 min-h-0 bg-background border border-border rounded-2xl overflow-hidden relative",
+                viewMode === 'list' && "bg-transparent border-0 overflow-visible"
             )}>
                 {viewMode === 'calendar' ? (
                     <div className="flex flex-col h-full">
@@ -588,9 +586,9 @@ function MonthView({
         : -1;
 
     return (
-        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
+        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-background">
             <table className="w-full table-fixed border-separate border-spacing-0">
-                <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-muted/50 backdrop-blur-sm text-muted-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
                             <th key={day} className={cn(
@@ -618,8 +616,8 @@ function MonthView({
 
                                 return (
                                     <td key={colIndex} className={cn(
-                                        "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-white/5",
-                                        (!isValidDay || isToday) ? "bg-zinc-900/40" : "hover:bg-zinc-900/40"
+                                        "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-border",
+                                        (!isValidDay || isToday) ? "bg-muted/30" : "hover:bg-muted/30"
                                     )} style={{ minHeight: '160px', height: '160px' }}
                                         onClick={() => {
                                             if (isValidDay && cellDateString) {
@@ -631,7 +629,7 @@ function MonthView({
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
                                                 <span className={cn(
                                                     "text-base font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
-                                                    isToday ? "bg-cyan-400 text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "text-zinc-500 group-hover:text-zinc-300"
+                                                    isToday ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground group-hover:text-foreground"
                                                 )}>{dayNumber}</span>
 
                                                 {daysEvents.map((event) => (
@@ -703,14 +701,14 @@ function ToolbarButton({
             onClick={onClick}
             disabled={disabled}
             className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border border-transparent hover:border-zinc-700",
+                "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border hover:border-sidebar-accent",
                 primary
-                    ? "bg-cyan-400 text-black hover:bg-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-glow"
                     : active
-                        ? "bg-cyan-400/20 text-cyan-400 shadow-sm"
+                        ? "bg-primary/20 text-primary border-primary/20 shadow-sm"
                         : danger
-                            ? "text-zinc-500 hover:text-red-400 hover:bg-red-400/10"
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50",
+                            ? "text-muted-foreground border-transparent hover:text-destructive hover:bg-destructive/10"
+                            : "text-muted-foreground border-border hover:text-foreground hover:bg-muted",
                 disabled && "opacity-50 cursor-not-allowed pointer-events-none grayscale",
                 className
             )}>
@@ -744,8 +742,8 @@ function EventChip({
     onClick?: (e?: React.MouseEvent) => void
 }) {
     const style = selected
-        ? "bg-cyan-400 border-2 border-white/80 shadow-[0_0_15px_rgba(6,182,212,0.6)] saturate-150 scale-[1.02] z-10"
-        : "bg-cyan-700/90 hover:bg-cyan-400";
+        ? "bg-primary border-2 border-primary-foreground/80 shadow-glow saturate-150 scale-[1.02] z-10"
+        : "bg-primary/90 hover:bg-primary";
 
     return (
         <div
@@ -754,11 +752,11 @@ function EventChip({
             onMouseDown={onMouseDown}
             onMouseEnter={onMouseEnter}
         >
-            <span className="font-bold text-white group-hover:text-[#010e0f] text-xs leading-tight">{abbr}</span>
-            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">Start: {time}</span>
-            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">{bookings}</span>
-            <span className="text-white group-hover:text-[#010e0f] font-bold text-xs leading-tight">{cap}</span>
-            {note && <span className="text-white group-hover:text-[#010e0f] font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
+            <span className="font-bold text-primary-foreground group-hover:text-primary-foreground text-xs leading-tight">{abbr}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">Start: {time}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">{bookings}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">{cap}</span>
+            {note && <span className="text-primary-foreground group-hover:text-primary-foreground font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
         </div>
     );
 }
@@ -801,7 +799,7 @@ function CustomSelect({
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "flex items-center justify-between gap-2 bg-zinc-900/50 border border-zinc-800 text-white text-lg font-bold py-1.5 px-3 rounded-lg hover:border-zinc-700 transition-all min-w-[fit-content]",
+                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-bold py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
                     className
                 )}
             >
@@ -810,7 +808,7 @@ function CustomSelect({
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                     {options.map((opt) => (
                         <button
                             key={opt.value}
@@ -819,8 +817,8 @@ function CustomSelect({
                                 setIsOpen(false);
                             }}
                             className={cn(
-                                "w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 transition-colors",
-                                value === opt.value ? "text-white font-medium bg-zinc-800/50" : "text-zinc-400"
+                                "w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors",
+                                value === opt.value ? "text-primary font-medium bg-primary/10" : "text-muted-foreground"
                             )}
                         >
                             {opt.label}

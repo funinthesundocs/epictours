@@ -174,9 +174,9 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
     };
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
-        <div className={cn("flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5", className)}>
-            <Icon size={16} className="text-cyan-400" />
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        <div className={cn("flex items-center gap-2 bg-muted/30 -mx-6 px-6 py-3 mb-6 border-y border-border", className)}>
+            <Icon size={16} className="text-primary" />
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -199,7 +199,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                             <div className="space-y-2 col-span-2">
                                 <Label>Vehicle Name</Label>
                                 <Input {...register("name")} placeholder="e.g. Mercedes Sprinter" />
-                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                             </div>
 
                             <div className="space-y-2">
@@ -209,7 +209,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                                     value={watch('status')}
                                     onChange={(val) => setValue('status', val)}
                                 />
-                                {errors.status && <p className="text-xs text-red-500">{errors.status.message}</p>}
+                                {errors.status && <p className="text-xs text-destructive">{errors.status.message}</p>}
                             </div>
 
                             {/* Row 2: Vendor (2/3) + Capacity (1/3) */}
@@ -221,13 +221,13 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                                     onChange={(val) => setValue('vendor_id', val || null)}
                                     placeholder="Select Vendor..."
                                 />
-                                <p className="text-[10px] text-zinc-500">Leave empty for internal fleet.</p>
+                                <p className="text-[10px] text-muted-foreground">Leave empty for internal fleet.</p>
                             </div>
 
                             <div className="space-y-2">
                                 <Label>Capacity</Label>
                                 <Input type="number" {...register("capacity")} placeholder="e.g. 14" />
-                                {errors.capacity && <p className="text-xs text-red-500">{errors.capacity.message}</p>}
+                                {errors.capacity && <p className="text-xs text-destructive">{errors.capacity.message}</p>}
                             </div>
                         </div>
                     </div>
@@ -239,12 +239,12 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                             <div className="space-y-2">
                                 <Label>License Requirement</Label>
                                 <Input {...register("license_requirement")} placeholder="e.g. CDL Class B" />
-                                {errors.license_requirement && <p className="text-xs text-red-500">{errors.license_requirement.message}</p>}
+                                {errors.license_requirement && <p className="text-xs text-destructive">{errors.license_requirement.message}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label>License Plate</Label>
                                 <Input {...register("plate_number")} className="uppercase" placeholder="ABC-1234" />
-                                {errors.plate_number && <p className="text-xs text-red-500">{errors.plate_number.message}</p>}
+                                {errors.plate_number && <p className="text-xs text-destructive">{errors.plate_number.message}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label>VIN Number</Label>
@@ -281,15 +281,15 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-card">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

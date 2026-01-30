@@ -55,33 +55,31 @@ export function GlassCombobox({
                     disabled={disabled}
                     className={cn(
                         "w-full justify-between font-normal",
-                        // Trigger Styling: Black/20, White Text, Subtle Border
-                        "bg-zinc-900/80 border-white/10 text-white hover:bg-zinc-900 hover:text-white hover:border-white/20",
-                        !value && "text-zinc-500",
+                        // Trigger Styling: Semantic Glass
+                        "bg-muted/80 border-border text-foreground hover:bg-muted hover:text-foreground hover:border-border/80",
+                        !value && "text-muted-foreground",
                         className
                     )}
                 >
                     <span className="truncate">
                         {selectedLabel || placeholder}
                     </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-zinc-400" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-white/10 bg-transparent shadow-2xl backdrop-blur-xl">
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-border bg-transparent shadow-2xl backdrop-blur-xl">
                 {/* 
                     Dropdown Content Styling: 
-                    - Background: Black/20 (Glass) -> We use bg-black/80 for readability or backdrop-blur 
-                    - User asked for "black/20". We will try bg-black/40 with blur for best compromise of "glass" and "readability".
-                    - Actually, strict adherence: "black/20".
+                    - Semantic Glass: bg-popover/80 with backdrop blur.
                 */}
-                <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-md overflow-hidden">
-                    <Command className="bg-transparent text-white">
+                <div className="bg-popover/80 backdrop-blur-xl border border-border rounded-md overflow-hidden">
+                    <Command className="bg-transparent text-foreground">
                         <CommandInput
                             placeholder={searchPlaceholder}
-                            className="border-none focus:ring-0 text-white placeholder:text-zinc-500"
+                            className="border-none focus:ring-0 text-foreground placeholder:text-muted-foreground"
                         />
                         <CommandList className="custom-scrollbar max-h-[300px]">
-                            <CommandEmpty className="py-3 text-sm text-center text-zinc-500">
+                            <CommandEmpty className="py-3 text-sm text-center text-muted-foreground">
                                 {emptyMessage}
                             </CommandEmpty>
                             <CommandGroup>
@@ -95,7 +93,7 @@ export function GlassCombobox({
                                         }}
                                         className={cn(
                                             "cursor-pointer transition-colors px-2 py-2 text-sm",
-                                            "text-white data-[selected=true]:bg-cyan-400 data-[selected=true]:text-black"
+                                            "text-foreground data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground"
                                         )}
                                     >
                                         <Check

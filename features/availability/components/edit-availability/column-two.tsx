@@ -7,7 +7,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 import { ResourceClusterList, Assignment } from "./resource-cluster-list";
 
 const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-    <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-4 mt-2">
+    <div className="flex items-center gap-2 text-primary border-b border-border pb-2 mb-4 mt-2">
         <Icon size={16} />
         <h3 className="text-xs font-bold uppercase tracking-wider">{title}</h3>
     </div>
@@ -39,10 +39,10 @@ export function ColumnTwo({
     return (
         <div className="flex flex-col h-full bg-transparent">
             {/* Sticky Header */}
-            <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
+            <div className="shrink-0 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 px-6 py-4">
-                    <Users size={16} className="text-cyan-400" />
-                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Capacity & Resources</span>
+                    <Users size={16} className="text-primary" />
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Capacity & Resources</span>
                 </div>
             </div>
 
@@ -54,17 +54,17 @@ export function ColumnTwo({
 
 
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Max Capacity</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Max Capacity</label>
                             <input
                                 type="number"
                                 {...register("max_capacity")}
-                                className="w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-400/50 focus:outline-none transition-colors"
+                                className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-primary/50 focus:outline-none transition-colors"
                                 placeholder="0"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Default Pricing Schedule</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Default Pricing Schedule</label>
                             <CustomSelect
                                 value={watch("pricing_schedule_id") || undefined}
                                 onChange={(val) => setValue("pricing_schedule_id", val, { shouldValidate: true })}
@@ -77,7 +77,7 @@ export function ColumnTwo({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Default Pricing Variation</label>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Default Pricing Variation</label>
                             <CustomSelect
                                 value={watch("pricing_tier_id") || undefined}
                                 onChange={(val) => setValue("pricing_tier_id", val, { shouldValidate: true })}
@@ -90,7 +90,7 @@ export function ColumnTwo({
                         </div>
                     </div>
 
-                    <div className="h-px bg-white/5 my-6" />
+                    <div className="h-px bg-border my-6" />
 
                     {/* Resources Section (Clustered) */}
                     <div>

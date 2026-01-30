@@ -80,24 +80,24 @@ export function TimePicker({
             <PopoverTrigger asChild>
                 <button
                     className={cn(
-                        "w-full flex items-center justify-between bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-white/20 focus:outline-none focus:border-cyan-400/50",
-                        !value && "text-zinc-500",
-                        value && "text-white",
+                        "w-full flex items-center justify-between bg-muted/50 border border-input rounded-lg px-4 py-2.5 text-sm text-left transition-colors hover:border-input focus:outline-none focus:border-primary/50",
+                        !value && "text-muted-foreground",
+                        value && "text-foreground",
                         className
                     )}
                 >
                     <span>{value ? `${currentHour}:${currentMinute} ${currentPeriod}` : placeholder}</span>
-                    <Clock className="h-4 w-4 text-zinc-500" />
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                 </button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-[260px] p-0 bg-zinc-900 border-white/10"
+                className="w-[260px] p-0 bg-popover border-border"
                 align="start"
             >
-                <div className="flex divide-x divide-white/10 max-h-[280px] h-[280px]">
+                <div className="flex divide-x divide-border max-h-[280px] h-[280px]">
                     {/* Hours column */}
                     <div className="flex-1 flex flex-col overflow-hidden">
-                        <div className="bg-zinc-900 z-10 mx-1 mt-1 rounded-md px-3 py-2 text-sm text-zinc-500 font-medium text-center">
+                        <div className="bg-popover z-10 mx-1 mt-1 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium text-center">
                             Hour
                         </div>
                         <div className="flex-1 overflow-y-auto py-1 scrollbar-hide">
@@ -106,10 +106,10 @@ export function TimePicker({
                                     key={h}
                                     onClick={() => handleSelect(h, safeM, safeP)}
                                     className={cn(
-                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
+                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-muted transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentHour === h
-                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                                            : "text-zinc-300 hover:text-white"
+                                            ? "bg-primary text-primary-foreground font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     {h}
@@ -120,7 +120,7 @@ export function TimePicker({
 
                     {/* Minutes column */}
                     <div className="flex-1 flex flex-col overflow-hidden">
-                        <div className="bg-zinc-900 z-10 mx-1 mt-1 rounded-md px-3 py-2 text-sm text-zinc-500 font-medium text-center">
+                        <div className="bg-popover z-10 mx-1 mt-1 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium text-center">
                             Min
                         </div>
                         <div className="flex-1 overflow-y-auto py-1 scrollbar-hide">
@@ -129,10 +129,10 @@ export function TimePicker({
                                     key={m}
                                     onClick={() => handleSelect(safeH, m, safeP)}
                                     className={cn(
-                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
+                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-muted transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentMinute === m
-                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                                            : "text-zinc-300 hover:text-white"
+                                            ? "bg-primary text-primary-foreground font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     :{m}
@@ -143,10 +143,10 @@ export function TimePicker({
 
                     {/* AM/PM column */}
                     <div className="flex-1 flex flex-col overflow-hidden">
-                        <div className="bg-zinc-900 z-10 mx-1 mt-1 rounded-md flex items-center justify-end pr-2 h-[36px]">
+                        <div className="bg-popover z-10 mx-1 mt-1 rounded-md flex items-center justify-end pr-2 h-[36px]">
                             <button
                                 onClick={() => setOpen(false)}
-                                className="h-6 w-6 flex items-center justify-center rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 <X size={14} />
                             </button>
@@ -157,10 +157,10 @@ export function TimePicker({
                                     key={p}
                                     onClick={() => handleSelect(safeH, safeM, p)}
                                     className={cn(
-                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-white/10 transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
+                                        "w-full px-3 py-1.5 text-sm text-center hover:bg-muted transition-colors rounded-md mx-1 w-[calc(100%-8px)]",
                                         currentPeriod === p
-                                            ? "bg-cyan-400 text-black font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                                            : "text-zinc-300 hover:text-white"
+                                            ? "bg-primary text-primary-foreground font-semibold shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                                            : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     {p}

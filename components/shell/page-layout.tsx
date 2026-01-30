@@ -18,10 +18,10 @@ function PageLayoutContent({ children }: { children: ReactNode }) {
     // Show loading state while checking auth
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-                    <p className="text-zinc-500 text-sm">Loading...</p>
+                    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    <p className="text-muted-foreground text-sm">Loading...</p>
                 </div>
             </div>
         );

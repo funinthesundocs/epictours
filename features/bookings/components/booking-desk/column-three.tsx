@@ -101,9 +101,9 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
     return (
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-200">
             {/* Header */}
-            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
-                <Receipt size={16} className="text-cyan-400" />
-                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Payment</span>
+            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-10">
+                <Receipt size={16} className="text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment</span>
             </div>
 
             {/* Content */}
@@ -112,25 +112,25 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
 
                     {/* 1. BILL SUMMARY */}
                     {hasItems ? (
-                        <div className="bg-black/20 rounded-xl border border-white/10 p-4 space-y-4">
+                        <div className="bg-card rounded-xl border border-border p-4 space-y-4 shadow-sm">
                             <div className="space-y-2">
                                 {lineItems.map(item => (
                                     <div key={item!.customer_type_id} className="flex justify-between text-base">
-                                        <span className="text-zinc-400">
+                                        <span className="text-muted-foreground">
                                             {item!.count} x {item!.customer_type_name}
                                         </span>
-                                        <span className="text-white font-mono">${formatCurrency(item!.subtotal)}</span>
+                                        <span className="text-foreground font-mono">${formatCurrency(item!.subtotal)}</span>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="border-t border-zinc-800 my-4" />
+                            <div className="border-t border-dashed border-border my-4" />
 
                             <div className="space-y-2">
                                 {/* Promo Code Line Item */}
                                 {paymentState.promoCode ? (
                                     <div className="flex justify-between text-sm animate-in fade-in">
-                                        <span className="text-cyan-400 flex items-center gap-1">
+                                        <span className="text-primary flex items-center gap-1">
                                             <Tag size={12} />
                                             {paymentState.promoCode}
                                         </span>
@@ -140,7 +140,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                 setPaymentState(rest);
                                                 setTempPromo("");
                                             }}
-                                            className="text-zinc-500 hover:text-red-400 text-xs underline"
+                                            className="text-muted-foreground hover:text-destructive text-xs underline"
                                         >
                                             Remove
                                         </button>
@@ -149,7 +149,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     !isAddingPromo && (
                                         <button
                                             onClick={() => { setIsAddingPromo(true); setTempPromo(""); }}
-                                            className="text-cyan-400/80 hover:text-cyan-400 text-xs flex items-center gap-1 transition-colors"
+                                            className="text-primary/80 hover:text-primary text-xs flex items-center gap-1 transition-colors"
                                         >
                                             <Tag size={12} /> Add Promo Code
                                         </button>
@@ -165,32 +165,32 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                             value={tempPromo}
                                             onChange={(e) => setTempPromo(e.target.value)}
                                             placeholder="Enter code..."
-                                            className="bg-zinc-900/80 border border-cyan-400/50 rounded px-2 py-1 text-xs text-white outline-none w-32 uppercase"
+                                            className="bg-muted/50 border border-primary/50 rounded px-2 py-1 text-xs text-foreground outline-none w-32 uppercase"
                                             onKeyDown={(e) => e.key === 'Enter' && savePromo()}
                                             onBlur={savePromo}
                                         />
-                                        <button onClick={savePromo} className="text-cyan-400 bg-cyan-950/50 p-1 rounded hover:bg-cyan-400/20"><Check size={12} /></button>
-                                        <button onClick={() => setIsAddingPromo(false)} className="text-zinc-500 hover:text-white p-1"><X size={12} /></button>
+                                        <button onClick={savePromo} className="text-primary bg-primary/10 p-1 rounded hover:bg-primary/20"><Check size={12} /></button>
+                                        <button onClick={() => setIsAddingPromo(false)} className="text-muted-foreground hover:text-foreground p-1"><X size={12} /></button>
                                     </div>
                                 )}
 
 
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-zinc-500">Subtotal</span>
-                                    <span className="text-zinc-300 font-mono">${formatCurrency(subtotal)}</span>
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span className="text-muted-foreground font-mono">${formatCurrency(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-zinc-500">Tax</span>
-                                    <span className="text-zinc-300 font-mono">${formatCurrency(taxTotal)}</span>
+                                    <span className="text-muted-foreground">Tax</span>
+                                    <span className="text-muted-foreground font-mono">${formatCurrency(taxTotal)}</span>
                                 </div>
 
                                 {/* Grand Total Area */}
-                                <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-zinc-800 mt-2">
-                                    <span className="text-white">Total</span>
+                                <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-border mt-2">
+                                    <span className="text-foreground">Total</span>
 
                                     {isEditingTotal ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-cyan-400 font-mono text-xl">$</span>
+                                            <span className="text-primary font-mono text-xl">$</span>
                                             <input
                                                 autoFocus
                                                 type="number"
@@ -198,12 +198,12 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                 onChange={(e) => setTempOverride(e.target.value)}
                                                 onBlur={saveOverride}
                                                 onKeyDown={(e) => e.key === 'Enter' && saveOverride()}
-                                                className="bg-zinc-900/80 border border-cyan-400 rounded px-2 py-1 text-white font-mono w-24 text-right text-lg outline-none"
+                                                className="bg-muted/50 border border-primary rounded px-2 py-1 text-foreground font-mono w-24 text-right text-lg outline-none"
                                             />
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-2 group">
-                                            <span className="font-mono text-xl text-cyan-400">
+                                            <span className="font-mono text-xl text-primary">
                                                 ${formatCurrency(grandTotal)}
                                             </span>
                                             <button
@@ -211,7 +211,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                     setTempOverride(grandTotal.toFixed(2));
                                                     setIsEditingTotal(true);
                                                 }}
-                                                className="p-1 hover:bg-white/10 rounded text-zinc-600 group-hover:text-zinc-400 transition-colors"
+                                                className="p-1 hover:bg-muted/50 rounded text-muted-foreground group-hover:text-foreground transition-colors"
                                             >
                                                 <Edit2 size={14} />
                                             </button>
@@ -219,21 +219,21 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                     )}
                                 </div>
                                 {storedOverride !== undefined && (
-                                    <div className="text-right text-[10px] text-cyan-400 italic">
+                                    <div className="text-right text-[10px] text-primary italic">
                                         Manual override active
                                     </div>
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <div className="p-8 rounded border border-dashed border-zinc-800 text-center text-zinc-600 text-sm">
+                        <div className="p-8 rounded border border-dashed border-border text-center text-muted-foreground text-sm">
                             Select passengers to calculate total.
                         </div>
                     )}
 
                     {/* 2. PAYMENT STATUS (TILES) */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Payment Status</label>
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Status</label>
                         <div className="grid grid-cols-2 gap-3">
                             <StatusTile
                                 active={paymentState.status === 'paid_full'}
@@ -261,10 +261,10 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                     {/* 3. PAYMENT SPLIT (Moved Out) */}
                     {paymentState.status === 'paid_partial' && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Payment Split</label>
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Split</label>
                             <div className="flex items-center gap-3">
                                 <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                                     <input
                                         type="number"
                                         value={paymentState.amount !== undefined ? paymentState.amount : ""}
@@ -275,14 +275,14 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                                 setPaymentState({ ...paymentState, amount: Number(val.toFixed(2)) });
                                             }
                                         }}
-                                        className="w-full bg-zinc-900/80 border border-white/10 rounded-lg pl-6 pr-3 py-2 text-white font-mono focus:border-cyan-400/50 outline-none text-sm"
+                                        className="w-full bg-muted/50 border border-border rounded-lg pl-6 pr-3 py-2 text-foreground font-mono focus:border-primary/50 outline-none text-sm"
                                         placeholder="0.00"
                                         step="0.01"
                                     />
                                 </div>
-                                <div className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-cyan-400/10 border border-cyan-400/20">
-                                    <span className="text-xs font-medium text-cyan-400/70 uppercase">Balance</span>
-                                    <span className="text-sm font-mono font-bold text-cyan-400">${formatCurrency(grandTotal - (paymentState.amount || 0))}</span>
+                                <div className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                                    <span className="text-xs font-medium text-primary/70 uppercase">Balance</span>
+                                    <span className="text-sm font-mono font-bold text-primary">${formatCurrency(grandTotal - (paymentState.amount || 0))}</span>
                                 </div>
                             </div>
                         </div>
@@ -293,7 +293,7 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
 
                             {/* Method Tabs - Only show all options if NOT Pay Later (Pay Later forces card/terminal) */}
-                            <div className="flex p-1 bg-black/20 rounded-lg border border-white/5">
+                            <div className="flex p-1 bg-muted/30 rounded-lg border border-border">
                                 <MethodTab active={paymentState.method === 'credit_card'} onClick={() => handleMethodChange('credit_card')} label="Credit Card" />
                                 <MethodTab active={paymentState.method === 'crypto'} onClick={() => handleMethodChange('crypto')} label="Crypto" />
                                 {paymentState.status !== 'pay_later' && (
@@ -302,25 +302,25 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                             </div>
 
                             {/* Method Content */}
-                            <div className="bg-black/20 border border-white/5 rounded-xl p-4">
+                            <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
 
                                 {paymentState.method === 'credit_card' && (
                                     <div className="space-y-4">
-                                        <div className="p-3 bg-zinc-900/80 border border-white/10 rounded-lg flex items-center gap-3">
-                                            <CreditCard size={16} className="text-cyan-400" />
-                                            <input type="text" placeholder="Card Number" className="bg-transparent border-none outline-none text-white text-sm flex-1 placeholder:text-zinc-600 font-mono" />
+                                        <div className="p-3 bg-muted/50 border border-border rounded-lg flex items-center gap-3">
+                                            <CreditCard size={16} className="text-primary" />
+                                            <input type="text" placeholder="Card Number" className="bg-transparent border-none outline-none text-foreground text-sm flex-1 placeholder:text-muted-foreground font-mono" />
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <input type="text" placeholder="MM / YY" className="bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none placeholder:text-zinc-600 font-mono text-center" />
-                                            <input type="text" placeholder="CVC" className="bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none placeholder:text-zinc-600 font-mono text-center" />
+                                            <input type="text" placeholder="MM / YY" className="bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm outline-none placeholder:text-muted-foreground font-mono text-center" />
+                                            <input type="text" placeholder="CVC" className="bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm outline-none placeholder:text-muted-foreground font-mono text-center" />
                                         </div>
                                         <div className="grid grid-cols-5 gap-3">
-                                            <input type="text" placeholder="Billing Zip" className="col-span-2 bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none placeholder:text-zinc-600 font-mono" />
-                                            <input type="text" placeholder="Name on Card" className="col-span-3 bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none placeholder:text-zinc-600" />
+                                            <input type="text" placeholder="Billing Zip" className="col-span-2 bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm outline-none placeholder:text-muted-foreground font-mono" />
+                                            <input type="text" placeholder="Name on Card" className="col-span-3 bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm outline-none placeholder:text-muted-foreground" />
                                         </div>
 
                                         {paymentState.status === 'pay_later' && (
-                                            <div className="text-[10px] text-zinc-500 mt-2 text-center">
+                                            <div className="text-[10px] text-muted-foreground mt-2 text-center">
                                                 Card will be saved securely for future charges.
                                             </div>
                                         )}
@@ -339,19 +339,19 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                                             <div className="flex justify-center items-center gap-2">
                                                 {/* XRP Logo (Approximation with icon or text for now, using text/color standard) */}
                                                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center font-bold text-[10px] border border-white/20">X</div>
-                                                <span className="text-sm font-bold text-white">XRP / Ripple</span>
+                                                <span className="text-sm font-bold text-foreground">XRP / Ripple</span>
                                             </div>
-                                            <div className="text-xs font-mono bg-black/40 border border-white/10 p-2 rounded text-zinc-400 break-all select-all">
+                                            <div className="text-xs font-mono bg-muted/50 border border-border p-2 rounded text-muted-foreground break-all select-all">
                                                 rEb8TK3gBgk5auZkwc6sHnwrGVJH8DUAc
                                             </div>
-                                            <div className="text-[10px] text-zinc-500">Scan to pay with any supported wallet</div>
+                                            <div className="text-[10px] text-muted-foreground">Scan to pay with any supported wallet</div>
                                         </div>
                                     </div>
                                 )}
 
                                 {paymentState.method === 'cash' && (
                                     <div className="text-center py-4">
-                                        <p className="text-sm text-zinc-400 italic">Please collect cash at counter.</p>
+                                        <p className="text-sm text-muted-foreground italic">Please collect cash at counter.</p>
                                     </div>
                                 )}
                             </div>
@@ -359,35 +359,35 @@ export function ColumnThree({ currentRates, paxCounts, paymentState, setPaymentS
                     )}
                     {/* 5. RECEIPTS & NOTIFICATIONS */}
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="flex items-center gap-2 pb-2 border-b border-white/5 mt-8">
-                            <Mail size={16} className="text-cyan-400" />
-                            <span className="text-sm font-bold text-white uppercase tracking-wider">Receipts</span>
+                        <div className="flex items-center gap-2 pb-2 border-b border-border mt-8">
+                            <Mail size={16} className="text-primary" />
+                            <span className="text-sm font-bold text-foreground uppercase tracking-wider">Receipts</span>
                         </div>
 
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3 p-3 bg-black/20 border border-white/10 rounded-lg">
-                                <div className="bg-zinc-800 p-2 rounded-full">
-                                    <Mail size={14} className="text-zinc-400" />
+                            <div className="flex items-center gap-3 p-3 bg-muted/20 border border-border rounded-lg">
+                                <div className="bg-muted p-2 rounded-full">
+                                    <Mail size={14} className="text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <div className="text-sm font-medium text-white">Email Confirmation</div>
-                                    <div className="text-[10px] text-zinc-500">Send automatic receipt</div>
+                                    <div className="text-sm font-medium text-foreground">Email Confirmation</div>
+                                    <div className="text-[10px] text-muted-foreground">Send automatic receipt</div>
                                 </div>
-                                <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
-                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-400 rounded-full" />
+                                <div className="ml-auto w-8 h-4 bg-primary/20 rounded-full relative">
+                                    <div className="absolute right-0 top-0 w-4 h-4 bg-primary rounded-full" />
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 p-3 bg-black/20 border border-white/10 rounded-lg">
-                                <div className="bg-zinc-800 p-2 rounded-full">
-                                    <MessageSquare size={14} className="text-zinc-400" />
+                            <div className="flex items-center gap-3 p-3 bg-muted/20 border border-border rounded-lg">
+                                <div className="bg-muted p-2 rounded-full">
+                                    <MessageSquare size={14} className="text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <div className="text-sm font-medium text-white">SMS Updates</div>
-                                    <div className="text-[10px] text-zinc-500">Text notifications</div>
+                                    <div className="text-sm font-medium text-foreground">SMS Updates</div>
+                                    <div className="text-[10px] text-muted-foreground">Text notifications</div>
                                 </div>
-                                <div className="ml-auto w-8 h-4 bg-cyan-900 rounded-full relative">
-                                    <div className="absolute right-0 top-0 w-4 h-4 bg-cyan-400 rounded-full" />
+                                <div className="ml-auto w-8 h-4 bg-primary/20 rounded-full relative">
+                                    <div className="absolute right-0 top-0 w-4 h-4 bg-primary rounded-full" />
                                 </div>
                             </div>
                         </div>
@@ -407,8 +407,8 @@ function StatusTile({ active, onClick, label }: any) {
             className={cn(
                 "flex items-center justify-center py-3 px-4 rounded-xl border transition-all duration-200",
                 active
-                    ? "bg-cyan-950/30 border-cyan-400/50 ring-1 ring-cyan-400/20 text-white"
-                    : "bg-black/20 border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400"
+                    ? "bg-primary/10 border-primary/50 ring-1 ring-primary/20 text-foreground"
+                    : "bg-muted/30 border-border hover:border-border/80 hover:bg-muted/50 text-muted-foreground"
             )}
         >
             <div className="text-xs font-bold leading-tight">{label}</div>
@@ -423,8 +423,8 @@ function MethodTab({ active, onClick, label }: any) {
             className={cn(
                 "flex-1 py-1.5 text-xs font-medium rounded-md transition-all",
                 active
-                    ? "bg-zinc-800 text-white shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? "bg-background text-foreground shadow-sm border border-border"
+                    : "text-muted-foreground hover:text-foreground"
             )}
         >
             {label}

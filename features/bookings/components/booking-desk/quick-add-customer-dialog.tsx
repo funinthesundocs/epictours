@@ -116,10 +116,10 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-[425px]">
+            <DialogContent className="bg-background border-border text-foreground sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{customerToEdit ? "Edit Customer" : "Add New Customer"}</DialogTitle>
-                    <DialogDescription className="text-zinc-400">
+                    <DialogDescription className="text-muted-foreground">
                         {customerToEdit ? "Update customer details below." : "Quickly add a new customer to the database."}
                     </DialogDescription>
                 </DialogHeader>
@@ -127,21 +127,21 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                 <div className="grid gap-4 py-4">
                     {/* Name */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right text-zinc-400">
+                        <Label htmlFor="name" className="text-right text-muted-foreground">
                             Name
                         </Label>
                         <Input
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
+                            className="col-span-3 bg-muted/50 border-input focus-visible:ring-ring"
                             placeholder="John Doe"
                         />
                     </div>
 
                     {/* Email */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="email" className="text-right text-zinc-400">
+                        <Label htmlFor="email" className="text-right text-muted-foreground">
                             Email
                         </Label>
                         <Input
@@ -149,14 +149,14 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
+                            className="col-span-3 bg-muted/50 border-input focus-visible:ring-ring"
                             placeholder="john@example.com"
                         />
                     </div>
 
                     {/* Phone */}
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="phone" className="text-right text-zinc-400">
+                        <Label htmlFor="phone" className="text-right text-muted-foreground">
                             Phone
                         </Label>
                         <Input
@@ -164,26 +164,26 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            className="col-span-3 bg-zinc-900 border-zinc-700 focus-visible:ring-cyan-400"
+                            className="col-span-3 bg-muted/50 border-input focus-visible:ring-ring"
                             placeholder="+1 (555) 000-0000"
                         />
                     </div>
 
                     {error && (
-                        <div className="text-red-400 text-sm text-center">
+                        <div className="text-destructive text-sm text-center">
                             {error}
                         </div>
                     )}
                 </div>
 
                 <DialogFooter>
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-zinc-400 hover:text-white">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-foreground">
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={isLoading}
-                        className="bg-cyan-600 hover:bg-cyan-400 text-white"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {customerToEdit ? "Update Customer" : "Save Customer"}

@@ -89,17 +89,17 @@ export function AvailabilityListTable({
 
     if (!data || data.length === 0) {
         return (
-            <div className="h-full flex items-center justify-center bg-zinc-900 border border-zinc-800 rounded-2xl">
-                <div className="text-zinc-500 text-sm">No availabilities found for this month.</div>
+            <div className="h-full flex items-center justify-center bg-card border border-border rounded-2xl">
+                <div className="text-muted-foreground text-sm">No availabilities found for this month.</div>
             </div>
         );
     }
 
     return (
         <>
-            <div className="h-full overflow-auto relative bg-[#0b1115] border border-white/10 rounded-xl">
+            <div className="h-full overflow-auto relative bg-card border border-border rounded-xl">
                 <table className="w-full text-left">
-                    <thead className="bg-white/5 backdrop-blur-sm text-zinc-400 text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                    <thead className="bg-muted/50 backdrop-blur-sm text-foreground text-xs uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                         <tr>
                             {isBulkMode && (
                                 <th className="px-4 py-4 w-12">
@@ -108,7 +108,7 @@ export function AvailabilityListTable({
                                         checked={allSelected}
                                         ref={(el) => { if (el) el.indeterminate = someSelected; }}
                                         onChange={handleSelectAll}
-                                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-400 focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer"
+                                        className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                                     />
                                 </th>
                             )}
@@ -121,16 +121,16 @@ export function AvailabilityListTable({
                             <th className="px-6 py-4">Vehicle</th>
                             <th className="px-6 py-4">Assigned Staff</th>
                             <th className="px-6 py-4">Private Note</th>
-                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
+                            <th className="px-6 py-4 w-[100px] border-l border-border"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800 text-zinc-300">
+                    <tbody className="divide-y divide-border text-muted-foreground">
                         {data.map((item) => (
                             <tr
                                 key={item.id}
                                 className={cn(
-                                    "hover:bg-cyan-950/10 transition-colors group cursor-pointer",
-                                    selectedIds.has(item.id) && "bg-cyan-950/20"
+                                    "hover:bg-muted transition-colors group cursor-pointer",
+                                    selectedIds.has(item.id) && "bg-muted"
                                 )}
                                 onClick={() => isBulkMode ? handleSelectItem(item.id, { stopPropagation: () => { } } as React.MouseEvent) : onEdit?.(item.id, item)}
                             >
@@ -140,7 +140,7 @@ export function AvailabilityListTable({
                                             type="checkbox"
                                             checked={selectedIds.has(item.id)}
                                             onChange={(e) => handleSelectItem(item.id, e as unknown as React.MouseEvent)}
-                                            className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-cyan-400 focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer"
+                                            className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                                         />
                                     </td>
                                 )}
@@ -149,8 +149,8 @@ export function AvailabilityListTable({
                                     <span className={cn(
                                         "px-2 py-1 rounded text-xs font-bold uppercase",
                                         item.online_booking_status === 'open'
-                                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                            : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                            : "bg-destructive/10 text-destructive border border-destructive/20"
                                     )}>
                                         {item.online_booking_status}
                                     </span>
@@ -159,15 +159,15 @@ export function AvailabilityListTable({
                                 {/* Date */}
                                 <td className="px-6 py-4 align-middle">
                                     <div className="flex flex-col">
-                                        <span className="font-semibold text-white flex items-center gap-2">
-                                            <Calendar size={14} className="text-cyan-400" />
+                                        <span className="font-semibold text-foreground flex items-center gap-2">
+                                            <Calendar size={14} className="text-primary" />
                                             {(() => {
                                                 const [y, m, d] = item.start_date.split('-');
                                                 return `${m}-${d}-${y}`;
                                             })()}
                                         </span>
                                         {item.is_repeating && (
-                                            <span className="text-xs text-zinc-500 flex items-center gap-1 mt-1">
+                                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                                 <Repeat size={12} />
                                                 {item.repeat_days?.join(", ")}
                                             </span>
@@ -178,10 +178,10 @@ export function AvailabilityListTable({
                                 {/* Start Time */}
                                 <td className="px-6 py-4 align-middle">
                                     {item.duration_type === 'all_day' ? (
-                                        <span className="text-zinc-400 italic flex items-center gap-2"><Clock size={14} /> All Day</span>
+                                        <span className="text-muted-foreground italic flex items-center gap-2"><Clock size={14} /> All Day</span>
                                     ) : (
-                                        <span className="font-medium text-white flex items-center gap-2">
-                                            <Clock size={14} className="text-cyan-400" />
+                                        <span className="font-medium text-foreground flex items-center gap-2">
+                                            <Clock size={14} className="text-primary" />
                                             {new Date(`1970-01-01T${item.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </span>
                                     )}
@@ -190,18 +190,18 @@ export function AvailabilityListTable({
                                 {/* Duration */}
                                 <td className="px-6 py-4 align-middle">
                                     {item.duration_type === 'all_day' ? (
-                                        <span className="text-zinc-500 italic">All Day</span>
+                                        <span className="text-muted-foreground italic">All Day</span>
                                     ) : (
-                                        <span className="text-zinc-400">{item.hours_long} Hours</span>
+                                        <span className="text-muted-foreground">{item.hours_long} Hours</span>
                                     )}
                                 </td>
 
                                 {/* Capacity */}
                                 <td className="px-6 py-4 align-middle">
                                     <div className="flex items-center gap-2">
-                                        <Users size={14} className="text-zinc-500" />
+                                        <Users size={14} className="text-muted-foreground" />
                                         <span className={cn(
-                                            (item.booked_count || 0) > 0 && "text-cyan-400 font-medium"
+                                            (item.booked_count || 0) > 0 && "text-primary font-medium"
                                         )}>
                                             {item.booked_count || 0} / {item.max_capacity} pax
                                         </span>
@@ -210,49 +210,49 @@ export function AvailabilityListTable({
 
                                 {/* Route Schedule */}
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="flex items-center gap-2 text-zinc-400">
-                                        <MapPin size={14} className="text-zinc-500" />
-                                        <span>{item.route_name || <span className="text-zinc-600 italic">-</span>}</span>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <MapPin size={14} className="text-muted-foreground" />
+                                        <span>{item.route_name || <span className="text-muted-foreground italic">-</span>}</span>
                                     </div>
                                 </td>
 
                                 {/* Vehicle */}
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="flex items-center gap-2 text-zinc-400">
-                                        <Bus size={14} className="text-zinc-500" />
-                                        <span>{item.vehicle_name || <span className="text-zinc-600 italic">-</span>}</span>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Bus size={14} className="text-muted-foreground" />
+                                        <span>{item.vehicle_name || <span className="text-muted-foreground italic">-</span>}</span>
                                     </div>
                                 </td>
 
                                 {/* Staff */}
-                                <td className="px-6 py-4 align-middle text-zinc-400 max-w-[200px] truncate" title={item.staff_display}>
-                                    {item.staff_display || <span className="text-zinc-600 italic">Unassigned</span>}
+                                <td className="px-6 py-4 align-middle text-muted-foreground max-w-[200px] truncate" title={item.staff_display}>
+                                    {item.staff_display || <span className="text-muted-foreground italic">Unassigned</span>}
                                 </td>
 
                                 {/* Private Note */}
-                                <td className="px-6 py-4 align-middle text-zinc-400 max-w-[200px] truncate" title={item.private_announcement}>
+                                <td className="px-6 py-4 align-middle text-muted-foreground max-w-[200px] truncate" title={item.private_announcement}>
                                     {item.private_announcement ? (
                                         <div className="flex items-center gap-2">
-                                            <StickyNote size={14} className="text-zinc-500" />
+                                            <StickyNote size={14} className="text-muted-foreground" />
                                             {item.private_announcement}
                                         </div>
                                     ) : (
-                                        <span className="text-zinc-600 italic">-</span>
+                                        <span className="text-muted-foreground italic">-</span>
                                     )}
                                 </td>
 
                                 {/* Actions - Last Column */}
-                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                <td className="px-6 py-4 align-middle border-l border-border">
                                     <div className="flex items-center gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => onEdit?.(item.id, item)}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeletingItem(item)}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>

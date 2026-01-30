@@ -22,7 +22,7 @@ interface ColumnTwoProps {
     setOptionValues: (values: Record<string, any>) => void;
 }
 
-const inputStyles = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-400/50 focus:outline-none transition-colors placeholder:text-zinc-600";
+const inputStyles = "w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-primary/50 focus:outline-none transition-colors placeholder:text-muted-foreground/50";
 
 export function ColumnTwo({
     availability,
@@ -114,21 +114,21 @@ export function ColumnTwo({
                     />
 
                     {currentValue && pickupDetails && (
-                        <div className="p-3 bg-cyan-950/20 border border-cyan-400/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                            <div className="mt-0.5 text-cyan-400 flex-shrink-0">
+                        <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                            <div className="mt-0.5 text-primary flex-shrink-0">
                                 <MapPin size={16} />
                             </div>
                             <div className="space-y-1 min-w-0">
-                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
-                                <div className="text-sm text-zinc-200 font-medium truncate">{pickupDetails.locationName}</div>
-                                <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">{pickupDetails.time}</span>
+                                <div className="text-[10px] font-bold text-primary uppercase tracking-wider">Pickup Location</div>
+                                <div className="text-sm text-foreground font-medium truncate">{pickupDetails.locationName}</div>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                    <span className="bg-background/80 px-1.5 py-0.5 rounded text-foreground border border-border">{pickupDetails.time}</span>
                                     {pickupDetails.mapLink && (
                                         <a
                                             href={pickupDetails.mapLink}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="flex items-center gap-1 hover:text-cyan-400 transition-colors"
+                                            className="flex items-center gap-1 hover:text-primary transition-colors"
                                         >
                                             Map <ExternalLink size={10} />
                                         </a>
@@ -191,18 +191,18 @@ export function ColumnTwo({
                                     className={cn(
                                         "flex items-center gap-3 px-3 py-2 rounded-lg border text-left text-sm transition-colors",
                                         isSelected
-                                            ? "bg-cyan-400/10 border-cyan-400/50 text-cyan-400"
-                                            : "bg-zinc-900/80 border-white/10 text-zinc-300 hover:border-white/20"
+                                            ? "bg-primary/10 border-primary/50 text-primary"
+                                            : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30"
                                     )}
                                 >
                                     <div className={cn(
                                         "w-4 h-4 border flex items-center justify-center flex-shrink-0",
                                         isMulti ? "rounded" : "rounded-full",
-                                        isSelected ? "border-cyan-400 bg-cyan-400" : "border-white/20"
+                                        isSelected ? "border-primary bg-primary" : "border-border"
                                     )}>
                                         {isSelected && (
                                             <div className={cn(
-                                                "bg-white",
+                                                "bg-primary-foreground",
                                                 isMulti ? "w-2 h-2 rounded-sm" : "w-1.5 h-1.5 rounded-full"
                                             )} />
                                         )}
@@ -222,9 +222,9 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, Math.max(0, numValue - 1))}
-                            className="p-2 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
+                            className="p-2 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors"
                         >
-                            <Minus size={14} className="text-zinc-400" />
+                            <Minus size={14} className="text-muted-foreground" />
                         </button>
                         <input
                             type="number"
@@ -236,9 +236,9 @@ export function ColumnTwo({
                         <button
                             type="button"
                             onClick={() => handleValueChange(optId, numValue + 1)}
-                            className="p-2 bg-zinc-900/80 border border-white/10 rounded-lg hover:border-white/20 transition-colors"
+                            className="p-2 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors"
                         >
-                            <Plus size={14} className="text-zinc-400" />
+                            <Plus size={14} className="text-muted-foreground" />
                         </button>
                     </div>
                 );
@@ -282,18 +282,18 @@ export function ColumnTwo({
     return (
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
             {/* Header */}
-            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
-                <Settings size={16} className="text-cyan-400" />
-                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Options & Notes</span>
+            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-10">
+                <Settings size={16} className="text-primary" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Options & Notes</span>
             </div>
 
             {/* Content */}
             <div className="flex-1 flex flex-col min-h-0">
                 {/* Controls */}
-                <div className="px-6 py-6 grid grid-cols-2 gap-4 shrink-0 border-b border-white/5">
+                <div className="px-6 py-6 grid grid-cols-2 gap-4 shrink-0 border-b border-border">
                     {/* Schedule Selector */}
                     <div className={cn("space-y-1.5", !selectedOptionScheduleId ? "col-span-2" : "col-span-1")}>
-                        <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Option Schedule</label>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Option Schedule</label>
                         <div className="relative">
                             <Combobox
                                 value={selectedOptionScheduleId || undefined}
@@ -311,7 +311,7 @@ export function ColumnTwo({
                     {/* Variation Selector (Only show if schedule selected) */}
                     {selectedOptionScheduleId && (
                         <div className="space-y-1.5 col-span-1">
-                            <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Variation</label>
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Variation</label>
                             <div className="relative">
                                 <Combobox
                                     value={selectedVariation}
@@ -333,7 +333,7 @@ export function ColumnTwo({
                 {/* Options List */}
                 <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3 custom-scrollbar">
                     {selectedOptionScheduleId && currentOptions.length === 0 && (
-                        <div className="text-zinc-500 text-xs italic p-2 border border-dashed border-zinc-800 rounded">
+                        <div className="text-muted-foreground text-xs italic p-2 border border-dashed border-border rounded">
                             No options configured for this variation.
                         </div>
                     )}
@@ -345,11 +345,11 @@ export function ColumnTwo({
                         if (opt.type === 'header') {
                             return (
                                 <div key={optId} className="pt-4 pb-2">
-                                    <h4 className="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-400/30 pb-1 mb-1">
+                                    <h4 className="text-sm font-bold text-primary uppercase tracking-widest border-b border-primary/30 pb-1 mb-1">
                                         {opt.label}
                                     </h4>
                                     {opt.description && (
-                                        <p className="text-xs text-zinc-500 italic">
+                                        <p className="text-xs text-muted-foreground italic">
                                             {opt.description}
                                         </p>
                                     )}
@@ -358,22 +358,22 @@ export function ColumnTwo({
                         }
 
                         return (
-                            <div key={optId} className="p-3 bg-black/20 border border-white/10 rounded-lg hover:border-white/20 transition-colors">
+                            <div key={optId} className="p-3 bg-card border border-border rounded-lg hover:border-primary/20 transition-colors shadow-sm">
                                 {/* Label and Price */}
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
-                                        <div className="text-sm font-medium text-white flex items-center gap-2">
+                                        <div className="text-sm font-medium text-foreground flex items-center gap-2">
                                             {opt.label || "Unnamed Option"}
                                             {opt.required && (
-                                                <span className="text-[10px] text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">Required</span>
+                                                <span className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Required</span>
                                             )}
                                         </div>
                                         {opt.description && (
-                                            <div className="text-xs text-zinc-500 mt-0.5">{opt.description}</div>
+                                            <div className="text-xs text-muted-foreground mt-0.5">{opt.description}</div>
                                         )}
                                     </div>
                                     {opt.price > 0 && (
-                                        <div className="text-sm font-semibold text-cyan-400">
+                                        <div className="text-sm font-semibold text-primary">
                                             ${opt.price}
                                         </div>
                                     )}

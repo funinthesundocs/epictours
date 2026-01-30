@@ -38,13 +38,13 @@ function FieldSelector({ availableFields, currentFields, onSelect, onCancel }: F
                     onChange={onSelect}
                     options={options}
                     placeholder="Search fields to add..."
-                    inputClassName="bg-[#1a1f2e] border-cyan-400/30 text-zinc-200 placeholder:text-zinc-500 h-11"
+                    inputClassName="bg-card border-primary/30 text-foreground placeholder:text-muted-foreground h-11"
                 />
             </div>
             <button
                 type="button"
                 onClick={onCancel}
-                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:text-white transition-colors rounded-lg"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-lg"
             >
                 <X size={18} />
             </button>
@@ -110,7 +110,7 @@ interface SortableItemProps {
 
 // --- Field Preview Component ---
 function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
-    const inputClasses = "w-full bg-black/30 border border-white/10 rounded-md px-3 py-2 text-sm text-white placeholder:text-zinc-600 flex items-center";
+    const inputClasses = "w-full bg-muted/30 border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground flex items-center";
 
     if (type === 'text' || type === 'textarea') {
         return (
@@ -124,19 +124,19 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
         const options = fieldDef?.options || [];
         return (
             <div className="relative group/preview">
-                <div className={cn(inputClasses, "justify-between cursor-default group-hover/preview:border-cyan-400/30 transition-colors")}>
-                    <span className="text-zinc-500 text-xs">Select option...</span>
-                    <ChevronDown size={14} className="text-zinc-600" />
+                <div className={cn(inputClasses, "justify-between cursor-default group-hover/preview:border-primary/30 transition-colors")}>
+                    <span className="text-muted-foreground text-xs">Select option...</span>
+                    <ChevronDown size={14} className="text-muted-foreground" />
                 </div>
                 {options.length > 0 && (
-                    <div className="absolute top-full left-0 mt-1 w-full bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl z-30 hidden group-hover/preview:block py-1">
+                    <div className="absolute top-full left-0 mt-1 w-full bg-card border border-primary/30 rounded-lg shadow-2xl z-30 hidden group-hover/preview:block py-1">
                         {options.slice(0, 3).map((o: any) => (
-                            <div key={o.value} className="px-3 py-1.5 text-xs text-zinc-300 hover:bg-cyan-400/10 hover:text-cyan-400">
+                            <div key={o.value} className="px-3 py-1.5 text-xs text-foreground hover:bg-primary/10 hover:text-primary">
                                 {o.label}
                             </div>
                         ))}
                         {options.length > 3 && (
-                            <div className="px-3 py-1.5 text-xs text-zinc-500 italic border-t border-white/5">
+                            <div className="px-3 py-1.5 text-xs text-muted-foreground italic border-t border-border">
                                 +{options.length - 3} more
                             </div>
                         )}
@@ -154,13 +154,13 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
                 {options.slice(0, 3).map((opt: any, i: number) => (
                     <div key={i} className="flex items-center gap-2">
                         <div className={cn(
-                            "w-3 h-3 border border-white/30 flex-shrink-0",
+                            "w-3 h-3 border border-border flex-shrink-0",
                             isMulti ? "rounded" : "rounded-full"
                         )} />
-                        <span className="text-xs text-zinc-500">{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">{opt.label}</span>
                     </div>
                 ))}
-                {options.length > 3 && <span className="text-xs text-zinc-600">+{options.length - 3}</span>}
+                {options.length > 3 && <span className="text-xs text-muted-foreground">+{options.length - 3}</span>}
             </div>
         );
     }
@@ -168,16 +168,16 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
     if (type === 'date') {
         return (
             <div className={cn(inputClasses, "justify-between")}>
-                <span className="text-zinc-500 text-xs">Pick a date...</span>
-                <CalendarIcon size={14} className="text-zinc-600" />
+                <span className="text-muted-foreground text-xs">Pick a date...</span>
+                <CalendarIcon size={14} className="text-muted-foreground" />
             </div>
         );
     }
 
     if (type === 'header') {
         return (
-            <div className="border-b border-cyan-400/30 pb-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">{fieldDef?.label || 'Section'}</span>
+            <div className="border-b border-primary/30 pb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">{fieldDef?.label || 'Section'}</span>
             </div>
         );
     }
@@ -185,8 +185,8 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
     if (type === 'transport') {
         return (
             <div className={cn(inputClasses, "justify-between")}>
-                <span className="text-zinc-500 text-xs">Select Hotel...</span>
-                <ChevronDown size={14} className="text-zinc-600" />
+                <span className="text-muted-foreground text-xs">Select Hotel...</span>
+                <ChevronDown size={14} className="text-muted-foreground" />
             </div>
         );
     }
@@ -194,10 +194,10 @@ function FieldPreview({ type, fieldDef }: { type: string; fieldDef?: any }) {
     if (type === 'smart_pickup') {
         return (
             <div className={cn(inputClasses, "justify-between")}>
-                <select className="w-full bg-transparent appearance-none text-xs text-zinc-500 cursor-not-allowed outline-none" disabled>
+                <select className="w-full bg-transparent appearance-none text-xs text-muted-foreground cursor-not-allowed outline-none" disabled>
                     <option>Pickup Hotel (Smart)...</option>
                 </select>
-                <ChevronDown size={14} className="text-zinc-600 absolute right-3 pointer-events-none" />
+                <ChevronDown size={14} className="text-muted-foreground absolute right-3 pointer-events-none" />
             </div>
         );
     }
@@ -234,12 +234,12 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
             className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300 select-none"
         >
             {/* Field Container */}
-            <div className="flex-1 bg-white/5 px-4 py-3 rounded-xl border border-white/5 relative">
+            <div className="flex-1 bg-card px-4 py-3 rounded-xl border border-border relative">
                 {/* Mobile Delete Button - Top Right */}
                 <button
                     type="button"
                     onClick={onRemove}
-                    className="md:hidden absolute top-2 right-2 p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="md:hidden absolute top-2 right-2 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                 >
                     <Trash2 size={16} />
                 </button>
@@ -256,16 +256,16 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                         {/* Row 1 (Mobile) / Col 1-4 (Desktop): Grip (desktop) & Label */}
                         <div className="md:col-span-4 flex items-center gap-3 pr-10 md:pr-0">
                             {/* Desktop grip */}
-                            <div {...attributes} {...listeners} className="hidden md:block text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing border-r border-white/10 pr-3 py-1">
+                            <div {...attributes} {...listeners} className="hidden md:block text-muted-foreground cursor-grab hover:text-foreground active:cursor-grabbing border-r border-border pr-3 py-1">
                                 <GripVertical size={16} />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-medium text-zinc-200 truncate" title={item.label}>
+                                <span className="text-sm font-medium text-foreground truncate" title={item.label}>
                                     {(item.label || "Unknown Field").length > 25
                                         ? (item.label || "Unknown Field").substring(0, 25) + "..."
                                         : (item.label || "Unknown Field")}
                                 </span>
-                                <span className="text-[10px] uppercase text-zinc-500">{item.type || "field"}</span>
+                                <span className="text-[10px] uppercase text-muted-foreground">{item.type || "field"}</span>
                             </div>
                         </div>
 
@@ -280,26 +280,26 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                             <div className="flex items-center gap-1.5">
                                 <span
                                     onClick={() => onTogglePublic(!item.is_public)}
-                                    className={cn("text-[10px] font-medium transition-colors cursor-pointer select-none uppercase tracking-wider", !item.is_public ? "text-cyan-400" : "text-zinc-500")}
+                                    className={cn("text-[10px] font-medium transition-colors cursor-pointer select-none uppercase tracking-wider", !item.is_public ? "text-primary" : "text-muted-foreground")}
                                 >
                                     {!item.is_public ? "Private" : "Public"}
                                 </span>
                                 <Switch
                                     checked={!item.is_public}
                                     onCheckedChange={(val) => onTogglePublic(!val)}
-                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-400"
+                                    className="scale-90 origin-right data-[state=checked]:bg-primary"
                                 />
                             </div>
 
                             {/* Required Toggle */}
                             <div className="flex items-center gap-1.5">
-                                <span className={cn("text-[10px] font-medium uppercase tracking-wider", item.required ? "text-cyan-400" : "text-zinc-500")}>
+                                <span className={cn("text-[10px] font-medium uppercase tracking-wider", item.required ? "text-primary" : "text-muted-foreground")}>
                                     {item.required ? "Req" : "Opt"}
                                 </span>
                                 <Switch
                                     checked={item.required}
                                     onCheckedChange={onToggleRequired}
-                                    className="scale-90 origin-right data-[state=checked]:bg-cyan-400"
+                                    className="scale-90 origin-right data-[state=checked]:bg-primary"
                                 />
                             </div>
                         </div>
@@ -309,7 +309,7 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                             <button
                                 type="button"
                                 onClick={onRemove}
-                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                             >
                                 <Trash2 size={16} />
                             </button>
@@ -325,7 +325,7 @@ function SortableItem({ id, item, fieldDef, index, onRemove, onToggleRequired, o
                     variant="ghost"
                     size="sm"
                     onClick={onInsert}
-                    className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-10 w-10 p-0 shrink-0"
                 >
                     <Plus size={16} />
                 </Button>
@@ -618,8 +618,8 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
             className={cn(
                 "shrink-0 px-6 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                 activeTab === id
-                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
+                    ? "border-primary text-primary bg-primary/5"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80"
             )}
         >
             {label}
@@ -637,7 +637,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
         >
             <form onSubmit={handleSubmit(onSubmit, (errors) => console.error("Form Validation Errors:", errors))} className="pt-0 h-full flex flex-col">
                 {/* Header Config */}
-                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-white/5">
+                <div className="px-6 pt-6 pb-4 space-y-4 border-b border-border">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Schedule Name *</Label>
@@ -652,12 +652,12 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center border-b border-white/10 mb-0 sticky top-0 bg-[#0b1115] z-10">
+                <div className="flex items-center border-b border-border mb-0 sticky top-0 bg-background z-10">
                     {/* Left Arrow */}
                     <button
                         type="button"
                         onClick={() => scrollTabs('left')}
-                        className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-r border-white/10"
+                        className="shrink-0 p-3 text-muted-foreground hover:text-primary hover:bg-muted transition-colors border-r border-border"
                     >
                         <ChevronLeft size={18} />
                     </button>
@@ -678,14 +678,14 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                     <button
                         type="button"
                         onClick={() => scrollTabs('right')}
-                        className="shrink-0 p-3 text-zinc-500 hover:text-cyan-400 hover:bg-white/5 transition-colors border-l border-white/10"
+                        className="shrink-0 p-3 text-muted-foreground hover:text-primary hover:bg-muted transition-colors border-l border-border"
                     >
                         <ChevronRight size={18} />
                     </button>
                 </div>
 
                 {/* Builder Area */}
-                <div className="flex-1 overflow-y-auto p-6 bg-zinc-950/20">
+                <div className="flex-1 overflow-y-auto p-6 bg-muted/20">
                     <div className="flex items-center justify-end mb-6">
                         {activeTab !== "Retail" && (
                             <Button
@@ -693,7 +693,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                                 variant="outline"
                                 size="sm"
                                 onClick={handleCopyFromRetail}
-                                className="h-8 text-xs bg-black/40 border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white"
+                                className="h-8 text-xs bg-black/40 border-border hover:bg-muted text-muted-foreground hover:text-foreground"
                             >
                                 <Copy className="mr-2 h-3 w-3" /> Copy Retail
                             </Button>
@@ -707,9 +707,9 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                                 <button
                                     type="button"
                                     onClick={() => setInsertIndex(-1)}
-                                    className="w-full py-8 border border-dashed border-white/10 rounded-xl text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                                    className="w-full py-8 border border-dashed border-border rounded-xl text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                                 >
-                                    <div className="p-3 rounded-full bg-white/5 group-hover:bg-cyan-400/10 transition-colors">
+                                    <div className="p-3 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
                                         <Plus size={24} className="opacity-50 group-hover:opacity-100" />
                                     </div>
                                     <span className="text-sm font-medium">Add First Option</span>
@@ -780,7 +780,7 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-between items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/80 backdrop-blur-md">
                     {/* Save to All Option */}
                     <div className="flex items-center gap-2">
                         <div
@@ -789,11 +789,11 @@ export function EditBookingOptionSheet({ isOpen, onClose, onSuccess, initialData
                         >
                             <div className={cn(
                                 "w-4 h-4 rounded border flex items-center justify-center transition-colors",
-                                saveToAll ? "bg-cyan-400 border-cyan-400 text-black" : "border-zinc-600 bg-transparent group-hover:border-zinc-500"
+                                saveToAll ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground bg-transparent group-hover:border-foreground"
                             )}>
                                 {saveToAll && <Check size={12} strokeWidth={3} />}
                             </div>
-                            <Label className="cursor-pointer text-zinc-400 group-hover:text-zinc-300 normal-case text-sm mb-0">Apply to all variations</Label>
+                            <Label className="cursor-pointer text-muted-foreground group-hover:text-foreground normal-case text-sm mb-0">Apply to all variations</Label>
                         </div>
                     </div>
 

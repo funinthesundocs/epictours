@@ -108,7 +108,7 @@ export default function BookingOptionsPage() {
             action={
                 <Button
                     onClick={handleCreate}
-                    className="bg-cyan-400 hover:bg-cyan-300 text-black font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm transition-all"
                 >
                     <Plus className="mr-2 h-4 w-4" /> New Booking Option
                 </Button>
@@ -118,20 +118,20 @@ export default function BookingOptionsPage() {
                 {/* Toolbar */}
                 <div className="flex items-center gap-4 shrink-0">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search schedules..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 bg-[#0f172a]/50 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/20"
+                            className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
                         />
                     </div>
                 </div>
 
                 {/* Table Area */}
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     {isLoading ? (
-                        <div className="flex items-center justify-center h-full text-zinc-500 animate-pulse">
+                        <div className="flex items-center justify-center h-full text-muted-foreground animate-pulse">
                             Loading schedules...
                         </div>
                     ) : (

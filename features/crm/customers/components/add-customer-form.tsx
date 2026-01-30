@@ -204,9 +204,9 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
     };
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
-        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
-            <Icon size={16} className="text-cyan-400" />
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        <div className={`flex items-center gap-2 bg-muted/30 -mx-6 px-6 py-3 mb-6 border-y border-border ${className || ''}`}>
+            <Icon size={16} className="text-primary" />
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -223,19 +223,19 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2 md:col-span-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <User size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <User size={16} className="text-muted-foreground" />
                                     Name <RequiredIndicator />
                                 </Label>
                                 <Input
                                     {...register("name")}
                                     placeholder="Jane Doe"
                                 />
-                                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Flag size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Flag size={16} className="text-muted-foreground" />
                                     Status
                                 </Label>
                                 <CustomSelect
@@ -244,14 +244,14 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                                     options={STATUS_OPTIONS}
                                     placeholder="Status..."
                                 />
-                                {errors.status && <p className="text-xs text-red-400">{errors.status.message}</p>}
+                                {errors.status && <p className="text-xs text-destructive">{errors.status.message}</p>}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Mail size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Mail size={16} className="text-muted-foreground" />
                                     Email <RequiredIndicator />
                                 </Label>
                                 <Input
@@ -259,12 +259,12 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                                     type="email"
                                     placeholder="jane@example.com"
                                 />
-                                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Phone size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Phone size={16} className="text-muted-foreground" />
                                     Phone
                                 </Label>
                                 <Input
@@ -291,8 +291,8 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                         {/* Preferred Messaging App */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <MessageCircle size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <MessageCircle size={16} className="text-muted-foreground" />
                                     Preferred Messaging
                                 </Label>
                                 <CustomSelect
@@ -310,7 +310,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                             {/* Handle/Nickname - Only shows when app is selected */}
                             {watch("preferences.preferred_messaging_app") && (
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
+                                    <Label className="text-foreground flex items-center gap-2">
                                         Handle / Nickname
                                     </Label>
                                     <Input
@@ -331,8 +331,8 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Hotel - Smart Autocomplete */}
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Building size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Building size={16} className="text-muted-foreground" />
                                     Hotel / Accommodation
                                 </Label>
                                 <Combobox
@@ -345,8 +345,8 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
 
                             {/* Referral Source */}
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Users size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Users size={16} className="text-muted-foreground" />
                                     Referral Source
                                 </Label>
                                 <CustomSelect
@@ -361,14 +361,14 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
 
                         {/* Notes */}
                         <div className="space-y-2">
-                            <Label className="text-zinc-300 flex items-center gap-2">
-                                <FileText size={16} className="text-zinc-500" />
+                            <Label className="text-foreground flex items-center gap-2">
+                                <FileText size={16} className="text-muted-foreground" />
                                 Notes (Internal)
                             </Label>
                             <Textarea
                                 {...register("preferences.notes")}
                                 placeholder="Any special requests, internal context, or details..."
-                                className="min-h-[100px] bg-[#0b1115] border-white/10"
+                                className="min-h-[100px] bg-muted border-border"
                             />
                         </div>
                     </div>
@@ -376,22 +376,22 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
 
                 {/* Error Message */}
                 {submitError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive text-center">
                         {submitError}
                     </div>
                 )}
             </div>
 
             {/* Fixed Footer */}
-            <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+            <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-card">
                 <Button
                     type="submit"
                     disabled={isSubmitting || !isDirty}
                     className={cn(
                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                        isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                            isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                            isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" :
+                                "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                     )}
                 >
                     {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

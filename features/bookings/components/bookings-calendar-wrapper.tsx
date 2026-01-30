@@ -80,6 +80,7 @@ export function BookingsCalendarWrapper() {
                     id, start_date, start_time, max_capacity, experience_id,
                     pricing_schedule_id, booking_option_schedule_id, transportation_route_id,
                     driver_id, guide_id, vehicle_id, private_announcement, public_announcement,
+                    is_repeating, duration_type, hours_long, online_booking_status, repeat_days,
                     experiences!inner(id, name, short_code)
                 )
             `)
@@ -88,8 +89,8 @@ export function BookingsCalendarWrapper() {
 
         console.log("DEBUG: Fetched booking:", booking, "Error:", error);
 
-        if (booking?.availabilities) {
-            const avail = booking.availabilities as any;
+        if ((booking as any)?.availabilities) {
+            const avail = (booking as any).availabilities;
             console.log("DEBUG: Setting availability:", avail);
             // Construct availability object that matches the expected shape
             setSelectedAvailability({
@@ -108,6 +109,11 @@ export function BookingsCalendarWrapper() {
                 vehicle_id: avail.vehicle_id,
                 private_announcement: avail.private_announcement,
                 public_announcement: avail.public_announcement,
+                is_repeating: avail.is_repeating ?? false,
+                duration_type: avail.duration_type || 'time_range',
+                hours_long: avail.hours_long,
+                online_booking_status: avail.online_booking_status || 'closed',
+                repeat_days: avail.repeat_days,
                 booking_records_count: 0
             } as Availability);
         }
@@ -123,6 +129,7 @@ export function BookingsCalendarWrapper() {
         setRefreshTrigger(prev => prev + 1);
         setIsBookingDeskOpen(false);
         setEditingBookingId(null);
+        setSelectedAvailability(null);
     }, []);
 
     // Handle refresh from manager
@@ -137,7 +144,7 @@ export function BookingsCalendarWrapper() {
             action={
                 <NewBookingMenu onSelectAvailability={handleNewBooking}>
                     <button
-                        className="flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black text-sm font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold rounded-lg transition-colors shadow-glow"
                     >
                         <Plus size={16} />
                         New Booking
@@ -171,6 +178,7 @@ export function BookingsCalendarWrapper() {
                 onClose={() => {
                     setIsBookingDeskOpen(false);
                     setEditingBookingId(null);
+                    setSelectedAvailability(null);
                 }}
                 onSuccess={handleRefresh}
                 availability={selectedAvailability}
@@ -180,7 +188,10 @@ export function BookingsCalendarWrapper() {
             {/* Availability Manager (Actions & Settings) */}
             <AvailabilityManager
                 isOpen={isManagerOpen}
-                onClose={() => setIsManagerOpen(false)}
+                onClose={() => {
+                    setIsManagerOpen(false);
+                    setSelectedAvailability(null);
+                }}
                 availability={selectedAvailability}
                 onBookingEdit={handleBookingEdit}
                 onManifest={handleManifest}
@@ -190,7 +201,10 @@ export function BookingsCalendarWrapper() {
             {/* Manifest Panel (Coming Soon) */}
             <ManifestPanel
                 isOpen={isManifestOpen}
-                onClose={() => setIsManifestOpen(false)}
+                onClose={() => {
+                    setIsManifestOpen(false);
+                    setSelectedAvailability(null);
+                }}
                 availability={selectedAvailability}
             />
         </PageShell>

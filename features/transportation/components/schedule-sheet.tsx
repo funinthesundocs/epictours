@@ -92,14 +92,14 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
             className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300 select-none"
         >
             {/* Field Container */}
-            <div className="flex-1 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-400/30 relative">
+            <div className="flex-1 rounded-lg border bg-muted/40 border-border transition-colors focus-within:border-primary/50 relative">
                 {/* Mobile Delete Button - Top Right */}
                 <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => remove(index)}
-                    className="md:hidden absolute top-1 right-1 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-7 w-7 p-0 rounded-full z-10"
+                    className="md:hidden absolute top-1 right-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0 rounded-full z-10"
                 >
                     <Trash2 size={14} />
                 </Button>
@@ -110,7 +110,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                     <div
                         {...attributes}
                         {...listeners}
-                        className="text-zinc-600 cursor-grab hover:text-zinc-400 active:cursor-grabbing px-3 py-3 border-r border-white/5 touch-none flex items-center self-stretch"
+                        className="text-muted-foreground cursor-grab hover:text-foreground active:cursor-grabbing px-3 py-3 border-r border-border touch-none flex items-center self-stretch"
                     >
                         <GripVertical size={16} />
                     </div>
@@ -118,7 +118,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                     {/* Content Area - Stacked on mobile */}
                     <div className="flex-1 flex flex-col md:flex-row md:items-center pr-8 md:pr-2">
                         {/* Time Input */}
-                        <div className="w-32 md:w-32 md:border-r border-b md:border-b-0 border-white/5 relative p-2 md:p-0">
+                        <div className="w-32 md:w-32 md:border-r border-b md:border-b-0 border-border relative p-2 md:p-0">
                             <Controller
                                 control={control}
                                 name={`stops.${index}.pickup_time`}
@@ -127,13 +127,12 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                                         value={field.value}
                                         onChange={field.onChange}
                                         placeholder="00:00 AM"
-                                        className="w-full md:bg-transparent md:border-none text-white text-sm h-[42px] md:rounded-none px-3 md:hover:bg-white/5 md:shadow-none"
+                                        className="w-full md:bg-transparent md:border-none text-foreground text-sm h-[42px] md:rounded-none px-3 md:hover:bg-muted/50 md:shadow-none"
                                     />
                                 )}
                             />
                         </div>
 
-                        {/* Location Select */}
                         <div className="flex-1 min-w-0 relative">
                             <Controller
                                 control={control}
@@ -144,7 +143,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                                         value={field.value}
                                         onChange={(val) => field.onChange(val)}
                                         placeholder="Select Location..."
-                                        className="w-full bg-transparent border-none text-white text-sm h-[42px] px-3 shadow-none hover:bg-white/5"
+                                        className="w-full bg-transparent border-none text-foreground text-sm h-[42px] px-3 shadow-none hover:bg-muted/50"
                                     />
                                 )}
                             />
@@ -156,7 +155,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                             variant="ghost"
                             size="sm"
                             onClick={() => remove(index)}
-                            className="hidden md:flex text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0 rounded-full mr-1"
+                            className="hidden md:flex text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full mr-1"
                         >
                             <Trash2 size={15} />
                         </Button>
@@ -170,7 +169,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
                 variant="ghost"
                 size="sm"
                 onClick={() => insert(index + 1, { pickup_point_id: "", pickup_time: "" })}
-                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
+                className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-10 w-10 p-0 shrink-0"
             >
                 <Plus size={16} />
             </Button>
@@ -356,16 +355,16 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 text-cyan-400 border-b border-white/10 pb-2 mb-6 mt-2">
+        <div className="flex items-center gap-2 text-primary border-b border-border pb-2 mb-6 mt-2">
             <Icon size={18} />
             <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
         </div>
     );
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors";
+    const inputClasses = "w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none transition-colors";
 
     // Custom Fields "Input" style equivalent
-    const rowInputClasses = "w-full bg-transparent border-none text-white text-sm focus:ring-0 placeholder:text-zinc-600 h-full py-2 px-3";
+    const rowInputClasses = "w-full bg-transparent border-none text-foreground text-sm focus:ring-0 placeholder:text-muted-foreground h-full py-2 px-3";
 
     return (
         <SidePanel
@@ -379,7 +378,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             <div className="h-full flex flex-col bg-transparent">
                 <form id="schedule-form" onSubmit={form.handleSubmit(handleMasterSubmit)} className="h-full flex flex-col">
                     {/* Top Section: Schedule Details (Fixed) */}
-                    <div className="shrink-0 p-6 border-b border-white/5 space-y-4">
+                    <div className="shrink-0 p-6 border-b border-border space-y-4">
                         <div className="flex flex-row gap-4 items-end">
                             <div className="flex-1 space-y-2">
                                 <Label>Schedule Name</Label>
@@ -412,10 +411,10 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                     {/* Bottom Section: Route Stops (Scrollable) */}
                     <div className="flex-1 flex flex-col min-h-0 bg-transparent">
                         {/* Sticky Header */}
-                        <div className="shrink-0 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
+                        <div className="shrink-0 bg-muted/50 backdrop-blur-md border-b border-border sticky top-0 z-10 w-full animate-in fade-in slide-in-from-top-2">
                             <div className="flex items-center gap-2 px-6 py-4">
-                                <Route size={16} className="text-cyan-400" />
-                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Route Stops</span>
+                                <Route size={16} className="text-primary" />
+                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Route Stops</span>
                             </div>
                         </div>
 
@@ -452,7 +451,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                                     <button
                                         type="button"
                                         onClick={() => append({ pickup_point_id: "", pickup_time: "" })}
-                                        className="w-full py-4 border border-dashed border-white/10 rounded-lg text-zinc-500 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/5 transition-all flex flex-col items-center justify-center gap-2"
+                                        className="w-full py-4 border border-dashed border-border rounded-lg text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2"
                                     >
                                         <Plus size={24} className="opacity-50" />
                                         <span className="text-sm font-medium">Add First Stop</span>
@@ -464,18 +463,18 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                 </form>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-muted/40 backdrop-blur-md">
                     <Button
                         type="submit"
                         form="schedule-form"
                         disabled={isSubmitting || !form.formState.isDirty}
                         className={cn(
-                            "bg-cyan-400 hover:bg-cyan-300 text-black font-bold min-w-[120px]",
+                            "min-w-[120px]",
                             isSubmitting
-                                ? "bg-cyan-400/50 text-white cursor-not-allowed"
+                                ? "bg-primary/50 cursor-not-allowed"
                                 : form.formState.isDirty
-                                    ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                                    ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.4)]"
+                                    : "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? (

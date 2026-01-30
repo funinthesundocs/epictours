@@ -285,9 +285,9 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
     };
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
-        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
-            <Icon size={16} className="text-cyan-400" />
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        <div className={`flex items-center gap-2 bg-muted/50 -mx-6 px-6 py-3 mb-6 border-y border-border/50 ${className || ''}`}>
+            <Icon size={16} className="text-primary" />
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -308,16 +308,16 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                         <SectionHeader icon={Info} title="Basic Information" className="-mt-6 border-t-0" />
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <User size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <User size={16} className="text-muted-foreground" />
                                     Full Name
                                 </Label>
                                 <Input {...register("name")} placeholder="e.g. John Doe" />
                                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <BadgeCheck size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <BadgeCheck size={16} className="text-muted-foreground" />
                                     Position
                                 </Label>
                                 <Combobox
@@ -337,8 +337,8 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
-                                        <Phone size={16} className="text-zinc-500" />
+                                    <Label className="text-foreground flex items-center gap-2">
+                                        <Phone size={16} className="text-muted-foreground" />
                                         Phone Number
                                     </Label>
                                     <Input
@@ -351,8 +351,8 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
-                                        <Mail size={16} className="text-zinc-500" />
+                                    <Label className="text-foreground flex items-center gap-2">
+                                        <Mail size={16} className="text-muted-foreground" />
                                         Email Address
                                     </Label>
                                     <Input {...register("email")} type="email" placeholder="john@example.com" />
@@ -361,17 +361,17 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <MessageCircle size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <MessageCircle size={16} className="text-muted-foreground" />
                                     Messaging Apps
                                 </Label>
 
                                 <div className="space-y-2">
                                     {fields.map((field, index) => (
                                         <div key={field.id} className="flex items-center gap-2 group animate-in slide-in-from-left-2 duration-300">
-                                            <div className="flex-1 flex items-center pr-2 rounded-lg border bg-white/5 border-white/5 transition-colors focus-within:border-cyan-400/30">
+                                            <div className="flex-1 flex items-center pr-2 rounded-lg border bg-muted/50 border-border focus-within:border-primary/30">
                                                 {/* App Name */}
-                                                <div className="w-[40%] min-w-[120px] border-r border-white/5 h-full relative">
+                                                <div className="w-[40%] min-w-[120px] border-r border-border h-full relative">
                                                     <Controller
                                                         control={control}
                                                         name={`messaging_apps.${index}.app`}
@@ -381,7 +381,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                                 value={field.value}
                                                                 onChange={(val) => field.onChange(val)}
                                                                 placeholder="App..."
-                                                                className="w-full bg-transparent border-none text-white text-sm h-[42px] px-3 shadow-none hover:bg-white/5 rounded-none rounded-l-lg"
+                                                                className="w-full bg-transparent border-none text-foreground text-sm h-[42px] px-3 shadow-none hover:bg-muted rounded-none rounded-l-lg"
                                                             />
                                                         )}
                                                     />
@@ -408,7 +408,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                             }
                                                         })}
                                                         placeholder="@handle or number"
-                                                        className="w-full bg-transparent border-none text-white text-sm focus:ring-0 placeholder:text-zinc-600 h-[42px] px-3 outline-none"
+                                                        className="w-full bg-transparent border-none text-foreground text-sm focus:ring-0 placeholder:text-muted-foreground h-[42px] px-3 outline-none"
                                                     />
                                                 </div>
                                                 {/* Delete Button (Inside) */}
@@ -417,7 +417,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => remove(index)}
-                                                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0 rounded-full mr-1"
+                                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full mr-1"
                                                 >
                                                     <Trash2 size={15} />
                                                 </Button>
@@ -429,7 +429,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => append({ app: "", handle: "" })}
-                                                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-8 w-8 p-0 rounded-lg transition-colors shrink-0"
+                                                className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-8 w-8 p-0 rounded-lg transition-colors shrink-0"
                                             >
                                                 <Plus size={16} />
                                             </Button>
@@ -439,14 +439,14 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <FileText size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <FileText size={16} className="text-muted-foreground" />
                                     Notes
                                 </Label>
                                 <Textarea
                                     {...register("notes")}
                                     placeholder="Additional notes..."
-                                    className="min-h-[100px] bg-[#0b1115] border-white/10"
+                                    className="min-h-[100px] bg-muted/50 border-border"
                                 />
                             </div>
                         </div>
@@ -458,10 +458,10 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                             <SectionHeader icon={UserPlus} title="User Account (Optional)" />
                             <div className="space-y-4">
                                 {/* Toggle */}
-                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
                                     <div>
-                                        <p className="font-medium text-white">Create Login Account</p>
-                                        <p className="text-sm text-zinc-400">Allow this staff member to log in to the system</p>
+                                        <p className="font-medium text-foreground">Create Login Account</p>
+                                        <p className="text-sm text-muted-foreground">Allow this staff member to log in to the system</p>
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input
@@ -469,23 +469,23 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                             {...register("create_user_account")}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                        <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     </label>
                                 </div>
 
                                 {/* Password section - shows when toggle is on */}
                                 {watch("create_user_account") && (
-                                    <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/30 space-y-3">
+                                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/30 space-y-3">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <KeyRound size={16} className="text-cyan-400" />
-                                                <span className="text-sm font-medium text-white">Temporary Password</span>
+                                                <KeyRound size={16} className="text-primary" />
+                                                <span className="text-sm font-medium text-foreground">Temporary Password</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     type="button"
                                                     onClick={() => setValue("temp_password", generatePassword(), { shouldDirty: true })}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
                                                     title="Generate new password"
                                                 >
                                                     <RefreshCw size={14} />
@@ -496,7 +496,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                         navigator.clipboard.writeText(watch("temp_password") || "");
                                                         toast.success("Password copied!");
                                                     }}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
                                                     title="Copy password"
                                                 >
                                                     <Copy size={14} />
@@ -504,7 +504,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword(!showPassword)}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
                                                     title={showPassword ? "Hide password" : "Show password"}
                                                 >
                                                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -515,11 +515,11 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                                             <Input
                                                 {...register("temp_password")}
                                                 type={showPassword ? "text" : "password"}
-                                                className="font-mono text-sm bg-[#0b1115] border-white/10"
+                                                className="font-mono text-sm bg-muted/50 border-border"
                                                 readOnly
                                             />
                                         </div>
-                                        <p className="text-xs text-cyan-300/70">
+                                        <p className="text-xs text-primary/70">
                                             ⚠️ Share this password securely. User will be prompted to change it on first login.
                                         </p>
                                         {!watch("email") && (
@@ -534,11 +534,11 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                     )}
                 </div>
 
-                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/80 backdrop-blur-md">
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {initialData ? "Update" : "Create"}

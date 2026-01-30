@@ -90,7 +90,7 @@ export function AvailabilityActionMenu({
     return (
         <div
             ref={menuRef}
-            className="fixed z-50 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden min-w-[280px]"
+            className="fixed z-50 bg-popover border border-border rounded-xl shadow-2xl shadow-black/20 overflow-hidden min-w-[280px]"
             style={{
                 left: menuPosition?.x ?? 0,
                 top: menuPosition?.y ?? 0,
@@ -99,9 +99,9 @@ export function AvailabilityActionMenu({
             }}
         >
             {/* Header with Experience Info */}
-            <div className="px-4 py-3 bg-white/5 border-b border-white/10">
-                <div className="text-cyan-400 font-bold text-sm">{availability.experience_name || "Experience"}</div>
-                <div className="text-white text-xs mt-0.5">
+            <div className="px-4 py-3 bg-muted/40 border-b border-border">
+                <div className="text-primary font-bold text-sm">{availability.experience_name || "Experience"}</div>
+                <div className="text-foreground text-xs mt-0.5">
                     {(() => {
                         const [y, m, d] = availability.start_date.split('-');
                         return `${m}-${d}-${y}`;
@@ -118,35 +118,35 @@ export function AvailabilityActionMenu({
             <div className="py-1">
                 <button
                     onClick={() => { onNewBooking(); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors text-left"
                 >
-                    <Plus size={18} className="text-cyan-400" />
-                    <span className="text-white font-medium">New Booking</span>
+                    <Plus size={18} className="text-primary" />
+                    <span className="text-foreground font-medium">New Booking</span>
                 </button>
                 <button
                     onClick={() => { onActionsSettings(); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors text-left"
                 >
-                    <Settings size={18} className="text-zinc-400" />
-                    <span className="text-white font-medium">Actions & Settings</span>
+                    <Settings size={18} className="text-muted-foreground" />
+                    <span className="text-foreground font-medium">Actions & Settings</span>
                 </button>
                 <button
                     onClick={() => { onManifest(); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-cyan-400/10 transition-colors text-left"
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-muted transition-colors text-left"
                 >
-                    <FileText size={18} className="text-zinc-400" />
-                    <span className="text-white font-medium">Manifest</span>
+                    <FileText size={18} className="text-muted-foreground" />
+                    <span className="text-foreground font-medium">Manifest</span>
                 </button>
             </div>
 
             {/* Capacity Summary */}
-            <div className="px-4 py-3 bg-white/5 border-t border-white/10">
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+            <div className="px-4 py-3 bg-muted/40 border-t border-border">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Users size={14} />
-                    <span className="text-cyan-400 font-bold">{availability.booked_count || 0}</span>
+                    <span className="text-primary font-bold">{availability.booked_count || 0}</span>
                     <span>booked</span>
-                    <span className="text-zinc-600">|</span>
-                    <span className="text-emerald-400 font-bold">{(availability.max_capacity || 0) - (availability.booked_count || 0)}</span>
+                    <span className="text-muted-foreground/50">|</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{(availability.max_capacity || 0) - (availability.booked_count || 0)}</span>
                     <span>available</span>
                 </div>
             </div>

@@ -35,9 +35,9 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             {/* Background gradient effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-950/20 via-zinc-950 to-purple-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -46,29 +46,29 @@ export function LoginPage() {
             >
                 {/* Logo/Branding */}
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                        Epic<span className="text-cyan-400">.ai</span>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                        Epic<span className="text-primary">.ai</span>
                     </h1>
-                    <p className="text-xs text-zinc-500 uppercase tracking-[0.2em] mt-1">Business OS</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] mt-1">Business OS</p>
                 </div>
 
                 {/* Login Card */}
-                <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
+                <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-8 shadow-2xl">
+                    <h2 className="text-xl font-semibold text-foreground mb-6">Sign In</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Username Field */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-2">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">
                                 Username / Email
                             </label>
                             <div className="relative">
-                                <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                 <input
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
+                                    className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                                     placeholder="Enter your username"
                                     required
                                 />
@@ -77,23 +77,23 @@ export function LoginPage() {
 
                         {/* Password Field */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-400 mb-2">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-zinc-950/50 border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none focus:ring-1 focus:ring-cyan-400/20 transition-all"
+                                    className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-12 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
                                     placeholder="Enter your password"
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -105,7 +105,7 @@ export function LoginPage() {
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3"
+                                className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3"
                             >
                                 <AlertCircle size={16} />
                                 {error}
@@ -116,11 +116,11 @@ export function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-gradient-to-r from-cyan-400 to-cyan-600 hover:from-cyan-400 hover:to-cyan-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-cyan-400/20 hover:shadow-cyan-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                                     Signing in...
                                 </span>
                             ) : (
@@ -149,7 +149,7 @@ export function LoginPage() {
                 </div>
 
                 {/* Footer */}
-                <p className="text-center text-zinc-600 text-sm mt-6">
+                <p className="text-center text-muted-foreground text-sm mt-6">
                     © 2024 EpicTours.ai. All rights reserved.
                 </p>
             </motion.div>

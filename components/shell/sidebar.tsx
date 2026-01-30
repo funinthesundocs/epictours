@@ -74,7 +74,7 @@ export function Sidebar() {
         <>
             {/* Mobile Trigger */}
             <button
-                className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-zinc-900 rounded-md text-white border border-white/10 shadow-lg"
+                className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-background rounded-md text-foreground border border-border shadow-lg"
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
             >
                 <Menu size={20} />
@@ -83,7 +83,7 @@ export function Sidebar() {
             {/* Mobile Backdrop */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/80 lg:hidden backdrop-blur-sm"
+                    className="fixed inset-0 z-40 bg-background/80 lg:hidden backdrop-blur-sm"
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
@@ -91,7 +91,7 @@ export function Sidebar() {
             {/* Sidebar Container */}
             <aside
                 className={cn(
-                    "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-white/10 bg-[#010a0a]",
+                    "fixed top-0 left-0 z-50 h-dvh transition-all duration-300 ease-in-out border-r border-border bg-background",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
                 style={{ width: "var(--sidebar-width)" }}
@@ -101,22 +101,22 @@ export function Sidebar() {
 
                     {/* Header / Logo Area */}
                     <div
-                        className="relative flex items-center justify-between px-4 border-b border-white/10 shrink-0"
+                        className="relative flex items-center justify-between px-4 border-b border-border shrink-0"
                         style={{ zoom: zoom / 100, height: `${73}px` }}
                     >
                         {!isCollapsed && (
                             <Link href="/" className="overflow-hidden whitespace-nowrap hover:opacity-80 transition-opacity">
-                                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                                    EpicDash<span className="text-cyan-400">.ai</span>
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-white/60 bg-clip-text text-transparent">
+                                    EpicDash<span className="text-primary">.ai</span>
                                 </h1>
-                                <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">Custom OS</p>
+                                <p className="text-xs text-muted-foreground uppercase tracking-[0.2em]">Custom OS</p>
                             </Link>
                         )}
                         {/* Collapse Toggle */}
                         <button
                             onClick={toggleCollapse}
                             className={cn(
-                                "absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-white/5 border-l border-y border-white/10 text-cyan-400 hover:text-white hover:bg-white/10 transition-colors hidden lg:flex items-center justify-center rounded-l-lg rounded-r-none",
+                                "absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-muted border-l border-y border-border text-primary hover:text-foreground hover:bg-muted/80 transition-colors hidden lg:flex items-center justify-center rounded-l-lg rounded-r-none",
                             )}
                         >
                             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -125,7 +125,7 @@ export function Sidebar() {
 
                     {/* Navigation Items */}
                     <div
-                        className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-zinc-800"
+                        className="flex-1 overflow-y-auto py-4 px-3 space-y-2 scrollbar-thin scrollbar-thumb-border bg-background"
                         style={{ zoom: zoom / 100 }}
                     >
                         {navigation.map((section, idx) => {
@@ -138,7 +138,7 @@ export function Sidebar() {
                                 if (isCollapsed) {
                                     // In collapsed mode, wrap the items in a "section tile"
                                     return (
-                                        <div key={section.title} className="mx-2 mb-2 p-1.5 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1 items-center">
+                                        <div key={section.title} className="mx-2 mb-2 p-1.5 rounded-xl bg-muted/50 border border-border flex flex-col gap-1 items-center">
                                             {section.items.map((item) => (
                                                 <NavItem key={item.href} item={item} pathname={pathname} isCollapsed={true} />
                                             ))}
@@ -167,11 +167,10 @@ export function Sidebar() {
                         })}
                     </div>
 
-                    {/* Zoom Controls */}
                     <div
                         ref={zoomSliderRef}
                         className={cn(
-                            "border-t border-white/10 bg-zinc-900/80 shrink-0 relative",
+                            "border-t border-border bg-background/80 shrink-0 relative",
                             isCollapsed ? "flex flex-col" : "flex"
                         )}
                         style={{ zoom: zoom / 100 }}
@@ -184,10 +183,10 @@ export function Sidebar() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 10 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute bottom-full left-0 right-0 bg-zinc-900 border border-white/10 rounded-t-lg shadow-xl p-3"
+                                    className="absolute bottom-full left-0 right-0 bg-popover border border-border rounded-t-lg shadow-xl p-3"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className="text-[10px] text-zinc-500 font-bold">50%</span>
+                                        <span className="text-[10px] text-muted-foreground font-bold">50%</span>
                                         <input
                                             type="range"
                                             min="50"
@@ -195,9 +194,9 @@ export function Sidebar() {
                                             step="10"
                                             value={zoom}
                                             onChange={(e) => setZoom(parseInt(e.target.value))}
-                                            className="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(6,182,212,0.5)] [&::-webkit-slider-thumb]:cursor-pointer"
+                                            className="flex-1 h-1 bg-muted rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_6px_color-mix(in_srgb,var(--primary),transparent_50%)] [&::-webkit-slider-thumb]:cursor-pointer"
                                         />
-                                        <span className="text-[10px] text-zinc-500 font-bold">150%</span>
+                                        <span className="text-[10px] text-muted-foreground font-bold">150%</span>
                                     </div>
                                 </motion.div>
                             )}
@@ -208,20 +207,20 @@ export function Sidebar() {
                                 <button
                                     onClick={zoomIn}
                                     disabled={zoom >= 150}
-                                    className="py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-b border-white/10"
+                                    className="py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-b border-border"
                                 >
                                     <Plus size={12} />
                                 </button>
                                 <button
                                     onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
-                                    className="py-1 flex items-center justify-center border-b border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
+                                    className="py-1 flex items-center justify-center border-b border-border cursor-pointer hover:bg-muted transition-colors"
                                 >
-                                    <span className="text-[9px] text-cyan-400 font-bold">{zoom}%</span>
+                                    <span className="text-[9px] text-primary font-bold">{zoom}%</span>
                                 </button>
                                 <button
                                     onClick={zoomOut}
                                     disabled={zoom <= 50}
-                                    className="py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <Minus size={12} />
                                 </button>
@@ -231,21 +230,21 @@ export function Sidebar() {
                                 <button
                                     onClick={zoomOut}
                                     disabled={zoom <= 50}
-                                    className="w-1/4 py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-r border-white/10"
+                                    className="w-1/4 py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-r border-border"
                                 >
                                     <Minus size={12} />
                                 </button>
                                 <button
                                     onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
-                                    className="w-1/2 py-1.5 flex items-center justify-center gap-2 border-r border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
+                                    className="w-1/2 py-1.5 flex items-center justify-center gap-2 border-r border-border cursor-pointer hover:bg-muted transition-colors"
                                 >
-                                    <span className="text-xs text-zinc-500 font-medium">Zoom</span>
-                                    <span className="text-xs text-cyan-400 font-bold">{zoom}%</span>
+                                    <span className="text-xs text-muted-foreground font-medium">Zoom</span>
+                                    <span className="text-xs text-primary font-bold">{zoom}%</span>
                                 </button>
                                 <button
                                     onClick={zoomIn}
                                     disabled={zoom >= 150}
-                                    className="w-1/4 py-1.5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="w-1/4 py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <Plus size={12} />
                                 </button>
@@ -255,13 +254,13 @@ export function Sidebar() {
 
                     {/* User Profile Footer */}
                     <div
-                        className={cn("p-4 border-t border-white/10 bg-zinc-900/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}
+                        className={cn("p-4 border-t border-border bg-background/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}
                         style={{ zoom: zoom / 100 }}
                     >
                         {isCollapsed ? (
                             <>
                                 {/* Collapsed: Profile avatar and icons below */}
-                                <div className="w-9 h-9 rounded-full bg-cyan-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                                <div className="w-9 h-9 rounded-full bg-primary ring-2 ring-primary/20 shadow-[0_0_10px_color-mix(in_srgb,var(--primary),transparent_50%)]" />
                                 <div className="flex items-center gap-1">
                                     {/* Platform Admin Icon */}
                                     {isPlatformAdmin() && (
@@ -270,10 +269,9 @@ export function Sidebar() {
                                             className={cn(
                                                 "p-2 rounded-lg transition-colors",
                                                 isPlatformAdminOpen
-                                                    ? "bg-white/20 text-cyan-400"
-                                                    : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                                    ? "bg-primary/20 text-primary"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                             )}
-                                            title="Platform Admin"
                                         >
                                             <Shield size={24} />
                                         </button>
@@ -283,10 +281,9 @@ export function Sidebar() {
                                         className={cn(
                                             "p-2 rounded-lg transition-colors",
                                             isSettingsOpen
-                                                ? "bg-white/20 text-cyan-400"
-                                                : "text-cyan-400 hover:text-cyan-300 hover:bg-white/10"
+                                                ? "bg-primary/20 text-primary"
+                                                : "text-primary hover:text-primary/80 hover:bg-muted"
                                         )}
-                                        title="Settings"
                                     >
                                         <Settings size={24} />
                                     </button>
@@ -295,10 +292,10 @@ export function Sidebar() {
                         ) : (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-cyan-400 ring-2 ring-white/10 shadow-[0_0_10px_rgba(6,182,212,0.5)] shrink-0" />
+                                    <div className="w-9 h-9 rounded-full bg-primary ring-2 ring-primary/20 shadow-[0_0_10px_color-mix(in_srgb,var(--primary),transparent_50%)] shrink-0" />
                                     <div className="text-base overflow-hidden whitespace-nowrap">
-                                        <p className="font-medium text-white">Admin</p>
-                                        <p className="text-sm text-cyan-400">Online</p>
+                                        <p className="font-medium text-foreground">Admin</p>
+                                        <p className="text-sm text-primary">Online</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -309,10 +306,9 @@ export function Sidebar() {
                                             className={cn(
                                                 "p-2 rounded-lg transition-colors",
                                                 isPlatformAdminOpen
-                                                    ? "bg-white/20 text-cyan-400"
-                                                    : "text-zinc-400 hover:text-white hover:bg-white/10"
+                                                    ? "bg-primary/20 text-primary"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                             )}
-                                            title="Platform Admin"
                                         >
                                             <Shield size={24} />
                                         </button>
@@ -323,10 +319,9 @@ export function Sidebar() {
                                         className={cn(
                                             "p-2 rounded-lg transition-colors",
                                             isSettingsOpen
-                                                ? "bg-white/20 text-cyan-400"
-                                                : "text-cyan-400 hover:text-cyan-300 hover:bg-white/10"
+                                                ? "bg-primary/20 text-primary"
+                                                : "text-primary hover:text-primary/80 hover:bg-muted"
                                         )}
-                                        title="Settings"
                                     >
                                         <Settings size={24} />
                                     </button>
@@ -344,7 +339,7 @@ export function Sidebar() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-zinc-950/10 backdrop-blur-sm"
+                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm"
                                     onClick={() => setIsSettingsOpen(false)}
                                 />
                                 <motion.div
@@ -353,25 +348,25 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}
                                 >
                                     {/* Settings Header */}
                                     <div className={cn(
-                                        "shrink-0 px-4 py-3 bg-white/10 border-b border-white/10 flex items-center justify-between w-full",
+                                        "shrink-0 px-4 py-3 bg-muted/20 border-b border-border flex items-center justify-between w-full",
                                         isCollapsed && "justify-center px-2"
                                     )}>
                                         {!isCollapsed && (
                                             <div className="flex items-center gap-2">
-                                                <Settings size={18} className="text-cyan-400" />
-                                                <h3 className="text-lg font-semibold text-white">Settings</h3>
+                                                <Settings size={18} className="text-primary" />
+                                                <h3 className="text-lg font-semibold text-foreground">Settings</h3>
                                             </div>
                                         )}
                                         <button
                                             onClick={() => setIsSettingsOpen(false)}
-                                            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                         >
                                             <X size={18} />
                                         </button>
@@ -379,7 +374,7 @@ export function Sidebar() {
 
                                     {/* Settings content */}
                                     <div className={cn(
-                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-zinc-800",
+                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-border",
                                         isCollapsed && "px-1.5 flex flex-col items-center"
                                     )}>
                                         {settingsSection?.items.map((item) => (
@@ -412,7 +407,7 @@ export function Sidebar() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-zinc-950/10 backdrop-blur-sm"
+                                    className="absolute top-[73px] bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm"
                                     onClick={() => setIsPlatformAdminOpen(false)}
                                 />
                                 <motion.div
@@ -421,25 +416,25 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-zinc-950 rounded-t-xl border-t border-white/10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}
                                 >
                                     {/* Platform Admin Header */}
                                     <div className={cn(
-                                        "shrink-0 px-4 py-3 bg-white/10 border-b border-white/10 flex items-center justify-between w-full",
+                                        "shrink-0 px-4 py-3 bg-muted/20 border-b border-border flex items-center justify-between w-full",
                                         isCollapsed && "justify-center px-2"
                                     )}>
                                         {!isCollapsed && (
                                             <div className="flex items-center gap-2">
-                                                <Shield size={18} className="text-cyan-400" />
-                                                <h3 className="text-lg font-semibold text-white">Platform Admin</h3>
+                                                <Shield size={18} className="text-primary" />
+                                                <h3 className="text-lg font-semibold text-foreground">Platform Admin</h3>
                                             </div>
                                         )}
                                         <button
                                             onClick={() => setIsPlatformAdminOpen(false)}
-                                            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                         >
                                             <X size={18} />
                                         </button>
@@ -447,7 +442,7 @@ export function Sidebar() {
 
                                     {/* Platform Admin content */}
                                     <div className={cn(
-                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-zinc-800",
+                                        "flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-border",
                                         isCollapsed && "px-1.5 flex flex-col items-center"
                                     )}>
                                         {platformAdminSection?.items.map((item) => (
@@ -500,8 +495,8 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                             className={cn(
                                 "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 group relative",
                                 isActive || isChildActive
-                                    ? "bg-cyan-400/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]"
-                                    : "text-zinc-500 hover:text-white hover:bg-white/10"
+                                    ? "bg-primary/20 text-primary shadow-[0_0_10px_color-mix(in_srgb,var(--primary),transparent_90%)]"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                             )}
                         >
                             <Icon size={20} />
@@ -511,14 +506,14 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                         <div className="flex flex-col gap-1">
                             <span className="font-medium">{item.title}</span>
                             {hasChildren && (
-                                <div className="flex flex-col gap-1 pt-1 border-t border-white/10 mt-1">
+                                <div className="flex flex-col gap-1 pt-1 border-t border-border mt-1">
                                     {item.children.map((child: any) => (
                                         <Link
                                             key={child.href}
                                             href={child.href}
                                             className={cn(
-                                                "text-xs py-1 px-2 rounded hover:bg-white/10 transition-colors",
-                                                pathname === child.href ? "text-cyan-400" : "text-zinc-400 hover:text-white"
+                                                "text-xs py-1 px-2 rounded hover:bg-muted transition-colors",
+                                                pathname === child.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
                                             )}
                                         >
                                             {child.title}
@@ -542,13 +537,13 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                     className={cn(
                         "w-full group flex items-center justify-between px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                         (isActive || isChildActive)
-                            ? "text-cyan-400 font-medium"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                     style={{ paddingLeft: `${12 + (depth * 12)}px` }}
                 >
                     <div className="flex items-center gap-3">
-                        <Icon size={18} className={cn("transition-colors", (isActive || isChildActive) ? "text-cyan-400" : "text-zinc-500 group-hover:text-zinc-300")} />
+                        <Icon size={18} className={cn("transition-colors", (isActive || isChildActive) ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                         <span className="truncate">{item.title}</span>
                     </div>
                     <ChevronDown size={14} className={cn("transition-transform", isOpen ? "rotate-180" : "")} />
@@ -581,13 +576,13 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
             className={cn(
                 "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                 isActive
-                    ? "bg-cyan-400/10 text-cyan-400 font-medium shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "bg-primary/10 text-primary font-medium shadow-[0_0_15px_color-mix(in_srgb,var(--primary),transparent_85%)]"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
             style={{ paddingLeft: `${12 + (depth * 12)}px` }}
             onClick={() => onMobileItemClick?.()}
         >
-            <Icon size={18} className={cn("transition-colors", isActive ? "text-cyan-400" : "text-zinc-500 group-hover:text-zinc-300")} />
+            <Icon size={18} className={cn("transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
             <span className="truncate">{item.title}</span>
         </Link>
     );
@@ -614,14 +609,14 @@ function CollapsibleSection({
             <button
                 onClick={onToggle}
                 className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-white",
-                    isChildActive ? "text-cyan-400/90" : "text-zinc-500"
+                    "w-full flex items-center justify-between px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-foreground",
+                    isChildActive ? "text-primary/90" : "text-muted-foreground"
                 )}
             >
                 <span>{section.title}</span>
                 <ChevronDown
                     size={14}
-                    className={cn("transition-transform duration-200", isOpen ? "rotate-180 text-cyan-400" : "")}
+                    className={cn("transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "")}
                 />
             </button>
 

@@ -121,14 +121,14 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                     onFocus={() => !disabled && setIsOpen(true)}
                     disabled={disabled}
                     className={cn(
-                        "w-full bg-zinc-900/80 border border-white/10 rounded-lg pr-10 py-2.5 text-white focus:outline-none focus:border-cyan-400/50 transition-colors placeholder:text-zinc-600",
+                        "w-full bg-muted/80 border border-input rounded-lg pr-10 py-2.5 text-foreground focus:outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground",
                         selectedOption?.icon ? "pl-10" : "pl-4",
                         inputClassName,
                         disabled && "opacity-50 cursor-not-allowed"
                     )}
                     placeholder={placeholder}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                     <ChevronDown size={16} />
                 </div>
             </div>
@@ -139,7 +139,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                         initial={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: position === 'bottom' ? 5 : -5 }}
-                        className={`absolute z-[70] w-full left-0 bg-[#1a1f24] border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto
+                        className={`absolute z-[70] w-full left-0 bg-popover border border-border rounded-lg shadow-xl max-h-60 overflow-y-auto
                             ${position === 'bottom' ? "mt-1 top-full" : "mb-1 bottom-full"}
                         `}
                     >
@@ -151,7 +151,7 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors group
-                                        ${isSelected ? "bg-cyan-400/20 text-cyan-400" : "text-zinc-300 hover:bg-white/10 hover:text-white"}
+                                        ${isSelected ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}
                                     `}
                                 >
                                     <span className="flex items-center gap-2">
@@ -160,8 +160,8 @@ export function Combobox({ value, onChange, options, placeholder, forceOpen, cla
                                     </span>
                                     {isSelected && (
                                         option.value === ''
-                                            ? <Ban size={14} className="text-cyan-400" />
-                                            : <Check size={14} className="text-cyan-400" />
+                                            ? <Ban size={14} className="text-primary" />
+                                            : <Check size={14} className="text-primary" />
                                     )}
                                 </button>
                             );

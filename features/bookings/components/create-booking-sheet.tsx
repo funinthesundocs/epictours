@@ -89,63 +89,63 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
             contentClassName="p-0"
         >
             <div className="p-6 h-full flex flex-col bg-transparent">
-                <div className="text-sm text-zinc-400 mb-6 p-4 bg-white/5 rounded border border-zinc-800">
-                    <div className="font-bold text-white mb-2 text-base flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-cyan-400" />
+                <div className="text-sm text-muted-foreground mb-6 p-4 bg-muted/50 rounded border border-border">
+                    <div className="font-bold text-foreground mb-2 text-base flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-primary" />
                         {availability.start_date} @ {availability.start_time ? new Date(`1970-01-01T${availability.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All Day'}
                     </div>
                     <div className="flex flex-col gap-1 pl-6">
-                        <div><span className="text-zinc-500">Vehicle:</span> <span className="text-zinc-300">{availability.vehicle_name || 'Unassigned'}</span></div>
-                        <div><span className="text-zinc-500">Route:</span> <span className="text-zinc-300">{availability.route_name || 'Unassigned'}</span></div>
-                        <div><span className="text-zinc-500">Capacity:</span> <span className="text-zinc-300">{availability.max_capacity} pax</span></div>
+                        <div><span className="text-muted-foreground">Vehicle:</span> <span className="text-foreground">{availability.vehicle_name || 'Unassigned'}</span></div>
+                        <div><span className="text-muted-foreground">Route:</span> <span className="text-foreground">{availability.route_name || 'Unassigned'}</span></div>
+                        <div><span className="text-muted-foreground">Capacity:</span> <span className="text-foreground">{availability.max_capacity} pax</span></div>
                     </div>
                 </div>
 
                 <form className="space-y-6 flex-1 overflow-y-auto">
                     {/* Customer Selection */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-white flex items-center gap-2">
-                            <User size={16} className="text-cyan-400" />
+                        <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <User size={16} className="text-primary" />
                             Customer
                         </label>
                         <select
                             {...register("customer_id")}
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none appearance-none"
+                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none appearance-none"
                         >
                             <option value="">Select customer...</option>
                             {customers.map(c => (
                                 <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
                             ))}
                         </select>
-                        {errors.customer_id && <p className="text-red-400 text-xs">{errors.customer_id.message}</p>}
+                        {errors.customer_id && <p className="text-destructive text-xs">{errors.customer_id.message}</p>}
                     </div>
 
                     {/* Pax Count */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-white flex items-center gap-2">
-                            <Users size={16} className="text-cyan-400" />
+                        <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <Users size={16} className="text-primary" />
                             Passengers
                         </label>
                         <div className="flex items-center gap-4">
                             <input
                                 type="number"
                                 {...register("pax_count", { valueAsNumber: true })}
-                                className="w-24 bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none"
+                                className="w-24 bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none"
                                 min={1}
                             />
-                            <div className="text-xs text-zinc-500">
+                            <div className="text-xs text-muted-foreground">
                                 Total capacity: {availability.max_capacity}
                             </div>
                         </div>
-                        {errors.pax_count && <p className="text-red-400 text-xs">{errors.pax_count.message}</p>}
+                        {errors.pax_count && <p className="text-destructive text-xs">{errors.pax_count.message}</p>}
                     </div>
 
                     {/* Notes */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Internal Notes</label>
+                        <label className="text-sm font-medium text-foreground">Internal Notes</label>
                         <textarea
                             {...register("notes")}
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-400/50 focus:outline-none h-[100px]"
+                            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none h-[100px]"
                             placeholder="Internal notes..."
                         />
                     </div>
@@ -153,15 +153,15 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
                 </form>
 
                 {/* Footer pinned to bottom */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/95 backdrop-blur-md">
                     <Button
                         onClick={handleSubmit(onSubmit)}
                         disabled={isLoading || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isLoading ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-600 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isLoading ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> :

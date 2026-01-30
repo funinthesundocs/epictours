@@ -506,7 +506,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             contentClassName="p-0 overflow-hidden flex flex-col"
         >
             <div className="flex-1 min-h-0">
-                <div className="grid grid-cols-1 lg:grid-cols-[25fr_45fr_30fr] h-full divide-x divide-zinc-800">
+                <div className="grid grid-cols-1 lg:grid-cols-[25fr_45fr_30fr] h-full divide-x divide-border">
 
                     {/* COLUMN 1: Customer & Pax */}
                     <div className="flex flex-col h-full min-h-0">
@@ -564,12 +564,12 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+            <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/95 backdrop-blur-md">
                 {isEditMode && (
                     <button
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
-                        className="mr-auto px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
+                        className="mr-auto px-4 py-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex items-center gap-2"
                     >
                         <Trash2 size={16} />
                         Delete
@@ -581,9 +581,9 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     disabled={isSaving || !canSave || !isDirty}
                     className={cn(
                         "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                        isSaving ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                            (canSave && isDirty) ? "bg-cyan-600 hover:bg-cyan-400 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]" : // Cyan-600 for booking desk distinction or keep 500? Using 600 as per original but standard is 500. Let's use 500 to match others.
-                                "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        isSaving ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                            (canSave && isDirty) ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow" :
+                                "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                     )}
                 >
                     {isSaving ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

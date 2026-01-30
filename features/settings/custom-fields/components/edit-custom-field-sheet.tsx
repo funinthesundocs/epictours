@@ -139,14 +139,14 @@ function SortableOptionItem({
         position: 'relative' as const,
     };
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors h-10";
+    const inputClasses = "w-full bg-muted/50 border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none transition-colors h-10";
 
     return (
         <div ref={setNodeRef} style={style} className="flex items-center gap-2 group">
             {/* Field Container */}
             <div className={cn(
                 "flex-1 flex items-center gap-2 pr-2 rounded-lg border transition-colors",
-                isDefault ? "bg-cyan-950/20 border-cyan-400/30" : "bg-white/5 border-white/5"
+                isDefault ? "bg-primary/20 border-primary/30" : "bg-muted/30 border-border"
             )}>
                 <div
                     {...attributes}
@@ -195,8 +195,8 @@ function SortableOptionItem({
                                 className={cn(
                                     "h-8 w-8 p-0 rounded-full transition-all",
                                     isDefault
-                                        ? "text-cyan-400 bg-cyan-400/10 hover:bg-cyan-400/20"
-                                        : "text-zinc-600 hover:text-zinc-400 hover:bg-white/5"
+                                        ? "text-primary bg-primary/10 hover:bg-primary/20"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                 )}
                             >
                                 {isDefault ? <Circle size={14} fill="currentColor" strokeWidth={0} /> : <div className="w-3 h-3 rounded-full border-2 border-zinc-600" />}
@@ -213,7 +213,7 @@ function SortableOptionItem({
                     variant="ghost"
                     size="sm"
                     onClick={() => remove(index)}
-                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-10 w-10 p-0"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-10 w-10 p-0"
                 >
                     <Trash2 size={16} />
                 </Button>
@@ -225,7 +225,7 @@ function SortableOptionItem({
                 variant="ghost"
                 size="sm"
                 onClick={() => insert(index + 1, { label: "", value: "" })}
-                className="text-zinc-500 hover:text-cyan-400 hover:bg-cyan-400/10 h-10 w-10 p-0 shrink-0"
+                className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-10 w-10 p-0 shrink-0"
             >
                 <Plus size={16} />
             </Button>
@@ -242,7 +242,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
     const [previewValue, setPreviewValue] = useState<any>("");
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             name: "",
             label: "",
@@ -382,7 +382,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
     if (!isOpen) return null;
 
-    const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors";
+    const inputClasses = "w-full bg-muted/50 border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none transition-colors";
 
     const onSubmit = async (values: FormValues) => {
         setIsSubmitting(true);
@@ -450,19 +450,19 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
             {/* Side Panel */}
             <div
-                className="fixed inset-y-0 right-0 w-full md:w-[85vw] max-w-5xl bg-zinc-950/80 backdrop-blur-xl border-l border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300"
+                className="fixed inset-y-0 right-0 w-full md:w-[85vw] max-w-5xl bg-background/95 backdrop-blur-xl border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300"
             >
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/5 bg-transparent">
+                <div className="flex items-center justify-between px-6 md:px-10 py-4 border-b border-border bg-transparent">
                     <div>
-                        <h2 className="text-xl font-semibold text-white">
+                        <h2 className="text-xl font-semibold text-foreground">
                             {fieldToEdit ? "Edit Custom Field" : "Create Custom Field"}
                         </h2>
-                        <p className="text-sm text-zinc-400">Define data types for booking forms</p>
+                        <p className="text-sm text-muted-foreground">Define data types for booking forms</p>
                     </div>
 
-                    <Button variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground hover:text-foreground">
                         <X size={20} />
                     </Button>
                 </div>
@@ -472,13 +472,13 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                     <form id="custom-field-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col w-full">
 
                         {/* Top Section: Label, Internal, and Field Type - Fixed Header */}
-                        <div className="shrink-0 pt-6 px-6 md:pt-8 md:px-8 pb-0 border-b border-white/5 space-y-6">
+                        <div className="shrink-0 pt-6 px-6 md:pt-8 md:px-8 pb-0 border-b border-border space-y-6">
 
                             {/* Label and Internal Toggle Grid */}
                             <div className="grid grid-cols-2 gap-6">
                                 {/* Label */}
                                 <div className="col-span-2 md:col-span-1 space-y-2">
-                                    <Label className="text-sm text-zinc-300">Display Label</Label>
+                                    <Label className="text-sm text-muted-foreground">Display Label</Label>
                                     <input
                                         {...form.register("label")}
                                         className={inputClasses}
@@ -496,21 +496,21 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                     <div className="md:hidden flex items-start gap-4 w-full">
                                         {/* Field Type Dropdown */}
                                         <div className="flex-1 flex flex-col gap-2">
-                                            <Label className="text-sm text-zinc-300">Field Type</Label>
+                                            <Label className="text-sm text-muted-foreground">Field Type</Label>
                                             <CustomSelect
                                                 value={currentType === 'textarea' || currentType === 'quantity' ? 'text' : currentType}
                                                 onChange={(val) => form.setValue("type", val as any, { shouldDirty: true })}
                                                 options={FIELD_TYPES.map(t => ({
                                                     value: t.value,
                                                     label: t.label,
-                                                    icon: <t.icon size={16} className="text-zinc-400" />
+                                                    icon: <t.icon size={16} className="text-muted-foreground" />
                                                 }))}
                                                 placeholder="Select field type..."
                                             />
                                         </div>
                                         {/* Internal Toggle */}
                                         <div className="flex flex-col gap-2 shrink-0">
-                                            <Label className="text-sm text-zinc-300">INTERNAL</Label>
+                                            <Label className="text-sm text-muted-foreground">INTERNAL</Label>
                                             <Switch
                                                 checked={form.watch("is_internal")}
                                                 onCheckedChange={(c) => form.setValue("is_internal", c)}
@@ -519,15 +519,15 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                     </div>
 
                                     {/* Desktop: Original styled layout with tooltip */}
-                                    <div className="hidden md:flex items-center gap-4 p-3 rounded-lg border border-white/10 bg-white/5">
+                                    <div className="hidden md:flex items-center gap-4 p-3 rounded-lg border border-border bg-muted/30">
                                         <div className="flex items-center gap-2">
-                                            <Label className="text-sm text-zinc-200 font-medium cursor-help translate-y-[1px] mb-0">
+                                            <Label className="text-sm text-foreground font-medium cursor-help translate-y-[1px] mb-0">
                                                 Internal
                                             </Label>
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
-                                                        <Info size={14} className="text-zinc-500 hover:text-cyan-400 transition-colors" />
+                                                        <Info size={14} className="text-muted-foreground hover:text-primary transition-colors" />
                                                     </TooltipTrigger>
                                                     <TooltipContent>
                                                         <p>When enabled, this field will be hidden from<br />public booking forms and only visible to staff.</p>
@@ -545,7 +545,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
                             {/* Field Type Selection - Desktop Only */}
                             <div className="hidden md:block space-y-4">
-                                <Label className="text-sm text-zinc-300">Field Type</Label>
+                                <Label className="text-sm text-muted-foreground">Field Type</Label>
 
                                 {/* Desktop: Buttons */}
                                 <div className="hidden md:flex flex-wrap gap-2">
@@ -569,8 +569,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 className={cn(
                                                     "flex items-center gap-2 px-3 py-2 rounded-lg border transition-all text-sm font-medium",
                                                     isSelected
-                                                        ? "bg-cyan-400/20 border-cyan-400 text-cyan-400 shadow-sm shadow-cyan-400/10"
-                                                        : "bg-[#0b1115] border-white/10 text-zinc-400 hover:bg-white/5 hover:text-white"
+                                                        ? "bg-primary/20 border-primary text-primary shadow-sm"
+                                                        : "bg-muted border-border text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                                 )}
                                             >
                                                 <Icon size={16} />
@@ -584,13 +584,13 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                         </div>
 
                         {/* Split Layout: Config vs Preview - Stacked on mobile, side-by-side on desktop */}
-                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-white/10">
+                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:divide-x divide-border">
                             {/* LEFT COLUMN: Configuration & Options */}
                             <div className="flex flex-col">
                                 {/* Configuration Header */}
-                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 flex items-center gap-2">
-                                    <Settings size={16} className="text-cyan-400" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Configuration</h3>
+                                <div className="shrink-0 px-6 py-4 bg-muted/30 backdrop-blur-md border-b border-border sticky top-0 z-10 flex items-center gap-2">
+                                    <Settings size={16} className="text-primary" />
+                                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Configuration</h3>
                                 </div>
                                 <div className="flex-1 p-6 md:p-8 space-y-6 md:space-y-8">
                                     <div className="space-y-6">
@@ -599,9 +599,9 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                         {['text', 'textarea', 'quantity'].includes(currentType) && (
                                             <div className="pt-0 space-y-4">
                                                 <div className="flex justify-between items-center mb-6">
-                                                    <h4 className="text-xs uppercase text-cyan-400 font-bold tracking-widest">Text Field Options</h4>
+                                                    <h4 className="text-xs uppercase text-primary font-bold tracking-widest">Text Field Options</h4>
                                                 </div>
-                                                <div className="p-1 bg-black/20 rounded-lg border border-white/10 flex">
+                                                <div className="p-1 bg-muted/50 rounded-lg border border-border flex">
                                                     {[
                                                         { id: 'text', label: 'Single Line' },
                                                         { id: 'textarea', label: 'Multi-Line' },
@@ -614,8 +614,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             className={cn(
                                                                 "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                                 currentType === sub.id
-                                                                    ? "bg-cyan-400/20 text-cyan-400 shadow-sm"
-                                                                    : "text-zinc-500 hover:text-zinc-300"
+                                                                    ? "bg-primary/20 text-primary shadow-sm"
+                                                                    : "text-muted-foreground hover:text-foreground"
                                                             )}
                                                         >
                                                             {sub.label}
@@ -632,8 +632,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                             <div className="space-y-6">
                                                 {/* Display Style Selector */}
                                                 <div className="space-y-4">
-                                                    <Label className="text-sm text-zinc-300">Display Style</Label>
-                                                    <div className="flex bg-black/20 rounded-lg border border-white/10 p-1">
+                                                    <Label className="text-sm text-muted-foreground">Display Style</Label>
+                                                    <div className="flex bg-muted/50 rounded-lg border border-border p-1">
                                                         {[{ id: 'text', label: 'Text Input' }, { id: 'currency', label: 'Currency' }, { id: 'counter', label: 'Counter' }].map((style) => (
                                                             <button
                                                                 key={style.id}
@@ -642,8 +642,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 className={cn(
                                                                     "flex-1 py-1.5 text-sm font-medium rounded-md transition-all",
                                                                     (form.watch("settings.display_style") || 'text') === style.id
-                                                                        ? "bg-cyan-400/20 text-cyan-400 shadow-sm"
-                                                                        : "text-zinc-500 hover:text-zinc-300"
+                                                                        ? "bg-primary/20 text-primary shadow-sm"
+                                                                        : "text-muted-foreground hover:text-foreground"
                                                                 )}
                                                             >
                                                                 {style.label}
@@ -658,35 +658,35 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
                                                     {/* Section 1: Range Limits (Hidden for Currency) */}
                                                     {form.watch("settings.display_style") !== 'currency' && (
-                                                        <div className="p-4 bg-black/20 rounded-lg border border-white/10 space-y-4">
-                                                            <h4 className="text-xs uppercase text-cyan-400 font-bold tracking-widest mb-2">Range Limits</h4>
+                                                        <div className="p-4 bg-muted/50 rounded-lg border border-border space-y-4">
+                                                            <h4 className="text-xs uppercase text-primary font-bold tracking-widest mb-2">Range Limits</h4>
                                                             <div className="grid grid-cols-3 gap-3">
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">Start</Label>
+                                                                    <Label className="text-sm text-muted-foreground">Start</Label>
                                                                     <input
                                                                         type="number"
                                                                         {...form.register("settings.min")}
-                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-400/50 focus:outline-none transition-colors"
+                                                                        className="w-full bg-background border border-border rounded px-3 py-2 text-foreground text-sm focus:border-primary/50 focus:outline-none transition-colors"
                                                                     />
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">End</Label>
+                                                                    <Label className="text-sm text-muted-foreground">End</Label>
                                                                     <input
                                                                         type="number"
                                                                         {...form.register("settings.max")}
-                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-400/50 focus:outline-none transition-colors"
+                                                                        className="w-full bg-background border border-border rounded px-3 py-2 text-foreground text-sm focus:border-primary/50 focus:outline-none transition-colors"
                                                                     />
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label className="text-sm text-zinc-400">Increment</Label>
+                                                                    <Label className="text-sm text-muted-foreground">Increment</Label>
                                                                     <input
                                                                         type="number"
                                                                         defaultValue={1}
                                                                         placeholder="1"
                                                                         {...form.register("settings.step")}
-                                                                        className="w-full bg-[#0b1115] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-cyan-400/50 focus:outline-none transition-colors"
+                                                                        className="w-full bg-background border border-border rounded px-3 py-2 text-foreground text-sm focus:border-primary/50 focus:outline-none transition-colors"
                                                                     />
                                                                 </div>
                                                             </div>
@@ -707,7 +707,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 {currentType === 'checkbox' && (
                                                     <div className="flex flex-wrap items-center gap-2 mb-2">
                                                         {/* Layout Style Toolbar */}
-                                                        <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-2 duration-300">
+                                                        <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-lg border border-border w-fit animate-in fade-in slide-in-from-left-2 duration-300">
                                                             {[
                                                                 { value: 'vertical', icon: AlignJustify, label: 'Vertical' },
                                                                 { value: 'horizontal', icon: Columns, label: 'Horizontal' },
@@ -759,8 +759,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                                             className={cn(
                                                                                                 "w-5 h-5 flex items-center justify-center rounded text-[9px] font-bold transition-all",
                                                                                                 currentCols === cols
-                                                                                                    ? "bg-cyan-400 text-black shadow-sm"
-                                                                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                                                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                                                                             )}
                                                                                         >
                                                                                             {cols}
@@ -790,8 +790,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                             className={cn(
                                                                                 "p-1.5 rounded-md transition-all",
                                                                                 form.watch("settings.binary_mode")
-                                                                                    ? "bg-cyan-400/20 text-cyan-400 shadow-sm shadow-cyan-400/10"
-                                                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                                    ? "bg-primary/20 text-primary shadow-sm"
+                                                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                                                             )}
                                                                         >
                                                                             <ToggleRight size={16} />
@@ -805,7 +805,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                         </div>
 
                                                         {/* Visual Style + Binary Toggle Toolbar */}
-                                                        <div className="flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit animate-in fade-in slide-in-from-left-3 duration-300">
+                                                        <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-lg border border-border w-fit animate-in fade-in slide-in-from-left-3 duration-300">
                                                             {[
                                                                 { value: 'button', icon: Square, label: 'Button Style (Default)' },
                                                                 { value: 'list', icon: LayoutList, label: 'List Style (Compact)' }
@@ -823,8 +823,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                                     className={cn(
                                                                                         "p-1.5 rounded-md transition-all",
                                                                                         isActive
-                                                                                            ? "bg-cyan-400/20 text-cyan-400 shadow-sm shadow-cyan-400/10"
-                                                                                            : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                                                                                            ? "bg-primary/20 text-primary shadow-sm shadow-primary/10"
+                                                                                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                                                                     )}
                                                                                 >
                                                                                     <Icon size={16} />
@@ -849,7 +849,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
                                                 {!form.watch("settings.binary_mode") && (
                                                     <div className="flex justify-between items-center mb-6 pt-4">
-                                                        <h4 className="text-xs uppercase text-cyan-400 font-bold tracking-widest">Options List</h4>
+                                                        <h4 className="text-xs uppercase text-primary font-bold tracking-widest">Options List</h4>
                                                     </div>
                                                 )}
 
@@ -868,7 +868,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             <div className="space-y-2">
                                                                 {/* Allow Multiple Selections Toggle - First item */}
                                                                 {currentType === 'checkbox' && (
-                                                                    <div className="flex items-center justify-between pr-2 rounded-lg border border-white/10 bg-white/5">
+                                                                    <div className="flex items-center justify-between pr-2 rounded-lg border border-border bg-muted/30">
                                                                         <div className="flex items-center gap-2 px-4 py-2">
                                                                             <Label className="text-sm text-zinc-200 cursor-help translate-y-[1px] mb-0">
                                                                                 Allow Multiple Selections
@@ -876,7 +876,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                             <TooltipProvider>
                                                                                 <Tooltip>
                                                                                     <TooltipTrigger asChild>
-                                                                                        <Info size={14} className="text-zinc-500 hover:text-cyan-400 transition-colors" />
+                                                                                        <Info size={14} className="text-muted-foreground hover:text-primary transition-colors" />
                                                                                     </TooltipTrigger>
                                                                                     <TooltipContent>
                                                                                         <p>Enable to use checkboxes (select multiple). Disable for radio buttons (select one).</p>
@@ -923,8 +923,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                         )}
 
                                         {/* Description (Formerly Above Options) */}
-                                        <div className="space-y-2 pt-6 border-t border-white/5">
-                                            <Label className="text-sm text-zinc-300">Helper / Description</Label>
+                                        <div className="space-y-2 pt-6 border-t border-border">
+                                            <Label className="text-sm text-foreground">Helper / Description</Label>
                                             <textarea
                                                 {...form.register("description")}
                                                 className={cn(inputClasses, "min-h-[100px]")}
@@ -938,11 +938,11 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                             </div>
 
                             {/* RIGHT COLUMN: Live Preview */}
-                            <div className="flex flex-col bg-black/20">
+                            <div className="flex flex-col bg-muted/20">
                                 {/* Preview Header */}
-                                <div className="shrink-0 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10 flex items-center gap-2">
-                                    <Eye size={16} className="text-cyan-400" />
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Preview</h3>
+                                <div className="shrink-0 px-6 py-4 bg-muted/30 backdrop-blur-md border-b border-border sticky top-0 z-10 flex items-center gap-2">
+                                    <Eye size={16} className="text-primary" />
+                                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Live Preview</h3>
                                 </div>
                                 <div className="flex-1 p-8 space-y-8">
                                     <div className="h-full relative">
@@ -951,10 +951,10 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
                                             <div className="space-y-2">
                                                 {currentType !== 'header' && !(currentType === 'checkbox' && form.watch("settings.binary_mode")) && (
-                                                    <Label className="text-white text-sm uppercase tracking-wider ml-1 mb-2 block flex items-center gap-1">
+                                                    <Label className="text-foreground text-sm uppercase tracking-wider ml-1 mb-2 block flex items-center gap-1">
                                                         {form.watch("label") || "Field Label"}
                                                         {form.watch("settings.required") && <span className="text-red-500 text-lg leading-none">•</span>}
-                                                        {form.watch("is_internal") && <span className="ml-2 text-xs text-zinc-500 bg-white/10 px-1 rounded">Internal</span>}
+                                                        {form.watch("is_internal") && <span className="ml-2 text-xs text-muted-foreground bg-muted px-1 rounded">Internal</span>}
                                                     </Label>
                                                 )}
 
@@ -968,7 +968,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
 
                                                 {currentType === 'quantity' && form.watch("settings.display_style") === 'currency' && (
                                                     <div className="relative">
-                                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium select-none">
+                                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium select-none">
                                                             $
                                                         </div>
                                                         <input
@@ -981,7 +981,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 )}
 
                                                 {currentType === 'quantity' && form.watch("settings.display_style") === 'counter' && (
-                                                    <div className="flex items-center w-full bg-black/20 border border-white/10 rounded-lg overflow-hidden transition-colors focus-within:border-cyan-400/50">
+                                                    <div className="flex items-center w-full bg-muted/30 border border-border rounded-lg overflow-hidden transition-colors focus-within:border-primary/50">
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
@@ -994,7 +994,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 const newValue = Math.max(min, current - step);
                                                                 setPreviewValue(newValue);
                                                             }}
-                                                            className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-r border-white/5 active:bg-cyan-400/10 active:text-cyan-400"
+                                                            className="h-10 w-12 flex items-center justify-center bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border-r border-border active:bg-primary/10 active:text-primary"
                                                         >
                                                             <Minus size={16} />
                                                         </button>
@@ -1003,7 +1003,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             placeholder={String(Number(form.watch("settings.min")) || 0)}
                                                             value={typeof previewValue === 'number' ? previewValue : (Number(form.watch("settings.min")) || 0)}
                                                             onChange={(e) => setPreviewValue(e.target.value === "" ? (Number(form.watch("settings.min")) || 0) : parseInt(e.target.value))}
-                                                            className="flex-1 bg-transparent border-none text-center text-white h-10 focus:outline-none placeholder:text-zinc-600 appearance-none"
+                                                            className="flex-1 bg-transparent border-none text-center text-foreground h-10 focus:outline-none placeholder:text-muted-foreground appearance-none"
                                                         />
                                                         <button
                                                             type="button"
@@ -1017,7 +1017,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                     setPreviewValue(current + step);
                                                                 }
                                                             }}
-                                                            className="h-10 w-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border-l border-white/5 active:bg-cyan-400/10 active:text-cyan-400"
+                                                            className="h-10 w-12 flex items-center justify-center bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border-l border-border active:bg-primary/10 active:text-primary"
                                                         >
                                                             <Plus size={16} />
                                                         </button>
@@ -1099,7 +1099,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 {currentType === 'checkbox' && (
                                                     <div className={cn(
                                                         "pt-2",
-                                                        (form.watch("settings.multi_select_visual") === 'list' && !form.watch("settings.binary_mode")) ? "border border-white/10 rounded-lg p-3 bg-black/10" : "", // Outer border for List style, excluded for Binary Mode
+                                                        (form.watch("settings.multi_select_visual") === 'list' && !form.watch("settings.binary_mode")) ? "border border-border rounded-lg p-3 bg-muted/30" : "", // Outer border for List style, excluded for Binary Mode
                                                         (form.watch("settings.multi_select_style") === 'horizontal') ? "flex flex-wrap gap-3" :
                                                             (form.watch("settings.multi_select_style") === 'columns') ?
                                                                 ((Number(form.watch("settings.multi_select_columns") || 2) === 3) ? "grid grid-cols-3 gap-3" :
@@ -1112,8 +1112,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                             // Binary Mode: Always a Switch, styling depends on 'Visual Style'
                                                             (form.watch("settings.multi_select_visual") || 'button') === 'button' ? (
                                                                 // Button Style -> Boxed Switch (Duplicate of old List style)
-                                                                <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-black/20 hover:border-white/20 transition-colors">
-                                                                    <span className="text-sm text-zinc-300 font-medium">
+                                                                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/50 hover:border-muted-foreground/50 transition-colors">
+                                                                    <span className="text-sm text-foreground font-medium">
                                                                         {form.watch("label") || "Field Label"}
                                                                     </span>
                                                                     <Switch
@@ -1123,8 +1123,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 </div>
                                                             ) : (
                                                                 // List Style -> derived from Button Style but stripped of box styling
-                                                                <div className="flex items-center justify-between p-0 rounded-lg hover:bg-white/5 transition-colors">
-                                                                    <span className="text-sm text-zinc-300 font-medium">
+                                                                <div className="flex items-center justify-between p-0 rounded-lg hover:bg-muted/50 transition-colors">
+                                                                    <span className="text-sm text-foreground font-medium">
                                                                         {form.watch("label") || "Field Label"}
                                                                     </span>
                                                                     <Switch
@@ -1156,12 +1156,12 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                         className={cn(
                                                                             "flex items-center space-x-3 transition-all cursor-pointer group",
                                                                             isVisualList
-                                                                                ? "px-1 py-1 border-none hover:bg-white/5 rounded"
+                                                                                ? "px-1 py-1 border-none hover:bg-muted/50 rounded"
                                                                                 : "px-3 py-3 rounded-lg border",
                                                                             !isVisualList && isSelected
-                                                                                ? "bg-cyan-400/10 border-cyan-400/50"
+                                                                                ? "bg-primary/10 border-primary/50"
                                                                                 : !isVisualList
-                                                                                    ? "bg-black/20 border-white/10 hover:border-white/20"
+                                                                                    ? "bg-muted/30 border-border hover:border-muted-foreground"
                                                                                     : ""
                                                                         )}
                                                                         onClick={() => {
@@ -1180,11 +1180,11 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                         <div className={cn(
                                                                             "w-5 h-5 flex items-center justify-center border transition-colors",
                                                                             isMulti ? "rounded" : "rounded-full",
-                                                                            isSelected ? "bg-cyan-400 border-cyan-400 text-black" : "bg-white/5 border-white/20 group-hover:border-cyan-400/50"
+                                                                            isSelected ? "bg-primary border-primary text-primary-foreground" : "bg-muted border-muted-foreground/30 group-hover:border-primary/50"
                                                                         )}>
                                                                             {isSelected && <Check size={14} className="stroke-[3]" />}
                                                                         </div>
-                                                                        <span className={cn("text-sm", isSelected ? "text-white" : "text-zinc-400")}>
+                                                                        <span className={cn("text-sm", isSelected ? "text-foreground" : "text-muted-foreground")}>
                                                                             {safeOpt.label}
                                                                         </span>
                                                                     </div>
@@ -1195,8 +1195,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 )}
 
                                                 {currentType === 'header' && (
-                                                    <div className="py-3 border-b border-white/10 mt-4">
-                                                        <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+                                                    <div className="py-3 border-b border-border mt-4">
+                                                        <h3 className="text-sm font-bold uppercase tracking-wider text-primary">
                                                             {form.watch("label") || "Section Header"}
                                                         </h3>
                                                     </div>
@@ -1207,7 +1207,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                         <DatePicker
                                                             value={previewValue as Date || undefined}
                                                             onChange={(date) => setPreviewValue(date)}
-                                                            className="bg-black/20 border-white/10 text-zinc-400 hover:text-white"
+                                                            className="bg-muted/30 border-border text-muted-foreground hover:text-foreground"
                                                             defaultOpen={true}
                                                         />
                                                     </div>
@@ -1217,7 +1217,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                     <div className="space-y-3">
                                                         {/* Hotel Selection */}
                                                         <div>
-                                                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Hotel</label>
+                                                            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Hotel</label>
                                                             <div className="relative">
                                                                 <select className={cn(inputClasses, "appearance-none w-full cursor-not-allowed opacity-100")} disabled defaultValue="">
                                                                     <option value="" disabled>-- Select Hotel --</option>
@@ -1226,23 +1226,23 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                     <option>Hyatt Regency</option>
                                                                     <option>Royal Hawaiian</option>
                                                                 </select>
-                                                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                                             </div>
                                                         </div>
 
                                                         {/* Transport Options */}
                                                         <div>
-                                                            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Transportation</label>
+                                                            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Transportation</label>
                                                             <div className="space-y-2">
-                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-cyan-400/10 border-cyan-400/50">
-                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-cyan-400 border-cyan-400 text-black">
+                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-primary/10 border-primary/50">
+                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-primary border-primary text-primary-foreground">
                                                                         <Check size={14} className="stroke-[3]" />
                                                                     </div>
-                                                                    <span className="text-sm text-white">Pick-up / Drop-off</span>
+                                                                    <span className="text-sm text-foreground">Pick-up / Drop-off</span>
                                                                 </div>
-                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-black/20 border-white/10">
-                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-white/5 border-white/20"></div>
-                                                                    <span className="text-sm text-zinc-400">Self Drive</span>
+                                                                <div className="flex items-center space-x-3 px-3 py-3 rounded-lg border bg-muted/30 border-border">
+                                                                    <div className="w-5 h-5 flex items-center justify-center border rounded-full bg-muted/50 border-muted-foreground/30"></div>
+                                                                    <span className="text-sm text-muted-foreground">Self Drive</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1258,18 +1258,18 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                                 <option>Hilton Hawaiian Village</option>
                                                                 <option>Hyatt Regency</option>
                                                             </select>
-                                                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                                         </div>
-                                                        <div className="p-3 bg-cyan-950/20 border border-cyan-400/20 rounded-lg flex items-start gap-3">
-                                                            <div className="mt-0.5 text-cyan-400">
+                                                        <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3">
+                                                            <div className="mt-0.5 text-primary">
                                                                 <MapPin size={16} />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pickup Location</div>
-                                                                <div className="text-sm text-zinc-200 font-medium">Sheraton Waikiki (Aloha Landing)</div>
-                                                                <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                                                    <span className="bg-white/5 px-1.5 py-0.5 rounded text-white">7:15 AM</span>
-                                                                    <div className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
+                                                                <div className="text-[10px] font-bold text-primary uppercase tracking-wider">Pickup Location</div>
+                                                                <div className="text-sm text-foreground font-medium">Sheraton Waikiki (Aloha Landing)</div>
+                                                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                                                    <span className="bg-muted px-1.5 py-0.5 rounded text-foreground">7:15 AM</span>
+                                                                    <div className="flex items-center gap-1 hover:text-primary transition-colors">
                                                                         Map <ExternalLink size={10} />
                                                                     </div>
                                                                 </div>
@@ -1279,7 +1279,7 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                                                 )}
 
                                                 {form.watch("description") && (
-                                                    <p className="text-sm text-zinc-500 mt-1 ml-1">{form.watch("description")}</p>
+                                                    <p className="text-sm text-muted-foreground mt-1 ml-1">{form.watch("description")}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -1291,18 +1291,18 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/95 backdrop-blur-md">
                     <Button
                         type="submit"
                         form="custom-field-form"
                         disabled={isSubmitting || !form.formState.isDirty}
                         className={cn(
-                            "bg-cyan-400 hover:bg-cyan-300 text-black font-bold min-w-[120px]",
+                            "bg-primary hover:bg-primary/90 text-primary-foreground font-bold min-w-[120px]",
                             isSubmitting
-                                ? "bg-cyan-400/50 text-white cursor-not-allowed"
+                                ? "bg-primary/50 text-white cursor-not-allowed"
                                 : form.formState.isDirty
-                                    ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                                    ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_15px_rgba(var(--primary)_/_0.4)]"
+                                    : "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? (

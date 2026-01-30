@@ -113,8 +113,8 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset }: ColumnPicker
                 className={cn(
                     "h-10 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
                     isOpen
-                        ? "bg-white/10 border-white/20 text-white"
-                        : "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
+                        ? "bg-muted border-border text-foreground"
+                        : "bg-muted/50 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
             >
                 <Columns3 size={16} />
@@ -122,7 +122,7 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset }: ColumnPicker
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-[#0b1115] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                     <div className="p-2 space-y-1">
                         {CUSTOMER_COLUMNS.map((column) => (
                             <button
@@ -132,18 +132,18 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset }: ColumnPicker
                                 className={cn(
                                     "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
                                     column.alwaysVisible
-                                        ? "text-zinc-500 cursor-not-allowed"
-                                        : "text-zinc-300 hover:bg-white/10 hover:text-white"
+                                        ? "text-muted-foreground cursor-not-allowed"
+                                        : "text-foreground hover:bg-muted hover:text-foreground"
                                 )}
                             >
                                 <div className={cn(
                                     "w-4 h-4 rounded border flex items-center justify-center transition-colors",
                                     visibleColumns.includes(column.key)
-                                        ? "bg-cyan-400 border-cyan-400"
-                                        : "border-white/20"
+                                        ? "bg-primary border-primary"
+                                        : "border-border"
                                 )}>
                                     {visibleColumns.includes(column.key) && (
-                                        <Check size={12} className="text-white" />
+                                        <Check size={12} className="text-primary-foreground" />
                                     )}
                                 </div>
                                 {column.label}
@@ -153,14 +153,14 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset }: ColumnPicker
 
                     {!isDefault && (
                         <>
-                            <div className="border-t border-white/10" />
+                            <div className="border-t border-border" />
                             <div className="p-2">
                                 <button
                                     onClick={() => {
                                         onReset();
                                         setIsOpen(false);
                                     }}
-                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                 >
                                     <RotateCcw size={14} />
                                     Reset to Default

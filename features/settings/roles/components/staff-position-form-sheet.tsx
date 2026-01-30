@@ -413,7 +413,7 @@ export function StaffPositionFormSheet({
                                     type="button"
                                     onClick={() => setSelectedColor(null)}
                                     className={cn(
-                                        "w-8 h-8 rounded-full border-2 bg-zinc-700 transition-all flex items-center justify-center text-xs text-zinc-400",
+                                        "w-8 h-8 rounded-full border-2 bg-muted transition-all flex items-center justify-center text-xs text-muted-foreground",
                                         selectedColor === null
                                             ? "border-white scale-110"
                                             : "border-transparent hover:scale-105"
@@ -440,7 +440,7 @@ export function StaffPositionFormSheet({
                         </div>
 
                         {/* Custom Permissions Toggle */}
-                        <div className="bg-zinc-900/50 border border-white/10 rounded-lg p-4">
+                        <div className="bg-muted/50 border border-border rounded-lg p-4">
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -451,11 +451,11 @@ export function StaffPositionFormSheet({
                                             setPermissions(parentPermissions);
                                         }
                                     }}
-                                    className="w-5 h-5 rounded border-zinc-600 bg-zinc-800 text-cyan-500 focus:ring-cyan-500"
+                                    className="w-5 h-5 rounded border-muted-foreground/30 bg-card text-primary focus:ring-primary"
                                 />
                                 <div>
-                                    <span className="text-white font-medium">Use custom permissions</span>
-                                    <p className="text-xs text-zinc-500">
+                                    <span className="text-foreground font-medium">Use custom permissions</span>
+                                    <p className="text-xs text-muted-foreground">
                                         Override the inherited permissions from {selectedGroup?.label || "the group"}
                                     </p>
                                 </div>
@@ -466,7 +466,7 @@ export function StaffPositionFormSheet({
                         {useCustomPermissions && (
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
-                                    <Shield size={18} className="text-cyan-400" />
+                                    <Shield size={18} className="text-primary" />
                                     <Label className="text-lg">Custom Permissions</Label>
                                 </div>
 
@@ -474,7 +474,7 @@ export function StaffPositionFormSheet({
                                     {getRegisteredModules().map((module: ModuleDefinition) => (
                                         <div
                                             key={module.code}
-                                            className="border border-white/10 rounded-lg overflow-hidden"
+                                            className="border border-border rounded-lg overflow-hidden"
                                         >
                                             {/* Module Header */}
                                             <div
@@ -485,18 +485,18 @@ export function StaffPositionFormSheet({
                                                 className={cn(
                                                     "w-full flex items-center justify-between p-3 transition-colors cursor-pointer",
                                                     hasAnyPermission(module.code)
-                                                        ? "bg-cyan-500/10"
-                                                        : "bg-white/5 hover:bg-white/10"
+                                                        ? "bg-primary/10"
+                                                        : "bg-muted/50 hover:bg-muted"
                                                 )}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     {expandedModules.has(module.code)
-                                                        ? <ChevronDown size={16} className="text-zinc-400" />
-                                                        : <ChevronRight size={16} className="text-zinc-400" />
+                                                        ? <ChevronDown size={16} className="text-muted-foreground" />
+                                                        : <ChevronRight size={16} className="text-muted-foreground" />
                                                     }
-                                                    <span className="font-medium text-white">{module.name}</span>
+                                                    <span className="font-medium text-foreground">{module.name}</span>
                                                     {hasAnyPermission(module.code) && (
-                                                        <span className="px-2 py-0.5 text-xs bg-cyan-500/20 text-cyan-400 rounded">
+                                                        <span className="px-2 py-0.5 text-xs bg-primary/20 text-primary rounded">
                                                             Active
                                                         </span>
                                                     )}
@@ -505,14 +505,14 @@ export function StaffPositionFormSheet({
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); toggleAllForModule(module.code, true); }}
-                                                        className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                                        className="px-2 py-1 text-xs bg-muted/50 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
                                                     >
                                                         All
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); toggleAllForModule(module.code, false); }}
-                                                        className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors"
+                                                        className="px-2 py-1 text-xs bg-muted/50 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
                                                     >
                                                         None
                                                     </button>
@@ -521,10 +521,10 @@ export function StaffPositionFormSheet({
 
                                             {/* Resources */}
                                             {expandedModules.has(module.code) && (
-                                                <div className="border-t border-white/10">
+                                                <div className="border-t border-border">
                                                     <table className="w-full">
                                                         <thead>
-                                                            <tr className="text-xs text-zinc-500 uppercase">
+                                                            <tr className="text-xs text-muted-foreground uppercase">
                                                                 <th className="text-left p-3">Resource</th>
                                                                 <th className="text-center p-2 w-16">Create</th>
                                                                 <th className="text-center p-2 w-16">Read</th>
@@ -540,8 +540,8 @@ export function StaffPositionFormSheet({
                                                                 const allEnabled = perm && perm.can_create && perm.can_read && perm.can_update && perm.can_delete;
 
                                                                 return (
-                                                                    <tr key={resource.code} className="border-t border-white/5 hover:bg-white/5">
-                                                                        <td className="p-3 text-sm text-zinc-300">{resource.name}</td>
+                                                                    <tr key={resource.code} className="border-t border-border hover:bg-muted/50">
+                                                                        <td className="p-3 text-sm text-foreground">{resource.name}</td>
                                                                         {(['can_create', 'can_read', 'can_update', 'can_delete'] as const).map(action => (
                                                                             <td key={action} className="text-center p-2">
                                                                                 <button
@@ -550,12 +550,12 @@ export function StaffPositionFormSheet({
                                                                                     className={cn(
                                                                                         "w-6 h-6 rounded border-2 flex items-center justify-center transition-colors",
                                                                                         perm?.[action]
-                                                                                            ? "bg-cyan-500 border-cyan-500"
-                                                                                            : "border-zinc-600 hover:border-zinc-400"
+                                                                                            ? "bg-primary border-primary"
+                                                                                            : "border-muted-foreground/30 hover:border-muted-foreground"
                                                                                     )}
                                                                                 >
                                                                                     {perm?.[action] && (
-                                                                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                                                         </svg>
                                                                                     )}
@@ -574,7 +574,7 @@ export function StaffPositionFormSheet({
                                                                                 )}
                                                                             >
                                                                                 {allEnabled && (
-                                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                                                     </svg>
                                                                                 )}
@@ -595,14 +595,14 @@ export function StaffPositionFormSheet({
 
                         {/* Info when not using custom */}
                         {!useCustomPermissions && selectedGroup && (
-                            <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-4">
+                            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <Info size={18} className="text-cyan-400 shrink-0 mt-0.5" />
+                                    <Info size={18} className="text-primary shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-sm text-zinc-300">
-                                            Inheriting permissions from <span className="text-cyan-400 font-medium">{selectedGroup.label}</span>
+                                        <p className="text-sm text-foreground">
+                                            Inheriting permissions from <span className="text-primary font-medium">{selectedGroup.label}</span>
                                         </p>
-                                        <p className="text-xs text-zinc-500 mt-1">
+                                        <p className="text-xs text-muted-foreground mt-1">
                                             Enable "Use custom permissions" above to override.
                                         </p>
                                     </div>
@@ -613,7 +613,7 @@ export function StaffPositionFormSheet({
                 </div>
 
                 {/* Submit Button - Fixed Footer */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-zinc-950 border-t border-white/10 flex justify-end gap-3">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-card border-t border-border flex justify-end gap-3">
                     <Button
                         type="button"
                         variant="ghost"

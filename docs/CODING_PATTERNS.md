@@ -9,15 +9,25 @@
     4.  **Diff** against your broken file.
     5.  **Copy** the working logic exactly (Logic patterns, Zod schemas, Initialization).
 
+## 0. Design Strategy & Theming (Strict)
+*   **Rule**: **NEVER** use hard-coded colors (e.g. `bg-cyan-400`, `text-zinc-500`, `border-white/10`).
+*   **Requirement**: All UI components must use **Semantic Tokens** to ensure compatibility with Light/Dark modes and Themes.
+*   **Core Tokens**:
+    *   **Backgrounds**: `bg-background` (Page), `bg-card` (Containers), `bg-popover` (Dropdowns), `bg-muted` (Secondary).
+    *   **Text**: `text-foreground` (Primary), `text-muted-foreground` (Secondary).
+    *   **Borders**: `border-border`.
+    *   **Primary Actions**: `bg-primary`, `text-primary-foreground`, `border-primary`.
+    *   **Destructive**: `bg-destructive`, `text-destructive-foreground`.
+
 ## 1. UI Standards
 
 ### Save/Update Buttons
 *   **Primary Action Buttons** (Create, Save, Update, Add):
-    *   **Background**: `bg-cyan-400` (hover: `hover:bg-cyan-300`)
-    *   **Text**: `text-black` — Always use black text on cyan background
-    *   **Shadow**: `shadow-[0_0_15px_rgba(6,182,212,0.4)]`
-    *   **Disabled State**: `bg-zinc-800 text-zinc-500 cursor-not-allowed`
-    *   **Full Class**: `bg-cyan-400 hover:bg-cyan-300 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]`
+    *   **Background**: `bg-primary` (hover: `hover:bg-primary/90`)
+    *   **Text**: `text-primary-foreground`
+    *   **Shadow**: `shadow-glow` (Theme-aware glow)
+    *   **Disabled State**: `opacity-50 cursor-not-allowed`
+    *   **Full Class**: `bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-glow transition-all`
 
 ### 1.2 Deletion & Confirmation Protocol
 *   **Strict Rule**: Never use browser native `window.confirm()`.
@@ -30,7 +40,7 @@
 ### 1.3 UI Action Standards
 *   **Tooltips**: Do NOT add `title="..."` tooltips to standard action buttons (Edit, Delete, Duplicate) in tables. They add unnecessary clutter.
 *   **Icons**: Use `lucide-react` icons (16px).
-*   **Indicators**: Use `cyan-500` for active states.
+*   **Indicators**: Use `text-primary` or `bg-primary` for active states.
 
 ## 2. UI Components (Deep Core)
 *   **SidePanel / Sheet Layouts**:
@@ -40,8 +50,8 @@
         *   **Scroll Area**: Wrap content in `<div className="flex-1 overflow-y-auto p-6 ...">`.
     *   **Footer Rules**:
         *   **Position**: Sticky at bottom (`mt-auto`).
-        *   **Style**: `bg-zinc-950/40 backdrop-blur-md` with `border-t border-white/10`.
-        *   **Buttons**: Primary Action Button must use **Black Text** (`text-black`) on `bg-cyan-400` background. Never use white text on cyan.
+        *   **Style**: `bg-background/80 backdrop-blur-md` with `border-t border-border`.
+        *   **Buttons**: Primary Action Button must use `bg-primary` and `text-primary-foreground`.
     *   **Snippet**:
         ```tsx
         <SidePanel contentClassName="p-0 overflow-hidden flex flex-col" ...>
@@ -49,8 +59,8 @@
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     {/* Content */}
                 </div>
-                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
-                    <Button type="submit" className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]">Save</Button>
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/80 backdrop-blur-md">
+                    <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-glow">Save</Button>
                 </div>
             </form>
         </SidePanel>
@@ -63,7 +73,9 @@
         *   Desktop table structure and styling
         *   Mobile card view implementation
         *   Action button placement and hover effects
-        *   Header styling (`bg-white/5 backdrop-blur-sm`)
+        *   Mobile card view implementation
+        *   Action button placement and hover effects
+        *   Header styling (`bg-muted/50 backdrop-blur-sm`)
         *   Row hover states and transitions
 
 ### 2.2 Mobile Viewport Height (dvh Standard)
@@ -86,21 +98,21 @@
 *   **Card Container**: `<div className="md:hidden space-y-4 p-4">`
 *   **Card Styling**:
     ```css
-    bg-white/5 border border-white/10 rounded-xl p-4 space-y-4
+    bg-card border border-border rounded-xl p-4 space-y-4 shadow-sm
     ```
 *   **Card Structure**:
     1.  **Header Section**: Name/Title + Action Buttons (flex, justify-between)
-        *   Icon in circle: `w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400`
-        *   Name: `text-lg font-bold text-white leading-tight`
-        *   Separator: `border-b border-white/5 pb-3`
+        *   Icon in circle: `w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary`
+        *   Name: `text-lg font-bold text-foreground leading-tight`
+        *   Separator: `border-b border-border pb-3`
     2.  **Body Section**: Two-column grid for details
         *   Container: `grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base`
-        *   Labels: `text-zinc-500`
-        *   Values: `text-zinc-300`
+        *   Labels: `text-muted-foreground`
+        *   Values: `text-foreground`
 *   **Action Buttons**:
-    *   Container: `flex items-center gap-1 shrink-0`
-    *   Edit: `p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors`
-    *   Delete: `p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors`
+    *   **Container**: `flex items-center gap-1 shrink-0`
+    *   **Edit**: `p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors`
+    *   **Delete**: `p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors`
 *   **Reference Implementation**: `features/crm/customers/components/customer-table.tsx`
 *   **Template**:
     ```tsx
@@ -112,20 +124,20 @@
     {/* Mobile Card View */}
     <div className="md:hidden space-y-4 p-4">
         {data.map((item) => (
-            <div key={item.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+            <div key={item.id} className="bg-card border border-border rounded-xl p-4 space-y-4 shadow-sm">
                 {/* Header: Name + Actions */}
-                <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
+                <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <Icon size={20} />
                         </div>
-                        <h3 className="text-lg font-bold text-white leading-tight">{item.name}</h3>
+                        <h3 className="text-lg font-bold text-foreground leading-tight">{item.name}</h3>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                        <button onClick={() => onEdit(item)} className="p-2 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors">
+                        <button onClick={() => onEdit(item)} className="p-2 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors">
                             <Edit2 size={16} />
                         </button>
-                        <button onClick={() => setDeleteId(item.id)} className="p-2 hover:bg-red-500/10 rounded text-zinc-400 hover:text-red-400 transition-colors">
+                        <button onClick={() => setDeleteId(item.id)} className="p-2 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
                             <Trash2 size={16} />
                         </button>
                     </div>
@@ -133,8 +145,8 @@
 
                 {/* Body: Two Columns */}
                 <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-base">
-                    <div className="text-zinc-500">Label</div>
-                    <div className="text-zinc-300">{item.value}</div>
+                    <div className="text-muted-foreground">Label</div>
+                    <div className="text-foreground">{item.value}</div>
                 </div>
             </div>
         ))}
@@ -224,12 +236,12 @@
 ## 9. Calendar UI Rules
 *   **Uniform Row Heights**: All calendar rows must have a `min-height` that accommodates at least one data chip (e.g. `160px`) to prevent layout jumping between empty and filled rows. Rows with >1 item may expand naturally.
 *   **Dynamic Grid**: Always calculate precise row counts (`Math.ceil((first + days) / 7) * 7`) to prevent extra empty rows at the bottom.
-*   **Strict Colors**: Calendar inactive days/headers must strictly match the design token (e.g. `zinc-950/80`), even if it requires `!important` or specific class overrides.
+*   **Strict Colors**: Calendar inactive days/headers must strictly match the design token (e.g. `text-muted-foreground`), even if it requires `!important` or specific class overrides.
 *   **Popup Calendar Selection Style**:
     *   **Context**: For small popup calendars (e.g. Booking Modal).
     *   **Rule**: Selected date must use **Border Only** styling. NO background color ("glow") and NO shadow.
     *   **Implementation**: Override the `selected` class key.
-    *   **Class**: `border-2 border-cyan-500 text-cyan-400 bg-transparent hover:text-cyan-300 focus:text-cyan-300 shadow-none font-bold`
+    *   **Class**: `border-2 border-primary text-primary bg-transparent hover:text-primary focus:text-primary shadow-none font-bold`
 
 ## 10. Custom Select Pattern (Combobox Standard)
 *   **Standard**: Use the Combobox pattern for all "Select" inputs.
@@ -237,8 +249,8 @@
 *   **Core Requirements**:
     1.  **Always Searchable**: The trigger must be an input field that filters the dropdown options. Do NOT use static triggers.
     2.  **Dropdown Style**:
-        *   Background: `bg-[#1a1f24]`
-        *   Border: `border-white/10`
+        *   Background: `bg-popover`
+        *   Border: `border-border`
         *   Behavior: Popover / Floating
     3.  **Required Logic**:
         *   **Toggle**: Use "Required" (Default: False).
@@ -255,25 +267,25 @@
         onChange={(val) => setValue("field_id", val)}
         options={options}
         placeholder="Search or select..."
-        inputClassName="bg-zinc-900/80 ..." // Optional: Match standard input background
+        inputClassName="bg-input ..." // Optional: Match standard input background
         // Ensure parent handles the "None" logic if manually implemented
     />
     ```
 
 ## 11. Form Inputs (Text & Textarea)
 *   **Standard Styling**:
-    *   **Background**: `bg-black` (or `bg-black/30` for optional/secondary).
-    *   **Border**: `border border-white/10` default.
-    *   **Focus State**: `focus:border-cyan-500/50` (Cyan) + `focus:outline-none`.
+    *   **Background**: `bg-background` (or `bg-muted/30` for optional/secondary).
+    *   **Border**: `border border-border` default.
+    *   **Focus State**: `focus:border-primary/50` + `focus:outline-none`.
     *   **Shape/Space**: `rounded-lg px-4 py-3`.
-    *   **Text**: `text-white`.
+    *   **Text**: `text-foreground`.
 *   **Textarea Specifics**:
     *   Add `resize-none` to prevent layout shift.
 *   **Example**:
     ```tsx
     <input
         type="text"
-        className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+        className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none"
         placeholder="Enter text..."
     />
     ```
@@ -299,17 +311,17 @@
     *   `Columns` → Horizontal layout (flex-wrap)
     *   `LayoutGrid` → Columns layout (grid)
 *   **Styling**:
-    *   Container: `flex items-center gap-2 p-1 bg-black/20 rounded-lg border border-white/10 w-fit`
-    *   Active Button: `bg-cyan-500/20 text-cyan-400 shadow-sm shadow-cyan-500/10`
-    *   Inactive Button: `text-zinc-500 hover:text-zinc-300 hover:bg-white/5`
+    *   Container: `flex items-center gap-2 p-1 bg-muted rounded-lg border border-border w-fit`
+    *   Active Button: `bg-primary/20 text-primary shadow-sm shadow-primary/10`
+    *   Inactive Button: `text-muted-foreground hover:text-foreground hover:bg-muted`
 
 ### Column Count Selector (Nested)
 *   **When Visible**: Only when `multi_select_style === 'columns'`.
 *   **Values**: 2, 3, 4 columns.
 *   **Styling**:
-    *   Container: `flex items-center gap-0.5 ml-1 pl-1 border-l border-white/10`
-    *   Active Button: `bg-cyan-500 text-black shadow-sm`
-    *   Inactive Button: `text-zinc-500 hover:text-zinc-300 hover:bg-white/5`
+    *   Container: `flex items-center gap-0.5 ml-1 pl-1 border-l border-border`
+    *   Active Button: `bg-primary text-primary-foreground shadow-sm`
+    *   Inactive Button: `text-muted-foreground hover:text-foreground hover:bg-muted`
 *   **Animation**: `animate-in fade-in zoom-in-50 duration-200`
 
 ### Visual Style Toolbar
@@ -335,13 +347,13 @@
 *   **Button Style (default)**:
     ```css
     px-3 py-3 rounded-lg border cursor-pointer
-    /* Selected */ bg-cyan-500/10 border-cyan-500/50
-    /* Unselected */ bg-black/20 border-white/10 hover:border-white/20
+    /* Selected */ bg-primary/10 border-primary/50
+    /* Unselected */ bg-muted/20 border-border hover:border-border/80
     ```
 *   **List Style**:
     ```css
-    px-1 py-1 border-none hover:bg-white/5 rounded
-    /* Outer Container */ border border-white/10 rounded-lg p-3 bg-black/10
+    px-1 py-1 border-none hover:bg-muted/50 rounded
+    /* Outer Container */ border border-border rounded-lg p-3 bg-muted/10
     ```
 
 ### Usage Example
@@ -360,15 +372,15 @@
             className={cn(
                 "flex items-center space-x-3 transition-all cursor-pointer",
                 settings.multi_select_visual === 'list'
-                    ? "px-1 py-1 border-none hover:bg-white/5 rounded"
+                    ? "px-1 py-1 border-none hover:bg-muted/50 rounded"
                     : "px-3 py-3 rounded-lg border",
                 isSelected
-                    ? "bg-cyan-500/10 border-cyan-500/50"
-                    : "bg-black/20 border-white/10 hover:border-white/20"
+                    ? "bg-primary/10 border-primary/50"
+                    : "bg-muted/20 border-border hover:border-border/80"
             )}
         >
             <Checkbox checked={isSelected} />
-            <span className="text-sm text-zinc-300">{opt.label}</span>
+            <span className="text-sm text-foreground">{opt.label}</span>
         </div>
     ))}
 </div>
@@ -380,19 +392,19 @@
 *   **Core Rules**:
     1.  **Combobox Only**: NEVER use native `<select>`. Always use `<Combobox>`.
     2.  **Unboxed Inputs**:
-        *   The *Input* itself (Combobox trigger or Text input) must match the standard system input style (`bg-zinc-900/80`).
-        *   Do NOT double-wrap the input in another styled container (e.g., `bg-black/20`) if the component already provides one.
-        *   Use the `inputClassName` prop on `<Combobox>` to override default `bg-black/20` to `bg-zinc-900/80`.
+        *   The *Input* itself (Combobox trigger or Text input) must match the standard system input style (`bg-input`).
+        *   Do NOT double-wrap the input in another styled container (e.g., `bg-muted`) if the component already provides one.
+        *   Use the `inputClassName` prop on `<Combobox>` to override default `bg-input` only if necessary.
     3.  **Card Item Wrapper**:
         *   Wrap the *Field Object* (Label + Input + Description) in a "card" container if it's part of a list.
-        *   Style: `p-3 bg-black/20 border border-white/10 rounded-lg`.
+        *   Style: `p-3 bg-card border border-border rounded-lg`.
         *   This creates a clear visual distinction for "Content Objects" while keeping the "Form Controls" (Inputs) consistent.
     4.  **Layout**:
         *   **Top Controls**: Use `grid grid-cols-2` for primary controls (e.g., Schedule | Variation). Use conditional col-spanning to handle empty states.
         *   **Inline Actions**: Place "Add New" or "Edit" buttons as **Icon Buttons** inline with the field (e.g., inside the label row or flex-aligned), reducing vertical clutter.
     5.  **Reusability**:
         *   Define a standard `inputStyles` constant at the top of the file to ensure all inputs in the form share the exact class string.
-        *   `const inputStyles = "w-full bg-zinc-900/80 ...";`
+        *   `const inputStyles = "w-full bg-input ...";`
 
 ## 14. UI Scaling & Zoom
 *   **Context**: The application features a global "Zoom" setting (80% - 120%) controllable from the Sidebar.

@@ -201,14 +201,14 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
     };
 
     const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
-        <div className="flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5">
-            <Icon size={16} className="text-cyan-400" />
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        <div className="flex items-center gap-2 bg-muted/50 -mx-6 px-6 py-3 mb-6 border-y border-border">
+            <Icon size={16} className="text-primary" />
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
         </div>
     );
-    // Updated to match Input component (bg-zinc-900/80)
-    const inputClasses = "w-full bg-zinc-900/80 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:border-cyan-400/50 focus:outline-none transition-colors text-sm shadow-sm";
-    const labelClasses = "text-xs font-medium text-zinc-400 uppercase tracking-wider ml-1";
+    // Updated to match Input component (bg-muted/50)
+    const inputClasses = "w-full bg-muted/50 border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none transition-colors text-sm shadow-sm";
+    const labelClasses = "text-xs font-medium text-muted-foreground uppercase tracking-wider ml-1";
 
     const eventTypeOptions = ["Tour", "Activity", "Transport", "Event"];
 
@@ -220,8 +220,8 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
             className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === id
-                    ? "border-cyan-400 text-cyan-400 bg-cyan-400/5"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-white/5 active:bg-white/10"
+                    ? "border-primary text-primary bg-primary/5"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
             )}
         >
             {Icon && <Icon size={16} />}
@@ -240,7 +240,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
         >
             <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
                 {/* Tabs Header */}
-                <div className="shrink-0 flex items-center border-b border-white/10 bg-[#0b1115] px-6 z-10">
+                <div className="shrink-0 flex items-center border-b border-border bg-background px-6 z-10">
                     <TabButton id="basics" label="The Basics" icon={Info} />
                     <TabButton id="legal" label="Legal & Waivers" icon={FileText} />
                     <TabButton id="pricing" label="Pricing" icon={Users} />
@@ -251,7 +251,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {/* TAB: THE BASICS */}
                     {activeTab === "basics" && (
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-y-6 xl:gap-0 xl:divide-x xl:divide-white/10 animate-in fade-in duration-300 slide-in-from-left-4 pt-8 pb-6">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-y-6 xl:gap-0 xl:divide-x xl:divide-border animate-in fade-in duration-300 slide-in-from-left-4 pt-8 pb-6">
                             {/* COLUMN 1: BASICS & CAPACITY */}
                             <div className="xl:col-span-4 space-y-10 px-6">
                                 <div>
@@ -260,7 +260,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                         <div className="space-y-2">
                                             <Label>Experience Name *</Label>
                                             <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />
-                                            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                                            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
@@ -283,16 +283,16 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                                     onClick={() => setShowEventTypePicker(true)}
                                                     onFocus={() => setShowEventTypePicker(true)}
                                                 />
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={16} />
                                             </div>
                                             {showEventTypePicker && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-[#1a1f2e] border border-cyan-400/30 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-white/5">
+                                                <div className="absolute top-full left-0 w-full mt-1 bg-popover border border-border rounded-lg shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-border">
                                                     {eventTypeOptions.map(type => (
                                                         <div
                                                             key={type}
                                                             className={cn(
                                                                 "px-4 py-3 text-sm transition-colors cursor-pointer flex items-center justify-between",
-                                                                eventTypeValue === type ? "bg-cyan-400/10 text-cyan-400" : "text-zinc-300 hover:bg-white/5 hover:text-white"
+                                                                eventTypeValue === type ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                                                             )}
                                                             onMouseDown={(e) => {
                                                                 e.preventDefault(); // Prevent blur
@@ -406,7 +406,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                     <div className="space-y-2">
                                         <Label>Cancellation Policy</Label>
                                         <textarea {...register("cancellation_policy")} rows={6} className={inputClasses} placeholder="Enter your cancellation policy here..." />
-                                        <p className="text-xs text-zinc-500">Visible to customers during checkout and in their booking confirmation.</p>
+                                        <p className="text-xs text-muted-foreground">Visible to customers during checkout and in their booking confirmation.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Restrictions & Disclaimer</Label>
@@ -421,7 +421,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                     <div className="space-y-2">
                                         <Label>Digital Waiver Link</Label>
                                         <Input {...register("waiver_link")} placeholder="https://smartwaiver.com/v/..." />
-                                        <p className="text-xs text-zinc-500">Provide a link to your external digital waiver service (e.g. SmartWaiver).</p>
+                                        <p className="text-xs text-muted-foreground">Provide a link to your external digital waiver service (e.g. SmartWaiver).</p>
                                     </div>
                                 </div>
                             </div>
@@ -430,35 +430,35 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
 
                     {/* TAB: PRICING */}
                     {activeTab === "pricing" && (
-                        <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
-                            <Users size={48} className="mb-4 text-zinc-700" />
-                            <h3 className="text-lg font-medium text-zinc-300">Pricing Configuration</h3>
+                        <div className="min-h-[400px] flex flex-col items-center justify-center text-muted-foreground animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
+                            <Users size={48} className="mb-4 text-muted-foreground/50" />
+                            <h3 className="text-lg font-medium text-foreground">Pricing Configuration</h3>
                             <p className="text-sm">Manage ticket types, seasonal rates, and adjustments.</p>
-                            <p className="text-xs text-zinc-600 mt-2">Coming soon to the Deep Core.</p>
+                            <p className="text-xs text-muted-foreground mt-2">Coming soon to the Deep Core.</p>
                         </div>
                     )}
 
                     {/* TAB: BOOKING OPTIONS */}
                     {activeTab === "booking" && (
-                        <div className="min-h-[400px] flex flex-col items-center justify-center text-zinc-500 animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
-                            <ClipboardList size={48} className="mb-4 text-zinc-700" />
-                            <h3 className="text-lg font-medium text-zinc-300">Booking Options</h3>
+                        <div className="min-h-[400px] flex flex-col items-center justify-center text-muted-foreground animate-in fade-in duration-300 slide-in-from-right-4 px-6 pt-8">
+                            <ClipboardList size={48} className="mb-4 text-muted-foreground/50" />
+                            <h3 className="text-lg font-medium text-foreground">Booking Options</h3>
                             <p className="text-sm">Configure cut-off times, availability rules, and instant confirmation.</p>
-                            <p className="text-xs text-zinc-600 mt-2">Coming soon to the Deep Core.</p>
+                            <p className="text-xs text-muted-foreground mt-2">Coming soon to the Deep Core.</p>
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/95 backdrop-blur-md">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !formState.isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                formState.isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                formState.isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

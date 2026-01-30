@@ -30,10 +30,10 @@ export function ColumnThree({
     return (
         <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-200">
             {/* Fixed Header */}
-            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-background/95 backdrop-blur border-b border-border sticky top-0 z-10 supports-[backdrop-filter]:bg-background/60">
                 <div className="h-8 flex items-center gap-2">
-                    <Send size={16} className="text-cyan-400" />
-                    <span className="text-base font-bold text-white uppercase tracking-wider">Actions</span>
+                    <Send size={16} className="text-primary" />
+                    <span className="text-base font-bold text-foreground uppercase tracking-wider">Actions</span>
                 </div>
             </div>
 
@@ -44,42 +44,42 @@ export function ColumnThree({
                     {/* Email Entire Tour */}
                     <button
                         onClick={onEmailTour}
-                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-400/30 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:border-primary/50 transition-all text-left shadow-sm"
                     >
-                        <div className="bg-zinc-800 p-2 rounded-full">
-                            <Mail size={16} className="text-zinc-400" />
+                        <div className="bg-muted p-2 rounded-full">
+                            <Mail size={16} className="text-muted-foreground" />
                         </div>
                         <div>
-                            <div className="text-base font-medium text-white">Email Entire Tour</div>
-                            <div className="text-sm text-zinc-500">Send update to all participants</div>
+                            <div className="text-base font-medium text-foreground">Email Entire Tour</div>
+                            <div className="text-sm text-muted-foreground">Send update to all participants</div>
                         </div>
                     </button>
 
                     {/* SMS Entire Tour */}
                     <button
                         onClick={onSmsTour}
-                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-cyan-400/30 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:border-primary/50 transition-all text-left shadow-sm"
                     >
-                        <div className="bg-zinc-800 p-2 rounded-full">
-                            <MessageSquare size={16} className="text-zinc-400" />
+                        <div className="bg-muted p-2 rounded-full">
+                            <MessageSquare size={16} className="text-muted-foreground" />
                         </div>
                         <div>
-                            <div className="text-base font-medium text-white">SMS Entire Tour</div>
-                            <div className="text-sm text-zinc-500">Send text to all participants</div>
+                            <div className="text-base font-medium text-foreground">SMS Entire Tour</div>
+                            <div className="text-sm text-muted-foreground">Send text to all participants</div>
                         </div>
                     </button>
 
                     {/* Cancel Tour */}
                     <button
                         onClick={onCancelTour}
-                        className="w-full flex items-center gap-3 p-4 bg-black/20 border border-white/10 rounded-lg hover:border-amber-500/30 transition-all text-left"
+                        className="w-full flex items-center gap-3 p-4 bg-card border border-border rounded-lg hover:border-amber-500/50 transition-all text-left shadow-sm"
                     >
-                        <div className="bg-zinc-800 p-2 rounded-full">
-                            <XCircle size={16} className="text-amber-500" />
+                        <div className="bg-muted p-2 rounded-full">
+                            <XCircle size={16} className="text-amber-500 dark:text-amber-400" />
                         </div>
                         <div>
-                            <div className="text-base font-medium text-white">Cancel Tour</div>
-                            <div className="text-sm text-zinc-500">Cancel all reservations at once</div>
+                            <div className="text-base font-medium text-foreground">Cancel Tour</div>
+                            <div className="text-sm text-muted-foreground">Cancel all reservations at once</div>
                         </div>
                     </button>
 
@@ -87,14 +87,14 @@ export function ColumnThree({
                     {canDelete && (
                         <button
                             onClick={onDeleteAvailability}
-                            className="w-full flex items-center gap-3 p-4 bg-black/20 border border-red-500/20 rounded-lg hover:border-red-500/50 transition-all text-left"
+                            className="w-full flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg hover:border-destructive/50 transition-all text-left shadow-sm"
                         >
-                            <div className="bg-zinc-800 p-2 rounded-full">
-                                <Trash2 size={16} className="text-red-500" />
+                            <div className="bg-destructive/20 p-2 rounded-full">
+                                <Trash2 size={16} className="text-destructive" />
                             </div>
                             <div>
-                                <div className="text-base font-medium text-red-400">Delete Availability</div>
-                                <div className="text-sm text-zinc-500">Permanently remove this slot</div>
+                                <div className="text-base font-medium text-destructive">Delete Availability</div>
+                                <div className="text-sm text-muted-foreground">Permanently remove this slot</div>
                             </div>
                         </button>
                     )}

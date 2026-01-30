@@ -30,7 +30,7 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
 
     if (data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground bg-card rounded-xl border border-border">
                 <Search size={48} className="mb-4 opacity-20" />
                 <p>No booking option schedules found.</p>
             </div>
@@ -40,64 +40,64 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
     return (
         <div className="h-full overflow-auto relative">
             <table className="w-full text-left hidden md:table">
-                <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-muted/80 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[25%]">Schedule Name</th>
                         <th className="px-6 py-4 font-medium w-[35%]">Description</th>
                         <th className="px-6 py-4 font-medium">Field Count</th>
                         <th className="px-6 py-4 font-medium w-[150px]">Created</th>
-                        <th className="px-6 py-4 font-medium w-[120px] border-l border-white/10"></th>
+                        <th className="px-6 py-4 font-medium w-[120px] border-l border-border"></th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-zinc-300">
+                <tbody className="divide-y divide-border text-muted-foreground">
                     {data.map((schedule) => {
                         // Calculate total unique fields across configs or just show Retail count as proxy
                         const fieldCount = (schedule.config_retail?.length || 0);
 
                         return (
-                            <tr key={schedule.id} className="hover:bg-white/5 transition-colors group">
+                            <tr key={schedule.id} className="hover:bg-muted transition-colors group">
                                 {/* Name */}
-                                <td className="px-6 py-4 font-medium text-white align-middle">
+                                <td className="px-6 py-4 font-medium text-foreground align-middle">
                                     {schedule.name}
                                 </td>
 
                                 {/* Description */}
                                 <td className="px-6 py-4 align-top">
-                                    <div className="pt-3 text-zinc-400">
+                                    <div className="pt-3 text-muted-foreground">
                                         {schedule.description || <span className="opacity-30 italic">No description</span>}
                                     </div>
                                 </td>
 
                                 {/* Count */}
-                                <td className="px-6 py-4 align-middle text-zinc-400">
+                                <td className="px-6 py-4 align-middle text-muted-foreground">
                                     {fieldCount} Fields
                                 </td>
 
                                 {/* Created */}
-                                <td className="px-6 py-4 align-top text-zinc-400">
+                                <td className="px-6 py-4 align-top text-muted-foreground">
                                     <div className="pt-3">
                                         {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
                                 {/* Actions - Last Column */}
-                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                <td className="px-6 py-4 align-middle border-l border-border">
                                     <div className="flex items-center gap-2 justify-end">
                                         <button
                                             onClick={() => onEdit(schedule)}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => onDuplicate(schedule)}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeleteId(schedule.id)}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -115,26 +115,26 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                     const fieldCount = (schedule.config_retail?.length || 0);
 
                     return (
-                        <div key={schedule.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                        <div key={schedule.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
                             {/* Header: Name + Actions */}
-                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <h3 className="text-lg font-bold text-white leading-tight">{schedule.name}</h3>
+                            <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
+                                <h3 className="text-lg font-bold text-foreground leading-tight">{schedule.name}</h3>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(schedule)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => onDuplicate(schedule)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Copy size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeleteId(schedule.id)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -145,11 +145,11 @@ export function BookingOptionsTable({ data, onEdit, onDuplicate, onDelete }: Boo
                             <div className="space-y-3">
                                 {schedule.description && (
                                     <div>
-                                        <div className="text-zinc-500 mb-1">Description</div>
-                                        <div className="text-zinc-400">{schedule.description}</div>
+                                        <div className="text-muted-foreground mb-1">Description</div>
+                                        <div className="text-muted-foreground">{schedule.description}</div>
                                     </div>
                                 )}
-                                <div className="flex items-center justify-between text-zinc-400">
+                                <div className="flex items-center justify-between text-muted-foreground">
                                     <span>{fieldCount} Fields</span>
                                     <span>
                                         {new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

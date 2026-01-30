@@ -23,13 +23,13 @@ import { SiSignal } from "react-icons/si";
 // Messaging app options with icons
 const MESSAGING_OPTIONS = [
     { value: "", label: "None", icon: null },
-    { value: "WhatsApp", label: "WhatsApp", icon: <FaWhatsapp size={16} className="text-green-500" /> },
-    { value: "FB Messenger", label: "FB Messenger", icon: <FaFacebookMessenger size={16} className="text-blue-500" /> },
-    { value: "Signal", label: "Signal", icon: <SiSignal size={16} className="text-blue-400" /> },
-    { value: "Telegram", label: "Telegram", icon: <FaTelegram size={16} className="text-sky-400" /> },
-    { value: "Viber", label: "Viber", icon: <FaViber size={16} className="text-purple-500" /> },
-    { value: "Line", label: "Line", icon: <FaLine size={16} className="text-green-400" /> },
-    { value: "WeChat", label: "WeChat", icon: <FaWeixin size={16} className="text-green-600" /> },
+    { value: "WhatsApp", label: "WhatsApp", icon: <FaWhatsapp size={16} className="text-[#25D366]" /> },
+    { value: "FB Messenger", label: "FB Messenger", icon: <FaFacebookMessenger size={16} className="text-[#0084FF]" /> },
+    { value: "Signal", label: "Signal", icon: <SiSignal size={16} className="text-[#3A76F0]" /> },
+    { value: "Telegram", label: "Telegram", icon: <FaTelegram size={16} className="text-[#0088cc]" /> },
+    { value: "Viber", label: "Viber", icon: <FaViber size={16} className="text-[#7360f2]" /> },
+    { value: "Line", label: "Line", icon: <FaLine size={16} className="text-[#00C300]" /> },
+    { value: "WeChat", label: "WeChat", icon: <FaWeixin size={16} className="text-[#7BB32E]" /> },
 ];
 
 const US_STATES = [
@@ -296,9 +296,9 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
     };
 
     const SectionHeader = ({ icon: Icon, title, className }: { icon: any, title: string, className?: string }) => (
-        <div className={`flex items-center gap-2 bg-white/5 -mx-6 px-6 py-3 mb-6 border-y border-white/5 ${className || ''}`}>
-            <Icon size={16} className="text-cyan-400" />
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{title}</h3>
+        <div className={`flex items-center gap-2 bg-muted -mx-6 px-6 py-3 mb-6 border-y border-border ${className || ''}`}>
+            <Icon size={16} className="text-primary" />
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</h3>
         </div>
     );
 
@@ -321,19 +321,19 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                         <SectionHeader icon={Info} title="Basic Information" className="-mt-6 border-t-0" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <Handshake size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Handshake size={16} className="text-muted-foreground" />
                                     Vendor Name <RequiredIndicator />
                                 </Label>
                                 <Input
                                     {...register("name")}
                                     placeholder="e.g. Acme Transport Co."
                                 />
-                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <FileText size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <FileText size={16} className="text-muted-foreground" />
                                     EIN Number
                                 </Label>
                                 <Input
@@ -350,8 +350,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
-                                        <Phone size={16} className="text-zinc-500" />
+                                    <Label className="text-foreground flex items-center gap-2">
+                                        <Phone size={16} className="text-muted-foreground" />
                                         Phone Number
                                     </Label>
                                     <Input
@@ -364,23 +364,23 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
-                                        <Mail size={16} className="text-zinc-500" />
+                                    <Label className="text-foreground flex items-center gap-2">
+                                        <Mail size={16} className="text-muted-foreground" />
                                         Email Address
                                     </Label>
                                     <Input
                                         {...register("email")}
                                         placeholder="contact@vendor.com"
                                     />
-                                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                                    {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                                 </div>
                             </div>
 
                             {/* Preferred Messaging App */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300 flex items-center gap-2">
-                                        <MessageCircle size={16} className="text-zinc-500" />
+                                    <Label className="text-muted-foreground flex items-center gap-2">
+                                        <MessageCircle size={16} className="text-muted-foreground" />
                                         Preferred Messaging
                                     </Label>
                                     <CustomSelect
@@ -398,7 +398,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                 {/* Handle/Nickname - Only shows when app is selected */}
                                 {watch("preferred_messaging_app") && (
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300 flex items-center gap-2">
+                                        <Label className="text-muted-foreground flex items-center gap-2">
                                             Handle / Nickname
                                         </Label>
                                         <Input
@@ -410,8 +410,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-zinc-300 flex items-center gap-2">
-                                    <MapPin size={16} className="text-zinc-500" />
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <MapPin size={16} className="text-muted-foreground" />
                                     Street Address
                                 </Label>
                                 <Input
@@ -422,11 +422,11 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="col-span-2 space-y-2">
-                                    <Label className="text-zinc-300">City</Label>
+                                    <Label className="text-foreground">City</Label>
                                     <Input {...register("city")} placeholder="City" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">State</Label>
+                                    <Label className="text-foreground">State</Label>
                                     <Combobox
                                         value={watch("state")}
                                         onChange={(val) => setValue("state", val, { shouldDirty: true })}
@@ -435,7 +435,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-zinc-300">Zip Code</Label>
+                                    <Label className="text-foreground">Zip Code</Label>
                                     <Input {...register("zip_code")} placeholder="Zip" />
                                 </div>
                             </div>
@@ -447,10 +447,10 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                         <div>
                             <SectionHeader icon={UserPlus} title="User Account (Optional)" />
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                                     <div>
-                                        <p className="font-medium text-white">Create Login Account</p>
-                                        <p className="text-sm text-zinc-400">Allow this vendor contact to log in to the portal</p>
+                                        <p className="font-medium text-foreground">Create Login Account</p>
+                                        <p className="text-sm text-muted-foreground">Allow this vendor contact to log in to the portal</p>
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input
@@ -458,22 +458,22 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                             {...register("create_user_account")}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     </label>
                                 </div>
 
                                 {watch("create_user_account") && (
-                                    <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/30 space-y-3">
+                                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/30 space-y-3">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <KeyRound size={16} className="text-cyan-400" />
-                                                <span className="text-sm font-medium text-white">Temporary Password</span>
+                                                <KeyRound size={16} className="text-primary" />
+                                                <span className="text-sm font-medium text-foreground">Temporary Password</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <button
                                                     type="button"
                                                     onClick={() => setValue("temp_password", generatePassword(), { shouldDirty: true })}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     title="Generate new password"
                                                 >
                                                     <RefreshCw size={14} />
@@ -484,7 +484,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                                         navigator.clipboard.writeText(watch("temp_password") || "");
                                                         toast.success("Password copied!");
                                                     }}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     title="Copy password"
                                                 >
                                                     <Copy size={14} />
@@ -492,7 +492,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword(!showPassword)}
-                                                    className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                    className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     title={showPassword ? "Hide password" : "Show password"}
                                                 >
                                                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -503,15 +503,15 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                             <Input
                                                 {...register("temp_password")}
                                                 type={showPassword ? "text" : "password"}
-                                                className="font-mono text-sm bg-[#0b1115] border-white/10"
+                                                className="font-mono text-sm bg-muted border-border"
                                                 readOnly
                                             />
                                         </div>
-                                        <p className="text-xs text-cyan-300/70">
+                                        <p className="text-xs text-primary/70">
                                             ⚠️ Share this password securely. User will be prompted to change it on first login.
                                         </p>
                                         {!watch("email") && (
-                                            <p className="text-xs text-amber-400">
+                                            <p className="text-xs text-yellow-500">
                                                 ⚠️ Email address is required to create a user account.
                                             </p>
                                         )}
@@ -523,15 +523,15 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                 </div>
 
                 {/* Fixed Footer */}
-                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-card">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-white cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

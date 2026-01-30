@@ -83,11 +83,11 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
 
     if (data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/5">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground bg-card rounded-xl border border-border">
                 <Search size={48} className="mb-4 opacity-20" />
                 <p>No custom fields found.</p>
                 {activeFilter !== 'all' && (
-                    <Button variant="link" onClick={() => onFilterChange('all')} className="mt-2 text-cyan-400">
+                    <Button variant="link" onClick={() => onFilterChange('all')} className="mt-2 text-primary">
                         Clear Filters
                     </Button>
                 )}
@@ -98,30 +98,30 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
     return (
         <div className="h-full overflow-auto relative">
             <table className="w-full text-left hidden md:table">
-                <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-muted/80 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                     <tr>
                         <th className="px-6 py-4 font-medium w-[30%]">Field Name</th>
                         <th className="px-6 py-4 font-medium">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <button className={cn(
-                                        "flex items-center gap-2 hover:text-white transition-colors outline-none",
-                                        activeFilter !== 'all' && "text-cyan-400"
+                                        "flex items-center gap-2 hover:text-foreground transition-colors outline-none",
+                                        activeFilter !== 'all' && "text-primary"
                                     )}>
                                         Type
                                         {activeFilter !== 'all' ? <ListFilter size={14} /> : <ChevronDown size={14} />}
                                     </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-[180px] bg-[#1a1f2e] border-white/10 text-zinc-300">
-                                    <DropdownMenuLabel className="text-xs uppercase text-zinc-500 font-bold">Filter By Type</DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-white/5" />
+                                <DropdownMenuContent align="start" className="w-[180px] bg-popover border-border text-muted-foreground">
+                                    <DropdownMenuLabel className="text-xs uppercase text-muted-foreground font-bold">Filter By Type</DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-border" />
                                     {FILTER_OPTS.map((opt) => (
                                         <DropdownMenuItem
                                             key={opt.id}
                                             onClick={() => onFilterChange(opt.id)}
                                             className={cn(
-                                                "text-xs focus:bg-cyan-400/10 focus:text-cyan-400 cursor-pointer",
-                                                activeFilter === opt.id && "bg-cyan-400/10 text-cyan-400"
+                                                "text-xs focus:bg-muted focus:text-primary cursor-pointer",
+                                                activeFilter === opt.id && "bg-muted text-primary"
                                             )}
                                         >
                                             {opt.label}
@@ -132,16 +132,16 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                         </th>
                         <th className="px-6 py-4 font-medium">Visibility</th>
                         <th className="px-6 py-4 font-medium w-[30%]">Field Preview</th>
-                        <th className="px-6 py-4 font-medium w-[120px] border-l border-white/10"></th>
+                        <th className="px-6 py-4 font-medium w-[120px] border-l border-border"></th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-zinc-300">
+                <tbody className="divide-y divide-border text-muted-foreground">
                     {data.map((field) => {
                         const Icon = TYPE_ICONS[field.type] || Type;
 
                         // Render Preview Content based on type
-                        // Deep Core Aesthetic: bg-black/20 border-white/10 rounded-lg px-4 py-3
-                        const inputClasses = "w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 text-sm flex items-center";
+                        // Deep Core Aesthetic: bg-muted border-border rounded-lg px-4 py-3
+                        const inputClasses = "w-full bg-muted/50 border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground text-sm flex items-center";
 
                         let PreviewContent = (
                             <div className={inputClasses}>
@@ -160,7 +160,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                             if (style === 'currency') {
                                 QuantityPreview = (
                                     <div className="relative w-full">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-medium select-none">$</div>
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium select-none">$</div>
                                         <div className={cn(inputClasses, "pl-7")}>
                                             <span className="opacity-50 italic">0.00</span>
                                         </div>
@@ -168,10 +168,10 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 );
                             } else if (style === 'counter') {
                                 QuantityPreview = (
-                                    <div className="flex items-center w-full bg-black/20 border border-white/10 rounded-lg overflow-hidden h-[42px]">
-                                        <div className="h-full w-10 flex items-center justify-center bg-white/5 border-r border-white/5 text-zinc-500"><Minus size={14} /></div>
-                                        <div className="flex-1 flex items-center justify-center text-zinc-400 text-sm">{min || 0}</div>
-                                        <div className="h-full w-10 flex items-center justify-center bg-white/5 border-l border-white/5 text-zinc-500"><Plus size={14} /></div>
+                                    <div className="flex items-center w-full bg-muted/50 border border-border rounded-lg overflow-hidden h-[42px]">
+                                        <div className="h-full w-10 flex items-center justify-center bg-muted/50 border-r border-border text-muted-foreground"><Minus size={14} /></div>
+                                        <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">{min || 0}</div>
+                                        <div className="h-full w-10 flex items-center justify-center bg-muted/50 border-l border-border text-muted-foreground"><Plus size={14} /></div>
                                     </div>
                                 );
                             } else {
@@ -180,8 +180,8 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     // Hybrid Dropdown Mode
                                     QuantityPreview = (
                                         <div className={cn(inputClasses, "justify-between")}>
-                                            <span className="text-zinc-400">{min || 0}</span>
-                                            <ChevronDown size={16} className="text-zinc-500" />
+                                            <span className="text-muted-foreground">{min || 0}</span>
+                                            <ChevronDown size={16} className="text-muted-foreground" />
                                         </div>
                                     );
                                 } else {
@@ -200,12 +200,12 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     {/* Config Badges */}
                                     <div className="flex flex-wrap gap-1.5">
                                         {(min !== undefined || max !== undefined) && (
-                                            <span className="text-[10px] bg-white/5 border border-white/5 rounded px-1.5 py-0.5 text-zinc-500">
+                                            <span className="text-[10px] bg-muted border border-border rounded px-1.5 py-0.5 text-muted-foreground">
                                                 Range: {min ?? '∞'} - {max ?? '∞'}
                                             </span>
                                         )}
                                         {settings.step && settings.step !== 1 && (
-                                            <span className="text-[10px] bg-white/5 border border-white/5 rounded px-1.5 py-0.5 text-zinc-500">
+                                            <span className="text-[10px] bg-muted border border-border rounded px-1.5 py-0.5 text-muted-foreground">
                                                 Step: {settings.step}
                                             </span>
                                         )}
@@ -235,7 +235,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     />
                                     {/* Mini badge for options count */}
                                     <div className="mt-1 flex gap-2">
-                                        <span className="text-[10px] text-zinc-500 bg-white/5 border border-white/10 rounded px-2 py-0.5">
+                                        <span className="text-[10px] text-muted-foreground bg-muted border border-border rounded px-2 py-0.5">
                                             {options.length} options
                                         </span>
                                     </div>
@@ -253,12 +253,12 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     {previewOptions.map((opt: any, i: number) => (
                                         <div key={i} className="flex items-center gap-3 px-1">
                                             <div className={cn(
-                                                "w-4 h-4 border border-white/20 flex items-center justify-center flex-shrink-0",
+                                                "w-4 h-4 border border-border flex items-center justify-center flex-shrink-0",
                                                 isMulti ? "rounded" : "rounded-full"
                                             )}>
                                                 {/* Empty state for preview */}
                                             </div>
-                                            <span className="text-xs text-zinc-400 break-words">{opt.label}</span>
+                                            <span className="text-xs text-muted-foreground break-words">{opt.label}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -268,17 +268,17 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 <TooltipProvider>
                                     <Tooltip delayDuration={0}>
                                         <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="h-8 text-zinc-400 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-lg px-2">
+                                            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg px-2">
                                                 <Eye size={16} />
                                                 <span className="ml-2 text-xs">Preview</span>
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent side="top" className="bg-[#1a1f24] border-white/10 max-w-[300px]">
-                                            <div className="border-b border-white/10 pb-2 mb-1">
-                                                <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400 break-words">{field.label}</h3>
+                                        <TooltipContent side="top" className="bg-popover border-border max-w-[300px]">
+                                            <div className="border-b border-border pb-2 mb-1">
+                                                <h3 className="text-sm font-bold uppercase tracking-wider text-primary break-words">{field.label}</h3>
                                             </div>
                                             {field.description && (
-                                                <p className="text-xs text-zinc-400 mt-1">{field.description}</p>
+                                                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
                                             )}
                                         </TooltipContent>
                                     </Tooltip>
@@ -291,8 +291,8 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                         <Button
                                             variant={"outline"}
                                             className={cn(
-                                                "w-full justify-between text-left font-normal bg-black/20 border-white/10 px-4 py-3 h-[46px] text-white hover:bg-white/5 hover:text-white",
-                                                "text-zinc-400"
+                                                "w-full justify-between text-left font-normal bg-muted/50 border-border px-4 py-3 h-[46px] text-foreground hover:bg-muted hover:text-foreground",
+                                                "text-custom-foreground"
                                             )}
                                             onClick={(e) => e.stopPropagation()}
                                         >
@@ -300,7 +300,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                             <CalendarIcon className="h-4 w-4 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-[#0b1115] border-white/10" align="start">
+                                    <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
                                         <Calendar
                                             mode="single"
                                             initialFocus
@@ -311,18 +311,18 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                         } else if (field.type === 'transport') {
                             PreviewContent = (
                                 <div className={cn(inputClasses, "justify-between")}>
-                                    <span className="text-zinc-400">Select Hotel...</span>
-                                    <Hotel size={16} className="text-zinc-500" />
+                                    <span className="text-muted-foreground">Select Hotel...</span>
+                                    <Hotel size={16} className="text-muted-foreground" />
                                 </div>
                             );
                         }
 
                         return (
-                            <tr key={field.id} className="hover:bg-white/5 transition-colors group">
+                            <tr key={field.id} className="hover:bg-muted transition-colors group">
                                 {/* Label */}
-                                <td className="px-6 py-4 font-medium text-white align-middle">
+                                <td className="px-6 py-4 font-medium text-foreground align-middle">
                                     <div className="flex items-center gap-3 pt-2">
-                                        <div className="w-8 h-8 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                             <Icon size={16} />
                                         </div>
                                         <div className="flex flex-col">
@@ -332,7 +332,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                                         <span>{field.label.substring(0, 30)}...</span>
                                                         <button
                                                             onClick={(e) => toggleExpand(field.id, e)}
-                                                            className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400/20 transition-colors"
+                                                            className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                                                         >
                                                             <Plus size={10} />
                                                         </button>
@@ -343,7 +343,7 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                                         {field.type === 'header' && field.label.length > 30 && (
                                                             <button
                                                                 onClick={(e) => toggleExpand(field.id, e)}
-                                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+                                                                className="w-5 h-5 shrink-0 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
                                                             >
                                                                 <Minus size={10} />
                                                             </button>
@@ -361,13 +361,13 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                     <div className="flex flex-col items-start mt-2">
                                         <span className={cn(
                                             "inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize transition-colors",
-                                            "bg-white/5 border-white/10 text-zinc-400"
+                                            "bg-muted border-border text-muted-foreground"
                                         )}>
                                             {field.type === 'quantity' ? 'Number' : field.type}
                                         </span>
                                         {/* Show Subtype for Number (Quantity) */}
                                         {field.type === 'quantity' && (
-                                            <span className="text-[10px] text-zinc-500 bg-white/5 border border-white/10 rounded px-2 py-0.5 mt-2 ml-1 font-normal">
+                                            <span className="text-[10px] text-muted-foreground bg-muted border border-border rounded px-2 py-0.5 mt-2 ml-1 font-normal">
                                                 {(field as any).settings?.display_style
                                                     ? ((field as any).settings.display_style.charAt(0).toUpperCase() + (field as any).settings.display_style.slice(1))
                                                     : 'Text'} Style
@@ -379,12 +379,12 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 {/* Visibility */}
                                 <td className="px-6 py-4 align-middle">
                                     {field.is_internal ? (
-                                        <div className="flex items-center gap-2 text-zinc-500 text-sm bg-white/5 border border-white/10 px-2 py-1 rounded w-fit mt-2">
+                                        <div className="flex items-center gap-2 text-muted-foreground text-sm bg-muted border border-border px-2 py-1 rounded w-fit mt-2">
                                             <Lock size={12} />
                                             <span>Internal Only</span>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-2 text-zinc-500 text-sm bg-white/5 border border-white/10 px-2 py-1 rounded w-fit mt-2">
+                                        <div className="flex items-center gap-2 text-muted-foreground text-sm bg-muted border border-border px-2 py-1 rounded w-fit mt-2">
                                             <Globe size={12} />
                                             <span>Public</span>
                                         </div>
@@ -397,24 +397,24 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                                 </td>
 
                                 {/* Actions - Last Column */}
-                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                <td className="px-6 py-4 align-middle border-l border-border">
                                     <div className="flex items-center gap-2 justify-end">
                                         <button
                                             onClick={() => onEdit(field)}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                             title="Edit Field"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => onDuplicate(field)}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
                                             onClick={() => setDeleteId(field.id)}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -433,28 +433,28 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                     const typeLabel = field.type === 'quantity' ? 'Number' : field.type;
 
                     return (
-                        <div key={field.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                        <div key={field.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
                             {/* Header: Type Icon + Actions */}
                             <div className="flex items-start justify-between gap-4">
-                                <div className="w-10 h-10 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                     <Icon size={20} />
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(field)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => onDuplicate(field)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Copy size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeleteId(field.id)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -462,29 +462,29 @@ export function CustomFieldsTable({ data, activeFilter, onFilterChange, onEdit, 
                             </div>
 
                             {/* Field Name - beneath icon */}
-                            <h3 className="text-lg font-bold text-white leading-tight">{field.label}</h3>
+                            <h3 className="text-lg font-bold text-foreground leading-tight">{field.label}</h3>
 
                             {/* Body: Icon-based layout */}
-                            <div className="space-y-2 pt-2 border-t border-white/5">
-                                <div className="flex items-center gap-2 text-zinc-400">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize bg-white/5 border-white/10">
+                            <div className="space-y-2 pt-2 border-t border-border">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium border capitalize bg-muted border-border">
                                         {typeLabel}
                                     </span>
                                     {field.is_internal ? (
-                                        <div className="flex items-center gap-1 text-zinc-500 text-xs">
+                                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
                                             <Lock size={12} />
                                             <span>Internal</span>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-1 text-zinc-500 text-xs">
+                                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
                                             <Globe size={12} />
                                             <span>Public</span>
                                         </div>
                                     )}
                                 </div>
                                 {field.type === 'select' && field.options?.length > 0 && (
-                                    <div className="flex items-center gap-2 text-zinc-400">
-                                        <List size={14} className="text-zinc-500" />
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <List size={14} className="text-muted-foreground" />
                                         {field.options.length} options
                                     </div>
                                 )}

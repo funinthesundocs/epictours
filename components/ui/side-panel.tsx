@@ -41,8 +41,8 @@ export function SidePanel({
     // Standard: Fixed right, explicit width
     // Full Content: Fixed right, top, bottom. Left depends on sidebar.
     const positionClassName = isFullContent
-        ? `fixed right-0 top-0 bottom-0 z-[60] flex flex-col bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
-        : `fixed right-0 top-0 z-[60] h-full w-full ${width} bg-zinc-950/80 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
+        ? `fixed right-0 top-0 bottom-0 z-[60] flex flex-col bg-background/80 border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-[left] duration-300 ease-in-out`
+        : `fixed right-0 top-0 z-[60] h-full w-full ${width} bg-background/80 border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col`;
 
     // Inline styles for dynamic values
     const panelStyle = isFullContent
@@ -78,7 +78,7 @@ export function SidePanel({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 z-[40] bg-zinc-950/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-[40] bg-background/80 backdrop-blur-sm"
                     />
 
                     {/* Panel */}
@@ -91,16 +91,16 @@ export function SidePanel({
                         style={panelStyle}
                     >
                         {/* Header */}
-                        <div className="flex items-start justify-between p-6 border-b border-white/5 bg-transparent">
+                        <div className="flex items-start justify-between p-6 border-b border-border bg-transparent">
                             <div>
-                                <h2 className={cn("text-xl font-bold text-white tracking-tight", titleClassName)}>{title}</h2>
+                                <h2 className={cn("text-xl font-bold text-foreground tracking-tight", titleClassName)}>{title}</h2>
                                 {description && (
-                                    <p className="text-sm text-zinc-400 mt-1">{description}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">{description}</p>
                                 )}
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                 aria-label="Close"
                             >
                                 <X size={20} />
@@ -108,7 +108,7 @@ export function SidePanel({
                         </div>
 
                         {/* Content - Scrollable */}
-                        <div className={cn("flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-800 scrollbar-track-transparent", contentClassName)}>
+                        <div className={cn("flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent", contentClassName)}>
                             {children}
                         </div>
                     </motion.div>

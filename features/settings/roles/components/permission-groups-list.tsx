@@ -53,7 +53,7 @@ export function PermissionGroupsPositionsList({
 
     if (!groups || groups.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
                 <Shield size={48} className="mb-4 opacity-50" />
                 <p className="text-lg font-medium">No permission groups found</p>
                 <p className="text-sm">Create your first permission group to get started</p>
@@ -71,13 +71,13 @@ export function PermissionGroupsPositionsList({
                     return (
                         <div
                             key={group.id}
-                            className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
+                            className="bg-card border border-border rounded-xl overflow-hidden"
                         >
                             {/* Group Header */}
                             <div
                                 className={cn(
-                                    "flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors",
-                                    isExpanded && "border-b border-white/10"
+                                    "flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors",
+                                    isExpanded && "border-b border-border"
                                 )}
                                 onClick={() => toggleGroup(group.id)}
                             >
@@ -99,21 +99,21 @@ export function PermissionGroupsPositionsList({
                                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         onClick={() => onAddPosition(group.id)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
                                     >
                                         <Plus size={14} />
                                         Add Position
                                     </button>
                                     <button
                                         onClick={() => onEditGroup(group)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         title="Edit Permission Group"
                                     >
                                         <Edit2 size={14} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingGroup(group)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         title="Delete Permission Group"
                                     >
                                         <Trash2 size={14} />
@@ -123,36 +123,36 @@ export function PermissionGroupsPositionsList({
 
                             {/* Positions List */}
                             {isExpanded && (
-                                <div className="bg-zinc-900/50">
+                                <div className="bg-muted/30">
                                     {positionCount === 0 ? (
-                                        <div className="px-6 py-4 text-sm text-zinc-500 italic">
+                                        <div className="px-6 py-4 text-sm text-muted-foreground italic">
                                             No positions in this group yet
                                         </div>
                                     ) : (
-                                        <div className="divide-y divide-white/5">
+                                        <div className="divide-y divide-border">
                                             {group.positions?.map((position) => (
                                                 <div
                                                     key={position.id}
-                                                    className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition-colors"
+                                                    className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div
                                                             className="w-3 h-3 rounded-full"
                                                             style={{ backgroundColor: position.color || '#71717a' }}
                                                         />
-                                                        <span className="text-zinc-300">{position.name}</span>
+                                                        <span className="text-foreground">{position.name}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <button
                                                             onClick={() => onEditPosition(position)}
-                                                            className="p-1.5 text-zinc-500 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                                            className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                                             title="Edit Position"
                                                         >
                                                             <Edit2 size={12} />
                                                         </button>
                                                         <button
                                                             onClick={() => setDeletingPosition(position)}
-                                                            className="p-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                                            className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                                             title="Delete Position"
                                                         >
                                                             <Trash2 size={12} />

@@ -247,7 +247,7 @@ export function BookingsCalendar({
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 9rem)' }}
         >
             {/* TOP COMPONENT: Control Bar */}
-            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 border-b border-zinc-900 sticky top-0 z-40">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 pb-6 sticky top-0 z-40">
 
                 {/* LEFT: Title & Navigation */}
                 <div className="flex items-center gap-6">
@@ -289,15 +289,15 @@ export function BookingsCalendar({
                                         newDate.setFullYear(val);
                                         setCurrentDate(newDate);
                                     }}
-                                    className="w-[90px] text-cyan-400"
+                                    className="w-[90px] text-primary"
                                 />
                             </div>
 
                             <div className="flex gap-1">
-                                <button onClick={handlePrev} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
+                                <button onClick={handlePrev} className="w-8 h-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:border-sidebar-accent flex items-center justify-center transition-all active:scale-95">
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
-                                <button onClick={handleNext} className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-all active:scale-95">
+                                <button onClick={handleNext} className="w-8 h-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:border-sidebar-accent flex items-center justify-center transition-all active:scale-95">
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
@@ -312,26 +312,26 @@ export function BookingsCalendar({
                         <div className="relative w-[220px] mr-2" ref={expPickerRef}>
                             <div
                                 className={cn(
-                                    "w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700",
-                                    isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20"
+                                    "w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-foreground cursor-pointer flex items-center justify-between transition-all hover:bg-muted hover:border-sidebar-accent",
+                                    isExpPickerOpen && "border-primary/50 bg-muted ring-1 ring-primary/20"
                                 )}
                                 onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}
                             >
                                 <span className="font-semibold text-sm truncate">{selectedExpName}</span>
-                                <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0 ml-2", isExpPickerOpen && "rotate-180")} />
                             </div>
 
                             {/* Dropdown Menu */}
                             {isExpPickerOpen && (
-                                <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute top-full left-0 w-full mt-2 bg-popover border border-border rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                                     {experienceOptions.map((exp) => (
                                         <div
                                             key={exp.id}
                                             className={cn(
-                                                "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0",
+                                                "px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors border-b border-border last:border-0",
                                                 selectedExperienceId === exp.id
-                                                    ? "bg-cyan-900/20 text-cyan-400"
-                                                    : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                                                    ? "bg-primary/20 text-primary"
+                                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                             )}
                                             onClick={() => {
                                                 setSelectedExperienceId(exp.id);
@@ -346,31 +346,31 @@ export function BookingsCalendar({
                             )}
                         </div>
 
-                        <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800 mr-2">
+                        <div className="flex items-center bg-muted p-1 rounded-lg border border-border mr-2">
                             <button
                                 onClick={() => setViewMode('month')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}
                                 title="Month View"
                             >
                                 <Grid size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('week')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}
                                 title="Week View"
                             >
                                 <Columns size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('day')}
-                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-cyan-400/20 text-cyan-400 shadow-sm" : "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}
                                 title="Day View"
                             >
                                 <Clock size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")}
+                                className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")}
                                 title="List View"
                             >
                                 <List size={16} />
@@ -382,8 +382,8 @@ export function BookingsCalendar({
 
             {/* CONTENT AREA */}
             <div className={cn(
-                "flex-1 min-h-0 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative",
-                viewMode === 'list' && "bg-transparent border-0 shadow-none overflow-visible"
+                "flex-1 min-h-0 bg-background border border-border rounded-2xl overflow-hidden relative",
+                viewMode === 'list' && "bg-transparent border-0 overflow-visible"
             )}>
                 {viewMode === 'month' && (
                     <MonthView
@@ -422,34 +422,34 @@ export function BookingsCalendar({
                                 {/* Date Range Selectors - Double Decker */}
                                 <div className="flex flex-col gap-1 shrink-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">From</span>
+                                        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider w-10">From</span>
                                         <CustomSelect value={listStartDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listStartDate); d.setMonth(val); setListStartDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listStartDate.getDate()} options={Array.from({ length: new Date(listStartDate.getFullYear(), listStartDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listStartDate); d.setDate(val); setListStartDate(d); }} className="w-[60px] text-xs" />
-                                        <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-cyan-400" />
+                                        <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-primary" />
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider w-10">To</span>
+                                        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider w-10">To</span>
                                         <CustomSelect value={listEndDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listEndDate); d.setMonth(val); setListEndDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listEndDate.getDate()} options={Array.from({ length: new Date(listEndDate.getFullYear(), listEndDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listEndDate); d.setDate(val); setListEndDate(d); }} className="w-[60px] text-xs" />
-                                        <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-cyan-400" />
+                                        <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-primary" />
                                     </div>
                                 </div>
                                 {/* Search Bar - 25% larger */}
                                 <div className="flex items-center gap-2 w-[350px]">
                                     <div className="relative flex-1">
-                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                         <input
                                             type="text"
                                             value={listSearchQuery}
                                             onChange={(e) => setListSearchQuery(e.target.value)}
                                             placeholder="Search customer, experience, status..."
-                                            className="w-full h-8 bg-[#0b1115] border border-white/10 rounded-lg pl-8 pr-3 text-sm text-white focus:outline-none focus:border-cyan-400/50 transition-colors placeholder:text-zinc-600"
+                                            className="w-full h-8 bg-muted border border-border rounded-lg pl-8 pr-3 text-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
                                         />
                                     </div>
                                     {listSearchQuery && (
                                         <button
                                             onClick={() => setListSearchQuery("")}
-                                            className="h-8 px-2 flex items-center text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-xs"
+                                            className="h-8 px-2 flex items-center text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors text-xs"
                                         >
                                             <X size={14} />
                                         </button>
@@ -459,26 +459,26 @@ export function BookingsCalendar({
                             {/* RIGHT: Filter + View Buttons */}
                             <div className="flex items-center gap-2">
                                 <div className="relative w-[180px]" ref={expPickerRef}>
-                                    <div className={cn("w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2 text-white cursor-pointer flex items-center justify-between transition-all hover:bg-zinc-900 hover:border-zinc-700", isExpPickerOpen && "border-cyan-400/50 bg-zinc-900 ring-1 ring-cyan-400/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
+                                    <div className={cn("w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground cursor-pointer flex items-center justify-between transition-all hover:bg-muted hover:border-sidebar-accent", isExpPickerOpen && "border-primary/50 bg-muted ring-1 ring-primary/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
                                         <span className="font-semibold text-xs truncate">{selectedExpName}</span>
-                                        <ChevronDown className={cn("w-3 h-3 text-zinc-500 transition-transform shrink-0 ml-1", isExpPickerOpen && "rotate-180")} />
+                                        <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform shrink-0 ml-1", isExpPickerOpen && "rotate-180")} />
                                     </div>
                                     {isExpPickerOpen && (
-                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#0a0a0a] border border-zinc-800 rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="absolute top-full left-0 w-full mt-2 bg-popover border border-border rounded-lg shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                                             {experienceOptions.map((exp) => (
-                                                <div key={exp.id} className={cn("px-3 py-2 text-xs cursor-pointer flex items-center justify-between transition-colors border-b border-zinc-900 last:border-0", selectedExperienceId === exp.id ? "bg-cyan-900/20 text-cyan-400" : "text-zinc-400 hover:bg-zinc-900 hover:text-white")} onClick={() => { setSelectedExperienceId(exp.id); setIsExpPickerOpen(false); }}>
+                                                <div key={exp.id} className={cn("px-3 py-2 text-xs cursor-pointer flex items-center justify-between transition-colors border-b border-border last:border-0", selectedExperienceId === exp.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")} onClick={() => { setSelectedExperienceId(exp.id); setIsExpPickerOpen(false); }}>
                                                     {exp.name}
-                                                    {selectedExperienceId === exp.id && <span className="text-cyan-400">✓</span>}
+                                                    {selectedExperienceId === exp.id && <span className="text-primary">✓</span>}
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex items-center bg-zinc-900 p-1 rounded-lg border border-zinc-800">
-                                    <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Month View"><Grid size={14} /></button>
-                                    <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Week View"><Columns size={14} /></button>
-                                    <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", "text-zinc-500 hover:text-zinc-300")} title="Day View"><Clock size={14} /></button>
-                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-cyan-400/20 text-cyan-400 shadow-sm")} title="List View"><List size={14} /></button>
+                                <div className="flex items-center bg-muted p-1 rounded-lg border border-border">
+                                    <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Month View"><Grid size={14} /></button>
+                                    <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Week View"><Columns size={14} /></button>
+                                    <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Day View"><Clock size={14} /></button>
+                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-primary/20 text-primary shadow-sm")} title="List View"><List size={14} /></button>
                                 </div>
                             </div>
                         </div>
@@ -487,7 +487,7 @@ export function BookingsCalendar({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -532,9 +532,9 @@ function MonthView({
         : -1;
 
     return (
-        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-[#010e0f]">
+        <div ref={scrollContainerRef} className="h-full overflow-auto rounded-xl relative bg-background">
             <table className="w-full table-fixed border-separate border-spacing-0">
-                <thead className="bg-zinc-900/40 backdrop-blur-sm text-zinc-400 text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                <thead className="bg-muted/50 backdrop-blur-sm text-muted-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                     <tr>
                         {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day, idx) => (
                             <th key={day} className={cn(
@@ -558,12 +558,12 @@ function MonthView({
 
                                 return (
                                     <td key={colIndex} className={cn(
-                                        "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-white/5",
-                                        (!isValidDay || isToday) ? "bg-zinc-900/40" : "hover:bg-zinc-900/40"
+                                        "relative group transition-colors p-2 min-h-[160px] align-top border-b border-r border-border",
+                                        (!isValidDay || isToday) ? "bg-muted/30" : "hover:bg-muted/30"
                                     )} style={{ minHeight: '160px', height: '160px' }}>
                                         {isValidDay && (
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
-                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-cyan-400 text-black shadow-glow" : "text-zinc-500")}>{dayNumber}</span>
+                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground")}>{dayNumber}</span>
                                                 {daysEvents.map((event) => (
                                                     <EventChip
                                                         key={event.id}
@@ -616,23 +616,23 @@ function WeekView({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#0b1115]">
+        <div className="flex flex-col h-full bg-background">
             {/* Header Row (Sticky) */}
-            <div className="flex divide-x divide-white/5 border-b border-white/5 overflow-hidden pr-[var(--scrollbar-width)]">
+            <div className="flex divide-x divide-border border-b border-border overflow-hidden pr-[var(--scrollbar-width)]">
                 {days.map((day) => {
                     const events = getEventsForDay(day);
                     const isDayToday = isToday(day);
 
                     return (
                         <div key={day.toString()} className={cn(
-                            "flex-1 min-w-[220px] p-2 text-center transition-colors border-b border-white/5",
-                            isDayToday ? "bg-cyan-950/20 border-t-2 border-cyan-400" : "bg-white/5 backdrop-blur-sm"
+                            "flex-1 min-w-[220px] p-2 text-center transition-colors border-b border-border",
+                            isDayToday ? "bg-primary/20 border-t-2 border-primary" : "bg-card backdrop-blur-sm"
                         )}>
-                            <div className="text-zinc-500 text-sm font-bold uppercase tracking-wider">{format(day, 'EEE')}</div>
-                            <div className={cn("text-3xl font-black mt-0 tracking-tight", isDayToday ? "text-cyan-400" : "text-white")}>
+                            <div className="text-muted-foreground text-sm font-bold uppercase tracking-wider">{format(day, 'EEE')}</div>
+                            <div className={cn("text-3xl font-black mt-0 tracking-tight", isDayToday ? "text-primary" : "text-foreground")}>
                                 {format(day, 'd')}
                             </div>
-                            <div className="mt-1 text-sm text-zinc-500 font-bold uppercase">
+                            <div className="mt-1 text-sm text-muted-foreground font-bold uppercase">
                                 {events.length} Event{events.length !== 1 && 's'}
                             </div>
                         </div>
@@ -642,7 +642,7 @@ function WeekView({
 
             {/* Scrollable Columns */}
             <div className="flex-1 overflow-auto">
-                <div className="flex h-full min-h-0 divide-x divide-white/5">
+                <div className="flex h-full min-h-0 divide-x divide-border">
                     {days.map((day) => {
                         const events = getEventsForDay(day);
                         const isDayToday = isToday(day);
@@ -651,11 +651,11 @@ function WeekView({
                         return (
                             <div key={day.toString()} className={cn(
                                 "flex-1 min-w-[220px] flex flex-col transition-colors",
-                                isDayToday && "bg-cyan-950/5"
+                                isDayToday && "bg-primary/5"
                             )}>
                                 {/* Click-to-Create Area (Fill space) */}
                                 <div
-                                    className="flex-1 p-2 space-y-2 cursor-pointer hover:bg-white/[0.02]"
+                                    className="flex-1 p-2 space-y-2 cursor-pointer hover:bg-muted/10"
                                     onClick={() => {
                                         // TODO: Pass intent to create new booking for this date
                                         console.log("Create for", formattedDate);
@@ -793,19 +793,19 @@ function DailyView({
     const isTodayView = isSameDay(currentDate, now);
 
     return (
-        <div className="flex flex-col h-full bg-[#0b1115] relative group/view">
+        <div className="flex flex-col h-full bg-background relative group/view">
             {/* Zoom Control */}
-            <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-zinc-900/90 backdrop-blur border border-zinc-800 p-1 rounded-lg shadow-xl">
+            <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-popover/90 backdrop-blur border border-border p-1 rounded-lg shadow-xl">
                 <button
                     onClick={() => setPixelsPerMinute(Math.max(0.5, pixelsPerMinute - 0.25))}
-                    className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded"
+                    className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded"
                 >
                     <ZoomOut size={14} />
                 </button>
-                <span className="text-[10px] font-mono text-zinc-500 min-w-[30px] text-center">{pixelsPerMinute}x</span>
+                <span className="text-[10px] font-mono text-muted-foreground min-w-[30px] text-center">{pixelsPerMinute}x</span>
                 <button
                     onClick={() => setPixelsPerMinute(Math.min(5, pixelsPerMinute + 0.25))}
-                    className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded"
+                    className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded"
                 >
                     <ZoomIn size={14} />
                 </button>
@@ -815,12 +815,13 @@ function DailyView({
             <div className="flex-1 overflow-auto relative custom-scrollbar">
 
                 {/* Header: Time Scale */}
-                <div className="sticky top-0 z-40 bg-[#0b1115] border-b border-zinc-800 flex items-end h-10 shadow-md ring-1 ring-white/5" style={{ width: Math.max(viewWidth + 200, 1000) }}>
+                {/* Header: Time Scale */}
+                <div className="sticky top-0 z-40 bg-background border-b border-border flex items-end h-10 shadow-md ring-1 ring-border/5" style={{ width: Math.max(viewWidth + 200, 1000) }}>
                     {/* Sticky Left Corner */}
-                    <div className="sticky left-0 w-[200px] h-full bg-[#0b1115] z-50 border-r border-zinc-800 shrink-0"></div>
+                    <div className="sticky left-0 w-[200px] h-full bg-background z-50 border-r border-border shrink-0"></div>
 
                     {/* Time Labels */}
-                    <div className="relative flex-1 h-full bg-[#0b1115]">
+                    <div className="relative flex-1 h-full bg-background">
                         {Array.from({ length: (endHour - startHour) + 1 }).map((_, i) => {
                             const hourRaw = startHour + i;
                             // Modulo 24 for label display 8, 9... 23, 0, 1...
@@ -833,7 +834,7 @@ function DailyView({
                             return (
                                 <div
                                     key={hourRaw}
-                                    className="absolute bottom-1 text-xs font-bold text-zinc-500 pl-1 border-l-2 border-zinc-700 h-4"
+                                    className="absolute bottom-1 text-xs font-bold text-muted-foreground pl-1 border-l-2 border-border h-4"
                                     style={{ left: offset }}
                                 >
                                     {label}
@@ -853,7 +854,7 @@ function DailyView({
                             {Array.from({ length: (endHour - startHour) + 1 }).map((_, i) => (
                                 <div
                                     key={`grid-${i}`}
-                                    className="absolute top-0 bottom-0 border-r border-zinc-800/40"
+                                    className="absolute top-0 bottom-0 border-r border-border/40"
                                     style={{ left: i * 60 * pixelsPerMinute }}
                                 />
                             ))}
@@ -861,7 +862,7 @@ function DailyView({
                             {Array.from({ length: (totalMinutes / 15) }).map((_, i) => (
                                 <div
                                     key={`subgrid-${i}`}
-                                    className="absolute top-0 bottom-0 border-r border-zinc-800/10"
+                                    className="absolute top-0 bottom-0 border-r border-border/10"
                                     style={{ left: i * 15 * pixelsPerMinute }}
                                 />
                             ))}
@@ -892,10 +893,10 @@ function DailyView({
                             return (
                                 <div key={expId} className="flex flex-col">
                                     {/* Group Header Row */}
-                                    <div className="sticky left-0 bg-[#0b1115] border-b border-zinc-800 p-2 pl-4 flex items-center justify-between z-20 w-[200px] border-r border-zinc-800/50">
+                                    <div className="sticky left-0 bg-background border-b border-border p-2 pl-4 flex items-center justify-between z-20 w-[200px] border-r border-border/50">
                                         <div className="flex flex-col">
-                                            <span className="text-lg font-black text-white tracking-tight">{exp.short_code}</span>
-                                            <span className="text-[10px] text-zinc-500 uppercase font-bold">{events.length} Trips</span>
+                                            <span className="text-lg font-black text-foreground tracking-tight">{exp.short_code}</span>
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">{events.length} Trips</span>
                                         </div>
                                     </div>
 
@@ -914,8 +915,8 @@ function DailyView({
                                         if (!startTimeStr || !startDateStr) {
                                             console.log(`[DEBUG] INVALID EVENT (ID: ${event.id}):`, JSON.stringify(event, null, 2));
                                             return (
-                                                <div key={event.id} className="flex border-b border-zinc-900 min-h-[50px] bg-red-900/20 items-center px-4">
-                                                    <span className="text-red-500 font-mono text-xs">INVALID DATA: ID {event.id} Missing Time</span>
+                                                <div key={event.id} className="flex border-b border-destructive/20 min-h-[50px] bg-destructive/10 items-center px-4">
+                                                    <span className="text-destructive font-mono text-xs">INVALID DATA: ID {event.id} Missing Time</span>
                                                 </div>
                                             );
                                         }
@@ -923,8 +924,8 @@ function DailyView({
                                         const startDateTime = new Date(`${startDateStr}T${startTimeStr}`);
                                         if (isNaN(startDateTime.getTime())) {
                                             return (
-                                                <div key={event.id} className="flex border-b border-zinc-900 min-h-[50px] bg-red-900/20 items-center px-4">
-                                                    <span className="text-red-500 font-mono text-xs">INVALID TIME FORMAT: {startTimeStr}</span>
+                                                <div key={event.id} className="flex border-b border-destructive/20 min-h-[50px] bg-destructive/10 items-center px-4">
+                                                    <span className="text-destructive font-mono text-xs">INVALID TIME FORMAT: {startTimeStr}</span>
                                                 </div>
                                             );
                                         }
@@ -957,10 +958,10 @@ function DailyView({
                                         const width = Math.max(duration * pixelsPerMinute, 50);
 
                                         return (
-                                            <div key={event.id} className="flex border-b border-zinc-900/50 min-h-[60px] relative items-center group/row hover:bg-white/[0.02] transition-colors">
+                                            <div key={event.id} className="flex border-b border-border/50 min-h-[60px] relative items-center group/row hover:bg-muted/10 transition-colors">
                                                 {/* Sticky Left Label (Time?) - Optional */}
-                                                <div className="sticky left-0 w-[200px] h-full border-r border-zinc-800/50 bg-[#0b1115] z-20 shrink-0 flex items-center justify-end pr-4">
-                                                    <span className="text-xs font-mono text-zinc-600 group-hover/row:text-zinc-400 transition-colors">
+                                                <div className="sticky left-0 w-[200px] h-full border-r border-border/50 bg-background z-20 shrink-0 flex items-center justify-end pr-4">
+                                                    <span className="text-xs font-mono text-muted-foreground group-hover/row:text-foreground transition-colors">
                                                         {format(startDateTime, "h:mm a")}
                                                     </span>
                                                 </div>
@@ -1047,7 +1048,7 @@ function CustomSelect({
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "flex items-center justify-between gap-2 bg-zinc-900/50 border border-zinc-800 text-white text-lg font-bold py-1.5 px-3 rounded-lg hover:border-zinc-700 transition-all min-w-[fit-content]",
+                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-bold py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
                     className
                 )}
             >
@@ -1056,7 +1057,7 @@ function CustomSelect({
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-1 w-full min-w-[140px] bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                     {options.map((opt) => (
                         <button
                             key={opt.value}
@@ -1065,8 +1066,8 @@ function CustomSelect({
                                 setIsOpen(false);
                             }}
                             className={cn(
-                                "w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 transition-colors",
-                                value === opt.value ? "text-white font-medium bg-zinc-800/50" : "text-zinc-400"
+                                "w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors",
+                                value === opt.value ? "text-primary font-medium bg-primary/10" : "text-muted-foreground"
                             )}
                         >
                             {opt.label}
@@ -1105,13 +1106,13 @@ function EventChip({
     const openCount = maxCapacity - bookedCount;
 
     // Uniform text class
-    const textClass = `font-bold text-xs leading-tight pointer-events-none ${isSelected ? 'text-black' : 'text-white group-hover/chip:text-[#010e0f]'}`;
+    const textClass = `font-bold text-xs leading-tight pointer-events-none ${isSelected ? 'text-primary-foreground' : 'text-primary-foreground group-hover/chip:text-primary-foreground'}`;
 
     return (
         <div
             className={cn(
                 "group/chip mb-1 p-2 rounded-sm shadow-sm cursor-pointer transition-all backdrop-blur-md flex flex-col items-start gap-0.5 min-h-[fit-content] select-none overflow-hidden ring-1 ring-white/10",
-                isSelected ? "bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-[1.02] z-10" : "bg-cyan-700/90 hover:bg-cyan-400"
+                isSelected ? "bg-primary shadow-glow scale-[1.02] z-10" : "bg-primary/90 hover:bg-primary"
             )}
             onClick={(e) => {
                 e.stopPropagation();
@@ -1128,7 +1129,7 @@ function EventChip({
                         e.stopPropagation();
                         setIsExpanded(!isExpanded);
                     }}
-                    className="text-white/80 hover:text-white p-0.5 rounded hover:bg-white/10 transition-colors shrink-0 -mt-0.5"
+                    className="text-primary-foreground/80 hover:text-primary-foreground p-0.5 rounded hover:bg-primary-foreground/10 transition-colors shrink-0 -mt-0.5"
                 >
                     <ChevronDown size={14} className={cn("transition-transform duration-200 stroke-[3]", isExpanded && "rotate-180")} />
                 </button>
@@ -1141,7 +1142,7 @@ function EventChip({
 
             {/* Line 3: Private Note (Always visible if present) */}
             {note && (
-                <div className={cn(textClass, isSelected ? "text-black" : "text-white/90", "truncate w-full")}>
+                <div className={cn(textClass, isSelected ? "text-primary-foreground" : "text-primary-foreground/90", "truncate w-full")}>
                     {note}
                 </div>
             )}

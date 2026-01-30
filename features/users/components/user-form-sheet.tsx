@@ -146,7 +146,7 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
                         onClick={onClose}
                     />
 
@@ -156,16 +156,16 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed right-0 top-0 z-50 h-full w-full max-w-md bg-zinc-950 border-l border-white/10 shadow-2xl flex flex-col"
+                        className="fixed right-0 top-0 z-50 h-full w-full max-w-md bg-background border-l border-border shadow-2xl flex flex-col"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                            <h2 className="text-lg font-semibold text-white">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                            <h2 className="text-lg font-semibold text-foreground">
                                 {isEditing ? "Edit User" : "Invite User"}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -176,61 +176,61 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                             <div className="p-6 space-y-6">
                                 {/* Name */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-400">Full Name</label>
+                                    <label className="text-sm font-medium text-muted-foreground">Full Name</label>
                                     <input
                                         {...register("name")}
-                                        className="w-full bg-[#0b1115] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                                        className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-ring focus:outline-none transition-colors"
                                         placeholder="John Smith"
                                     />
                                     {errors.name && (
-                                        <p className="text-sm text-red-400">{errors.name.message}</p>
+                                        <p className="text-sm text-destructive">{errors.name.message}</p>
                                     )}
                                 </div>
 
                                 {/* Email (disabled when editing) */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-zinc-400">Email Address</label>
+                                    <label className="text-sm font-medium text-muted-foreground">Email Address</label>
                                     <input
                                         {...register("email")}
                                         type="email"
                                         disabled={isEditing}
                                         className={cn(
-                                            "w-full bg-[#0b1115] border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none transition-colors",
+                                            "w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-ring focus:outline-none transition-colors",
                                             isEditing && "opacity-50 cursor-not-allowed"
                                         )}
                                         placeholder="john@company.com"
                                     />
                                     {errors.email && (
-                                        <p className="text-sm text-red-400">{errors.email.message}</p>
+                                        <p className="text-sm text-destructive">{errors.email.message}</p>
                                     )}
                                     {isEditing && (
-                                        <p className="text-xs text-zinc-500">Email cannot be changed</p>
+                                        <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                                     )}
                                 </div>
 
                                 {/* Temporary Password (only for new users) */}
                                 {!isEditing && (
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-400">Temporary Password</label>
+                                        <label className="text-sm font-medium text-muted-foreground">Temporary Password</label>
                                         <div className="flex gap-2">
                                             <div className="relative flex-1">
                                                 <input
                                                     {...register("temp_password")}
                                                     type={showPassword ? "text" : "password"}
-                                                    className="w-full bg-[#0b1115] border border-white/10 rounded-lg px-4 py-2.5 pr-20 text-white focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+                                                    className="w-full bg-input border border-border rounded-lg px-4 py-2.5 pr-20 text-foreground focus:border-ring focus:outline-none transition-colors font-mono"
                                                 />
                                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                        className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     >
                                                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={handleCopyPassword}
-                                                        className="p-1.5 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                        className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                                     >
                                                         <Copy size={16} />
                                                     </button>
@@ -239,26 +239,26 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                                             <button
                                                 type="button"
                                                 onClick={handleGeneratePassword}
-                                                className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white transition-colors"
+                                                className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 border border-border text-muted-foreground hover:text-foreground transition-colors"
                                                 title="Generate new password"
                                             >
                                                 <RefreshCw size={18} />
                                             </button>
                                         </div>
                                         {errors.temp_password && (
-                                            <p className="text-sm text-red-400">{errors.temp_password.message}</p>
+                                            <p className="text-sm text-destructive">{errors.temp_password.message}</p>
                                         )}
-                                        <p className="text-xs text-zinc-500">
+                                        <p className="text-xs text-muted-foreground">
                                             User will be prompted to change this on first login
                                         </p>
                                     </div>
                                 )}
 
                                 {/* Tenant Admin Toggle */}
-                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                                <div className="flex items-center justify-between p-4 bg-muted/40 rounded-lg border border-border">
                                     <div>
-                                        <p className="font-medium text-white">Tenant Administrator</p>
-                                        <p className="text-sm text-zinc-400">Full access to manage users and settings</p>
+                                        <p className="font-medium text-foreground">Tenant Administrator</p>
+                                        <p className="text-sm text-muted-foreground">Full access to manage users and settings</p>
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input
@@ -266,16 +266,16 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                                             {...register("is_tenant_admin")}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     </label>
                                 </div>
 
                                 {/* Role Selection */}
                                 <div className="space-y-3">
-                                    <label className="text-sm font-medium text-zinc-400">Assign Roles</label>
+                                    <label className="text-sm font-medium text-muted-foreground">Assign Roles</label>
                                     <div className="space-y-2">
                                         {availableRoles.length === 0 ? (
-                                            <p className="text-sm text-zinc-500 p-4 bg-white/5 rounded-lg text-center">
+                                            <p className="text-sm text-muted-foreground p-4 bg-muted/40 rounded-lg text-center">
                                                 No roles available. Create roles first.
                                             </p>
                                         ) : (
@@ -287,24 +287,24 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                                                     className={cn(
                                                         "w-full flex items-center justify-between p-3 rounded-lg border transition-colors text-left",
                                                         selectedRoles.includes(role.id)
-                                                            ? "bg-cyan-500/10 border-cyan-500/50 text-white"
-                                                            : "bg-white/5 border-white/10 text-zinc-400 hover:border-white/20 hover:text-white"
+                                                            ? "bg-primary/10 border-primary/50 text-foreground"
+                                                            : "bg-muted/30 border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
                                                     )}
                                                 >
                                                     <div>
                                                         <p className="font-medium">{role.name}</p>
                                                         {role.description && (
-                                                            <p className="text-sm text-zinc-500">{role.description}</p>
+                                                            <p className="text-sm text-muted-foreground">{role.description}</p>
                                                         )}
                                                     </div>
                                                     <div className={cn(
                                                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                                                         selectedRoles.includes(role.id)
-                                                            ? "bg-cyan-500 border-cyan-500"
-                                                            : "border-zinc-600"
+                                                            ? "bg-primary border-primary"
+                                                            : "border-muted-foreground"
                                                     )}>
                                                         {selectedRoles.includes(role.id) && (
-                                                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         )}
@@ -318,18 +318,18 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                         </form>
 
                         {/* Footer */}
-                        <div className="px-6 py-4 border-t border-white/10 flex items-center justify-end gap-3">
+                        <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                                className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSubmit(onFormSubmit)}
                                 disabled={isSubmitting || (!isDirty && isEditing)}
-                                className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold rounded-lg transition-colors"
                             >
                                 {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                                 {isEditing ? "Save Changes" : "Send Invite"}

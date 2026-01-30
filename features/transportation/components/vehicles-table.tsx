@@ -62,7 +62,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
     const SortIcon = ({ column }: { column: string }) => {
         if (sortConfig?.key !== column) return <ArrowUpDown size={12} className="opacity-30" />;
-        return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-cyan-400" /> : <ArrowDown size={12} className="text-cyan-400" />;
+        return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />;
     };
 
     const formatCurrency = (val: number) => {
@@ -71,16 +71,16 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
-            case 'active': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-            case 'maintenance': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
-            case 'retired': return 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20';
-            default: return 'text-zinc-400';
+            case 'active': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+            case 'maintenance': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+            case 'retired': return 'text-muted-foreground bg-muted border-border';
+            default: return 'text-muted-foreground';
         }
     };
 
     if (!data || data.length === 0) {
         return (
-            <div className="text-center py-12 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/10">
+            <div className="text-center py-12 text-muted-foreground bg-popover rounded-xl border border-border">
                 No vehicles found.
             </div>
         );
@@ -90,7 +90,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
         <>
             <div className="h-full overflow-auto relative">
                 <table className="w-full text-left hidden md:table">
-                    <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                    <thead className="bg-muted/50 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                         <tr>
                             {[
                                 { key: 'name', label: 'Vehicle Name' },
@@ -102,7 +102,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                             ].map((col) => (
                                 <th
                                     key={col.key}
-                                    className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none"
+                                    className="px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors select-none"
                                     onClick={() => handleSort(col.key as keyof Vehicle)}
                                 >
                                     <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                             ))}
                             <th className="px-6 py-4">Rates</th>
                             <th
-                                className="px-6 py-4 cursor-pointer hover:bg-[#0b1115] transition-colors select-none"
+                                className="px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors select-none"
                                 onClick={() => handleSort('status')}
                             >
                                 <div className="flex items-center gap-2">
@@ -121,44 +121,44 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                     <SortIcon column="status" />
                                 </div>
                             </th>
-                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
+                            <th className="px-6 py-4 w-[100px] border-l border-border"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-zinc-300">
+                    <tbody className="divide-y divide-border text-muted-foreground">
                         {sortedData.map((v) => (
-                            <tr key={v.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white align-middle">
+                            <tr key={v.id} className="hover:bg-muted/50 transition-colors group">
+                                <td className="px-6 py-4 font-medium text-foreground align-middle">
                                     {v.name}
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 align-middle">
-                                    {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
+                                <td className="px-6 py-4 text-muted-foreground align-middle">
+                                    {v.vendor?.name || <span className="text-muted-foreground italic">Internal</span>}
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.capacity}</td>
-                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.license_requirement}</td>
-                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.plate_number}</td>
-                                <td className="px-6 py-4 text-zinc-400 align-middle">{v.miles_per_gallon}</td>
+                                <td className="px-6 py-4 text-muted-foreground align-middle">{v.capacity}</td>
+                                <td className="px-6 py-4 text-muted-foreground align-middle">{v.license_requirement}</td>
+                                <td className="px-6 py-4 text-muted-foreground align-middle">{v.plate_number}</td>
+                                <td className="px-6 py-4 text-muted-foreground align-middle">{v.miles_per_gallon}</td>
                                 <td className="px-6 py-4 align-middle">
                                     <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-1.5 items-center">
                                         {v.rate_per_hour > 0 && (
                                             <>
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Hourly</span>
-                                                <span className="font-mono text-white text-sm">{formatCurrency(v.rate_per_hour)}</span>
+                                                <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Hourly</span>
+                                                <span className="font-mono text-foreground text-sm">{formatCurrency(v.rate_per_hour)}</span>
                                             </>
                                         )}
                                         {v.fixed_rate > 0 && (
                                             <>
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Fixed</span>
-                                                <span className="font-mono text-white text-sm">{formatCurrency(v.fixed_rate)}</span>
+                                                <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Fixed</span>
+                                                <span className="font-mono text-foreground text-sm">{formatCurrency(v.fixed_rate)}</span>
                                             </>
                                         )}
                                         {v.per_pax_rate > 0 && (
                                             <>
-                                                <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Per PAX</span>
-                                                <span className="font-mono text-white text-sm">{formatCurrency(v.per_pax_rate)}</span>
+                                                <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Per PAX</span>
+                                                <span className="font-mono text-foreground text-sm">{formatCurrency(v.per_pax_rate)}</span>
                                             </>
                                         )}
                                         {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
-                                            <span className="text-zinc-600 italic col-span-2">-</span>
+                                            <span className="text-muted-foreground italic col-span-2">-</span>
                                         )}
                                     </div>
                                 </td>
@@ -167,7 +167,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                         {v.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 align-middle border-l border-white/10">
+                                <td className="px-6 py-4 align-middle border-l border-border">
                                     <div className="flex items-center gap-2 justify-end">
                                         <button
                                             type="button"
@@ -175,7 +175,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                                 e.stopPropagation();
                                                 onEdit(v);
                                             }}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -185,7 +185,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                                 e.stopPropagation();
                                                 setDeletingItem(v);
                                             }}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -199,22 +199,22 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                 {/* Mobile Card View */}
                 <div className="md:hidden space-y-4 p-4">
                     {sortedData.map((v) => (
-                        <div key={v.id} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                        <div key={v.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
                             {/* Header */}
-                            <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-3">
-                                <h3 className="text-lg font-bold text-white leading-tight">
+                            <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
+                                <h3 className="text-lg font-bold text-foreground leading-tight">
                                     {v.name}
                                 </h3>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(v)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(v)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -223,52 +223,52 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
                             {/* Body Grid */}
                             <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
-                                <div className="text-zinc-500">Status</div>
+                                <div className="text-muted-foreground">Status</div>
                                 <div>
                                     <span className={`px-2 py-0.5 rounded text-xs border ${getStatusColor(v.status)} uppercase font-bold tracking-wide`}>
                                         {v.status}
                                     </span>
                                 </div>
 
-                                <div className="text-zinc-500">Vendor</div>
-                                <div className="text-white">
-                                    {v.vendor?.name || <span className="text-zinc-600 italic">Internal</span>}
+                                <div className="text-muted-foreground">Vendor</div>
+                                <div className="text-foreground">
+                                    {v.vendor?.name || <span className="text-muted-foreground italic">Internal</span>}
                                 </div>
 
-                                <div className="text-zinc-500">Capacity</div>
-                                <div className="text-white">{v.capacity}</div>
+                                <div className="text-muted-foreground">Capacity</div>
+                                <div className="text-foreground">{v.capacity}</div>
 
-                                <div className="text-zinc-500">License</div>
-                                <div className="text-zinc-400 text-xs">{v.license_requirement}</div>
+                                <div className="text-muted-foreground">License</div>
+                                <div className="text-muted-foreground text-xs">{v.license_requirement}</div>
 
-                                <div className="text-zinc-500">Plate</div>
-                                <div className="text-white font-mono text-xs">{v.plate_number}</div>
+                                <div className="text-muted-foreground">Plate</div>
+                                <div className="text-foreground font-mono text-xs">{v.plate_number}</div>
 
-                                <div className="text-zinc-500">MPG</div>
-                                <div className="text-white">{v.miles_per_gallon}</div>
+                                <div className="text-muted-foreground">MPG</div>
+                                <div className="text-foreground">{v.miles_per_gallon}</div>
 
-                                <div className="text-zinc-500">Rates</div>
+                                <div className="text-muted-foreground">Rates</div>
                                 <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-1.5 items-center">
                                     {v.rate_per_hour > 0 && (
                                         <>
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Hourly</span>
-                                            <span className="font-mono text-white text-sm">{formatCurrency(v.rate_per_hour)}</span>
+                                            <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Hourly</span>
+                                            <span className="font-mono text-foreground text-sm">{formatCurrency(v.rate_per_hour)}</span>
                                         </>
                                     )}
                                     {v.fixed_rate > 0 && (
                                         <>
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Fixed</span>
-                                            <span className="font-mono text-white text-sm">{formatCurrency(v.fixed_rate)}</span>
+                                            <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Fixed</span>
+                                            <span className="font-mono text-foreground text-sm">{formatCurrency(v.fixed_rate)}</span>
                                         </>
                                     )}
                                     {v.per_pax_rate > 0 && (
                                         <>
-                                            <span className="text-[10px] uppercase text-zinc-500 font-bold tracking-wider">Per PAX</span>
-                                            <span className="font-mono text-white text-sm">{formatCurrency(v.per_pax_rate)}</span>
+                                            <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Per PAX</span>
+                                            <span className="font-mono text-foreground text-sm">{formatCurrency(v.per_pax_rate)}</span>
                                         </>
                                     )}
                                     {!v.rate_per_hour && !v.fixed_rate && !v.per_pax_rate && (
-                                        <span className="text-zinc-600 italic col-span-2">-</span>
+                                        <span className="text-muted-foreground italic col-span-2">-</span>
                                     )}
                                 </div>
                             </div>

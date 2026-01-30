@@ -104,7 +104,7 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
                             {...register("name")}
                             placeholder="e.g. Regular Guest"
                         />
-                        {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -113,7 +113,7 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
                             {...register("code")}
                             placeholder="e.g. REG"
                         />
-                        {errors.code && <p className="text-xs text-red-400">{errors.code.message}</p>}
+                        {errors.code && <p className="text-xs text-destructive">{errors.code.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -126,15 +126,15 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
                     </div>
                 </div>
 
-                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-zinc-950/40 backdrop-blur-md">
+                <div className="shrink-0 flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background/80 backdrop-blur-md">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

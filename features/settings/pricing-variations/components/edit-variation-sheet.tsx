@@ -95,8 +95,8 @@ export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: 
             <form onSubmit={handleSubmit(onSubmit, (e) => console.error("Validation:", e))} className="flex flex-col h-full">
                 <div className="flex-1 overflow-y-auto p-6 custom-scrollbar pb-24 space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-zinc-300 flex items-center gap-2">
-                            <Layers size={16} className="text-zinc-500" />
+                        <Label className="text-foreground flex items-center gap-2">
+                            <Layers size={16} className="text-muted-foreground" />
                             Variation Name <RequiredIndicator />
                         </Label>
                         <Input
@@ -104,19 +104,19 @@ export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: 
                             placeholder="e.g. Retail, Online, Partner"
                             className="text-lg"
                         />
-                        {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                     </div>
                 </div>
 
-                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-white/10 mt-auto bg-[#0b1115]">
+                <div className="flex justify-end items-center gap-4 py-4 px-6 border-t border-border mt-auto bg-background">
                     <Button
                         type="submit"
                         disabled={isSubmitting || !isDirty}
                         className={cn(
                             "px-6 py-2 font-bold rounded-lg text-sm flex items-center gap-2 transition-colors",
-                            isSubmitting ? "bg-cyan-400/50 text-white cursor-not-allowed" :
-                                isDirty ? "bg-cyan-400 hover:bg-cyan-300 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]" :
-                                    "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                            isSubmitting ? "bg-primary/50 text-primary-foreground cursor-not-allowed" :
+                                isDirty ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm" :
+                                    "bg-muted text-muted-foreground cursor-not-allowed border border-border"
                         )}
                     >
                         {isSubmitting ? <><Loader2 className="animate-spin" size={16} /> Saving...</> :

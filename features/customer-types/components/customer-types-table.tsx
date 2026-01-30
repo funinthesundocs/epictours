@@ -16,7 +16,7 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
 
     if (!data || data.length === 0) {
         return (
-            <div className="text-center py-12 text-zinc-500 bg-[#0b1115] rounded-xl border border-white/10">
+            <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-xl border border-border">
                 No customer types found.
             </div>
         );
@@ -26,29 +26,29 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
         <>
             <div className="h-full overflow-auto relative">
                 <table className="w-full text-left hidden md:table">
-                    <thead className="bg-zinc-900/80 backdrop-blur-sm text-white text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-white/5">
+                    <thead className="bg-muted/50 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                         <tr>
                             <th className="px-6 py-4">Customer Type</th>
                             <th className="px-6 py-4">Code</th>
                             <th className="px-6 py-4">Notes</th>
-                            <th className="px-6 py-4 w-[100px] border-l border-white/10"></th>
+                            <th className="px-6 py-4 w-[100px] border-l border-border"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-zinc-300">
+                    <tbody className="divide-y divide-border text-muted-foreground">
                         {data.map((type) => (
-                            <tr key={type.id} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 font-medium text-white">
+                            <tr key={type.id} className="hover:bg-muted/50 transition-colors group">
+                                <td className="px-6 py-4 font-medium text-foreground">
                                     {type.name}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                                         {type.code}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-zinc-400 max-w-xs truncate">
+                                <td className="px-6 py-4 text-muted-foreground max-w-xs truncate">
                                     {type.description || "-"}
                                 </td>
-                                <td className="px-6 py-4 border-l border-white/10">
+                                <td className="px-6 py-4 border-l border-border">
                                     <div className="flex items-center gap-2 justify-end">
                                         <button
                                             type="button"
@@ -56,7 +56,7 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                                                 e.stopPropagation();
                                                 onEdit(type);
                                             }}
-                                            className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                         >
                                             <Edit2 size={16} />
                                         </button>
@@ -66,7 +66,7 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                                                 e.stopPropagation();
                                                 setDeletingItem(type);
                                             }}
-                                            className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -80,27 +80,27 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
                 {/* Mobile Card View */}
                 <div className="md:hidden space-y-4 p-4">
                     {data.map((type) => (
-                        <div key={type.id} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <div key={type.id} className="bg-card border border-border rounded-xl p-4">
                             {/* Header */}
-                            <div className={`flex items-start justify-between gap-4 ${type.description ? 'border-b border-white/5 pb-3' : ''}`}>
+                            <div className={`flex items-start justify-between gap-4 ${type.description ? 'border-b border-border pb-3' : ''}`}>
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-bold text-white leading-tight">
+                                    <h3 className="text-lg font-bold text-foreground leading-tight">
                                         {type.name}
                                     </h3>
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                                         {type.code}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => onEdit(type)}
-                                        className="p-2 text-zinc-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => setDeletingItem(type)}
-                                        className="p-2 text-zinc-400 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
+                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -109,7 +109,7 @@ export function CustomerTypesTable({ data, onEdit, onDelete }: CustomerTypesTabl
 
                             {/* Body */}
                             {type.description && (
-                                <div className="text-zinc-400 pt-3">{type.description}</div>
+                                <div className="text-muted-foreground pt-3">{type.description}</div>
                             )}
                         </div>
                     ))}
