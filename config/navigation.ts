@@ -143,14 +143,17 @@ export const navigation: NavSection[] = [
         title: "Settings",
         requiredModule: "settings",
         items: [
+            { title: "Organization Profile", href: "/settings/organization", icon: Building2, tenantAdminOnly: true },
+            { title: "My Profile", href: "/settings/profile", icon: UserCog },
             {
                 title: "Users",
                 href: "/settings/users",
                 icon: UserCog,
                 tenantAdminOnly: true,
                 children: [
-                    { title: "Staff", href: "/operations/staff", icon: Users },
-                    { title: "Permission Groups", href: "/settings/users/roles", icon: Shield, tenantAdminOnly: true }
+                    { title: "Staff", href: "/settings/users", icon: Users },
+                    { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, tenantAdminOnly: true },
+                    { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, tenantAdminOnly: true }
                 ]
             },
 
@@ -167,8 +170,14 @@ export const navigation: NavSection[] = [
         title: "Platform Admin",
         items: [
             {
+                title: "Platform Users",
+                href: "/admin/users",
+                icon: Users,
+                platformAdminOnly: true
+            },
+            {
                 title: "Organizations",
-                href: "/admin/tenants",
+                href: "/admin/organizations",
                 icon: Building2,
                 platformAdminOnly: true
             },

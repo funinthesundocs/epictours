@@ -1,53 +1,51 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/auth-context";
+import { OrganizationService } from "@/lib/services/organization-service";
+import { UserService } from "@/lib/services/user-service";
 
 export interface User {
-    id: string;
+    id: string; // This is the ORGANIZATION MEMBER ID (organization_users.id)
+    userId: string; // The actual user.id
     email: string;
     name: string;
     avatar_url: string | null;
-    platform_role: string | null;
-    tenant_id: string | null;
-    is_tenant_admin: boolean;
-    is_active: boolean;
-    temp_password: boolean;
-    created_at: string | null;
-    last_login_at: string | null;
-    // Joined data
-    roles?: Array<{
+    is_organization_owner: boolean;
+    status: 'active' | 'invited' | 'suspended';
+    created_at: string;
+    // Position Data
+    position: {
         id: string;
         name: string;
-        color: string | null;
-    }>;
+        color?: string | null;
+    } | null;
+    // Permissions (Resolved)
+    role?: {
+        id: string;
+        name: string;
+    } | null;
 }
 
 export interface CreateUserData {
     email: string;
     name: string;
-    temp_password?: string;
-    is_tenant_admin?: boolean;
-    role_ids?: string[];
+    position_id?: string;
 }
 
 export interface UpdateUserData {
-    name?: string;
-    is_tenant_admin?: boolean;
-    is_active?: boolean;
-    role_ids?: string[];
+    position_id?: string;
 }
 
 export function useUsers() {
-    const { user: currentUser } = useAuth();
+    const { user: currentUser } = useAuth(); // currentUser is AuthenticatedUser
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchUsers = useCallback(async () => {
-        if (!currentUser?.tenantId) {
+        if (!currentUser?.organizationId) {
             setUsers([]);
             setIsLoading(false);
             return;
@@ -57,23 +55,23 @@ export function useUsers() {
         setError(null);
 
         try {
-            const { data, error: fetchError } = await supabase
-                .from("users")
-                .select(`
-                    *,
-                    user_roles(
-                        roles(id, name, color)
-                    )
-                `)
-                .eq("tenant_id", currentUser.tenantId)
-                .order("name");
+            const members = await OrganizationService.getOrganizationMembers(currentUser.organizationId);
 
-            if (fetchError) throw fetchError;
-
-            // Transform data to flatten roles
-            const transformedUsers: User[] = (data || []).map(user => ({
-                ...user,
-                roles: user.user_roles?.map((ur: { roles: { id: string; name: string; color: string | null } }) => ur.roles).filter(Boolean) || []
+            const transformedUsers: User[] = members.map(m => ({
+                id: m.id, // organization_users.id
+                userId: m.user.id,
+                email: m.user.email,
+                name: m.user.name,
+                avatar_url: m.user.avatar_url,
+                is_organization_owner: m.is_owner,
+                status: m.status,
+                created_at: m.created_at,
+                position: m.position ? {
+                    id: m.position.id,
+                    name: m.position.name,
+                    // color: m.position.color // Service needs to fetch color if we want it
+                } : null,
+                role: null // Derived from position usually
             }));
 
             setUsers(transformedUsers);
@@ -83,105 +81,45 @@ export function useUsers() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentUser?.tenantId]);
+    }, [currentUser?.organizationId]);
 
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
 
     const createUser = async (userData: CreateUserData): Promise<boolean> => {
-        if (!currentUser?.tenantId) {
-            toast.error("No tenant context");
+        if (!currentUser?.organizationId) {
+            toast.error("No organization context");
             return false;
         }
 
         try {
-            // Hash the temporary password (in production, use a proper hashing library)
-            // For now, we'll store it as-is since Supabase will handle auth
-            const { data: newUser, error: createError } = await supabase
-                .from("users")
-                .insert({
-                    email: userData.email,
-                    name: userData.name,
-                    tenant_id: currentUser.tenantId,
-                    is_tenant_admin: userData.is_tenant_admin || false,
-                    password_hash: userData.temp_password || null, // In production: hash this
-                    temp_password: !!userData.temp_password,
-                    is_active: true,
-                })
-                .select()
-                .single();
+            const result = await UserService.inviteUserToOrganization(
+                currentUser.organizationId,
+                userData.email,
+                userData.name,
+                userData.position_id
+            );
 
-            if (createError) throw createError;
-
-            // Assign roles if provided
-            if (userData.role_ids && userData.role_ids.length > 0 && newUser) {
-                const roleAssignments = userData.role_ids.map(roleId => ({
-                    user_id: newUser.id,
-                    role_id: roleId,
-                    assigned_by: currentUser.id,
-                }));
-
-                const { error: roleError } = await supabase
-                    .from("user_roles")
-                    .insert(roleAssignments);
-
-                if (roleError) {
-                    console.error("Error assigning roles:", roleError);
-                    // Don't fail the whole operation, user is created
-                }
+            if (!result.success && result.message) {
+                toast.error(result.message);
+                return false;
             }
 
-            toast.success("User created successfully");
+            toast.success("User invited successfully");
             await fetchUsers();
             return true;
         } catch (err: any) {
-            console.error("Error creating user:", err);
-            toast.error(err.message || "Failed to create user");
+            console.error("Error inviting user:", err);
+            toast.error(err.message || "Failed to invite user");
             return false;
         }
     };
 
-    const updateUser = async (userId: string, userData: UpdateUserData): Promise<boolean> => {
+    const updateUser = async (memberId: string, userData: UpdateUserData): Promise<boolean> => {
         try {
-            // Update user record
-            const updateData: Record<string, any> = {};
-            if (userData.name !== undefined) updateData.name = userData.name;
-            if (userData.is_tenant_admin !== undefined) updateData.is_tenant_admin = userData.is_tenant_admin;
-            if (userData.is_active !== undefined) updateData.is_active = userData.is_active;
-
-            if (Object.keys(updateData).length > 0) {
-                const { error: updateError } = await supabase
-                    .from("users")
-                    .update(updateData)
-                    .eq("id", userId);
-
-                if (updateError) throw updateError;
-            }
-
-            // Update role assignments if provided
-            if (userData.role_ids !== undefined) {
-                // Delete existing assignments
-                await supabase
-                    .from("user_roles")
-                    .delete()
-                    .eq("user_id", userId);
-
-                // Insert new assignments
-                if (userData.role_ids.length > 0) {
-                    const roleAssignments = userData.role_ids.map(roleId => ({
-                        user_id: userId,
-                        role_id: roleId,
-                        assigned_by: currentUser?.id,
-                    }));
-
-                    const { error: roleError } = await supabase
-                        .from("user_roles")
-                        .insert(roleAssignments);
-
-                    if (roleError) throw roleError;
-                }
-            }
+            // Only updating position supported for now via this simplified hook
+            await UserService.updateMemberPosition(memberId, userData.position_id || null);
 
             toast.success("User updated successfully");
             await fetchUsers();
@@ -193,43 +131,15 @@ export function useUsers() {
         }
     };
 
-    const deleteUser = async (userId: string): Promise<boolean> => {
+    const deleteUser = async (memberId: string): Promise<boolean> => {
         try {
-            // Soft delete - just deactivate
-            const { error } = await supabase
-                .from("users")
-                .update({ is_active: false })
-                .eq("id", userId);
-
-            if (error) throw error;
-
-            toast.success("User deactivated");
+            await UserService.removeUserFromOrganization(memberId);
+            toast.success("User removed from organization");
             await fetchUsers();
             return true;
         } catch (err: any) {
-            console.error("Error deleting user:", err);
-            toast.error(err.message || "Failed to deactivate user");
-            return false;
-        }
-    };
-
-    const resetPassword = async (userId: string, newPassword: string): Promise<boolean> => {
-        try {
-            const { error } = await supabase
-                .from("users")
-                .update({
-                    password_hash: newPassword, // In production: hash this
-                    temp_password: true,
-                })
-                .eq("id", userId);
-
-            if (error) throw error;
-
-            toast.success("Password reset - user will need to change on next login");
-            return true;
-        } catch (err: any) {
-            console.error("Error resetting password:", err);
-            toast.error(err.message || "Failed to reset password");
+            console.error("Error removing user:", err);
+            toast.error(err.message || "Failed to remove user");
             return false;
         }
     };
@@ -242,6 +152,6 @@ export function useUsers() {
         createUser,
         updateUser,
         deleteUser,
-        resetPassword,
+        // resetPassword removed - handled via Supabase Auth reset flow generally, can add back tailored for Organization Admin if needed later
     };
 }

@@ -32,13 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      */
     const fetchUserData = useCallback(async (email: string): Promise<AuthenticatedUser | null> => {
         try {
-            // Get user from database
+            // 1. Get Base User
             const { data: userData, error: userError } = await supabase
                 .from('users')
-                .select(`
-                    *,
-                    tenant:tenants(id, name, slug)
-                `)
+                .select('*')
                 .eq('email', email)
                 .eq('is_active', true)
                 .single();
@@ -48,94 +45,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return null;
             }
 
-            // Get subscribed modules if user has a tenant
+            const isSuperAdmin = userData.is_platform_super_admin ?? false;
+            const isSystemAdmin = userData.is_platform_system_admin ?? false;
+            const isPlatformAdmin = isSuperAdmin || isSystemAdmin;
+
+            // 2. Get Organization Membership (Default to first active for now)
+            // In future, this would load all memberships and let user switch context
+            let activeOrgMembership = null;
+            let activeOrg = null;
+            let activePosition = null;
+
+            if (!isPlatformAdmin) {
+                // Fetch direct organization membership
+                const { data: orgUsers } = await supabase
+                    .from('organization_users')
+                    .select(`
+                        id,
+                        organization_id,
+                        is_organization_owner,
+                        primary_position_id,
+                        organizations (id, name, slug, status),
+                        staff_positions (id, name, default_role_id)
+                    `)
+                    .eq('user_id', userData.id)
+                    .eq('status', 'active')
+                    .limit(1);
+
+                if (orgUsers && orgUsers.length > 0) {
+                    activeOrgMembership = orgUsers[0];
+                    activeOrg = activeOrgMembership.organizations;
+                    activePosition = activeOrgMembership.staff_positions as any; // Cast for now
+                }
+
+                // TODO: Handle Cross-Organization Access if no direct membership found
+            }
+
+            // 3. Get Subscribed Modules (if in an org)
             let subscribedModules: ModuleCode[] = [];
-            if (userData.tenant_id) {
+            if (activeOrg?.id) {
                 const { data: subscriptions } = await supabase
                     .from('tenant_subscriptions')
                     .select('modules(code)')
-                    .eq('tenant_id', userData.tenant_id)
+                    .eq('tenant_id', activeOrg.id)
                     .eq('status', 'active');
 
                 subscribedModules = (subscriptions ?? [])
-                    .map((s: { modules: { code: string } | null }) => s.modules?.code as ModuleCode)
+                    .map((s: any) => s.modules?.code as ModuleCode)
                     .filter(Boolean);
             }
 
-            // Get user's resolved permissions from roles
+            // 4. Resolve Permissions
             let permissions: ResolvedPermission[] = [];
-            if (!userData.platform_role) {
-                // Only fetch role permissions for non-platform users
-                const { data: rolePerms } = await supabase
-                    .from('user_roles')
-                    .select(`
-                        roles!inner(
-                            role_permissions(
-                                module_code,
-                                resource_type,
-                                can_create,
-                                can_read,
-                                can_update,
-                                can_delete,
-                                scope
-                            )
-                        )
-                    `)
-                    .eq('user_id', userData.id);
 
-                // Flatten and aggregate permissions
-                const permMap = new Map<string, ResolvedPermission>();
-                rolePerms?.forEach((ur: {
-                    roles: {
-                        role_permissions: Array<{
-                            module_code: string;
-                            resource_type: string;
-                            can_create: boolean;
-                            can_read: boolean;
-                            can_update: boolean;
-                            can_delete: boolean;
-                            scope?: Record<string, unknown>;
-                        }>
-                    }
-                }) => {
-                    ur.roles.role_permissions?.forEach(rp => {
-                        const key = `${rp.module_code}:${rp.resource_type}`;
-                        const existing = permMap.get(key);
-                        if (existing) {
-                            // Merge permissions (OR logic)
-                            existing.canCreate = existing.canCreate || rp.can_create;
-                            existing.canRead = existing.canRead || rp.can_read;
-                            existing.canUpdate = existing.canUpdate || rp.can_update;
-                            existing.canDelete = existing.canDelete || rp.can_delete;
-                        } else {
-                            permMap.set(key, {
-                                moduleCode: rp.module_code as ModuleCode,
-                                resourceType: rp.resource_type,
-                                canCreate: rp.can_create,
-                                canRead: rp.can_read,
-                                canUpdate: rp.can_update,
-                                canDelete: rp.can_delete,
-                                scope: rp.scope,
-                            });
-                        }
+            if (!isPlatformAdmin && activeOrgMembership) {
+                // A. Get permissions from Primary Position's Default Role
+                const roleId = activePosition?.default_role_id;
+
+                if (roleId) {
+                    const { data: rolePerms } = await supabase
+                        .from('role_permissions')
+                        .select('*')
+                        .eq('role_id', roleId);
+
+                    rolePerms?.forEach(rp => {
+                        permissions.push({
+                            moduleCode: rp.module_code as ModuleCode,
+                            resourceType: rp.resource_type,
+                            canCreate: rp.can_create ?? false,
+                            canRead: rp.can_read ?? false,
+                            canUpdate: rp.can_update ?? false,
+                            canDelete: rp.can_delete ?? false,
+                            scope: rp.scope as any,
+                        });
                     });
-                });
-                permissions = Array.from(permMap.values());
-            }
+                }
 
-            const tenant = userData.tenant as { id: string; name: string; slug: string } | null;
+                // TODO: B. Merge "Position Overrides" from position_permissions
+                // Not implementing yet to keep migration simple, but architecture supports it.
+            }
 
             return {
                 id: userData.id,
                 email: userData.email,
                 name: userData.name,
-                avatarUrl: userData.avatar_url,
-                platformRole: userData.platform_role,
-                isPlatformAdmin: userData.platform_role === 'developer' || userData.platform_role === 'system_admin',
-                tenantId: userData.tenant_id,
-                tenantName: tenant?.name ?? null,
-                tenantSlug: tenant?.slug ?? null,
-                isTenantAdmin: userData.is_tenant_admin,
+                avatarUrl: userData.avatar_url ?? undefined,
+
+                isPlatformSuperAdmin: isSuperAdmin,
+                isPlatformSystemAdmin: isSystemAdmin,
+                isPlatformAdmin,
+
+                organizationId: activeOrg?.id ?? null,
+                organizationName: activeOrg?.name ?? null,
+                organizationSlug: activeOrg?.slug ?? null,
+
+                memberId: activeOrgMembership?.id ?? null,
+                isOrganizationOwner: activeOrgMembership?.is_organization_owner ?? false,
+                activePositionId: activePosition?.id ?? null,
+                activePositionName: activePosition?.name ?? null,
+
                 subscribedModules,
                 permissions,
                 requiresPasswordChange: userData.temp_password ?? false,
@@ -244,12 +251,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     id: 'dev-user',
                     email: devAccount.email,
                     name: devAccount.name,
-                    platformRole: 'developer',
+                    isPlatformSuperAdmin: true,
+                    isPlatformSystemAdmin: false,
                     isPlatformAdmin: true,
-                    tenantId: null,
-                    tenantName: null,
-                    tenantSlug: null,
-                    isTenantAdmin: false,
+                    organizationId: null,
+                    organizationName: null,
+                    organizationSlug: null,
+                    memberId: null,
+                    isOrganizationOwner: false,
+                    activePositionId: null,
+                    activePositionName: null,
                     subscribedModules: ['crm', 'bookings', 'transportation', 'communications', 'visibility', 'finance', 'settings'],
                     permissions: [],
                     requiresPasswordChange: false,
@@ -271,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const can = (action: PermissionAction, module: ModuleCode, resource: string): boolean => {
         if (!user) return false;
         if (user.isPlatformAdmin) return true;
-        if (user.isTenantAdmin && hasModule(module)) return true;
+        if (user.isOrganizationOwner && hasModule(module)) return true;
 
         const permission = user.permissions.find(
             p => p.moduleCode === module && p.resourceType === resource
@@ -289,7 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const isPlatformAdmin = (): boolean => user?.isPlatformAdmin ?? false;
-    const isTenantAdmin = (): boolean => user?.isTenantAdmin ?? false;
+    const isTenantAdmin = (): boolean => user?.isOrganizationOwner ?? false; // Backward compat for hook name
 
     return (
         <AuthContext.Provider

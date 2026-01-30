@@ -401,14 +401,14 @@ export type Database = {
         }
         Relationships: []
       }
-      tenants: {
+      organizations: {
         Row: {
           id: string
           name: string
           slug: string
           created_at: string | null
           settings: Json | null
-          is_active: boolean | null
+          status: string | null
         }
         Insert: {
           id?: string
@@ -416,7 +416,7 @@ export type Database = {
           slug: string
           created_at?: string | null
           settings?: Json | null
-          is_active?: boolean | null
+          status?: string | null
         }
         Update: {
           id?: string
@@ -424,9 +424,129 @@ export type Database = {
           slug?: string
           created_at?: string | null
           settings?: Json | null
-          is_active?: boolean | null
+          status?: string | null
         }
         Relationships: []
+      }
+      organization_users: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string
+          primary_position_id: string | null
+          is_organization_owner: boolean | null
+          status: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id: string
+          primary_position_id?: string | null
+          is_organization_owner?: boolean | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string
+          primary_position_id?: string | null
+          is_organization_owner?: boolean | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_users_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_users_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_users_primary_position_id_fkey"
+            columns: ["primary_position_id"]
+            isOneToOne: false
+            referencedRelation: "staff_positions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      cross_organization_access: {
+        Row: {
+          id: string
+          user_id: string
+          host_organization_id: string
+          relationship_type: "partner" | "affiliate"
+          module_id: string | null
+          permission_group_id: string | null
+          status: "active" | "pending" | "revoked" | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          host_organization_id: string
+          relationship_type: "partner" | "affiliate"
+          module_id?: string | null
+          permission_group_id?: string | null
+          status?: "active" | "pending" | "revoked" | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          host_organization_id?: string
+          relationship_type?: "partner" | "affiliate"
+          module_id?: string | null
+          permission_group_id?: string | null
+          status?: "active" | "pending" | "revoked" | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_organization_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_organization_access_host_organization_id_fkey"
+            columns: ["host_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_organization_access_permission_group_id_fkey"
+            columns: ["permission_group_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_organization_access_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       modules: {
         Row: {
@@ -534,10 +654,18 @@ export type Database = {
           id: string
           email: string
           name: string
+          phone_number: string | null
           avatar_url: string | null
+          is_platform_super_admin: boolean | null
+          is_platform_system_admin: boolean | null
+          messaging_apps: Json | null
+          notes: string | null
+
+          // Deprecated/Migrating columns
           platform_role: string | null
           tenant_id: string | null
           is_tenant_admin: boolean | null
+
           password_hash: string | null
           temp_password: boolean | null
           supabase_auth_id: string | null
@@ -549,10 +677,17 @@ export type Database = {
           id?: string
           email: string
           name: string
+          phone_number?: string | null
           avatar_url?: string | null
+          is_platform_super_admin?: boolean | null
+          is_platform_system_admin?: boolean | null
+          messaging_apps?: Json | null
+          notes?: string | null
+
           platform_role?: string | null
           tenant_id?: string | null
           is_tenant_admin?: boolean | null
+
           password_hash?: string | null
           temp_password?: boolean | null
           supabase_auth_id?: string | null
@@ -564,10 +699,17 @@ export type Database = {
           id?: string
           email?: string
           name?: string
+          phone_number?: string | null
           avatar_url?: string | null
+          is_platform_super_admin?: boolean | null
+          is_platform_system_admin?: boolean | null
+          messaging_apps?: Json | null
+          notes?: string | null
+
           platform_role?: string | null
           tenant_id?: string | null
           is_tenant_admin?: boolean | null
+
           password_hash?: string | null
           temp_password?: boolean | null
           supabase_auth_id?: string | null
@@ -580,7 +722,7 @@ export type Database = {
             foreignKeyName: "users_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
-            referencedRelation: "tenants"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           }
         ]

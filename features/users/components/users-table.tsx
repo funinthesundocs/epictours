@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserCog, Shield, MoreHorizontal, KeyRound, UserX } from "lucide-react";
+import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserCog, Shield, MoreHorizontal, UserX } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import type { User } from "@/features/users/hooks/use-users";
 import { cn } from "@/lib/utils";
@@ -10,17 +10,16 @@ interface UsersTableProps {
     data: User[];
     onEdit: (user: User) => void;
     onDelete: (id: string) => void;
-    onResetPassword: (id: string) => void;
 }
 
-type SortKey = 'name' | 'email' | 'is_tenant_admin' | 'is_active' | 'created_at';
+type SortKey = 'name' | 'email' | 'status' | 'created_at';
 
 interface SortConfig {
     key: SortKey;
     direction: 'asc' | 'desc';
 }
 
-export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTableProps) {
+export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'name', direction: 'asc' });
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -34,8 +33,8 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
     };
 
     const sortedData = [...data].sort((a, b) => {
-        const aVal = a[sortConfig.key];
-        const bVal = b[sortConfig.key];
+        const aVal = a[sortConfig.key as keyof User];
+        const bVal = b[sortConfig.key as keyof User];
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -98,16 +97,14 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
                                 </button>
                             </th>
                             <th className="text-left py-3 px-4">
-                                <span className="text-xs uppercase tracking-wider text-muted-foreground">Roles</span>
+                                <span className="text-xs uppercase tracking-wider text-muted-foreground">Position</span>
                             </th>
                             <th className="text-center py-3 px-4">
-                                <button onClick={() => handleSort('is_tenant_admin')} className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mx-auto">
-                                    Admin <SortIcon column="is_tenant_admin" />
-                                </button>
+                                <span className="text-xs uppercase tracking-wider text-muted-foreground">Role</span>
                             </th>
                             <th className="text-center py-3 px-4">
-                                <button onClick={() => handleSort('is_active')} className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mx-auto">
-                                    Status <SortIcon column="is_active" />
+                                <button onClick={() => handleSort('status')} className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mx-auto">
+                                    Status <SortIcon column="status" />
                                 </button>
                             </th>
                             <th className="text-left py-3 px-4">
@@ -131,37 +128,31 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
                                 </td>
                                 <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
                                 <td className="py-3 px-4">
-                                    <div className="flex flex-wrap gap-1">
-                                        {user.roles && user.roles.length > 0 ? (
-                                            user.roles.map(role => (
-                                                <span
-                                                    key={role.id}
-                                                    className="px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
-                                                    style={role.color ? { backgroundColor: `${role.color}20`, color: role.color } : {}}
-                                                >
-                                                    {role.name}
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-muted-foreground text-sm">No roles</span>
-                                        )}
-                                    </div>
+                                    {user.position ? (
+                                        <span
+                                            className="px-2 py-0.5 text-xs rounded-full bg-muted text-foreground"
+                                        >
+                                            {user.position.name}
+                                        </span>
+                                    ) : (
+                                        <span className="text-muted-foreground text-sm italic">No position</span>
+                                    )}
                                 </td>
                                 <td className="py-3 px-4 text-center">
-                                    {user.is_tenant_admin && (
-                                        <span title="Tenant Admin">
-                                            <Shield size={16} className="text-amber-500 mx-auto" />
+                                    {user.is_organization_owner && (
+                                        <span title="Owner" className="inline-flex items-center gap-1 text-amber-500 text-xs font-medium">
+                                            <Shield size={14} /> Owner
                                         </span>
                                     )}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                     <span className={cn(
                                         "px-2 py-0.5 text-xs rounded-full",
-                                        user.is_active
+                                        user.status === 'active'
                                             ? "bg-emerald-500/10 text-emerald-500"
-                                            : "bg-destructive/10 text-destructive"
+                                            : "bg-muted text-muted-foreground"
                                     )}>
-                                        {user.is_active ? "Active" : "Inactive"}
+                                        {user.status === 'active' ? "Active" : user.status}
                                     </span>
                                 </td>
                                 <td className="py-3 px-4 text-muted-foreground text-sm">{formatDate(user.created_at)}</td>
@@ -184,16 +175,10 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
                                                         <Edit2 size={14} /> Edit User
                                                     </button>
                                                     <button
-                                                        onClick={() => { onResetPassword(user.id); setOpenMenuId(null); }}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                                                    >
-                                                        <KeyRound size={14} /> Reset Password
-                                                    </button>
-                                                    <button
                                                         onClick={() => { confirmDelete(user.id); setOpenMenuId(null); }}
                                                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                                                     >
-                                                        <UserX size={14} /> Deactivate
+                                                        <UserX size={14} /> Remove User
                                                     </button>
                                                 </div>
                                             </>
@@ -219,34 +204,27 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium text-foreground">{user.name}</span>
-                                            {user.is_tenant_admin && <Shield size={14} className="text-amber-500" />}
+                                            {user.is_organization_owner && <Shield size={14} className="text-amber-500" />}
                                         </div>
                                         <span className="text-sm text-muted-foreground">{user.email}</span>
                                     </div>
                                 </div>
                                 <span className={cn(
                                     "px-2 py-0.5 text-xs rounded-full",
-                                    user.is_active
+                                    user.status === 'active'
                                         ? "bg-emerald-500/10 text-emerald-500"
-                                        : "bg-destructive/10 text-destructive"
+                                        : "bg-muted text-muted-foreground"
                                 )}>
-                                    {user.is_active ? "Active" : "Inactive"}
+                                    {user.status === 'active' ? "Active" : user.status}
                                 </span>
                             </div>
 
-                            <div className="flex flex-wrap gap-1 mb-3">
-                                {user.roles && user.roles.length > 0 ? (
-                                    user.roles.map(role => (
-                                        <span
-                                            key={role.id}
-                                            className="px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
-                                            style={role.color ? { backgroundColor: `${role.color}20`, color: role.color } : {}}
-                                        >
-                                            {role.name}
-                                        </span>
-                                    ))
+                            <div className="flex items-center gap-2 mb-3 text-sm">
+                                <UserCog size={14} className="text-muted-foreground" />
+                                {user.position ? (
+                                    <span>{user.position.name}</span>
                                 ) : (
-                                    <span className="text-muted-foreground text-sm">No roles assigned</span>
+                                    <span className="text-muted-foreground italic">No position</span>
                                 )}
                             </div>
 
@@ -275,9 +253,9 @@ export function UsersTable({ data, onEdit, onDelete, onResetPassword }: UsersTab
             <AlertDialog
                 isOpen={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen(false)}
-                title="Deactivate User"
-                description="This user will lose access to the system. You can reactivate them later."
-                confirmLabel="Deactivate"
+                title="Remove User"
+                description="This user will be removed from the organization. They can be re-invited later."
+                confirmLabel="Remove"
                 onConfirm={handleConfirmDelete}
                 isDestructive={true}
             />

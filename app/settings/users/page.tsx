@@ -4,14 +4,13 @@ import { PageShell } from "@/components/shell/page-shell";
 import { UserCog, Shield, Users, Plus, Loader2, Search } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
 import { useUsers, type User, type CreateUserData, type UpdateUserData } from "@/features/users/hooks/use-users";
-import { useRoles } from "@/features/users/hooks/use-roles";
+import { useStaffPositions } from "@/features/settings/hooks/use-staff-positions";
 import { UsersTable } from "@/features/users/components/users-table";
 import { UserFormSheet } from "@/features/users/components/user-form-sheet";
-import { toast } from "sonner";
 
 export default function UsersPage() {
-    const { users, isLoading, createUser, updateUser, deleteUser, resetPassword } = useUsers();
-    const { roles } = useRoles();
+    const { users, isLoading, createUser, updateUser, deleteUser } = useUsers();
+    const { positions } = useStaffPositions(); // Positions for the dropdown
     const [searchQuery, setSearchQuery] = useState("");
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -23,15 +22,15 @@ export default function UsersPage() {
         return users.filter(u =>
             u.name.toLowerCase().includes(lowerQ) ||
             u.email.toLowerCase().includes(lowerQ) ||
-            u.roles?.some(r => r.name.toLowerCase().includes(lowerQ))
+            u.position?.name.toLowerCase().includes(lowerQ)
         );
     }, [users, searchQuery]);
 
     // Stats
     const stats = useMemo(() => [
         { label: "Total Users", value: users.length.toString(), icon: Users },
-        { label: "Active Users", value: users.filter(u => u.is_active).length.toString(), icon: UserCog },
-        { label: "Admins", value: users.filter(u => u.is_tenant_admin).length.toString(), icon: Shield },
+        { label: "Active Users", value: users.filter(u => u.status === 'active').length.toString(), icon: UserCog },
+        { label: "Owners", value: users.filter(u => u.is_organization_owner).length.toString(), icon: Shield },
     ], [users]);
 
     const handleEdit = useCallback((user: User) => {
@@ -48,15 +47,6 @@ export default function UsersPage() {
         await deleteUser(id);
     }, [deleteUser]);
 
-    const handleResetPassword = useCallback(async (id: string) => {
-        const newPassword = prompt("Enter new temporary password (min 8 characters):");
-        if (newPassword && newPassword.length >= 8) {
-            await resetPassword(id, newPassword);
-        } else if (newPassword) {
-            toast.error("Password must be at least 8 characters");
-        }
-    }, [resetPassword]);
-
     const handleFormSubmit = useCallback(async (
         data: CreateUserData | UpdateUserData,
         userId?: string
@@ -71,7 +61,7 @@ export default function UsersPage() {
     return (
         <PageShell
             title="User Management"
-            description="Team access, roles, and invite links."
+            description="Manage team access and positions."
             icon={UserCog}
             stats={stats}
             action={
@@ -110,7 +100,6 @@ export default function UsersPage() {
                             data={filteredUsers}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            onResetPassword={handleResetPassword}
                         />
                     </div>
                 )}
@@ -121,7 +110,7 @@ export default function UsersPage() {
                 onClose={() => setIsSheetOpen(false)}
                 onSubmit={handleFormSubmit}
                 initialData={editingUser}
-                availableRoles={roles}
+                availablePositions={positions}
             />
         </PageShell>
     );

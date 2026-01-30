@@ -22,13 +22,28 @@ export type ModuleCode =
 // Database Entity Types
 // ============================================
 
-export interface Tenant {
+// Replaces Tenant
+export interface Organization {
     id: string;
     name: string;
     slug: string;
     created_at: string;
     settings: Record<string, unknown>;
-    is_active: boolean;
+    status: 'active' | 'suspended';
+}
+
+export interface OrganizationUser {
+    id: string;
+    organization_id: string;
+    user_id: string;
+    primary_position_id: string | null;
+    is_organization_owner: boolean;
+    status: string;
+    // Expanded position data
+    position?: {
+        name: string;
+        default_role_id: string | null;
+    };
 }
 
 export interface Module {
@@ -126,14 +141,20 @@ export interface AuthenticatedUser {
     avatarUrl?: string;
 
     // Platform level (Tier 1)
-    platformRole: PlatformRole | null;
-    isPlatformAdmin: boolean;
+    isPlatformSuperAdmin: boolean;
+    isPlatformSystemAdmin: boolean;
+    isPlatformAdmin: boolean; // Computed helper
 
-    // Tenant context (Tier 2)
-    tenantId: string | null;
-    tenantName: string | null;
-    tenantSlug: string | null;
-    isTenantAdmin: boolean;
+    // Organization context (Tier 2) - Currently active organization
+    organizationId: string | null;
+    organizationName: string | null;
+    organizationSlug: string | null;
+
+    // Member details in active organization
+    memberId: string | null; // ID in organization_users table
+    isOrganizationOwner: boolean;
+    activePositionId: string | null;
+    activePositionName: string | null;
 
     // Module access
     subscribedModules: ModuleCode[];

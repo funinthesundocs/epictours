@@ -4,19 +4,17 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Loader2, Eye, EyeOff, Copy, RefreshCw } from "lucide-react";
+import { X, Loader2, Eye, EyeOff, Copy, RefreshCw, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import type { User, CreateUserData, UpdateUserData } from "@/features/users/hooks/use-users";
-import type { Role } from "@/features/users/hooks/use-roles";
+import type { StaffPosition } from "@/features/settings/hooks/use-staff-positions";
 import { cn } from "@/lib/utils";
 
 const userSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Valid email required"),
-    is_tenant_admin: z.boolean(),
-    role_ids: z.array(z.string()),
-    temp_password: z.string().optional(),
+    position_id: z.string().optional(),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -26,23 +24,12 @@ interface UserFormSheetProps {
     onClose: () => void;
     onSubmit: (data: CreateUserData | UpdateUserData, userId?: string) => Promise<boolean>;
     initialData?: User | null;
-    availableRoles: Role[];
+    availablePositions: StaffPosition[];
 }
 
-function generatePassword(): string {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
-    let password = "";
-    for (let i = 0; i < 12; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
-}
-
-export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availableRoles }: UserFormSheetProps) {
+export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availablePositions }: UserFormSheetProps) {
     const isEditing = !!initialData;
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [generatedPassword, setGeneratedPassword] = useState("");
 
     const {
         register,
@@ -56,13 +43,11 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
         defaultValues: {
             name: "",
             email: "",
-            is_tenant_admin: false,
-            role_ids: [],
-            temp_password: "",
+            position_id: "",
         }
     });
 
-    const selectedRoles = watch("role_ids") || [];
+    const selectedPositionId = watch("position_id");
 
     // Reset form when sheet opens/closes or initial data changes
     useEffect(() => {
@@ -71,44 +56,17 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                 reset({
                     name: initialData.name,
                     email: initialData.email,
-                    is_tenant_admin: initialData.is_tenant_admin,
-                    role_ids: initialData.roles?.map(r => r.id) || [],
-                    temp_password: "",
+                    position_id: initialData.position?.id || "",
                 });
-                setGeneratedPassword("");
             } else {
-                const pw = generatePassword();
                 reset({
                     name: "",
                     email: "",
-                    is_tenant_admin: false,
-                    role_ids: [],
-                    temp_password: pw,
+                    position_id: "",
                 });
-                setGeneratedPassword(pw);
             }
         }
     }, [isOpen, initialData, reset]);
-
-    const handleGeneratePassword = () => {
-        const pw = generatePassword();
-        setGeneratedPassword(pw);
-        setValue("temp_password", pw, { shouldDirty: true });
-    };
-
-    const handleCopyPassword = () => {
-        navigator.clipboard.writeText(generatedPassword);
-        toast.success("Password copied to clipboard");
-    };
-
-    const toggleRole = (roleId: string) => {
-        const current = selectedRoles;
-        if (current.includes(roleId)) {
-            setValue("role_ids", current.filter(id => id !== roleId), { shouldDirty: true });
-        } else {
-            setValue("role_ids", [...current, roleId], { shouldDirty: true });
-        }
-    };
 
     const onFormSubmit = async (data: UserFormData) => {
         setIsSubmitting(true);
@@ -116,18 +74,14 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
             const success = await onSubmit(
                 isEditing
                     ? {
-                        name: data.name,
-                        is_tenant_admin: data.is_tenant_admin,
-                        role_ids: data.role_ids,
+                        position_id: data.position_id,
                     }
                     : {
                         email: data.email,
                         name: data.name,
-                        temp_password: data.temp_password,
-                        is_tenant_admin: data.is_tenant_admin,
-                        role_ids: data.role_ids,
+                        position_id: data.position_id,
                     },
-                initialData?.id
+                initialData?.id // This is Member ID
             );
             if (success) {
                 onClose();
@@ -161,7 +115,7 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
                             <h2 className="text-lg font-semibold text-foreground">
-                                {isEditing ? "Edit User" : "Invite User"}
+                                {isEditing ? "Edit Team Member" : "Invite Team Member"}
                             </h2>
                             <button
                                 onClick={onClose}
@@ -179,9 +133,14 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                                     <label className="text-sm font-medium text-muted-foreground">Full Name</label>
                                     <input
                                         {...register("name")}
-                                        className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-ring focus:outline-none transition-colors"
+                                        disabled={isEditing} // Name usually editable by user only, or allow admin? For now lock it like email if editing MEMBER details not USER profile. But invite flow allows setting name.
+                                        className={cn(
+                                            "w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground focus:border-ring focus:outline-none transition-colors",
+                                            isEditing && "opacity-50 cursor-not-allowed"
+                                        )}
                                         placeholder="John Smith"
                                     />
+                                    {isEditing && <p className="text-xs text-muted-foreground">Name is managed by the user</p>}
                                     {errors.name && (
                                         <p className="text-sm text-destructive">{errors.name.message}</p>
                                     )}
@@ -208,111 +167,50 @@ export function UserFormSheet({ isOpen, onClose, onSubmit, initialData, availabl
                                     )}
                                 </div>
 
-                                {/* Temporary Password (only for new users) */}
-                                {!isEditing && (
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">Temporary Password</label>
-                                        <div className="flex gap-2">
-                                            <div className="relative flex-1">
-                                                <input
-                                                    {...register("temp_password")}
-                                                    type={showPassword ? "text" : "password"}
-                                                    className="w-full bg-input border border-border rounded-lg px-4 py-2.5 pr-20 text-foreground focus:border-ring focus:outline-none transition-colors font-mono"
-                                                />
-                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                        className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                                    >
-                                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleCopyPassword}
-                                                        className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                                    >
-                                                        <Copy size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={handleGeneratePassword}
-                                                className="p-2.5 rounded-lg bg-muted hover:bg-muted/80 border border-border text-muted-foreground hover:text-foreground transition-colors"
-                                                title="Generate new password"
-                                            >
-                                                <RefreshCw size={18} />
-                                            </button>
-                                        </div>
-                                        {errors.temp_password && (
-                                            <p className="text-sm text-destructive">{errors.temp_password.message}</p>
-                                        )}
-                                        <p className="text-xs text-muted-foreground">
-                                            User will be prompted to change this on first login
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Tenant Admin Toggle */}
-                                <div className="flex items-center justify-between p-4 bg-muted/40 rounded-lg border border-border">
-                                    <div>
-                                        <p className="font-medium text-foreground">Tenant Administrator</p>
-                                        <p className="text-sm text-muted-foreground">Full access to manage users and settings</p>
-                                    </div>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            {...register("is_tenant_admin")}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                    </label>
-                                </div>
-
-                                {/* Role Selection */}
+                                {/* Position Selection */}
                                 <div className="space-y-3">
-                                    <label className="text-sm font-medium text-muted-foreground">Assign Roles</label>
+                                    <label className="text-sm font-medium text-muted-foreground">Position</label>
                                     <div className="space-y-2">
-                                        {availableRoles.length === 0 ? (
+                                        {availablePositions.length === 0 ? (
                                             <p className="text-sm text-muted-foreground p-4 bg-muted/40 rounded-lg text-center">
-                                                No roles available. Create roles first.
+                                                No positions available. Create positions in Roles & Permissions.
                                             </p>
                                         ) : (
-                                            availableRoles.map(role => (
-                                                <button
-                                                    key={role.id}
-                                                    type="button"
-                                                    onClick={() => toggleRole(role.id)}
-                                                    className={cn(
-                                                        "w-full flex items-center justify-between p-3 rounded-lg border transition-colors text-left",
-                                                        selectedRoles.includes(role.id)
-                                                            ? "bg-primary/10 border-primary/50 text-foreground"
-                                                            : "bg-muted/30 border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
-                                                    )}
-                                                >
-                                                    <div>
-                                                        <p className="font-medium">{role.name}</p>
-                                                        {role.description && (
-                                                            <p className="text-sm text-muted-foreground">{role.description}</p>
+                                            <div className="grid gap-2">
+                                                {availablePositions.map(position => (
+                                                    <button
+                                                        key={position.id}
+                                                        type="button"
+                                                        onClick={() => setValue("position_id", position.id, { shouldDirty: true })}
+                                                        className={cn(
+                                                            "w-full flex items-center justify-between p-3 rounded-lg border transition-colors text-left",
+                                                            selectedPositionId === position.id
+                                                                ? "bg-primary/10 border-primary/50 text-foreground"
+                                                                : "bg-muted/30 border-border text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
                                                         )}
-                                                    </div>
-                                                    <div className={cn(
-                                                        "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
-                                                        selectedRoles.includes(role.id)
-                                                            ? "bg-primary border-primary"
-                                                            : "border-muted-foreground"
-                                                    )}>
-                                                        {selectedRoles.includes(role.id) && (
-                                                            <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                            </svg>
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-3 h-3 rounded-full shrink-0"
+                                                                style={{ backgroundColor: position.color || '#71717a' }}
+                                                            />
+                                                            <div>
+                                                                <p className="font-medium">{position.name}</p>
+                                                            </div>
+                                                        </div>
+                                                        {selectedPositionId === position.id && (
+                                                            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                                                                <Check size={12} strokeWidth={3} />
+                                                            </div>
                                                         )}
-                                                    </div>
-                                                </button>
-                                            ))
+                                                    </button>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        The position determines the user's permissions via the assigned Permission Group.
+                                    </p>
                                 </div>
                             </div>
                         </form>
