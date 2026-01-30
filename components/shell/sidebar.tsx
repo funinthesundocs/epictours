@@ -9,7 +9,7 @@ import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minus, Plus, Sun, Moon, Loader2 } from "lucide-react";
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minus, Plus, Sun, Moon, Loader2, LogOut } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,7 +28,7 @@ export function Sidebar() {
         pathname.startsWith('/admin')
     );
     const [isZoomSliderOpen, setIsZoomSliderOpen] = useState(false);
-    const { isPlatformAdmin } = useAuth();
+    const { isPlatformAdmin, logout } = useAuth();
 
     // Ref for zoom slider click-outside detection
     const zoomSliderRef = useRef<HTMLDivElement>(null);
@@ -169,6 +169,28 @@ export function Sidebar() {
                         })}
                     </div>
 
+                    {/* Logout Toolbar */}
+                    <div
+                        className={cn(
+                            "border-t border-border bg-background/80 shrink-0",
+                            isCollapsed ? "flex flex-col items-center p-2" : "p-2"
+                        )}
+                        style={{ zoom: zoom / 100 }}
+                    >
+                        <button
+                            onClick={() => logout()}
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg transition-colors w-full group",
+                                isCollapsed
+                                    ? "justify-center p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    : "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted justify-start"
+                            )}
+                        >
+                            <LogOut size={18} className="transition-colors group-hover:text-foreground" />
+                            {!isCollapsed && <span className="font-medium text-sm transition-colors group-hover:text-foreground">Log Out</span>}
+                        </button>
+                    </div>
+
                     <div
                         ref={zoomSliderRef}
                         className={cn(
@@ -289,6 +311,7 @@ export function Sidebar() {
                                     >
                                         <Settings size={24} />
                                     </button>
+
                                 </div>
                             </>
                         ) : (
@@ -327,6 +350,8 @@ export function Sidebar() {
                                     >
                                         <Settings size={24} />
                                     </button>
+
+
                                 </div>
                             </div>
                         )}
