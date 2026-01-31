@@ -1,7 +1,7 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { User, Mail, Save, Loader2, Info, Contact, MapPin, MessageCircle, Plus, Trash2, Shield, RefreshCw, Copy, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Save, Loader2, Info, Contact, MapPin, MessageCircle, Plus, Trash2, Shield, RefreshCw, Copy, Eye, EyeOff, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -74,7 +74,7 @@ const formSchema = z.object({
 type ProfileFormData = z.infer<typeof formSchema>;
 
 export default function UserProfilePage() {
-    const { user, refreshUser } = useAuth();
+    const { user, refreshUser, logout } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -215,6 +215,16 @@ export default function UserProfilePage() {
                 { label: "Role", value: user?.isPlatformAdmin ? "Administrator" : "User", icon: Shield },
                 { label: "Email", value: user?.email || "N/A", icon: Mail },
             ]}
+            action={
+                <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted border border-border rounded-lg transition-colors"
+                >
+                    <LogOut size={16} />
+                    Log Out
+                </button>
+            }
         >
             <div className="max-w-2xl mx-auto bg-card rounded-xl border border-border shadow-sm overflow-hidden">
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">

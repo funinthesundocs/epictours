@@ -145,7 +145,6 @@ export const navigation: NavSection[] = [
         requiredModule: "settings",
         items: [
             { title: "Organization Profile", href: "/settings/organization", icon: Building2, tenantAdminOnly: true },
-            { title: "My Profile", href: "/settings/profile", icon: UserCog },
             {
                 title: "Users",
                 href: "/settings/users",

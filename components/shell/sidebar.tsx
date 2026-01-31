@@ -186,7 +186,7 @@ export function Sidebar() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 10 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute bottom-full left-0 right-0 bg-popover border border-border rounded-t-lg shadow-xl p-3"
+                                    className="absolute bottom-full left-0 right-0 bg-popover border border-border rounded-t-lg p-3"
                                 >
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] text-muted-foreground font-bold">50%</span>
@@ -257,7 +257,7 @@ export function Sidebar() {
 
                     {/* User Profile Footer */}
                     <div
-                        className={cn("p-4 border-t border-border bg-background/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}
+                        className={cn("px-4 py-2 border-t border-border bg-background/80 backdrop-blur-md shrink-0 relative z-30", isCollapsed && "flex flex-col items-center gap-2 p-2")}
                         style={{ zoom: zoom / 100 }}
                     >
                         {isCollapsed ? (
@@ -293,9 +293,8 @@ export function Sidebar() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-
+                            <div className="relative">
+                                <Link href="/settings/profile" className="block py-2 px-1.5 pr-24 rounded-lg hover:bg-muted transition-all cursor-pointer">
                                     <div className="text-base overflow-hidden whitespace-nowrap">
                                         <p className="font-medium text-foreground truncate">
                                             {user?.name?.split(' ')[0] || 'User'}
@@ -304,8 +303,8 @@ export function Sidebar() {
                                             {user?.activePositionName || (user?.isPlatformAdmin ? 'Platform Admin' : 'Member')}
                                         </p>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-1">
+                                </Link>
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 px-1.5">
                                     {/* Platform Admin Icon */}
                                     {isPlatformAdmin() && (
                                         <button
@@ -339,28 +338,6 @@ export function Sidebar() {
                         )}
                     </div>
 
-                    {/* Logout - Very bottom of sidebar */}
-                    <div
-                        className={cn(
-                            "border-t border-border bg-background/80 shrink-0",
-                            isCollapsed ? "flex flex-col items-center p-2" : "p-2"
-                        )}
-                        style={{ zoom: zoom / 100 }}
-                    >
-                        <button
-                            onClick={() => logout()}
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg transition-colors w-full group",
-                                isCollapsed
-                                    ? "justify-center p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
-                                    : "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted justify-start"
-                            )}
-                        >
-                            <LogOut size={18} className="transition-colors group-hover:text-foreground" />
-                            {!isCollapsed && <span className="font-medium text-sm transition-colors group-hover:text-foreground">Log Out</span>}
-                        </button>
-                    </div>
-
                     {/* Settings Slide-Up Panel */}
                     <AnimatePresence>
                         {isSettingsOpen && (
@@ -379,7 +356,7 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[120px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-190px)]",
+                                        "absolute bottom-[68px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-140px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}
@@ -447,7 +424,7 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[120px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-190px)]",
+                                        "absolute bottom-[68px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-140px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}

@@ -1,10 +1,12 @@
 "use client";
 
-import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye } from "lucide-react";
+import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye, LogOut } from "lucide-react";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { NewBookingMenu } from "@/features/bookings/components/new-booking-menu";
+import { useAuth } from "@/features/auth/auth-context";
 
 export default function Home() {
+    const { logout, user } = useAuth();
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
@@ -15,18 +17,20 @@ export default function Home() {
                         Command Center
                     </h1>
                     <p className="text-muted-foreground">
-                        Welcome back, Operator. System status is <span className="text-primary font-medium">Nominal</span>.
+                        Welcome back, {user?.name?.split(' ')[0] || 'User'}. System status is <span className="text-primary font-medium">Nominal</span>.
                     </p>
                 </div>
                 <div className="flex gap-3">
                     <button className="px-4 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg text-sm text-foreground transition-colors">
                         Customize Layout
                     </button>
-                    <NewBookingMenu onSelectAvailability={() => { }}>
-                        <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-sm transition-colors shadow-[0_0_20px_rgba(var(--color-primary),0.3)]">
-                            Create Booking
-                        </button>
-                    </NewBookingMenu>
+                    <button
+                        onClick={() => logout()}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted border border-border rounded-lg transition-colors"
+                    >
+                        <LogOut size={16} />
+                        Log Out
+                    </button>
                 </div>
             </div>
 
