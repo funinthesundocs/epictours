@@ -2,6 +2,7 @@
 
 import { Search, X, RotateCcw } from "lucide-react";
 import { ColumnPicker } from "./column-picker";
+import { SortManager, SortCriteria } from "./sort-manager";
 import { cn } from "@/lib/utils";
 import { CustomSelect } from "@/components/ui/custom-select";
 
@@ -13,6 +14,9 @@ interface ReportToolbarProps {
     onToggleColumn: (columnKey: string) => void;
     onResetColumns: () => void;
     onReorderColumns?: (newOrder: string[]) => void;
+    // Sort props
+    sortCriteria: SortCriteria[];
+    onSortChange: (criteria: SortCriteria[]) => void;
     totalRecords: number;
     filteredRecords: number;
     // Date range filter props
@@ -36,6 +40,8 @@ export function ReportToolbar({
     onToggleColumn,
     onResetColumns,
     onReorderColumns,
+    sortCriteria,
+    onSortChange,
     totalRecords,
     filteredRecords,
     startDate,
@@ -133,6 +139,12 @@ export function ReportToolbar({
                         Clear
                     </button>
                 )}
+
+                {/* Sort Manager */}
+                <SortManager
+                    sortCriteria={sortCriteria}
+                    onSortChange={onSortChange}
+                />
 
                 {/* Column Picker */}
                 <ColumnPicker

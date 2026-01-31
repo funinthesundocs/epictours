@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { MasterReportRow } from "./types";
-import { ReportTable } from "./components/report-table";
+import { ReportTable, ColumnFilters } from "./components/report-table";
 import { ReportToolbar } from "./components/report-toolbar";
 import { useColumnVisibility } from "./components/column-picker";
+import { SortCriteria } from "./components/sort-manager";
 import { Loader2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,14 +35,29 @@ export function MasterReportPage() {
     // Date filter type state
     const [dateFilterType, setDateFilterType] = useState<"activity" | "booking">("activity");
 
-    // Sort State
-    const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>({
-        key: "start_date",
-        direction: "desc"
-    });
+    // Sort State - array for multi-level sorting
+    const [sortCriteria, setSortCriteria] = useState<SortCriteria[]>([
+        { key: "start_date", direction: "desc" }
+    ]);
+
+    // Column Filters State
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     // Column Visibility
     const { visibleColumns, toggleColumn, resetToDefault, reorderColumns } = useColumnVisibility();
+
+    // Handle column filter change
+    const handleColumnFilterChange = (key: string, values: Set<string>) => {
+        setColumnFilters(prev => {
+            const next = { ...prev };
+            if (values.size === 0) {
+                delete next[key];
+            } else {
+                next[key] = values;
+            }
+            return next;
+        });
+    };
 
     const fetchReportData = useCallback(async () => {
         try {
@@ -234,27 +250,41 @@ export function MasterReportPage() {
         );
     });
 
-    // Sort filtered data
+    // Multi-level sort filtered data
     const sortedData = [...filteredData].sort((a, b) => {
-        if (!sortConfig) return 0;
-        const { key, direction } = sortConfig;
+        if (sortCriteria.length === 0) return 0;
 
-        let aVal: any = (a as any)[key];
-        let bVal: any = (b as any)[key];
+        for (const { key, direction } of sortCriteria) {
+            let aVal: any = (a as any)[key];
+            let bVal: any = (b as any)[key];
 
-        // Handle nulls
-        if (aVal == null) aVal = "";
-        if (bVal == null) bVal = "";
+            // Handle nulls - push to end
+            if (aVal == null && bVal == null) continue;
+            if (aVal == null) return 1;
+            if (bVal == null) return -1;
 
-        // String comparison
-        if (typeof aVal === "string") {
-            const cmp = aVal.localeCompare(bVal);
-            return direction === "asc" ? cmp : -cmp;
+            let cmp = 0;
+            if (typeof aVal === "string") {
+                cmp = aVal.localeCompare(bVal);
+            } else {
+                cmp = aVal - bVal;
+            }
+
+            if (cmp !== 0) {
+                return direction === "asc" ? cmp : -cmp;
+            }
         }
+        return 0;
+    });
 
-        // Number comparison
-        const cmp = aVal - bVal;
-        return direction === "asc" ? cmp : -cmp;
+    // Apply column filters AFTER sorting
+    const fullyFilteredData = sortedData.filter(row => {
+        for (const [key, allowedValues] of Object.entries(columnFilters)) {
+            if (allowedValues.size === 0) continue;
+            const cellValue = String((row as any)[key] ?? "-");
+            if (!allowedValues.has(cellValue)) return false;
+        }
+        return true;
     });
 
     return (
@@ -282,8 +312,10 @@ export function MasterReportPage() {
                     onToggleColumn={toggleColumn}
                     onResetColumns={resetToDefault}
                     onReorderColumns={reorderColumns}
+                    sortCriteria={sortCriteria}
+                    onSortChange={setSortCriteria}
                     totalRecords={data.length}
-                    filteredRecords={sortedData.length}
+                    filteredRecords={fullyFilteredData.length}
                     startDate={startDate}
                     endDate={endDate}
                     onStartDateChange={setStartDate}
@@ -312,11 +344,12 @@ export function MasterReportPage() {
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
                     <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
                         <ReportTable
-                            data={sortedData}
-                            sortConfig={sortConfig}
-                            onSort={handleSort}
+                            data={fullyFilteredData}
+                            unfilteredData={sortedData}
                             visibleColumns={visibleColumns}
                             searchQuery={searchQuery}
+                            columnFilters={columnFilters}
+                            onColumnFilterChange={handleColumnFilterChange}
                         />
                     </div>
                 </div>
