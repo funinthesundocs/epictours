@@ -162,8 +162,8 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                     )}
                 >
                     {selectedPresetId
-                        ? presets.find(p => p.id === selectedPresetId)?.name || "Select / Save a Preset"
-                        : "Select / Save a Preset"
+                        ? presets.find(p => p.id === selectedPresetId)?.name || "Preset"
+                        : "Preset"
                     }
                     <ChevronDown size={16} className={cn("transition-transform", isOpen && "rotate-180")} />
                 </button>

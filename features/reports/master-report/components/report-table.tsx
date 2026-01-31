@@ -38,9 +38,14 @@ const SUMMABLE_COLUMNS = new Set([
 function formatPhoneNumber(phone: string | null): string {
     if (!phone) return "-";
     const digits = phone.replace(/\D/g, '');
-    if (digits.length >= 10) {
+    if (digits.length >= 11) {
+        // Has country code (e.g., 1 for US)
+        const countryCode = digits.slice(0, digits.length - 10);
         const last10 = digits.slice(-10);
-        return `(${last10.slice(0, 3)})${last10.slice(3, 6)}-${last10.slice(6)}`;
+        return `+${countryCode} (${last10.slice(0, 3)}) ${last10.slice(3, 6)} - ${last10.slice(6)}`;
+    } else if (digits.length === 10) {
+        // No country code, assume +1
+        return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)} - ${digits.slice(6)}`;
     }
     return phone;
 }
@@ -379,8 +384,9 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
     // Calculate totals for summable columns
     const columnTotals = useMemo(() => {
         const totals: { [key: string]: string | number } = {};
+        const firstColumnKey = visibleColumnConfigs[0]?.key;
 
-        visibleColumnConfigs.forEach(col => {
+        visibleColumnConfigs.forEach((col, index) => {
             if (SUMMABLE_COLUMNS.has(col.key)) {
                 const sum = data.reduce((acc, row) => {
                     const value = row[col.key as keyof MasterReportRow];
@@ -388,8 +394,11 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                     return acc + (isNaN(num) ? 0 : num);
                 }, 0);
                 totals[col.key] = sum;
+            } else if (col.key === firstColumnKey) {
+                // First column shows record count
+                totals[col.key] = `${data.length.toLocaleString()} records`;
             } else {
-                totals[col.key] = "Total";
+                totals[col.key] = "";
             }
         });
 

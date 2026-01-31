@@ -169,28 +169,7 @@ export function Sidebar() {
                         })}
                     </div>
 
-                    {/* Logout Toolbar */}
-                    <div
-                        className={cn(
-                            "border-t border-border bg-background/80 shrink-0",
-                            isCollapsed ? "flex flex-col items-center p-2" : "p-2"
-                        )}
-                        style={{ zoom: zoom / 100 }}
-                    >
-                        <button
-                            onClick={() => logout()}
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg transition-colors w-full group",
-                                isCollapsed
-                                    ? "justify-center p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
-                                    : "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted justify-start"
-                            )}
-                        >
-                            <LogOut size={18} className="transition-colors group-hover:text-foreground" />
-                            {!isCollapsed && <span className="font-medium text-sm transition-colors group-hover:text-foreground">Log Out</span>}
-                        </button>
-                    </div>
-
+                    {/* Zoom Controls - Now above Log Out */}
                     <div
                         ref={zoomSliderRef}
                         className={cn(
@@ -231,22 +210,22 @@ export function Sidebar() {
                                 <button
                                     onClick={zoomIn}
                                     disabled={zoom >= 150}
-                                    className="py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-b border-border"
+                                    className="py-3 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-b border-border"
                                 >
-                                    <Plus size={12} />
+                                    <Plus size={14} />
                                 </button>
                                 <button
                                     onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
-                                    className="py-1 flex items-center justify-center border-b border-border cursor-pointer hover:bg-muted transition-colors"
+                                    className="py-2 flex items-center justify-center border-b border-border cursor-pointer hover:bg-muted transition-colors"
                                 >
-                                    <span className="text-[9px] text-primary font-bold">{zoom}%</span>
+                                    <span className="text-xs text-primary font-bold">{zoom}%</span>
                                 </button>
                                 <button
                                     onClick={zoomOut}
                                     disabled={zoom <= 50}
-                                    className="py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="py-3 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
-                                    <Minus size={12} />
+                                    <Minus size={14} />
                                 </button>
                             </>
                         ) : (
@@ -254,23 +233,23 @@ export function Sidebar() {
                                 <button
                                     onClick={zoomOut}
                                     disabled={zoom <= 50}
-                                    className="w-1/4 py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-r border-border"
+                                    className="w-1/4 py-3 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed border-r border-border"
                                 >
-                                    <Minus size={12} />
+                                    <Minus size={14} />
                                 </button>
                                 <button
                                     onClick={() => setIsZoomSliderOpen(!isZoomSliderOpen)}
-                                    className="w-1/2 py-1.5 flex items-center justify-center gap-2 border-r border-border cursor-pointer hover:bg-muted transition-colors"
+                                    className="w-1/2 py-3 flex items-center justify-center gap-2 border-r border-border cursor-pointer hover:bg-muted transition-colors"
                                 >
-                                    <span className="text-xs text-muted-foreground font-medium">Zoom</span>
-                                    <span className="text-xs text-primary font-bold">{zoom}%</span>
+                                    <span className="text-sm text-muted-foreground font-medium">Zoom</span>
+                                    <span className="text-sm text-primary font-bold">{zoom}%</span>
                                 </button>
                                 <button
                                     onClick={zoomIn}
                                     disabled={zoom >= 150}
-                                    className="w-1/4 py-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="w-1/4 py-3 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
-                                    <Plus size={12} />
+                                    <Plus size={14} />
                                 </button>
                             </>
                         )}
@@ -357,6 +336,28 @@ export function Sidebar() {
                         )}
                     </div>
 
+                    {/* Logout - Very bottom of sidebar */}
+                    <div
+                        className={cn(
+                            "border-t border-border bg-background/80 shrink-0",
+                            isCollapsed ? "flex flex-col items-center p-2" : "p-2"
+                        )}
+                        style={{ zoom: zoom / 100 }}
+                    >
+                        <button
+                            onClick={() => logout()}
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg transition-colors w-full group",
+                                isCollapsed
+                                    ? "justify-center p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    : "px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-muted justify-start"
+                            )}
+                        >
+                            <LogOut size={18} className="transition-colors group-hover:text-foreground" />
+                            {!isCollapsed && <span className="font-medium text-sm transition-colors group-hover:text-foreground">Log Out</span>}
+                        </button>
+                    </div>
+
                     {/* Settings Slide-Up Panel */}
                     <AnimatePresence>
                         {isSettingsOpen && (
@@ -375,7 +376,7 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        "absolute bottom-[120px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-190px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}
@@ -443,7 +444,7 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[73px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-146px)]",
+                                        "absolute bottom-[120px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-190px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}

@@ -21,8 +21,6 @@ interface ReportToolbarProps {
     // Sort props
     sortCriteria: SortCriteria[];
     onSortChange: (criteria: SortCriteria[]) => void;
-    totalRecords: number;
-    filteredRecords: number;
     // Date range filter props
     startDate: Date;
     endDate: Date;
@@ -51,8 +49,6 @@ export function ReportToolbar({
     onReorderColumns,
     sortCriteria,
     onSortChange,
-    totalRecords,
-    filteredRecords,
     startDate,
     endDate,
     onStartDateChange,
@@ -112,18 +108,6 @@ export function ReportToolbar({
                         />
                         <span className="text-sm text-white">Booking Date</span>
                     </label>
-                    {/* Record Count */}
-                    <div className="text-sm text-zinc-400 whitespace-nowrap mt-1">
-                        {filteredRecords === totalRecords ? (
-                            <span>{totalRecords.toLocaleString()} records</span>
-                        ) : (
-                            <span>
-                                <span className="text-cyan-400">{filteredRecords.toLocaleString()}</span>
-                                {" / "}
-                                {totalRecords.toLocaleString()} records
-                            </span>
-                        )}
-                    </div>
                 </div>
 
                 {/* Date Range Preset Dropdown - positioned after radio buttons */}
@@ -131,14 +115,14 @@ export function ReportToolbar({
                     startDate={startDate}
                     endDate={endDate}
                     onRangeChange={handleDateRangeChange}
-                    className="w-[280px]"
+                    className="w-[238px]"
                 />
             </div>
 
             {/* Right: Search, Sort, Columns, Preset */}
             <div className="flex items-center gap-3">
                 {/* Search Input */}
-                <div className="relative w-64">
+                <div className="relative w-[218px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
                     <input
                         type="text"
