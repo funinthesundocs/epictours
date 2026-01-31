@@ -424,7 +424,7 @@ export function Sidebar() {
                                     exit={{ y: '100%' }}
                                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                                     className={cn(
-                                        "absolute bottom-[68px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-140px)]",
+                                        "absolute bottom-[68px] left-0 right-0 z-20 flex flex-col bg-popover rounded-t-xl border-t border-border shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] max-h-[calc(100%-140px)]",
                                         isCollapsed && "items-center"
                                     )}
                                     style={{ zoom: zoom / 100 }}

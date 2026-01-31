@@ -83,8 +83,8 @@
 
 /* Custom Scrollbar - Thinner & Darker */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -190,8 +190,8 @@
 
 /* Report Table Scrollbar - Slightly thicker than default */
 .report-scrollbar::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 16px;
+  width: 16px;
 }
 
 .report-scrollbar::-webkit-scrollbar-track {
