@@ -29,7 +29,8 @@ import {
     Coins,
     Settings,
     List,
-    Palette
+    Palette,
+    UserCheck      // Check-In Statuses
 } from "lucide-react";
 import type { ModuleCode, PermissionAction } from "@/features/auth/types";
 
@@ -160,6 +161,7 @@ export const navigation: NavSection[] = [
             { title: "Experiences", href: "/operations/tours", icon: Map, requiredModule: "bookings" },
             { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
             { title: "Booking Options", href: "/settings/booking-options", icon: List, requiredModule: "bookings" },
+            { title: "Check-In Statuses", href: "/settings/check-in-statuses", icon: UserCheck, requiredModule: "bookings" },
             { title: "Customer Types", href: "/customers/types", icon: Users, requiredModule: "crm" },
             { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins, requiredModule: "finance" },
             { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers, requiredModule: "finance" },

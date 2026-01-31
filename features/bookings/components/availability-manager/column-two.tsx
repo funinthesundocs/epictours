@@ -5,6 +5,24 @@ import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { FileText, ChevronDown, Loader2, Search, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// Color options (70% opacity for soft effect)
+const COLOR_MAP: Record<string, string> = {
+    red: "bg-red-500/70",
+    orange: "bg-orange-500/70",
+    yellow: "bg-yellow-500/70",
+    green: "bg-emerald-500/70",
+    blue: "bg-blue-500/70",
+    indigo: "bg-indigo-500/70",
+    violet: "bg-violet-500/70",
+};
+
+interface CheckInStatus {
+    id: string;
+    status: string;
+    color: string;
+}
 
 interface BookingItem {
     id: string;
@@ -21,6 +39,7 @@ interface BookingItem {
     confirmation_number?: string;
     notes?: string;
     created_at: string;
+    check_in_status_id?: string | null;
 }
 
 interface ColumnTwoProps {
@@ -36,6 +55,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     const [cancelledExpanded, setCancelledExpanded] = useState(false);
     const [customerTypeMap, setCustomerTypeMap] = useState<Record<string, string>>({});
     const [searchQuery, setSearchQuery] = useState("");
+    const [checkInStatuses, setCheckInStatuses] = useState<CheckInStatus[]>([]);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -48,11 +68,15 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 setCustomerTypeMap(map);
             }
 
+            // Fetch check-in statuses
+            const { data: cisData } = await supabase.from('check_in_statuses').select('id, status, color').order('created_at', { ascending: true });
+            if (cisData) setCheckInStatuses(cisData as CheckInStatus[]);
+
             const { data, error } = await supabase
                 .from('bookings' as any)
                 .select(`
                     id, status, pax_count, pax_breakdown, payment_status, 
-                    amount_paid, total_amount, voucher_numbers, confirmation_number, notes, created_at,
+                    amount_paid, total_amount, voucher_numbers, confirmation_number, notes, created_at, check_in_status_id,
                     customers(name, email, phone)
                 `)
                 .eq('availability_id', availability.id)
@@ -73,7 +97,8 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     voucher_numbers: b.voucher_numbers || "",
                     confirmation_number: b.confirmation_number || "",
                     notes: b.notes || "",
-                    created_at: b.created_at
+                    created_at: b.created_at,
+                    check_in_status_id: b.check_in_status_id || null
                 }));
                 setBookings(flat);
             }
@@ -83,6 +108,15 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
 
         fetchBookings();
     }, [availability.id]);
+
+    const handleCheckInChange = async (bookingId: string, statusId: string | null) => {
+        const { error } = await supabase.from('bookings').update({ check_in_status_id: statusId }).eq('id', bookingId);
+        if (error) {
+            toast.error("Failed to update check-in status");
+        } else {
+            setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, check_in_status_id: statusId } : b));
+        }
+    };
 
     const activeBookings = bookings.filter(b => b.status !== 'cancelled');
     const cancelledBookings = bookings.filter(b => b.status === 'cancelled');
@@ -186,51 +220,63 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                             onClick={() => onBookingClick(booking.id)}
                                             className="w-full p-3 bg-card rounded-lg border border-border hover:border-primary/50 transition-all text-left shadow-sm"
                                         >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-4">
+                                                {/* Section 1: Customer Info */}
+                                                <div className="basis-1/4 min-w-0">
                                                     <div className="text-foreground font-medium text-base">{booking.customer_name}</div>
-                                                    <div className="text-muted-foreground text-sm mt-0.5">
+                                                    <div className="text-foreground text-base mt-0.5">
                                                         {booking.confirmation_number && (
                                                             <span className="text-primary font-mono mr-2">{booking.confirmation_number}</span>
                                                         )}
-                                                        {booking.pax_count} Pax
-                                                        {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
+                                                        {booking.voucher_numbers && `#${booking.voucher_numbers}`}
                                                     </div>
-                                                    {/* Contact Info */}
-                                                    {(booking.customer_email || booking.customer_phone) && (
-                                                        <div className="text-muted-foreground text-xs mt-1 space-y-0.5">
-                                                            {booking.customer_phone && (
-                                                                <div>{booking.customer_phone}</div>
-                                                            )}
-                                                            {booking.customer_email && (
-                                                                <div className="truncate">{booking.customer_email}</div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                    {/* Notes */}
-                                                    {booking.notes && (
-                                                        <div className="text-muted-foreground text-xs mt-1 italic line-clamp-2">
-                                                            {booking.notes}
-                                                        </div>
-                                                    )}
-                                                    {/* Balance Due */}
-                                                    {booking.total_amount > booking.amount_paid && (
-                                                        <div className="text-amber-500 text-xs mt-1 font-medium">
-                                                            Due: ${(booking.total_amount - booking.amount_paid).toFixed(2)}
-                                                        </div>
-                                                    )}
                                                 </div>
-                                                <span className={cn(
-                                                    "px-2 py-0.5 rounded text-sm font-medium shrink-0",
-                                                    booking.payment_status === 'paid'
-                                                        ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                                        : booking.payment_status === 'partial'
-                                                            ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                                                            : "bg-muted text-muted-foreground"
-                                                )}>
-                                                    {booking.payment_status === 'paid' ? 'Paid' :
-                                                        booking.payment_status === 'partial' ? 'Partial' : 'Unpaid'}
-                                                </span>
+
+                                                {/* Vertical Divider */}
+                                                <div className="w-px h-10 bg-border/50" />
+
+                                                {/* Section 2: Contact & Notes */}
+                                                <div className="basis-1/4 min-w-0 text-foreground text-base space-y-0.5">
+                                                    {booking.customer_phone && <div>{booking.customer_phone}</div>}
+                                                    {booking.customer_email && <div className="truncate">{booking.customer_email}</div>}
+                                                    {booking.notes && <div className="italic truncate">{booking.notes}</div>}
+                                                </div>
+
+                                                {/* Vertical Divider */}
+                                                <div className="w-px h-10 bg-border/50" />
+
+                                                {/* Section 3: Payment Amounts */}
+                                                <div className="basis-1/4 flex items-center justify-center">
+                                                    <div className="text-foreground text-base space-y-0.5">
+                                                        <div>Paid: <span className="font-medium text-emerald-500">${booking.amount_paid.toFixed(2)}</span></div>
+                                                        <div>Due: <span className={cn("font-medium", booking.total_amount > booking.amount_paid ? "text-red-500" : "text-emerald-500")}>${(booking.total_amount - booking.amount_paid).toFixed(2)}</span></div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Vertical Divider */}
+                                                <div className="w-px h-10 bg-border/50" />
+
+                                                {/* Section 4: Pax & Check-In Status */}
+                                                <div className="basis-1/4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                                                    <div className="text-foreground text-base space-y-1">
+                                                        <div className="font-medium">{booking.pax_count} Pax</div>
+                                                        <select
+                                                            value={booking.check_in_status_id || ""}
+                                                            onChange={(e) => handleCheckInChange(booking.id, e.target.value || null)}
+                                                            className={cn(
+                                                                "w-full h-7 px-2 rounded text-xs font-medium text-white border-0 cursor-pointer [&>option]:bg-zinc-900 [&>option]:text-white",
+                                                                booking.check_in_status_id
+                                                                    ? COLOR_MAP[checkInStatuses.find(s => s.id === booking.check_in_status_id)?.color || "blue"]
+                                                                    : "bg-muted text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            <option value="">Select</option>
+                                                            {checkInStatuses.map(status => (
+                                                                <option key={status.id} value={status.id}>{status.status}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </button>
                                     ))

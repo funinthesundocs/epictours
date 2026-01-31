@@ -6,6 +6,27 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import {
+    BOOKING_COLUMNS
+} from "./bookings-column-picker";
+
+// Color options (70% opacity for soft effect)
+const COLOR_MAP: Record<string, string> = {
+    red: "bg-red-500/70",
+    orange: "bg-orange-500/70",
+    yellow: "bg-yellow-500/70",
+    green: "bg-emerald-500/70",
+    blue: "bg-blue-500/70",
+    indigo: "bg-indigo-500/70",
+    violet: "bg-violet-500/70",
+};
+
+interface CheckInStatus {
+    id: string;
+    status: string;
+    color: string;
+}
 
 interface Booking {
     id: string;
@@ -28,6 +49,8 @@ interface Booking {
     notes?: string;
     // Resolved pickup details
     pickup_details?: string;
+    // Check-in status
+    check_in_status_id?: string;
 }
 
 interface BookingsListTableProps {
@@ -35,6 +58,7 @@ interface BookingsListTableProps {
     endDate: Date;
     searchQuery?: string;
     onBookingClick?: (bookingId: string) => void;
+    visibleColumns: string[];
 }
 
 // Format phone number to +1 (XXX) XXX-XXXX
@@ -76,12 +100,13 @@ function formatPhoneNumber(phone: string | null | undefined): string {
     return phone; // Fallback to original
 }
 
-export function BookingsListTable({ startDate, endDate, searchQuery = "", onBookingClick }: BookingsListTableProps) {
+export function BookingsListTable({ startDate, endDate, searchQuery = "", onBookingClick, visibleColumns }: BookingsListTableProps) {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const [customerTypeMap, setCustomerTypeMap] = useState<Record<string, string>>({});
     const [customFieldMap, setCustomFieldMap] = useState<Record<string, { label: string, type?: string, options?: any[] }>>({});
+    const [checkInStatuses, setCheckInStatuses] = useState<CheckInStatus[]>([]);
 
     // Smart Pickup Resolution Maps
     const [hotelMap, setHotelMap] = useState<Record<string, { name: string, pickup_point_id: string }>>({});
@@ -138,6 +163,12 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                 });
                 setScheduleStopMap(map);
             }
+
+            // Fetch Check-In Statuses
+            const { data: cisData } = await supabase.from('check_in_statuses').select('id, status, color').order('created_at', { ascending: true });
+            if (cisData) {
+                setCheckInStatuses(cisData as CheckInStatus[]);
+            }
         };
 
         const fetchBookings = async () => {
@@ -149,7 +180,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                     .from('bookings' as any)
                     .select(`
                         id, status, pax_count, pax_breakdown, option_values, 
-                        payment_status, amount_paid, total_amount, voucher_numbers, confirmation_number, notes,
+                        payment_status, amount_paid, total_amount, voucher_numbers, confirmation_number, notes, check_in_status_id,
                         customers!inner(name, email, phone),
                         availabilities!inner(
                             start_date, 
@@ -178,6 +209,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                         voucher_numbers: b.voucher_numbers || "",
                         confirmation_number: b.confirmation_number || "",
                         notes: b.notes || "",
+                        check_in_status_id: b.check_in_status_id || null,
                         customer_name: b.customers?.name || "Unknown",
                         customer_email: b.customers?.email || "",
                         customer_phone: b.customers?.phone || "",
@@ -247,25 +279,129 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
         );
     }
 
+    // Helper to render cell content based on column key
+    const renderCell = (booking: Booking, columnKey: string) => {
+        const column = BOOKING_COLUMNS.find(c => c.key === columnKey);
+        const alignClass = column?.align === "right" ? "text-right" : column?.align === "center" ? "text-center" : "";
+
+        switch (columnKey) {
+            case "confirmation_number":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.confirmation_number || "-"}</td>;
+
+            case "experience_short_code":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.experience_short_code}</td>;
+
+            case "start_date":
+                return (
+                    <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>
+                        {(() => {
+                            const [y, m, d] = booking.start_date.split('-');
+                            return `${m}-${d}-${y}`;
+                        })()}
+                    </td>
+                );
+
+            case "start_time":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.start_time?.slice(0, 5) || "-"}</td>;
+
+            case "status":
+                return (
+                    <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>
+                        <span className={cn(
+                            "px-2 py-1 rounded text-xs font-medium",
+                            booking.status === "confirmed" && "bg-emerald-500/20 text-emerald-400",
+                            booking.status === "pending" && "bg-yellow-500/20 text-yellow-400",
+                            booking.status === "cancelled" && "bg-red-500/20 text-red-400"
+                        )}>
+                            {booking.status}
+                        </span>
+                    </td>
+                );
+
+            case "check_in_status":
+                return (
+                    <td key={columnKey} className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <select
+                            value={booking.check_in_status_id || ""}
+                            onChange={async (e) => {
+                                const newStatusId = e.target.value || null;
+                                const { error } = await supabase
+                                    .from('bookings')
+                                    .update({ check_in_status_id: newStatusId })
+                                    .eq('id', booking.id);
+                                if (error) {
+                                    toast.error("Failed to update check-in status");
+                                } else {
+                                    setBookings(prev => prev.map(b =>
+                                        b.id === booking.id ? { ...b, check_in_status_id: newStatusId } : b
+                                    ));
+                                }
+                            }}
+                            className={cn(
+                                "h-8 px-2 rounded text-xs font-medium text-white border-0 cursor-pointer min-w-[130px] [&>option]:bg-zinc-900 [&>option]:text-white",
+                                booking.check_in_status_id
+                                    ? COLOR_MAP[checkInStatuses.find(s => s.id === booking.check_in_status_id)?.color || "blue"]
+                                    : "bg-muted text-muted-foreground"
+                            )}
+                        >
+                            <option value="">Select Status</option>
+                            {checkInStatuses.map(status => (
+                                <option key={status.id} value={status.id}>{status.status}</option>
+                            ))}
+                        </select>
+                    </td>
+                );
+
+            case "pickup_details":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{resolvePickupDetails(booking)}</td>;
+
+            case "customer_name":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.customer_name}</td>;
+
+            case "pax_count":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.pax_count}</td>;
+
+            case "customer_phone":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{formatPhoneNumber(booking.customer_phone)}</td>;
+
+            case "customer_email":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm max-w-[150px] truncate", alignClass)} title={booking.customer_email}>{booking.customer_email || "-"}</td>;
+
+            case "voucher_numbers":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm max-w-[120px] truncate", alignClass)} title={booking.voucher_numbers}>{booking.voucher_numbers || "-"}</td>;
+
+            case "notes":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm max-w-[150px] truncate", alignClass)} title={booking.notes}>{booking.notes || "-"}</td>;
+
+            case "total_amount":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>${booking.total_amount.toFixed(2)}</td>;
+
+            case "amount_paid":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>${booking.amount_paid.toFixed(2)}</td>;
+
+            case "balance_due":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>${(booking.total_amount - booking.amount_paid).toFixed(2)}</td>;
+
+            default:
+                return <td key={columnKey} className="px-6 py-4 text-foreground text-sm">-</td>;
+        }
+    };
+
     return (
         <div className="rounded-xl border border-border overflow-hidden bg-card">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
                     <thead className="bg-muted/50 text-foreground font-bold uppercase text-xs tracking-wider border-b border-border">
                         <tr>
-                            <th className="px-6 py-4">Confirmation</th>
-                            <th className="px-6 py-4">Exp</th>
-                            <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Pickup Details</th>
-                            <th className="px-6 py-4">Customer</th>
-                            <th className="px-6 py-4">Pax</th>
-                            <th className="px-6 py-4">Phone</th>
-                            <th className="px-6 py-4">Email</th>
-                            <th className="px-6 py-4">Voucher Numbers</th>
-                            <th className="px-6 py-4">Booking Notes</th>
-                            <th className="px-6 py-4 text-right">Total</th>
-                            <th className="px-6 py-4 text-right">Paid</th>
-                            <th className="px-6 py-4 text-right">Due</th>
+                            {visibleColumns.map(colKey => {
+                                const column = BOOKING_COLUMNS.find(c => c.key === colKey);
+                                const alignClass = column?.align === "right" ? "text-right" : column?.align === "center" ? "text-center" : "";
+                                return (
+                                    <th key={colKey} className={cn("px-6 py-4", alignClass)}>
+                                        {column?.label || colKey}
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-muted-foreground">
@@ -294,73 +430,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                     className="hover:bg-muted transition-colors cursor-pointer group"
                                     onClick={() => onBookingClick?.(booking.id)}
                                 >
-                                    {/* Confirmation Number */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {booking.confirmation_number || "-"}
-                                    </td>
-
-                                    {/* Exp */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {booking.experience_short_code}
-                                    </td>
-
-                                    {/* Date */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {(() => {
-                                            const [y, m, d] = booking.start_date.split('-');
-                                            return `${m}-${d}-${y}`;
-                                        })()}
-                                    </td>
-
-                                    {/* Pickup Details */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {resolvePickupDetails(booking)}
-                                    </td>
-
-                                    {/* Customer */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {booking.customer_name}
-                                    </td>
-
-                                    {/* Pax - Just the total number */}
-                                    <td className="px-6 py-4 text-foreground text-sm text-center">
-                                        {booking.pax_count}
-                                    </td>
-
-                                    {/* Phone */}
-                                    <td className="px-6 py-4 text-foreground text-sm">
-                                        {formatPhoneNumber(booking.customer_phone)}
-                                    </td>
-
-                                    {/* Email */}
-                                    <td className="px-6 py-4 text-foreground text-sm max-w-[150px] truncate" title={booking.customer_email}>
-                                        {booking.customer_email || "-"}
-                                    </td>
-
-                                    {/* Voucher Numbers */}
-                                    <td className="px-6 py-4 text-foreground text-sm max-w-[120px] truncate" title={booking.voucher_numbers}>
-                                        {booking.voucher_numbers || "-"}
-                                    </td>
-
-                                    {/* Booking Notes */}
-                                    <td className="px-6 py-4 text-foreground text-sm max-w-[150px] truncate" title={booking.notes}>
-                                        {booking.notes || "-"}
-                                    </td>
-
-                                    {/* Total */}
-                                    <td className="px-6 py-4 text-foreground text-sm text-right">
-                                        ${booking.total_amount.toFixed(2)}
-                                    </td>
-
-                                    {/* Paid */}
-                                    <td className="px-6 py-4 text-foreground text-sm text-right">
-                                        ${booking.amount_paid.toFixed(2)}
-                                    </td>
-
-                                    {/* Due */}
-                                    <td className="px-6 py-4 text-foreground text-sm text-right">
-                                        ${(booking.total_amount - booking.amount_paid).toFixed(2)}
-                                    </td>
+                                    {visibleColumns.map(colKey => renderCell(booking, colKey))}
                                 </tr>
                             ))}
                     </tbody>

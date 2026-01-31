@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { Availability } from "@/features/availability/components/availability-list-table";
-import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users, Edit2 } from "lucide-react";
+import { Calendar, Check, ChevronsUpDown, Plus, Search, User, Users, Edit2, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Customer, PricingSchedule, PricingTier, PricingRate } from "@/features/bookings/types";
 import { Button } from "@/components/ui/button";
 import { QuickAddCustomerDialog } from "./quick-add-customer-dialog";
 import { Combobox } from "@/components/ui/combobox";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
-
+// Color options (70% opacity for soft effect)
+const COLOR_MAP: Record<string, string> = {
+    red: "bg-red-500/70",
+    orange: "bg-orange-500/70",
+    yellow: "bg-yellow-500/70",
+    green: "bg-emerald-500/70",
+    blue: "bg-blue-500/70",
+    indigo: "bg-indigo-500/70",
+    violet: "bg-violet-500/70",
+};
 
 import { NewBookingMenu } from "../new-booking-menu";
 import { format } from "date-fns";
@@ -33,6 +44,10 @@ interface ColumnOneProps {
     onCustomerUpdated: (c: Customer) => void;
     isEditMode?: boolean;
     onAvailabilityChange?: (a: Availability) => void;
+    // Check-in status for edit mode
+    bookingId?: string;
+    checkInStatusId?: string | null;
+    onCheckInStatusChange?: (statusId: string | null) => void;
 }
 
 export function ColumnOne({
@@ -52,12 +67,42 @@ export function ColumnOne({
     onCustomerCreated,
     onCustomerUpdated,
     isEditMode,
-    onAvailabilityChange
+    onAvailabilityChange,
+    bookingId,
+    checkInStatusId,
+    onCheckInStatusChange
 }: ColumnOneProps) {
 
     // UI State (Local)
     const [showAddCustomer, setShowAddCustomer] = useState(false);
     const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
+    const [checkInStatuses, setCheckInStatuses] = useState<{ id: string; status: string; color: string }[]>([]);
+    const [localCheckInStatusId, setLocalCheckInStatusId] = useState<string | null>(checkInStatusId || null);
+
+    // Fetch check-in statuses
+    useEffect(() => {
+        const fetchStatuses = async () => {
+            const { data } = await supabase.from('check_in_statuses').select('id, status, color').order('created_at', { ascending: true });
+            if (data) setCheckInStatuses(data);
+        };
+        if (isEditMode) fetchStatuses();
+    }, [isEditMode]);
+
+    // Sync local state with prop
+    useEffect(() => {
+        setLocalCheckInStatusId(checkInStatusId || null);
+    }, [checkInStatusId]);
+
+    const handleCheckInStatusChange = async (statusId: string | null) => {
+        if (!bookingId) return;
+        const { error } = await supabase.from('bookings').update({ check_in_status_id: statusId }).eq('id', bookingId);
+        if (error) {
+            toast.error("Failed to update check-in status");
+        } else {
+            setLocalCheckInStatusId(statusId);
+            onCheckInStatusChange?.(statusId);
+        }
+    };
 
     const handlePaxChange = (typeId: string, delta: number) => {
         setPaxCounts(prev => {
@@ -125,6 +170,31 @@ export function ColumnOne({
             {/* Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <div className="p-6 space-y-8">
+
+                    {/* Check-In Status (Edit Mode Only) */}
+                    {isEditMode && checkInStatuses.length > 0 && (
+                        <div className="space-y-2">
+                            <label className="text-base font-medium text-muted-foreground flex items-center gap-2">
+                                <UserCheck size={18} className="text-primary" />
+                                Check-In Status
+                            </label>
+                            <select
+                                value={localCheckInStatusId || ""}
+                                onChange={(e) => handleCheckInStatusChange(e.target.value || null)}
+                                className={cn(
+                                    "w-full h-10 px-3 rounded-md border border-border text-sm font-medium cursor-pointer [&>option]:bg-zinc-900 [&>option]:text-white",
+                                    localCheckInStatusId
+                                        ? cn("text-white", COLOR_MAP[checkInStatuses.find(s => s.id === localCheckInStatusId)?.color || "blue"])
+                                        : "bg-muted/50 text-foreground"
+                                )}
+                            >
+                                <option value="">Select Status</option>
+                                {checkInStatuses.map(status => (
+                                    <option key={status.id} value={status.id}>{status.status}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Rescheduling Field (Edit Mode Only) */}
                     {isEditMode && onAvailabilityChange && (

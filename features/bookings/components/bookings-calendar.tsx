@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { BookingsListTable } from "./bookings-list-table";
+import { BookingColumnPicker, useBookingColumnVisibility } from "./bookings-column-picker";
 import {
     addDays, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay, isToday, differenceInMinutes,
     addMinutes,
@@ -71,6 +72,9 @@ export function BookingsCalendar({
         return d;
     });
     const [listSearchQuery, setListSearchQuery] = useState("");
+
+    // Column Visibility State (for List View)
+    const { visibleColumns, toggleColumn, resetToDefault, reorderColumns } = useBookingColumnVisibility();
 
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -456,8 +460,15 @@ export function BookingsCalendar({
                                     )}
                                 </div>
                             </div>
-                            {/* RIGHT: Filter + View Buttons */}
+                            {/* RIGHT: Columns + Filter + View Buttons */}
                             <div className="flex items-center gap-2">
+                                {/* Column Manager */}
+                                <BookingColumnPicker
+                                    visibleColumns={visibleColumns}
+                                    onToggle={toggleColumn}
+                                    onReset={resetToDefault}
+                                    onReorder={reorderColumns}
+                                />
                                 <div className="relative w-[180px]" ref={expPickerRef}>
                                     <div className={cn("w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground cursor-pointer flex items-center justify-between transition-all hover:bg-muted hover:border-sidebar-accent", isExpPickerOpen && "border-primary/50 bg-muted ring-1 ring-primary/20")} onClick={() => setIsExpPickerOpen(!isExpPickerOpen)}>
                                         <span className="font-semibold text-xs truncate">{selectedExpName}</span>
@@ -483,7 +494,7 @@ export function BookingsCalendar({
                             </div>
                         </div>
                         {/* Table */}
-                        <BookingsListTable startDate={listStartDate} endDate={listEndDate} searchQuery={listSearchQuery} onBookingClick={onBookingEdit} />
+                        <BookingsListTable startDate={listStartDate} endDate={listEndDate} searchQuery={listSearchQuery} onBookingClick={onBookingEdit} visibleColumns={visibleColumns} />
                     </div>
                 )}
             </div>
