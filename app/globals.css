@@ -187,3 +187,22 @@
       radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--primary), transparent 90%) 0%, transparent 30%);
   }
 }
+
+/* Report Table Scrollbar - 50% thicker */
+.report-scrollbar::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+
+.report-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.report-scrollbar::-webkit-scrollbar-thumb {
+  background: #0e7490;
+  border-radius: 6px;
+}
+
+.report-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #22d3ee;
+}

@@ -47,12 +47,12 @@ export function CustomSelect({ value, onChange, options, placeholder = "Select..
     const selectedOption = normalizedOptions.find(o => o.value === value);
 
     return (
-        <div className="relative" ref={containerRef}>
+        <div className={`relative ${className || ""}`} ref={containerRef}>
             {/* Trigger Button */}
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full bg-muted/80 border border-input rounded-lg px-4 text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 transition-colors group ${className || "py-2.5"}`}
+                className={`w-full h-8 bg-muted/80 border border-input rounded-lg px-3 text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 transition-colors group`}
             >
                 <span className={`flex items-center gap-2 ${value ? "text-foreground" : "text-muted-foreground"}`}>
                     {selectedOption?.icon}

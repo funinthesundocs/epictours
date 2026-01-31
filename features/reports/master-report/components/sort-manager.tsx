@@ -237,7 +237,7 @@ export function SortManager({ sortCriteria, onSortChange }: SortManagerProps) {
             <button
                 onClick={() => setIsOpen(true)}
                 className={cn(
-                    "h-10 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
+                    "h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
                     sortCriteria.length > 0
                         ? "bg-cyan-400/10 border-cyan-400/30 text-cyan-400"
                         : "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"

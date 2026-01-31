@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { MasterReportRow } from "./types";
 import { ReportTable, ColumnFilters } from "./components/report-table";
 import { ReportToolbar } from "./components/report-toolbar";
-import { useColumnVisibility } from "./components/column-picker";
+import { useColumnVisibility, REPORT_COLUMNS } from "./components/column-picker";
 import { SortCriteria } from "./components/sort-manager";
+import { PresetSettings } from "./components/preset-manager";
 import { Loader2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BookingDesk } from "@/features/bookings/components/booking-desk";
+import { AddCustomerSheet } from "@/features/crm/customers/components/add-customer-sheet";
+import { EditAvailabilitySheet } from "@/features/availability/components/edit-availability-sheet";
+import { Availability } from "@/features/availability/components/availability-list-table";
+import { Customer } from "@/features/crm/customers/types";
 
 const MAX_RECORDS = 10000;
 
@@ -46,6 +52,59 @@ export function MasterReportPage() {
     // Column Visibility
     const { visibleColumns, toggleColumn, resetToDefault, reorderColumns } = useColumnVisibility();
 
+    // Side Panel State
+    const [bookingPanelOpen, setBookingPanelOpen] = useState(false);
+    const [bookingPanelData, setBookingPanelData] = useState<{ availability: Availability | null; bookingId: string | null }>({ availability: null, bookingId: null });
+    const [customerPanelOpen, setCustomerPanelOpen] = useState(false);
+    const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
+    const [availabilityPanelOpen, setAvailabilityPanelOpen] = useState(false);
+    const [editingAvailability, setEditingAvailability] = useState<any>(undefined);
+
+    // Handle cell click - route to appropriate side panel based on column category
+    const handleCellClick = useCallback(async (row: MasterReportRow, columnKey: string) => {
+        const column = REPORT_COLUMNS.find(c => c.key === columnKey);
+        const category = column?.category;
+
+        if (!category) return;
+
+        switch (category) {
+            case "booking":
+            case "experience":
+            case "pickup":
+                // Open BookingDesk - need to fetch availability data
+                const { data: availData } = await supabase
+                    .from("availabilities" as any)
+                    .select("*")
+                    .eq("id", row.availability_id)
+                    .single();
+                setBookingPanelData({ availability: availData as Availability, bookingId: row.booking_id });
+                setBookingPanelOpen(true);
+                break;
+
+            case "customer":
+                // Open AddCustomerSheet - fetch customer data
+                const { data: custData } = await supabase
+                    .from("customers" as any)
+                    .select("*")
+                    .eq("id", row.customer_id)
+                    .single();
+                setEditingCustomer(custData as Customer);
+                setCustomerPanelOpen(true);
+                break;
+
+            case "staff":
+                // Open EditAvailabilitySheet - fetch availability data
+                const { data: staffAvailData } = await supabase
+                    .from("availabilities" as any)
+                    .select("*")
+                    .eq("id", row.availability_id)
+                    .single();
+                setEditingAvailability(staffAvailData);
+                setAvailabilityPanelOpen(true);
+                break;
+        }
+    }, []);
+
     // Handle column filter change
     const handleColumnFilterChange = (key: string, values: Set<string>) => {
         setColumnFilters(prev => {
@@ -57,6 +116,35 @@ export function MasterReportPage() {
             }
             return next;
         });
+    };
+
+    // Build current preset settings for saving
+    const currentPresetSettings: PresetSettings = useMemo(() => ({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        dateFilterType,
+        searchQuery,
+        visibleColumns,
+        sortCriteria,
+        columnFilters: Object.fromEntries(
+            Object.entries(columnFilters).map(([k, v]) => [k, Array.from(v)])
+        )
+    }), [startDate, endDate, dateFilterType, searchQuery, visibleColumns, sortCriteria, columnFilters]);
+
+    // Handle loading a preset
+    const handleLoadPreset = (settings: PresetSettings) => {
+        setStartDate(new Date(settings.startDate));
+        setEndDate(new Date(settings.endDate));
+        setDateFilterType(settings.dateFilterType);
+        setSearchQuery(settings.searchQuery);
+        reorderColumns(settings.visibleColumns);
+        setSortCriteria(settings.sortCriteria);
+        // Convert arrays back to Sets
+        const restoredFilters: ColumnFilters = {};
+        for (const [key, values] of Object.entries(settings.columnFilters)) {
+            restoredFilters[key] = new Set(values);
+        }
+        setColumnFilters(restoredFilters);
     };
 
     const fetchReportData = useCallback(async () => {
@@ -303,6 +391,9 @@ export function MasterReportPage() {
                     </div>
                 </div>
 
+                {/* Spacer */}
+                <div style={{ height: "16px" }} />
+
                 {/* Toolbar */}
                 <ReportToolbar
                     searchQuery={searchQuery}
@@ -322,10 +413,12 @@ export function MasterReportPage() {
                     onEndDateChange={setEndDate}
                     dateFilterType={dateFilterType}
                     onDateFilterTypeChange={setDateFilterType}
+                    currentPresetSettings={currentPresetSettings}
+                    onLoadPreset={handleLoadPreset}
+                    exportData={fullyFilteredData}
                 />
             </div>
 
-            {/* Content */}
             {isLoading && data.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
                     <Loader2 size={24} className="animate-spin" />
@@ -350,10 +443,57 @@ export function MasterReportPage() {
                             searchQuery={searchQuery}
                             columnFilters={columnFilters}
                             onColumnFilterChange={handleColumnFilterChange}
+                            onCellClick={handleCellClick}
                         />
                     </div>
                 </div>
             )}
+
+            {/* Booking Desk Side Panel */}
+            <BookingDesk
+                isOpen={bookingPanelOpen}
+                onClose={() => {
+                    setBookingPanelOpen(false);
+                    setBookingPanelData({ availability: null, bookingId: null });
+                }}
+                onSuccess={() => {
+                    setBookingPanelOpen(false);
+                    setBookingPanelData({ availability: null, bookingId: null });
+                    fetchData();
+                }}
+                availability={bookingPanelData.availability}
+                editingBookingId={bookingPanelData.bookingId}
+            />
+
+            {/* Customer Edit Side Panel */}
+            <AddCustomerSheet
+                isOpen={customerPanelOpen}
+                onClose={() => {
+                    setCustomerPanelOpen(false);
+                    setEditingCustomer(undefined);
+                }}
+                onCustomerAdded={() => {
+                    setCustomerPanelOpen(false);
+                    setEditingCustomer(undefined);
+                    fetchData();
+                }}
+                editingCustomer={editingCustomer}
+            />
+
+            {/* Availability Edit Side Panel */}
+            <EditAvailabilitySheet
+                isOpen={availabilityPanelOpen}
+                onClose={() => {
+                    setAvailabilityPanelOpen(false);
+                    setEditingAvailability(undefined);
+                }}
+                onSuccess={() => {
+                    setAvailabilityPanelOpen(false);
+                    setEditingAvailability(undefined);
+                    fetchData();
+                }}
+                initialData={editingAvailability}
+            />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { MasterReportRow } from "../types";
 import { REPORT_COLUMNS } from "./column-picker";
 import { ChevronDown, Check, Filter } from "lucide-react";
@@ -19,9 +19,20 @@ interface ReportTableProps {
     searchQuery?: string;
     columnFilters: ColumnFilters;
     onColumnFilterChange: (key: string, values: Set<string>) => void;
+    onCellClick?: (row: MasterReportRow, columnKey: string) => void;
 }
 
 const ROW_HEIGHT = 44;
+
+// Columns that can be summed for totals row
+const SUMMABLE_COLUMNS = new Set([
+    "pax_count",
+    "total_amount",
+    "amount_paid",
+    "balance_due",
+    "customer_total_value",
+    "max_capacity"
+]);
 
 // Format phone number as (XXX)XXX-XXXX
 function formatPhoneNumber(phone: string | null): string {
@@ -162,7 +173,7 @@ function ColumnFilterDropdown({
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "flex items-center gap-1 px-4 py-3 text-sm font-bold uppercase tracking-wider transition-colors select-none shrink-0 w-full",
+                    "flex items-center gap-1 px-4 py-3 text-sm font-bold uppercase tracking-wider transition-colors select-none shrink-0 w-full whitespace-nowrap",
                     hasFilter ? "text-cyan-400" : "text-white hover:text-zinc-300",
                     align === "right" && "justify-end",
                     align === "center" && "justify-center"
@@ -234,7 +245,7 @@ function ColumnFilterDropdown({
     );
 }
 
-export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange }: ReportTableProps) {
+export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange, onCellClick }: ReportTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
@@ -260,8 +271,14 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                 return <span className="font-mono text-white">{formatCurrency(row.amount_paid)}</span>;
             case "balance_due":
                 return <span className="font-mono text-white">{formatCurrency(row.balance_due)}</span>;
-            case "payment_status":
-                return <span className="text-sm text-white">{row.payment_status || "-"}</span>;
+            case "payment_status": {
+                // Humanize snake_case to Title Case (e.g., "no_payment" → "No Payment")
+                const humanize = (str: string) => str
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                return <span className="text-sm text-white">{row.payment_status ? humanize(row.payment_status) : "-"}</span>;
+            }
             case "voucher_numbers":
                 return row.voucher_numbers || "-";
             case "notes":
@@ -359,13 +376,52 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
         return acc + width;
     }, 0);
 
+    // Calculate totals for summable columns
+    const columnTotals = useMemo(() => {
+        const totals: { [key: string]: string | number } = {};
+
+        visibleColumnConfigs.forEach(col => {
+            if (SUMMABLE_COLUMNS.has(col.key)) {
+                const sum = data.reduce((acc, row) => {
+                    const value = row[col.key as keyof MasterReportRow];
+                    const num = typeof value === 'number' ? value : parseFloat(String(value) || '0');
+                    return acc + (isNaN(num) ? 0 : num);
+                }, 0);
+                totals[col.key] = sum;
+            } else {
+                totals[col.key] = "Total";
+            }
+        });
+
+        return totals;
+    }, [data, visibleColumnConfigs]);
+
+    // Format total value for display
+    const formatTotalValue = (key: string, value: string | number): string => {
+        if (typeof value === 'string') return value;
+
+        // Currency columns
+        if (['total_amount', 'amount_paid', 'balance_due', 'customer_total_value'].includes(key)) {
+            return `$${value.toFixed(2)}`;
+        }
+
+        // Integer columns
+        return value.toString();
+    };
+
     return (
         <div className="h-full flex flex-col overflow-hidden">
             {/* Horizontal scroll container */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden">
+            <div
+                className="flex-1 overflow-x-auto overflow-y-hidden report-scrollbar"
+                style={{
+                    scrollbarWidth: 'auto',
+                    scrollbarColor: '#0e7490 transparent'
+                }}
+            >
                 <div style={{ minWidth: `${totalWidth}px` }}>
                     {/* Header with Filter Dropdowns */}
-                    <div className="shrink-0 bg-white/5 border-b border-white/10 sticky top-0 z-10">
+                    <div className="shrink-0 bg-white/5 border-b-2 border-white/20 sticky top-0 z-10">
                         <div className="flex">
                             {visibleColumnConfigs.map((column) => (
                                 <div
@@ -401,10 +457,14 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                         >
                             {virtualizer.getVirtualItems().map((virtualRow) => {
                                 const row = data[virtualRow.index];
+                                const isOddRow = virtualRow.index % 2 === 1;
                                 return (
                                     <div
                                         key={row.booking_id}
-                                        className="absolute top-0 left-0 w-full flex items-center border-b border-white/5 hover:bg-cyan-400/5 transition-colors"
+                                        className={cn(
+                                            "absolute top-0 left-0 w-full flex items-center border-b border-white/10 hover:bg-cyan-400/10 transition-colors",
+                                            isOddRow && "bg-white/[0.02]"
+                                        )}
                                         style={{
                                             height: `${ROW_HEIGHT}px`,
                                             transform: `translateY(${virtualRow.start}px)`,
@@ -413,10 +473,12 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                                         {visibleColumnConfigs.map((column) => (
                                             <div
                                                 key={column.key}
+                                                onClick={() => onCellClick?.(row, column.key)}
                                                 className={cn(
                                                     "px-4 text-sm text-white truncate shrink-0",
                                                     getColumnAlign(column.key) === "right" && "text-right",
-                                                    getColumnAlign(column.key) === "center" && "text-center"
+                                                    getColumnAlign(column.key) === "center" && "text-center",
+                                                    onCellClick && "cursor-pointer hover:bg-cyan-400/10 transition-colors"
                                                 )}
                                                 style={{ width: getColumnWidth(column.key) }}
                                             >
@@ -428,6 +490,30 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                             })}
                         </div>
                     </div>
+
+                    {/* Totals Row */}
+                    {data.length > 0 && (
+                        <div className="shrink-0 bg-white/10 border-t-2 border-white/20 sticky bottom-0 z-10">
+                            <div
+                                className="flex items-center"
+                                style={{ height: `${ROW_HEIGHT}px` }}
+                            >
+                                {visibleColumnConfigs.map((column) => (
+                                    <div
+                                        key={column.key}
+                                        className={cn(
+                                            "px-4 text-sm font-bold text-white truncate shrink-0",
+                                            getColumnAlign(column.key) === "right" && "text-right",
+                                            getColumnAlign(column.key) === "center" && "text-center"
+                                        )}
+                                        style={{ width: getColumnWidth(column.key) }}
+                                    >
+                                        {formatTotalValue(column.key, columnTotals[column.key])}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

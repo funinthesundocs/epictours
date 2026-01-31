@@ -24,54 +24,56 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 // All available columns for the Master Report (35+ columns)
+// Alignment rules: Text=left, Numbers/Amounts=center, Phone=center, Notes=justify
 export const REPORT_COLUMNS: ColumnConfig[] = [
     // Booking fields
-    { key: "confirmation_number", label: "Confirmation", width: "140px" },
-    { key: "booking_status", label: "Status", width: "100px" },
-    { key: "pax_count", label: "Pax", width: "60px", align: "center" },
-    { key: "total_amount", label: "Total", width: "100px", align: "right", format: "currency" },
-    { key: "amount_paid", label: "Paid", width: "100px", align: "right", format: "currency" },
-    { key: "balance_due", label: "Due", width: "100px", align: "right", format: "currency" },
-    { key: "payment_status", label: "Payment", width: "100px" },
-    { key: "voucher_numbers", label: "Vouchers", width: "120px" },
-    { key: "notes", label: "Notes", width: "200px" },
-    { key: "booking_created_at", label: "Booked On", width: "110px", format: "date" },
+    { key: "confirmation_number", label: "Confirmation", width: "140px", align: "left", category: "booking" },
+    { key: "booking_status", label: "Status", width: "100px", align: "left", category: "booking" },
+    { key: "pax_count", label: "Pax", width: "60px", align: "center", category: "booking" },
+    { key: "total_amount", label: "Total", width: "100px", align: "center", format: "currency", category: "booking" },
+    { key: "amount_paid", label: "Paid", width: "100px", align: "center", format: "currency", category: "booking" },
+    { key: "balance_due", label: "Due", width: "100px", align: "center", format: "currency", category: "booking" },
+    { key: "payment_status", label: "Payment", width: "120px", align: "left", category: "booking" },
+    { key: "voucher_numbers", label: "Vouchers", width: "120px", align: "left", category: "booking" },
+    { key: "notes", label: "Notes", width: "300px", align: "left", category: "booking" },
+    { key: "booking_created_at", label: "Booked On", width: "120px", align: "center", format: "date", category: "booking" },
 
     // Customer fields
-    { key: "customer_name", label: "Customer", width: "160px" },
-    { key: "customer_email", label: "Email", width: "180px" },
-    { key: "customer_phone", label: "Phone", width: "140px", format: "phone" },
-    { key: "customer_hotel", label: "Hotel", width: "140px" },
-    { key: "customer_source", label: "Source", width: "100px" },
-    { key: "customer_status", label: "Cust Status", width: "100px" },
-    { key: "preferred_messaging_app", label: "Com App", width: "100px" },
-    { key: "dietary_restrictions", label: "Dietary", width: "120px" },
-    { key: "accessibility_needs", label: "Accessibility", width: "120px" },
-    { key: "emergency_contact_name", label: "Emergency Contact", width: "150px" },
-    { key: "emergency_contact_phone", label: "Emergency Phone", width: "140px", format: "phone" },
-    { key: "customer_total_value", label: "Lifetime Value", width: "110px", align: "right", format: "currency" },
+    { key: "customer_name", label: "Customer", width: "160px", align: "left", category: "customer" },
+    { key: "customer_email", label: "Email", width: "200px", align: "left", category: "customer" },
+    { key: "customer_phone", label: "Phone", width: "150px", align: "center", format: "phone", category: "customer" },
+    { key: "customer_hotel", label: "Hotel", width: "140px", align: "left", category: "customer" },
+    { key: "customer_source", label: "Source", width: "100px", align: "left", category: "customer" },
+    { key: "customer_status", label: "Cust Status", width: "120px", align: "left", category: "customer" },
+    { key: "preferred_messaging_app", label: "Com App", width: "110px", align: "left", category: "customer" },
+    { key: "dietary_restrictions", label: "Dietary", width: "120px", align: "left", category: "customer" },
+    { key: "accessibility_needs", label: "Accessibility", width: "130px", align: "left", category: "customer" },
+    { key: "emergency_contact_name", label: "Emergency Contact", width: "180px", align: "left", category: "customer" },
+    { key: "emergency_contact_phone", label: "Emergency Phone", width: "170px", align: "center", format: "phone", category: "customer" },
+    { key: "customer_total_value", label: "Lifetime Value", width: "140px", align: "center", format: "currency", category: "customer" },
 
     // Experience/Availability fields
-    { key: "experience_code", label: "Exp Code", width: "90px" },
-    { key: "experience_name", label: "Experience", width: "160px" },
-    { key: "start_date", label: "Start Date", width: "100px", format: "date" },
-    { key: "start_time", label: "Start Time", width: "90px" },
-    { key: "max_capacity", label: "Capacity", width: "80px", align: "center" },
+    { key: "experience_code", label: "Exp Code", width: "110px", align: "left", category: "experience" },
+    { key: "experience_name", label: "Experience", width: "160px", align: "left", category: "experience" },
+    { key: "start_date", label: "Start Date", width: "120px", align: "center", format: "date", category: "experience" },
+    { key: "start_time", label: "Start Time", width: "110px", align: "center", category: "experience" },
+    { key: "max_capacity", label: "Capacity", width: "100px", align: "center", category: "experience" },
 
     // Staff & Resources
-    { key: "driver_name", label: "Driver", width: "120px" },
-    { key: "guide_name", label: "Guide", width: "120px" },
-    { key: "vehicle_name", label: "Vehicle", width: "120px" },
-    { key: "route_name", label: "Route", width: "120px" },
+    { key: "driver_name", label: "Driver", width: "120px", align: "left", category: "staff" },
+    { key: "guide_name", label: "Guide", width: "120px", align: "left", category: "staff" },
+    { key: "vehicle_name", label: "Vehicle", width: "120px", align: "left", category: "staff" },
+    { key: "route_name", label: "Route", width: "120px", align: "left", category: "staff" },
 
     // Pickup info
-    { key: "pickup_location", label: "Pickup Location", width: "150px" },
-    { key: "pickup_time", label: "Pickup Time", width: "100px" },
+    { key: "pickup_location", label: "Pickup Location", width: "170px", align: "left", category: "pickup" },
+    { key: "pickup_time", label: "Pickup Time", width: "130px", align: "center", category: "pickup" },
 
     // IDs (for export/debugging)
-    { key: "booking_id", label: "Booking ID", width: "280px" },
-    { key: "customer_id", label: "Customer ID", width: "280px" },
+    { key: "booking_id", label: "Booking ID", width: "300px", align: "left", category: "booking" },
+    { key: "customer_id", label: "Customer ID", width: "300px", align: "left", category: "customer" },
 ];
+
 
 // Default visible columns (most useful subset)
 export const DEFAULT_VISIBLE_COLUMNS = [
@@ -289,7 +291,7 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset, onReorder }: C
             <button
                 onClick={() => setIsOpen(true)}
                 className={cn(
-                    "h-10 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
+                    "h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
                     "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
                 )}
             >

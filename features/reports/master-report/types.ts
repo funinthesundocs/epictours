@@ -88,4 +88,5 @@ export type ColumnConfig = {
     width?: string;
     align?: "left" | "center" | "right";
     format?: "text" | "date" | "currency" | "phone";
+    category?: "booking" | "customer" | "experience" | "staff" | "pickup";
 };
