@@ -12,12 +12,14 @@ interface BookingItem {
     pax_count: number;
     pax_breakdown: any;
     customer_name: string;
+    customer_email: string;
     customer_phone: string;
     payment_status: string;
     amount_paid: number;
     total_amount: number;
     voucher_numbers?: string;
     confirmation_number?: string;
+    notes?: string;
     created_at: string;
 }
 
@@ -50,8 +52,8 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 .from('bookings' as any)
                 .select(`
                     id, status, pax_count, pax_breakdown, payment_status, 
-                    amount_paid, total_amount, voucher_numbers, confirmation_number, created_at,
-                    customers(name, phone)
+                    amount_paid, total_amount, voucher_numbers, confirmation_number, notes, created_at,
+                    customers(name, email, phone)
                 `)
                 .eq('availability_id', availability.id)
                 .order('created_at', { ascending: false });
@@ -63,12 +65,14 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     pax_count: b.pax_count,
                     pax_breakdown: b.pax_breakdown,
                     customer_name: b.customers?.name || "Unknown",
+                    customer_email: b.customers?.email || "",
                     customer_phone: b.customers?.phone || "",
                     payment_status: b.payment_status || "unpaid",
                     amount_paid: b.amount_paid || 0,
                     total_amount: b.total_amount || 0,
                     voucher_numbers: b.voucher_numbers || "",
                     confirmation_number: b.confirmation_number || "",
+                    notes: b.notes || "",
                     created_at: b.created_at
                 }));
                 setBookings(flat);
@@ -183,7 +187,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                             className="w-full p-3 bg-card rounded-lg border border-border hover:border-primary/50 transition-all text-left shadow-sm"
                                         >
                                             <div className="flex items-start justify-between gap-3">
-                                                <div>
+                                                <div className="flex-1 min-w-0">
                                                     <div className="text-foreground font-medium text-base">{booking.customer_name}</div>
                                                     <div className="text-muted-foreground text-sm mt-0.5">
                                                         {booking.confirmation_number && (
@@ -192,9 +196,32 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                                                         {booking.pax_count} Pax
                                                         {booking.voucher_numbers && ` • #${booking.voucher_numbers}`}
                                                     </div>
+                                                    {/* Contact Info */}
+                                                    {(booking.customer_email || booking.customer_phone) && (
+                                                        <div className="text-muted-foreground text-xs mt-1 space-y-0.5">
+                                                            {booking.customer_phone && (
+                                                                <div>{booking.customer_phone}</div>
+                                                            )}
+                                                            {booking.customer_email && (
+                                                                <div className="truncate">{booking.customer_email}</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {/* Notes */}
+                                                    {booking.notes && (
+                                                        <div className="text-muted-foreground text-xs mt-1 italic line-clamp-2">
+                                                            {booking.notes}
+                                                        </div>
+                                                    )}
+                                                    {/* Balance Due */}
+                                                    {booking.total_amount > booking.amount_paid && (
+                                                        <div className="text-amber-500 text-xs mt-1 font-medium">
+                                                            Due: ${(booking.total_amount - booking.amount_paid).toFixed(2)}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <span className={cn(
-                                                    "px-2 py-0.5 rounded text-sm font-medium",
+                                                    "px-2 py-0.5 rounded text-sm font-medium shrink-0",
                                                     booking.payment_status === 'paid'
                                                         ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                                                         : booking.payment_status === 'partial'
@@ -241,6 +268,6 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
