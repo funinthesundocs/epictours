@@ -239,8 +239,8 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
                         "w-full h-8 flex items-center justify-between gap-2 px-3 rounded-lg text-sm font-medium transition-all",
-                        "bg-white/5 border border-white/10 hover:bg-white/10",
-                        selectedPresetName && selectedPresetName !== "Custom Range" ? "text-cyan-400" : "text-zinc-400"
+                        "bg-muted/50 border border-border hover:bg-muted",
+                        selectedPresetName && selectedPresetName !== "Custom Range" ? "text-primary" : "text-muted-foreground"
                     )}
                 >
                     <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
 
                 {/* Dropdown Menu */}
                 {isOpen && (
-                    <div className="absolute top-full left-0 mt-1 w-full bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="absolute top-full left-0 mt-1 w-full bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                         {/* Custom Range Option */}
                         <button
                             onClick={() => {
@@ -260,14 +260,14 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                                 setIsOpen(false);
                             }}
                             className={cn(
-                                "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors border-b border-white/10",
+                                "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors border-b border-border",
                                 selectedPresetName === "Custom Range" || !selectedPresetName
-                                    ? "bg-cyan-400/10 text-cyan-400"
-                                    : "hover:bg-white/5 text-white"
+                                    ? "bg-primary/10 text-primary"
+                                    : "hover:bg-muted text-foreground"
                             )}
                         >
                             <span>Custom Range</span>
-                            {(selectedPresetName === "Custom Range" || !selectedPresetName) && <Check size={14} className="text-cyan-400" />}
+                            {(selectedPresetName === "Custom Range" || !selectedPresetName) && <Check size={14} className="text-primary" />}
                         </button>
 
                         {/* Save Current Range Option */}
@@ -276,7 +276,7 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                                 setIsSaveDialogOpen(true);
                                 setIsOpen(false);
                             }}
-                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-cyan-400/10 text-cyan-400 transition-colors border-b border-white/10"
+                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-primary/10 text-primary transition-colors border-b border-border"
                         >
                             <Save size={14} />
                             <span className="font-medium text-sm">Save Current Range</span>
@@ -286,7 +286,7 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                         <div className="max-h-72 overflow-y-auto">
                             {builtInPresets.map((preset, idx) => {
                                 if ('divider' in preset) {
-                                    return <div key={`div-${idx}`} className="border-t border-white/10 my-1" />;
+                                    return <div key={`div-${idx}`} className="border-t border-border my-1" />;
                                 }
                                 const isSelected = selectedPresetName === preset.name;
                                 return (
@@ -296,12 +296,12 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                                         className={cn(
                                             "w-full flex items-center justify-between px-4 py-2 text-sm transition-colors",
                                             isSelected
-                                                ? "bg-cyan-400/10 text-cyan-400"
-                                                : "hover:bg-white/5 text-white"
+                                                ? "bg-primary/10 text-primary"
+                                                : "hover:bg-muted text-foreground"
                                         )}
                                     >
                                         <span>{preset.name}</span>
-                                        {isSelected && <Check size={14} className="text-cyan-400" />}
+                                        {isSelected && <Check size={14} className="text-primary" />}
                                     </button>
                                 );
                             })}
@@ -309,8 +309,8 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                             {/* Custom Presets */}
                             {customPresets.length > 0 && (
                                 <>
-                                    <div className="border-t border-white/10 my-1" />
-                                    <div className="px-4 py-1.5 text-xs text-zinc-500 uppercase tracking-wider">
+                                    <div className="border-t border-border my-1" />
+                                    <div className="px-4 py-1.5 text-xs text-muted-foreground uppercase tracking-wider">
                                         Saved Ranges
                                     </div>
                                     {customPresets.map((preset) => {
@@ -322,18 +322,18 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                                                 className={cn(
                                                     "flex items-center justify-between px-4 py-2 text-sm cursor-pointer transition-colors group",
                                                     isSelected
-                                                        ? "bg-cyan-400/10 text-cyan-400"
-                                                        : "hover:bg-white/5 text-white"
+                                                        ? "bg-primary/10 text-primary"
+                                                        : "hover:bg-muted text-foreground"
                                                 )}
                                             >
                                                 <span>{preset.name}</span>
                                                 <div className="flex items-center gap-2">
-                                                    {isSelected && <Check size={14} className="text-cyan-400" />}
+                                                    {isSelected && <Check size={14} className="text-primary" />}
                                                     <button
                                                         onClick={(e) => handleDeletePreset(e, preset.id)}
-                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded transition-all"
                                                     >
-                                                        <Trash2 size={12} className="text-red-400" />
+                                                        <Trash2 size={12} className="text-destructive" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -349,36 +349,36 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
             {/* Save Dialog Modal */}
             {isSaveDialogOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-zinc-900 border border-white/10 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                    <div className="bg-popover border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                            <h3 className="text-lg font-semibold text-white">Save Date Range</h3>
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                            <h3 className="text-lg font-semibold text-foreground">Save Date Range</h3>
                             <button
                                 onClick={() => {
                                     setIsSaveDialogOpen(false);
                                     setNewPresetName("");
                                 }}
-                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                className="p-1 hover:bg-muted rounded transition-colors"
                             >
-                                <X size={20} className="text-zinc-400" />
+                                <X size={20} className="text-muted-foreground" />
                             </button>
                         </div>
 
                         {/* Body */}
                         <div className="px-6 py-6">
-                            <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Current Range</div>
-                                <div className="text-white font-medium">
+                            <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-border">
+                                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Current Range</div>
+                                <div className="text-foreground font-medium">
                                     {format(startDate, "MMM d, yyyy")} → {format(endDate, "MMM d, yyyy")}
                                 </div>
                             </div>
-                            <label className="block text-sm text-zinc-400 mb-2">Preset Name</label>
+                            <label className="block text-sm text-muted-foreground mb-2">Preset Name</label>
                             <input
                                 type="text"
                                 value={newPresetName}
                                 onChange={(e) => setNewPresetName(e.target.value)}
                                 placeholder="e.g., Q1 2025"
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50"
+                                className="w-full px-4 py-3 bg-muted/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
                                 autoFocus
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && newPresetName.trim()) {
@@ -389,13 +389,13 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                         </div>
 
                         {/* Footer */}
-                        <div className="flex justify-end gap-3 px-6 py-4 border-t border-white/10 bg-white/5">
+                        <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/50">
                             <button
                                 onClick={() => {
                                     setIsSaveDialogOpen(false);
                                     setNewPresetName("");
                                 }}
-                                className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 Cancel
                             </button>
@@ -405,8 +405,8 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                                 className={cn(
                                     "px-6 py-2 rounded-lg text-sm font-medium transition-all",
                                     newPresetName.trim() && !isLoading
-                                        ? "bg-cyan-400 text-black hover:bg-cyan-300"
-                                        : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                        : "bg-muted text-muted-foreground cursor-not-allowed"
                                 )}
                             >
                                 {isLoading ? "Saving..." : "Save Range"}

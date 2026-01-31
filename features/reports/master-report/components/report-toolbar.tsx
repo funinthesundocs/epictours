@@ -73,16 +73,16 @@ export function ReportToolbar({
                 {/* FROM/TO Date Selectors */}
                 <div className="flex flex-col gap-1 shrink-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-white font-bold uppercase tracking-wider w-12">From</span>
+                        <span className="text-sm text-foreground font-bold uppercase tracking-wider w-12">From</span>
                         <CustomSelect value={startDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(startDate); d.setMonth(val); onStartDateChange(d); }} className="w-[80px] text-sm" />
                         <CustomSelect value={startDate.getDate()} options={Array.from({ length: new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(startDate); d.setDate(val); onStartDateChange(d); }} className="w-[60px] text-sm" />
-                        <CustomSelect value={startDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(startDate); d.setFullYear(val); onStartDateChange(d); }} className="w-[90px] text-sm text-white" />
+                        <CustomSelect value={startDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(startDate); d.setFullYear(val); onStartDateChange(d); }} className="w-[90px] text-sm" />
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-white font-bold uppercase tracking-wider w-12">To</span>
+                        <span className="text-sm text-foreground font-bold uppercase tracking-wider w-12">To</span>
                         <CustomSelect value={endDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(endDate); d.setMonth(val); onEndDateChange(d); }} className="w-[80px] text-sm" />
                         <CustomSelect value={endDate.getDate()} options={Array.from({ length: new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(endDate); d.setDate(val); onEndDateChange(d); }} className="w-[60px] text-sm" />
-                        <CustomSelect value={endDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(endDate); d.setFullYear(val); onEndDateChange(d); }} className="w-[90px] text-sm text-white" />
+                        <CustomSelect value={endDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(endDate); d.setFullYear(val); onEndDateChange(d); }} className="w-[90px] text-sm" />
                     </div>
                 </div>
 
@@ -94,9 +94,9 @@ export function ReportToolbar({
                             name="dateFilterType"
                             checked={dateFilterType === "activity"}
                             onChange={() => onDateFilterTypeChange("activity")}
-                            className="w-4 h-4 accent-cyan-400"
+                            className="w-4 h-4 accent-primary"
                         />
-                        <span className="text-sm text-white">Start Date</span>
+                        <span className="text-sm text-foreground">Start Date</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -104,9 +104,9 @@ export function ReportToolbar({
                             name="dateFilterType"
                             checked={dateFilterType === "booking"}
                             onChange={() => onDateFilterTypeChange("booking")}
-                            className="w-4 h-4 accent-cyan-400"
+                            className="w-4 h-4 accent-primary"
                         />
-                        <span className="text-sm text-white">Booking Date</span>
+                        <span className="text-sm text-foreground">Booking Date</span>
                     </label>
                 </div>
 
@@ -123,18 +123,18 @@ export function ReportToolbar({
             <div className="flex items-center gap-3">
                 {/* Search Input */}
                 <div className="relative w-[218px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={14} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder="Search all fields..."
-                        className="w-full h-8 pl-9 pr-9 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 text-sm"
+                        className="w-full h-8 pl-9 pr-9 bg-muted/50 border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 text-sm"
                     />
                     {searchQuery && (
                         <button
                             onClick={() => onSearchChange("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <X size={14} />
                         </button>
@@ -145,7 +145,7 @@ export function ReportToolbar({
                 {hasActiveFilters && (
                     <button
                         onClick={onReset}
-                        className="h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
+                        className="h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors bg-muted/50 border border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                     >
                         <RotateCcw size={14} />
                         Clear

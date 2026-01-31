@@ -60,7 +60,7 @@ export default function UsersPage() {
 
     return (
         <PageShell
-            title="User Management"
+            title="Staff Management"
             description="Manage team access and positions."
             icon={UserCog}
             stats={stats}
@@ -70,7 +70,7 @@ export default function UsersPage() {
                     className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm transition-colors"
                 >
                     <Plus size={16} />
-                    Invite User
+                    Add Staff
                 </button>
             }
             className="flex flex-col"

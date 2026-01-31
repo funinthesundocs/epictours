@@ -188,10 +188,10 @@
   }
 }
 
-/* Report Table Scrollbar - 50% thicker */
+/* Report Table Scrollbar - Slightly thicker than default */
 .report-scrollbar::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
+  height: 8px;
+  width: 8px;
 }
 
 .report-scrollbar::-webkit-scrollbar-track {
@@ -199,10 +199,10 @@
 }
 
 .report-scrollbar::-webkit-scrollbar-thumb {
-  background: #0e7490;
-  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-muted-foreground), transparent 50%);
+  border-radius: 10px;
 }
 
 .report-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #22d3ee;
+  background: color-mix(in srgb, var(--color-muted-foreground), transparent 20%);
 }

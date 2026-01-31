@@ -67,9 +67,9 @@ function AdminUsersContent() {
         userId?: string
     ): Promise<boolean> => {
         if (userId) {
-            return await updatePlatformUser(userId, { name: data.name, email: data.email });
+            return await updatePlatformUser(userId, data);
         } else {
-            return await createPlatformUser({ name: data.name, email: data.email });
+            return await createPlatformUser(data);
         }
     }, [createPlatformUser, updatePlatformUser]);
 

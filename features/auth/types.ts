@@ -39,6 +39,8 @@ export interface OrganizationUser {
     primary_position_id: string | null;
     is_organization_owner: boolean;
     status: string;
+    created_at: string;
+    updated_at: string;
     // Expanded position data
     position?: {
         name: string;
@@ -138,6 +140,14 @@ export interface AuthenticatedUser {
     id: string;
     email: string;
     name: string;
+    nickname?: string | null;
+    phone_number?: string | null;
+    notes?: string | null;
+    messaging_apps?: { type: string; handle: string }[] | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
     avatarUrl?: string;
 
     // Platform level (Tier 1)

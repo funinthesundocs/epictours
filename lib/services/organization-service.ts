@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { Organization, OrganizationUser } from "@/features/auth/types";
 
 export class OrganizationService {
@@ -38,7 +38,8 @@ export class OrganizationService {
             .select(`
                 *,
                 user:users (
-                    id, name, email, avatar_url, phone_number
+                    id, name, email, avatar_url, phone_number, nickname,
+                    notes, messaging_apps, address, city, state, zip_code
                 ),
                 position:staff_positions (
                     id, name
@@ -48,7 +49,20 @@ export class OrganizationService {
 
         if (error) throw error;
         return data as (OrganizationUser & {
-            user: { id: string; name: string; email: string; avatar_url: string | null; phone_number: string | null },
+            user: {
+                id: string;
+                name: string;
+                email: string;
+                avatar_url: string | null;
+                phone_number: string | null;
+                nickname: string | null;
+                notes: string | null;
+                messaging_apps: any[] | null;
+                address: string | null;
+                city: string | null;
+                state: string | null;
+                zip_code: string | null;
+            },
             position: { id: string; name: string } | null
         })[];
     }

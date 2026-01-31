@@ -157,8 +157,8 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
                         "h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-all",
-                        "bg-white/5 border border-white/10 hover:bg-white/10",
-                        selectedPresetId ? "text-cyan-400" : "text-zinc-300"
+                        "bg-muted/50 border border-border hover:bg-muted",
+                        selectedPresetId ? "text-primary" : "text-muted-foreground"
                     )}
                 >
                     {selectedPresetId
@@ -170,14 +170,14 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
 
                 {/* Dropdown Menu */}
                 {isOpen && (
-                    <div className="absolute top-full right-0 mt-1 w-72 bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="absolute top-full right-0 mt-1 w-72 bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                         {/* Save Current Settings Option */}
                         <button
                             onClick={() => {
                                 setIsSaveDialogOpen(true);
                                 setIsOpen(false);
                             }}
-                            className="w-full flex items-center gap-2 px-4 py-3 hover:bg-cyan-400/10 text-cyan-400 transition-colors border-b border-white/10"
+                            className="w-full flex items-center gap-2 px-4 py-3 hover:bg-primary/10 text-primary transition-colors border-b border-border"
                         >
                             <Save size={16} />
                             <span className="font-medium">Save Current Settings</span>
@@ -188,20 +188,20 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                             <button
                                 onClick={handleLoadCurrentReport}
                                 className={cn(
-                                    "w-full flex items-center gap-2 px-4 py-2.5 transition-colors border-b border-white/10",
+                                    "w-full flex items-center gap-2 px-4 py-2.5 transition-colors border-b border-border",
                                     selectedPresetId === null
-                                        ? "bg-cyan-400/10 text-cyan-400"
-                                        : "hover:bg-white/5 text-white"
+                                        ? "bg-primary/10 text-primary"
+                                        : "hover:bg-muted text-foreground"
                                 )}
                             >
-                                {selectedPresetId === null && <Check size={14} className="text-cyan-400" />}
+                                {selectedPresetId === null && <Check size={14} className="text-primary" />}
                                 <span className="text-sm font-medium">Current Report</span>
                             </button>
                         )}
 
                         {/* Presets List */}
                         {presets.length === 0 && !hasSavedCurrentSettings ? (
-                            <div className="px-4 py-3 text-sm text-zinc-500 text-center">
+                            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
                                 No saved presets
                             </div>
                         ) : (
@@ -213,21 +213,21 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                                         className={cn(
                                             "flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors group",
                                             selectedPresetId === preset.id
-                                                ? "bg-cyan-400/10 text-cyan-400"
-                                                : "hover:bg-white/5 text-white"
+                                                ? "bg-primary/10 text-primary"
+                                                : "hover:bg-muted text-foreground"
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
                                             {selectedPresetId === preset.id && (
-                                                <Check size={14} className="text-cyan-400" />
+                                                <Check size={14} className="text-primary" />
                                             )}
                                             <span className="text-sm">{preset.name}</span>
                                         </div>
                                         <button
                                             onClick={(e) => handleDeletePreset(e, preset.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded transition-all"
                                         >
-                                            <Trash2 size={14} className="text-red-400" />
+                                            <Trash2 size={14} className="text-destructive" />
                                         </button>
                                     </div>
                                 ))}
@@ -240,30 +240,30 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
             {/* Save Dialog Modal */}
             {isSaveDialogOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-                    <div className="bg-zinc-900 border border-white/10 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                    <div className="bg-popover border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                            <h3 className="text-lg font-semibold text-white">Save Preset</h3>
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                            <h3 className="text-lg font-semibold text-foreground">Save Preset</h3>
                             <button
                                 onClick={() => {
                                     setIsSaveDialogOpen(false);
                                     setNewPresetName("");
                                 }}
-                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                className="p-1 hover:bg-muted rounded transition-colors"
                             >
-                                <X size={20} className="text-zinc-400" />
+                                <X size={20} className="text-muted-foreground" />
                             </button>
                         </div>
 
                         {/* Body */}
                         <div className="px-6 py-6">
-                            <label className="block text-sm text-zinc-400 mb-2">Preset Name</label>
+                            <label className="block text-sm text-muted-foreground mb-2">Preset Name</label>
                             <input
                                 type="text"
                                 value={newPresetName}
                                 onChange={(e) => setNewPresetName(e.target.value)}
                                 placeholder="e.g., Weekly Summary"
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50"
+                                className="w-full px-4 py-3 bg-muted/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
                                 autoFocus
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && newPresetName.trim()) {
@@ -274,13 +274,13 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                         </div>
 
                         {/* Footer */}
-                        <div className="flex justify-end gap-3 px-6 py-4 border-t border-white/10 bg-white/5">
+                        <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/50">
                             <button
                                 onClick={() => {
                                     setIsSaveDialogOpen(false);
                                     setNewPresetName("");
                                 }}
-                                className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 Cancel
                             </button>
@@ -290,8 +290,8 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                                 className={cn(
                                     "px-6 py-2 rounded-lg text-sm font-medium transition-all",
                                     newPresetName.trim() && !isLoading
-                                        ? "bg-cyan-400 text-black hover:bg-cyan-300"
-                                        : "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                        : "bg-muted text-muted-foreground cursor-not-allowed"
                                 )}
                             >
                                 {isLoading ? "Saving..." : "Save Preset"}

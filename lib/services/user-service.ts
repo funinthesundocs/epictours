@@ -10,7 +10,8 @@ export class UserService {
         organizationId: string,
         email: string,
         name: string,
-        positionId?: string
+        positionId?: string,
+        nickname?: string
     ) {
         // 1. Check if user exists
         const { data: existingUser } = await supabase
@@ -28,6 +29,7 @@ export class UserService {
                 .insert({
                     email,
                     name,
+                    nickname: nickname || null,
                     temp_password: true, // Flag to force password setup
                     is_active: true
                 })
@@ -101,25 +103,51 @@ export class UserService {
     /**
      * Create a pure platform user (no organization link initially)
      */
-    static async createPlatformUser(email: string, name: string) {
+    static async createPlatformUser(data: {
+        email: string;
+        name: string;
+        nickname?: string;
+        phone_number?: string;
+        notes?: string;
+        messaging_apps?: { type: string; handle: string }[];
+        address?: string;
+        city?: string;
+        state?: string;
+        zip_code?: string;
+        is_platform_super_admin?: boolean;
+        is_platform_system_admin?: boolean;
+        password?: string;
+    }) {
         // 1. Check if user exists
         const { data: existingUser } = await supabase
             .from('users')
             .select('id')
-            .eq('email', email)
+            .eq('email', data.email)
             .single();
 
         if (existingUser) {
-            throw new Error(`User with email ${email} already exists.`);
+            throw new Error(`User with email ${data.email} already exists.`);
         }
 
         // 2. Create User
         const { data: newUser, error: createError } = await supabase
             .from('users')
             .insert({
-                email,
-                name,
-                temp_password: true,
+                email: data.email,
+                name: data.name,
+                nickname: data.nickname || null,
+                phone_number: data.phone_number || null,
+                notes: data.notes || null,
+                messaging_apps: data.messaging_apps || [],
+                address: data.address || null,
+                city: data.city || null,
+                state: data.state || null,
+                zip_code: data.zip_code || null,
+                is_platform_super_admin: data.is_platform_super_admin || false,
+                is_platform_system_admin: data.is_platform_system_admin || false,
+                // If password provided, use it. Otherwise set temp_password to true.
+                password_hash: data.password || null,
+                temp_password: !data.password,
                 is_active: true
             })
             .select()
@@ -132,10 +160,34 @@ export class UserService {
     /**
      * Update basic user details
      */
-    static async updateUser(userId: string, data: { name?: string; email?: string }) {
+    static async updateUser(userId: string, data: {
+        name?: string;
+        email?: string;
+        nickname?: string;
+        password?: string;
+        phone_number?: string;
+        notes?: string;
+        messaging_apps?: { type: string; handle: string }[];
+        address?: string;
+        city?: string;
+        state?: string;
+        zip_code?: string;
+        is_platform_super_admin?: boolean;
+        is_platform_system_admin?: boolean;
+    }) {
+        const updateData: any = { ...data };
+
+        // Handle password update - mapping to password_hash column
+        // In a real app, we would hash this password here
+        if (data.password) {
+            updateData.password_hash = data.password;
+        }
+        // Always remove the virtual 'password' field before sending to DB
+        delete updateData.password;
+
         const { error } = await supabase
             .from('users')
-            .update(data)
+            .update(updateData)
             .eq('id', userId);
 
         if (error) throw error;

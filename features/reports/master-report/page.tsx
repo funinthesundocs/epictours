@@ -381,12 +381,12 @@ export function MasterReportPage() {
             <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-400/10 flex items-center justify-center text-cyan-400 shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <FileSpreadsheet size={20} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-white">Master Report</h1>
-                            <p className="text-zinc-400 text-sm">Complete booking, customer, and operations data</p>
+                            <h1 className="text-2xl font-bold text-foreground">Master Report</h1>
+                            <p className="text-muted-foreground text-sm">Complete booking, customer, and operations data</p>
                         </div>
                     </div>
                 </div>
@@ -420,21 +420,21 @@ export function MasterReportPage() {
             </div>
 
             {isLoading && data.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-zinc-500 gap-2">
+                <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
                     <Loader2 size={24} className="animate-spin" />
                     Loading report data...
                 </div>
             ) : error ? (
-                <div className="flex items-center gap-2 text-red-400 bg-red-500/10 p-4 rounded-xl border border-red-500/20">
+                <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">
                     <AlertCircle size={20} />
                     {error}
                 </div>
             ) : sortedData.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                <div className="flex-1 flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-xl">
                     {searchQuery ? "No matching records found" : "No booking data available"}
                 </div>
             ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-white/5 bg-[#010e0f]">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
                         <ReportTable
                             data={fullyFilteredData}

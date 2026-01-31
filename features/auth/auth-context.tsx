@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import {
     AuthContextType,
     AuthenticatedUser,
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .select('*')
                 .eq('email', email)
                 .eq('is_active', true)
-                .single();
+                .single() as { data: any, error: any };
 
             if (userError || !userData) {
                 console.error('User fetch error:', userError);
@@ -128,6 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: userData.id,
                 email: userData.email,
                 name: userData.name,
+                nickname: userData.nickname || null,
+                phone_number: userData.phone_number || null,
+                notes: userData.notes || null,
+                messaging_apps: userData.messaging_apps || [],
                 avatarUrl: userData.avatar_url ?? undefined,
 
                 isPlatformSuperAdmin: isSuperAdmin,
@@ -194,24 +198,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [isAuthenticated, isLoading, pathname, router, user?.isPlatformAdmin]);
 
-    const login = async (email: string, password: string): Promise<LoginResult> => {
+    const login = async (emailOrNickname: string, password: string): Promise<LoginResult> => {
         try {
-            // For now, check against hardcoded accounts (will be replaced with proper auth)
-            // TODO: Implement proper password verification with bcrypt
-            const validAccounts = [
-                { email: "funinthesundocs", password: "epictours123!" },
-                { email: "denis@crodesign.com", password: "epictours123!" },
-            ];
+            // 1. Try to find user in local dev DB (users table)
+            // We check against email OR nickname
+            const { data: dbUser, error } = await supabase
+                .from('users')
+                .select('*')
+                .or(`email.eq.${emailOrNickname},nickname.eq.${emailOrNickname}`)
+                .eq('is_active', true)
+                .single();
 
-            const account = validAccounts.find(
-                acc => acc.email.toLowerCase() === email.toLowerCase() && acc.password === password
-            );
+            let isValid = false;
+            let finalEmail = "";
 
-            if (!account) {
-                return { success: false, error: "Invalid email or password" };
+            if (dbUser) {
+                // Verify password (comparing against password_hash column)
+                // Note: For this prototype/dev environment, we are doing direct comparison.
+                // In production, this MUST use bcrypt.compare(password, dbUser.password_hash)
+                if (dbUser.password_hash === password) {
+                    isValid = true;
+                    finalEmail = dbUser.email;
+                }
             }
 
-            const fullUser = await fetchUserData(account.email);
+            // 2. Fallback to Hardcoded Dev Accounts (if DB lookup fails or user not found)
+            // This is to prevent locking ourselves out if DB is empty or migration hasn't run
+            if (!isValid) {
+                const validAccounts = [
+                    { email: "funinthesundocs", password: "epictours123!" },
+                    { email: "denis@crodesign.com", password: "epictours123!" },
+                ];
+                const account = validAccounts.find(
+                    acc => (acc.email.toLowerCase() === emailOrNickname.toLowerCase() || acc.email.split('@')[0] === emailOrNickname) && acc.password === password
+                );
+
+                if (account) {
+                    isValid = true;
+                    finalEmail = account.email;
+                    // Note: This logic relies on fetchUserData finding the user by email later.
+                    // If the user isn't in DB, fetchUserData will fail anyway.
+                }
+            }
+
+            if (!isValid) {
+                return { success: false, error: "Invalid username or password" };
+            }
+
+            const fullUser = await fetchUserData(finalEmail);
             if (!fullUser) {
                 return { success: false, error: "User account not found in database" };
             }

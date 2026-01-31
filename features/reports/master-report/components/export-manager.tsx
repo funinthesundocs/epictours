@@ -264,19 +264,19 @@ export function ExportManager({ data, visibleColumns }: ExportManagerProps) {
         <div ref={dropdownRef} className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="h-8 px-3 text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center gap-2 transition-colors"
+                className="h-8 px-3 text-sm font-medium bg-muted/50 hover:bg-muted border border-border rounded-lg flex items-center gap-2 transition-colors"
             >
                 <Download size={14} />
                 Export
             </button>
 
             {isOpen && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                <div className="absolute top-full right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-xl z-50 overflow-hidden">
                     {/* PDF with inline options */}
                     {!showPdfOptions ? (
                         <button
                             onClick={() => setShowPdfOptions(true)}
-                            className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center justify-between transition-colors"
+                            className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center justify-between transition-colors"
                         >
                             <span className="flex items-center gap-2">
                                 <FileText size={14} />
@@ -288,21 +288,21 @@ export function ExportManager({ data, visibleColumns }: ExportManagerProps) {
                         <>
                             <button
                                 onClick={() => setShowPdfOptions(false)}
-                                className="w-full px-4 py-2 text-xs text-zinc-400 text-left hover:bg-white/5 flex items-center gap-1 transition-colors"
+                                className="w-full px-4 py-2 text-xs text-muted-foreground text-left hover:bg-muted/50 flex items-center gap-1 transition-colors"
                             >
                                 <ChevronRight size={12} className="rotate-180" />
                                 Back
                             </button>
                             <button
                                 onClick={() => exportToPdf("portrait")}
-                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors"
                             >
                                 <FileText size={14} />
                                 PDF - Portrait
                             </button>
                             <button
                                 onClick={() => exportToPdf("landscape")}
-                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors"
                             >
                                 <FileText size={14} />
                                 PDF - Landscape
@@ -315,7 +315,7 @@ export function ExportManager({ data, visibleColumns }: ExportManagerProps) {
 
                             <button
                                 onClick={exportToCsv}
-                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors"
                             >
                                 <FileText size={14} />
                                 CSV
@@ -323,17 +323,17 @@ export function ExportManager({ data, visibleColumns }: ExportManagerProps) {
 
                             <button
                                 onClick={exportToExcel}
-                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors"
                             >
                                 <FileSpreadsheet size={14} />
                                 Excel
                             </button>
 
-                            <div className="border-t border-white/10" />
+                            <div className="border-t border-border" />
 
                             <button
                                 onClick={copyForSpreadsheet}
-                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                className="w-full px-4 py-2.5 text-sm text-left hover:bg-muted flex items-center gap-2 transition-colors"
                             >
                                 <Copy size={14} />
                                 Copy for Spreadsheet

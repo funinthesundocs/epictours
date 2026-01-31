@@ -28,7 +28,7 @@ export function Sidebar() {
         pathname.startsWith('/admin')
     );
     const [isZoomSliderOpen, setIsZoomSliderOpen] = useState(false);
-    const { isPlatformAdmin, logout } = useAuth();
+    const { isPlatformAdmin, logout, user } = useAuth();
 
     // Ref for zoom slider click-outside detection
     const zoomSliderRef = useRef<HTMLDivElement>(null);
@@ -262,8 +262,7 @@ export function Sidebar() {
                     >
                         {isCollapsed ? (
                             <>
-                                {/* Collapsed: Profile avatar and icons below */}
-                                <div className="w-9 h-9 rounded-full bg-primary ring-2 ring-primary/20 shadow-[0_0_10px_color-mix(in_srgb,var(--primary),transparent_50%)]" />
+
                                 <div className="flex items-center gap-1">
                                     {/* Platform Admin Icon */}
                                     {isPlatformAdmin() && (
@@ -296,10 +295,14 @@ export function Sidebar() {
                         ) : (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-primary ring-2 ring-primary/20 shadow-[0_0_10px_color-mix(in_srgb,var(--primary),transparent_50%)] shrink-0" />
+
                                     <div className="text-base overflow-hidden whitespace-nowrap">
-                                        <p className="font-medium text-foreground">Admin</p>
-                                        <p className="text-sm text-primary">Online</p>
+                                        <p className="font-medium text-foreground truncate">
+                                            {user?.name?.split(' ')[0] || 'User'}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                            {user?.activePositionName || (user?.isPlatformAdmin ? 'Platform Admin' : 'Member')}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">

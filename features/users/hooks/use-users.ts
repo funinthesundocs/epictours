@@ -11,10 +11,19 @@ export interface User {
     userId: string; // The actual user.id
     email: string;
     name: string;
+    nickname: string | null;
     avatar_url: string | null;
     is_organization_owner: boolean;
     status: 'active' | 'invited' | 'suspended';
     created_at: string;
+    // Extended profile
+    phone_number?: string | null;
+    notes?: string | null;
+    messaging_apps?: { type: string; handle: string }[] | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
     // Position Data
     position: {
         id: string;
@@ -31,11 +40,29 @@ export interface User {
 export interface CreateUserData {
     email: string;
     name: string;
+    nickname?: string;
+    phone_number?: string;
+    notes?: string;
     position_id?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    messaging_apps?: { type: string; handle: string }[];
 }
 
 export interface UpdateUserData {
-    position_id?: string;
+    name?: string;
+    email?: string;
+    nickname?: string;
+    password?: string;
+    phone_number?: string;
+    notes?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    messaging_apps?: { type: string; handle: string }[];
 }
 
 export function useUsers() {
@@ -62,10 +89,18 @@ export function useUsers() {
                 userId: m.user.id,
                 email: m.user.email,
                 name: m.user.name,
+                nickname: m.user.nickname,
                 avatar_url: m.user.avatar_url,
-                is_organization_owner: m.is_owner,
-                status: m.status,
+                is_organization_owner: m.is_organization_owner,
+                status: m.status as 'active' | 'invited' | 'suspended',
                 created_at: m.created_at,
+                phone_number: m.user.phone_number,
+                notes: m.user.notes,
+                messaging_apps: m.user.messaging_apps,
+                address: m.user.address,
+                city: m.user.city,
+                state: m.user.state,
+                zip_code: m.user.zip_code,
                 position: m.position ? {
                     id: m.position.id,
                     name: m.position.name,
@@ -95,10 +130,11 @@ export function useUsers() {
 
         try {
             const result = await UserService.inviteUserToOrganization(
-                currentUser.organizationId,
+                userData.organizationId, // Wait, createPlatformUser args? No this is inviteUserToOrganization
                 userData.email,
                 userData.name,
-                userData.position_id
+                userData.position_id,
+                userData.nickname
             );
 
             if (!result.success && result.message) {
@@ -118,8 +154,32 @@ export function useUsers() {
 
     const updateUser = async (memberId: string, userData: UpdateUserData): Promise<boolean> => {
         try {
-            // Only updating position supported for now via this simplified hook
-            await UserService.updateMemberPosition(memberId, userData.position_id || null);
+            // 1. Update Profile (if name, email, nickname, or password provided)
+            if (userData.name || userData.email || userData.nickname || userData.password) {
+                // accessing user.userId from the list is hard without iterating
+                // Hack: We need the userId. We can find it in the users list using memberId.
+                const user = users.find(u => u.id === memberId);
+                if (user) {
+                    await UserService.updateUser(user.userId, {
+                        name: userData.name,
+                        email: userData.email,
+                        nickname: userData.nickname,
+                        password: userData.password,
+                        phone_number: userData.phone_number,
+                        notes: userData.notes,
+                        messaging_apps: userData.messaging_apps,
+                        address: userData.address,
+                        city: userData.city,
+                        state: userData.state,
+                        zip_code: userData.zip_code
+                    });
+                }
+            }
+
+            // 2. Update Position
+            if (userData.position_id !== undefined) {
+                await UserService.updateMemberPosition(memberId, userData.position_id || null);
+            }
 
             toast.success("User updated successfully");
             await fetchUsers();

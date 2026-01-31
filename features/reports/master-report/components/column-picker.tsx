@@ -172,21 +172,21 @@ function SortableColumnItem({ id, onRemove }: { id: string; onRemove: (key: stri
             ref={setNodeRef}
             style={style}
             className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm bg-white/5 border border-white/10 group transition-all",
-                isDragging && "opacity-50 bg-cyan-400/10 border-cyan-400/30 shadow-lg"
+                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm bg-muted/50 border border-border group transition-all",
+                isDragging && "opacity-50 bg-primary/10 border-primary/30 shadow-lg"
             )}
         >
             <div
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing text-zinc-500 hover:text-cyan-400 transition-colors"
+                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary transition-colors"
             >
                 <GripVertical size={16} />
             </div>
-            <span className="flex-1 text-white font-medium">{column.label}</span>
+            <span className="flex-1 text-foreground font-medium">{column.label}</span>
             <button
                 onClick={() => onRemove(id)}
-                className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-all p-1 hover:bg-red-400/10 rounded"
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1 hover:bg-destructive/10 rounded"
             >
                 <X size={14} />
             </button>
@@ -213,7 +213,7 @@ function CategoryGroup({
         <div className="mb-2">
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm font-bold text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
             >
                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 <span className="flex-1 text-left uppercase tracking-wider">{label}</span>
@@ -231,17 +231,17 @@ function CategoryGroup({
                             <button
                                 key={key}
                                 onClick={() => onToggle(key)}
-                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-zinc-300 hover:bg-white/10 hover:text-white"
+                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-muted hover:text-foreground"
                             >
                                 <div className={cn(
                                     "w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0",
                                     isActive
-                                        ? "bg-cyan-400 border-cyan-400"
-                                        : "border-white/20 hover:border-white/40"
+                                        ? "bg-primary border-primary"
+                                        : "border-border hover:border-muted-foreground"
                                 )}>
-                                    {isActive && <Check size={14} className="text-black" strokeWidth={3} />}
+                                    {isActive && <Check size={14} className="text-primary-foreground" strokeWidth={3} />}
                                 </div>
-                                <span className={cn(isActive && "text-white font-medium")}>{column.label}</span>
+                                <span className={cn(isActive && "text-foreground font-medium")}>{column.label}</span>
                             </button>
                         );
                     })}
@@ -292,12 +292,12 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset, onReorder }: C
                 onClick={() => setIsOpen(true)}
                 className={cn(
                     "h-8 px-3 flex items-center gap-2 rounded-lg text-sm font-medium transition-colors border whitespace-nowrap",
-                    "bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
+                    "bg-muted/50 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
             >
                 <Columns3 size={16} />
                 Columns
-                <span className="text-xs bg-cyan-400/20 text-cyan-400 px-1.5 py-0.5 rounded">
+                <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
                     {visibleColumns.length}
                 </span>
             </button>
@@ -313,8 +313,8 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset, onReorder }: C
                     {/* Left Column - Available Columns */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-white">Available Columns</h3>
-                            <span className="text-xs text-zinc-500">Click to add/remove</span>
+                            <h3 className="text-lg font-bold text-foreground">Available Columns</h3>
+                            <span className="text-xs text-muted-foreground">Click to add/remove</span>
                         </div>
                         <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-1">
                             {COLUMN_GROUPS.map((group) => (
@@ -330,16 +330,16 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset, onReorder }: C
                     </div>
 
                     {/* Divider */}
-                    <div className="w-px bg-white/10 shrink-0" />
+                    <div className="w-px bg-border shrink-0" />
 
                     {/* Right Column - Active Columns (Draggable) */}
                     <div className="flex-1 flex flex-col min-w-0">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-white">
+                            <h3 className="text-lg font-bold text-foreground">
                                 Active Columns
-                                <span className="ml-2 text-sm font-normal text-cyan-400">({visibleColumns.length})</span>
+                                <span className="ml-2 text-sm font-normal text-primary">({visibleColumns.length})</span>
                             </h3>
-                            <span className="text-xs text-zinc-500">Drag to reorder</span>
+                            <span className="text-xs text-muted-foreground">Drag to reorder</span>
                         </div>
                         <div className="flex-1 overflow-y-auto pr-2 -mr-2">
                             <DndContext
@@ -366,10 +366,10 @@ export function ColumnPicker({ visibleColumns, onToggle, onReset, onReorder }: C
 
                         {/* Reset Button */}
                         {!isDefault && (
-                            <div className="mt-4 pt-4 border-t border-white/10">
+                            <div className="mt-4 pt-4 border-t border-border">
                                 <button
                                     onClick={onReset}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-border"
                                 >
                                     <RotateCcw size={16} />
                                     Reset to Default

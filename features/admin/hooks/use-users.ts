@@ -43,7 +43,15 @@ export function useUsers() {
                     id: u.id,
                     email: u.email,
                     name: u.name,
+                    nickname: u.nickname,
                     avatarUrl: u.avatar_url,
+                    phone_number: u.phone_number,
+                    notes: u.notes,
+                    messaging_apps: u.messaging_apps,
+                    address: u.address,
+                    city: u.city,
+                    state: u.state,
+                    zip_code: u.zip_code,
 
                     isPlatformSuperAdmin: u.is_platform_super_admin,
                     isPlatformSystemAdmin: u.is_platform_system_admin,
@@ -96,9 +104,23 @@ export function useUsers() {
         }
     };
 
-    const createPlatformUser = async (data: { email: string; name: string }) => {
+    const createPlatformUser = async (data: {
+        email: string;
+        name: string;
+        nickname?: string;
+        phone_number?: string;
+        notes?: string;
+        messaging_apps?: { type: string; handle: string }[];
+        address?: string;
+        city?: string;
+        state?: string;
+        zip_code?: string;
+        is_platform_super_admin?: boolean;
+        is_platform_system_admin?: boolean;
+        password?: string;
+    }) => {
         try {
-            await UserService.createPlatformUser(data.email, data.name);
+            await UserService.createPlatformUser(data);
             toast.success("User created successfully");
             fetchUsers();
             return true;
@@ -109,7 +131,21 @@ export function useUsers() {
         }
     };
 
-    const updatePlatformUser = async (userId: string, data: { name: string; email: string }) => {
+    const updatePlatformUser = async (userId: string, data: {
+        name?: string;
+        email?: string;
+        nickname?: string;
+        password?: string;
+        phone_number?: string;
+        notes?: string;
+        messaging_apps?: { type: string; handle: string }[];
+        address?: string;
+        city?: string;
+        state?: string;
+        zip_code?: string;
+        is_platform_super_admin?: boolean;
+        is_platform_system_admin?: boolean;
+    }) => {
         try {
             await UserService.updateUser(userId, data);
             toast.success("User updated successfully");

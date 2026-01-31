@@ -179,14 +179,14 @@ function ColumnFilterDropdown({
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
                     "flex items-center gap-1 px-4 py-3 text-sm font-bold uppercase tracking-wider transition-colors select-none shrink-0 w-full whitespace-nowrap",
-                    hasFilter ? "text-cyan-400" : "text-white hover:text-zinc-300",
+                    hasFilter ? "text-primary" : "text-foreground hover:text-muted-foreground",
                     align === "right" && "justify-end",
                     align === "center" && "justify-center"
                 )}
             >
                 {columnLabel}
                 {hasFilter ? (
-                    <Filter size={14} className="text-cyan-400" />
+                    <Filter size={14} className="text-primary" />
                 ) : (
                     <ChevronDown size={14} className={cn("transition-transform", isOpen && "rotate-180")} />
                 )}
@@ -194,26 +194,26 @@ function ColumnFilterDropdown({
 
             {isOpen && (
                 <div
-                    className="absolute top-full left-0 mt-1 w-64 bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 max-h-80 overflow-hidden flex flex-col"
+                    className="absolute top-full left-0 mt-1 w-64 bg-popover border border-border rounded-lg shadow-xl z-50 max-h-80 overflow-hidden flex flex-col"
                     style={{ minWidth: "200px" }}
                 >
                     {/* Header */}
-                    <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
-                        <span className="text-xs text-zinc-400 uppercase tracking-wider">Filter by {columnLabel}</span>
-                        <span className="text-xs text-zinc-500">{uniqueValues.length} values</span>
+                    <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Filter by {columnLabel}</span>
+                        <span className="text-xs text-muted-foreground">{uniqueValues.length} values</span>
                     </div>
 
                     {/* Select All / Clear */}
-                    <div className="px-2 py-2 border-b border-white/10 flex gap-2">
+                    <div className="px-2 py-2 border-b border-border flex gap-2">
                         <button
                             onClick={handleSelectAll}
-                            className="flex-1 text-xs px-2 py-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 transition-colors"
+                            className="flex-1 text-xs px-2 py-1.5 rounded bg-muted hover:bg-muted/80 text-foreground transition-colors"
                         >
                             Select All
                         </button>
                         <button
                             onClick={handleClearAll}
-                            className="flex-1 text-xs px-2 py-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-300 transition-colors"
+                            className="flex-1 text-xs px-2 py-1.5 rounded bg-muted hover:bg-muted/80 text-foreground transition-colors"
                         >
                             Clear
                         </button>
@@ -228,18 +228,18 @@ function ColumnFilterDropdown({
                                 <button
                                     key={value}
                                     onClick={() => handleToggleValue(value)}
-                                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 transition-colors text-left"
+                                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-muted transition-colors text-left"
                                 >
                                     <div className={cn(
                                         "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
                                         isChecked
-                                            ? "bg-cyan-400 border-cyan-400"
-                                            : "border-white/20"
+                                            ? "bg-primary border-primary"
+                                            : "border-border"
                                     )}>
-                                        {isChecked && <Check size={12} className="text-black" strokeWidth={3} />}
+                                        {isChecked && <Check size={12} className="text-primary-foreground" strokeWidth={3} />}
                                     </div>
-                                    <span className="flex-1 text-sm text-white truncate">{value}</span>
-                                    <span className="text-xs text-zinc-500">({count})</span>
+                                    <span className="flex-1 text-sm text-foreground truncate">{value}</span>
+                                    <span className="text-xs text-muted-foreground">({count})</span>
                                 </button>
                             );
                         })}
@@ -265,24 +265,24 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
         switch (columnKey) {
             // Booking fields
             case "confirmation_number":
-                return <span className="font-mono text-white">{row.confirmation_number || "-"}</span>;
+                return <span className="font-mono text-foreground">{row.confirmation_number || "-"}</span>;
             case "booking_status":
-                return <span className="text-sm text-white">{row.booking_status || "-"}</span>;
+                return <span className="text-sm text-foreground">{row.booking_status || "-"}</span>;
             case "pax_count":
-                return <span className="text-white">{row.pax_count}</span>;
+                return <span className="text-foreground">{row.pax_count}</span>;
             case "total_amount":
-                return <span className="font-mono text-white">{formatCurrency(row.total_amount)}</span>;
+                return <span className="font-mono text-foreground">{formatCurrency(row.total_amount)}</span>;
             case "amount_paid":
-                return <span className="font-mono text-white">{formatCurrency(row.amount_paid)}</span>;
+                return <span className="font-mono text-foreground">{formatCurrency(row.amount_paid)}</span>;
             case "balance_due":
-                return <span className="font-mono text-white">{formatCurrency(row.balance_due)}</span>;
+                return <span className="font-mono text-foreground">{formatCurrency(row.balance_due)}</span>;
             case "payment_status": {
                 // Humanize snake_case to Title Case (e.g., "no_payment" → "No Payment")
                 const humanize = (str: string) => str
                     .split('_')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                     .join(' ');
-                return <span className="text-sm text-white">{row.payment_status ? humanize(row.payment_status) : "-"}</span>;
+                return <span className="text-sm text-foreground">{row.payment_status ? humanize(row.payment_status) : "-"}</span>;
             }
             case "voucher_numbers":
                 return row.voucher_numbers || "-";
@@ -295,11 +295,11 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
             case "booking_created_at":
                 return formatDate(row.booking_created_at);
             case "booking_id":
-                return <span className="font-mono text-sm text-white">{row.booking_id}</span>;
+                return <span className="font-mono text-sm text-foreground">{row.booking_id}</span>;
 
             // Customer fields
             case "customer_name":
-                return <span className="text-sm text-white">{row.customer_name}</span>;
+                return <span className="text-sm text-foreground">{row.customer_name}</span>;
             case "customer_email":
                 return row.customer_email || "-";
             case "customer_phone":
@@ -321,13 +321,13 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
             case "emergency_contact_phone":
                 return formatPhoneNumber(row.emergency_contact_phone);
             case "customer_total_value":
-                return <span className="font-mono text-white">{formatCurrency(row.customer_total_value)}</span>;
+                return <span className="font-mono text-foreground">{formatCurrency(row.customer_total_value)}</span>;
             case "customer_id":
-                return <span className="font-mono text-sm text-white">{row.customer_id}</span>;
+                return <span className="font-mono text-sm text-foreground">{row.customer_id}</span>;
 
             // Experience fields
             case "experience_code":
-                return <span className="font-mono text-white">{row.experience_code || "-"}</span>;
+                return <span className="font-mono text-foreground">{row.experience_code || "-"}</span>;
             case "experience_name":
                 return row.experience_name || "-";
             case "start_date":
@@ -420,17 +420,14 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
 
     return (
         <div className="h-full flex flex-col overflow-hidden">
-            {/* Horizontal scroll container */}
+            {/* Single scroll container that handles both directions */}
             <div
-                className="flex-1 overflow-x-auto overflow-y-hidden report-scrollbar"
-                style={{
-                    scrollbarWidth: 'auto',
-                    scrollbarColor: '#0e7490 transparent'
-                }}
+                ref={parentRef}
+                className="flex-1 overflow-auto"
             >
                 <div style={{ minWidth: `${totalWidth}px` }}>
-                    {/* Header with Filter Dropdowns */}
-                    <div className="shrink-0 bg-white/5 border-b-2 border-white/20 sticky top-0 z-10">
+                    {/* Header with Filter Dropdowns - Glass Effect */}
+                    <div className="bg-muted/80 backdrop-blur-sm border-b-2 border-border sticky top-0 z-20">
                         <div className="flex">
                             {visibleColumnConfigs.map((column) => (
                                 <div
@@ -451,80 +448,83 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                         </div>
                     </div>
 
-                    {/* Body with Virtual Scrolling */}
+                    {/* Virtual Scrolling Body */}
                     <div
-                        ref={parentRef}
-                        className="overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-800 scrollbar-track-transparent"
-                        style={{ height: "calc(100% - 44px)" }}
+                        style={{
+                            height: `${virtualizer.getTotalSize()}px`,
+                            width: "100%",
+                            position: "relative",
+                        }}
                     >
-                        <div
-                            style={{
-                                height: `${virtualizer.getTotalSize()}px`,
-                                width: "100%",
-                                position: "relative",
-                            }}
-                        >
-                            {virtualizer.getVirtualItems().map((virtualRow) => {
-                                const row = data[virtualRow.index];
-                                const isOddRow = virtualRow.index % 2 === 1;
-                                return (
-                                    <div
-                                        key={row.booking_id}
-                                        className={cn(
-                                            "absolute top-0 left-0 w-full flex items-center border-b border-white/10 hover:bg-cyan-400/10 transition-colors",
-                                            isOddRow && "bg-white/[0.02]"
-                                        )}
-                                        style={{
-                                            height: `${ROW_HEIGHT}px`,
-                                            transform: `translateY(${virtualRow.start}px)`,
-                                        }}
-                                    >
-                                        {visibleColumnConfigs.map((column) => (
-                                            <div
-                                                key={column.key}
-                                                onClick={() => onCellClick?.(row, column.key)}
-                                                className={cn(
-                                                    "px-4 text-sm text-white truncate shrink-0",
-                                                    getColumnAlign(column.key) === "right" && "text-right",
-                                                    getColumnAlign(column.key) === "center" && "text-center",
-                                                    onCellClick && "cursor-pointer hover:bg-cyan-400/10 transition-colors"
-                                                )}
-                                                style={{ width: getColumnWidth(column.key) }}
-                                            >
-                                                {getCellValue(row, column.key)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        {virtualizer.getVirtualItems().map((virtualRow) => {
+                            const row = data[virtualRow.index];
+                            const isOddRow = virtualRow.index % 2 === 1;
+                            return (
+                                <div
+                                    key={row.booking_id}
+                                    className={cn(
+                                        "absolute top-0 left-0 w-full flex items-center border-b border-border hover:bg-primary/10 transition-colors",
+                                        isOddRow && "bg-muted/30"
+                                    )}
+                                    style={{
+                                        height: `${ROW_HEIGHT}px`,
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                >
+                                    {visibleColumnConfigs.map((column) => (
+                                        <div
+                                            key={column.key}
+                                            onClick={() => onCellClick?.(row, column.key)}
+                                            className={cn(
+                                                "px-4 text-sm text-foreground truncate shrink-0",
+                                                getColumnAlign(column.key) === "right" && "text-right",
+                                                getColumnAlign(column.key) === "center" && "text-center",
+                                                onCellClick && "cursor-pointer hover:bg-primary/10 transition-colors"
+                                            )}
+                                            style={{ width: getColumnWidth(column.key) }}
+                                        >
+                                            {getCellValue(row, column.key)}
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })}
                     </div>
-
-                    {/* Totals Row */}
-                    {data.length > 0 && (
-                        <div className="shrink-0 bg-white/10 border-t-2 border-white/20 sticky bottom-0 z-10">
-                            <div
-                                className="flex items-center"
-                                style={{ height: `${ROW_HEIGHT}px` }}
-                            >
-                                {visibleColumnConfigs.map((column) => (
-                                    <div
-                                        key={column.key}
-                                        className={cn(
-                                            "px-4 text-sm font-bold text-white truncate shrink-0",
-                                            getColumnAlign(column.key) === "right" && "text-right",
-                                            getColumnAlign(column.key) === "center" && "text-center"
-                                        )}
-                                        style={{ width: getColumnWidth(column.key) }}
-                                    >
-                                        {formatTotalValue(column.key, columnTotals[column.key])}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Totals Row - Sticky at bottom outside scroll container */}
+            {data.length > 0 && (
+                <div
+                    className="shrink-0 bg-muted/80 backdrop-blur-sm border-t-2 border-border z-20"
+                    style={{
+                        overflowX: 'hidden',
+                        minWidth: `${totalWidth}px`
+                    }}
+                >
+                    <div
+                        className="flex items-center"
+                        style={{
+                            height: `${ROW_HEIGHT}px`,
+                            minWidth: `${totalWidth}px`
+                        }}
+                    >
+                        {visibleColumnConfigs.map((column) => (
+                            <div
+                                key={column.key}
+                                className={cn(
+                                    "px-4 text-sm font-bold text-foreground truncate shrink-0",
+                                    getColumnAlign(column.key) === "right" && "text-right",
+                                    getColumnAlign(column.key) === "center" && "text-center"
+                                )}
+                                style={{ width: getColumnWidth(column.key) }}
+                            >
+                                {formatTotalValue(column.key, columnTotals[column.key])}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

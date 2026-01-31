@@ -88,7 +88,9 @@ const US_STATES = [
 
 // Zod Schema
 const VendorSchema = z.object({
-    name: z.string().min(2, "Name is required"),
+    name: z.string().min(2, "Business Name is required"),
+    full_name: z.string().optional(), // Contact Person Name
+    nickname: z.string().optional(), // Contact Person Nickname
     address: z.string().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
@@ -145,6 +147,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
         resolver: zodResolver(VendorSchema),
         defaultValues: {
             name: "",
+            full_name: "",
+            nickname: "",
             address: "",
             city: "",
             state: "",
@@ -180,6 +184,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             if (initialData) {
                 reset({
                     name: initialData.name,
+                    full_name: "", // We don't have this on vendor yet, unless we fetch linked user
+                    nickname: "", // Same as above
                     address: initialData.address || "",
                     city: initialData.city || "",
                     state: initialData.state || "",
@@ -196,6 +202,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                 const pw = generatePassword();
                 reset({
                     name: "",
+                    full_name: "",
+                    nickname: "",
                     address: "",
                     city: "",
                     state: "",
@@ -243,13 +251,25 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     toast.info("Linked to existing user account");
                 } else {
                     // Create new user
+                    // USE FULL NAME FOR USER ACCOUNT, FALLBACK TO BUSINESS NAME
+                    const userName = data.full_name || data.name;
+
                     const { data: newUser, error: userError } = await supabase
                         .from("users")
                         .insert([{
                             email: data.email,
-                            name: data.name,
+                            name: userName,
+                            nickname: data.nickname || null,
                             password_hash: data.temp_password,
                             temp_password: true,
+                            phone_number: data.phone?.replace(/\D/g, "") || null,
+                            address: data.address || null,
+                            city: data.city || null,
+                            state: data.state || null,
+                            zip_code: data.zip_code || null,
+                            messaging_apps: data.preferred_messaging_app
+                                ? [{ type: data.preferred_messaging_app, handle: data.messaging_handle || "" }]
+                                : [],
                         }])
                         .select()
                         .single();
@@ -320,10 +340,34 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     <div>
                         <SectionHeader icon={Info} title="Basic Information" className="-mt-6 border-t-0" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Row 1: Contact Name and Nickname */}
+                            <div className="space-y-2">
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <UserPlus size={16} className="text-muted-foreground" />
+                                    Contact Person (Full Name)
+                                </Label>
+                                <Input
+                                    {...register("full_name")}
+                                    placeholder="e.g. John Doe"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <span className="text-muted-foreground">👤</span>
+                                    Nickname
+                                </Label>
+                                <Input
+                                    {...register("nickname")}
+                                    placeholder="e.g. Johnny"
+                                />
+                            </div>
+
+                            {/* Row 2: Business Name and EIN */}
                             <div className="space-y-2">
                                 <Label className="text-foreground flex items-center gap-2">
                                     <Handshake size={16} className="text-muted-foreground" />
-                                    Vendor Name <RequiredIndicator />
+                                    Business Name <RequiredIndicator />
                                 </Label>
                                 <Input
                                     {...register("name")}
@@ -331,6 +375,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                 />
                                 {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                             </div>
+
                             <div className="space-y-2">
                                 <Label className="text-foreground flex items-center gap-2">
                                     <FileText size={16} className="text-muted-foreground" />
@@ -376,37 +421,40 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                                 </div>
                             </div>
 
-                            {/* Preferred Messaging App */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-muted-foreground flex items-center gap-2">
-                                        <MessageCircle size={16} className="text-muted-foreground" />
-                                        Preferred Messaging
-                                    </Label>
-                                    <CustomSelect
-                                        value={watch("preferred_messaging_app") || ""}
-                                        onChange={(val) => {
-                                            setValue("preferred_messaging_app", val || null, { shouldDirty: true });
-                                            // Clear handle when app is unselected
-                                            if (!val) setValue("messaging_handle", null);
-                                        }}
-                                        options={MESSAGING_OPTIONS}
-                                        placeholder="Select App..."
-                                    />
-                                </div>
 
-                                {/* Handle/Nickname - Only shows when app is selected */}
-                                {watch("preferred_messaging_app") && (
-                                    <div className="space-y-2">
-                                        <Label className="text-muted-foreground flex items-center gap-2">
-                                            Handle / Nickname
-                                        </Label>
-                                        <Input
-                                            {...register("messaging_handle")}
-                                            placeholder="@username or phone"
-                                        />
+
+                            <div className="space-y-3 pt-2">
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-foreground flex items-center gap-2">
+                                                <MessageCircle size={16} className="text-muted-foreground" />
+                                                Preferred Messaging
+                                            </Label>
+                                            <CustomSelect
+                                                value={watch("preferred_messaging_app") || ""}
+                                                onChange={(val) => {
+                                                    setValue("preferred_messaging_app", val || "", { shouldDirty: true });
+                                                    if (!val) setValue("messaging_handle", "");
+                                                }}
+                                                options={MESSAGING_OPTIONS}
+                                                placeholder="Select App..."
+                                            />
+                                        </div>
+
+                                        {watch("preferred_messaging_app") && (
+                                            <div className="space-y-2">
+                                                <Label className="text-foreground flex items-center gap-2">
+                                                    Handle / Nickname
+                                                </Label>
+                                                <Input
+                                                    {...register("messaging_handle")}
+                                                    placeholder="@username or phone"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             <div className="space-y-2">

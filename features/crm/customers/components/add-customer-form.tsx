@@ -251,19 +251,6 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-foreground flex items-center gap-2">
-                                    <Mail size={16} className="text-muted-foreground" />
-                                    Email <RequiredIndicator />
-                                </Label>
-                                <Input
-                                    {...register("email")}
-                                    type="email"
-                                    placeholder="jane@example.com"
-                                />
-                                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-foreground flex items-center gap-2">
                                     <Phone size={16} className="text-muted-foreground" />
                                     Phone
                                 </Label>
@@ -285,6 +272,19 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                                     })}
                                     placeholder="(555) 000-0000"
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-foreground flex items-center gap-2">
+                                    <Mail size={16} className="text-muted-foreground" />
+                                    Email <RequiredIndicator />
+                                </Label>
+                                <Input
+                                    {...register("email")}
+                                    type="email"
+                                    placeholder="jane@example.com"
+                                />
+                                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                             </div>
                         </div>
 
