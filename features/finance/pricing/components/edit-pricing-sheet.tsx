@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { LoadingState } from "@/components/ui/loading-state";
 
 // Zod Schemas - tier is now dynamic string
 const PricingRateSchema = z.object({
@@ -268,8 +269,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 <div className="flex items-center border-b border-border mb-0 sticky top-0 bg-card z-10">
                     {isLoadingVariations ? (
                         <div className="flex items-center justify-center py-3 w-full px-6">
-                            <Loader2 className="animate-spin text-muted-foreground" size={16} />
-                            <span className="ml-2 text-muted-foreground text-sm">Loading variations...</span>
+                            <LoadingState size="sm" message="Loading variations..." />
                         </div>
                     ) : pricingVariations.length === 0 ? (
                         <div className="py-3 text-muted-foreground text-sm w-full text-center px-6">

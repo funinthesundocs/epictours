@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Bus, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -113,7 +114,7 @@ export default function VehiclesPage() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
+                        <LoadingState message="Loading vehicles..." />
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">

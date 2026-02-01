@@ -8,7 +8,8 @@
     "build": "cross-env NODE_OPTIONS='--no-deprecation' next build",
     "prestart": "npx kill-port 3001 || true",
     "start": "cross-env NODE_OPTIONS='--no-deprecation' next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "powershell -ExecutionPolicy Bypass -File scripts/db-migrate.ps1"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

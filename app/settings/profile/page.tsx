@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { User, Mail, Save, Loader2, Info, Contact, MapPin, MessageCircle, Plus, Trash2, Shield, RefreshCw, Copy, Eye, EyeOff, LogOut } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -202,7 +203,7 @@ export default function UserProfilePage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <Loader2 className="animate-spin text-primary" size={32} />
+                <LoadingState message="Loading profile..." size="lg" />
             </div>
         );
     }

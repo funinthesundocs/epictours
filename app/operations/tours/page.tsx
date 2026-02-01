@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Map, Plus, Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
@@ -65,19 +66,17 @@ export default function ToursPage() {
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
             <div className="h-full flex flex-col space-y-4">
-                {isLoading ? (
-                    <div className="flex justify-center py-12">
-                        <Loader2 className="animate-spin text-primary" size={32} />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading ? (
+                        <LoadingState message="Loading experiences..." />
+                    ) : (
                         <ExperiencesTable
                             data={data}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                         />
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             <ExperienceSheet

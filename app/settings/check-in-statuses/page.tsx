@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
 
 // Color options (70% opacity for soft effect)
 const COLOR_OPTIONS = [
@@ -170,9 +171,7 @@ export default function CheckInStatusesPage() {
                 {/* Table Area */}
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     {isLoading ? (
-                        <div className="flex items-center justify-center h-full text-muted-foreground animate-pulse">
-                            Loading statuses...
-                        </div>
+                        <LoadingState message="Loading statuses..." />
                     ) : filteredStatuses.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
                             <UserCheck size={32} className="opacity-50" />

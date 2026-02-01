@@ -54,43 +54,71 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
 
         try {
             if (customerToEdit) {
-                // EDIT MODE
-                const { data, error: updateError } = await supabase
+                // EDIT MODE - First get customer's user_id, then update user
+                const { data: customer } = await supabase
                     .from('customers')
-                    .update({
-                        name,
-                        email,
-                        phone: phone || undefined,
-                        // Not updating status or created_at
-                    })
+                    .select('user_id')
                     .eq('id', customerToEdit.id)
-                    .select()
                     .single();
 
-                if (updateError) throw updateError;
-
-                if (data) {
-                    onCustomerUpdated?.({
-                        id: data.id,
-                        name: data.name,
-                        email: data.email,
-                        phone: data.phone || undefined,
-                        status: data.status as any // casting to satisfy strict check if needed, or just status if types align
-                    });
-                    onOpenChange(false);
+                if (customer?.user_id) {
+                    // Update user identity data
+                    await supabase
+                        .from('users')
+                        .update({
+                            name,
+                            email,
+                            phone_number: phone || null,
+                        })
+                        .eq('id', customer.user_id);
                 }
+
+                // Return the updated customer info
+                onCustomerUpdated?.({
+                    id: customerToEdit.id,
+                    name,
+                    email,
+                    phone: phone || undefined,
+                    status: customerToEdit.status
+                });
+                onOpenChange(false);
             } else {
-                // CREATE MODE
-                const { data, error: insertError } = await supabase
-                    .from('customers')
+                // CREATE MODE - First create user, then create customer with user_id
+                // Check for duplicate email
+                const { data: existing } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                if (existing) {
+                    setError("A user with this email already exists.");
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Create user first
+                const { data: newUser, error: userError } = await supabase
+                    .from('users')
                     .insert({
                         name,
                         email,
-                        phone: phone || undefined,
-                        status: 'active', // Default to active for new quick adds
+                        phone_number: phone || null,
+                    })
+                    .select('id')
+                    .single();
+
+                if (userError) throw userError;
+
+                // Create customer linked to user
+                const { data, error: insertError } = await supabase
+                    .from('customers')
+                    .insert({
+                        user_id: newUser.id,
+                        status: 'active',
                         created_at: new Date().toISOString()
                     })
-                    .select()
+                    .select('id')
                     .single();
 
                 if (insertError) throw insertError;
@@ -98,10 +126,10 @@ export function QuickAddCustomerDialog({ isOpen, onOpenChange, onCustomerCreated
                 if (data) {
                     onCustomerCreated({
                         id: data.id,
-                        name: data.name,
-                        email: data.email,
-                        phone: data.phone || undefined, // Ensure phone is mapped if present in type
-                        status: data.status as any
+                        name,
+                        email,
+                        phone: phone || undefined,
+                        status: 'active' as any
                     });
                     onOpenChange(false);
                 }

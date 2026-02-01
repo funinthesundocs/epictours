@@ -42,6 +42,67 @@
 *   **Icons**: Use `lucide-react` icons (16px).
 *   **Indicators**: Use `text-primary` or `bg-primary` for active states.
 
+### 1.4 Loading States (Strict)
+*   **Standard**: ALL page-level and section-level loading states MUST use the `LoadingState` component.
+*   **Component**: `@/components/ui/loading-state`
+*   **Features**:
+    *   Primary-colored spinner with blur glow effect
+    *   Size variants: `sm`, `md` (default), `lg`
+    *   Optional message text
+*   **Usage**:
+    ```tsx
+    import { LoadingState } from "@/components/ui/loading-state";
+    
+    // Page loading
+    if (isLoading) {
+        return <LoadingState message="Loading customers..." />;
+    }
+    
+    // Inline/smaller loading
+    <LoadingState size="sm" />
+    ```
+*   **DO NOT USE**:
+    *   Inline `Loader2` with `animate-spin` for page/section loading
+    *   Custom border-based spinners (e.g., `border-2 border-primary/30 border-t-primary rounded-full animate-spin`)
+*   **Exception — Theme Toggle Loading Overlay**:
+    *   Located in `sidebar.tsx` for light/dark mode switching
+    *   Uses full-screen overlay with larger glow effect and transition text
+    *   Do NOT use `LoadingState` for this specific case — reference the existing implementation in `sidebar.tsx`
+*   **Button Loading States**:
+    *   For save/submit button spinners (e.g., "Saving..."), inline `Loader2` is acceptable
+    *   These are action feedback, not page loading states
+
+### 1.5 Progressive Loading (Tables & Calendars)
+*   **Principle**: Shell renders first → container visible → loading spinner centered → data loads
+*   **Structure**:
+    1. Page header/toolbar render immediately (no loading check)
+    2. Table/calendar container (`rounded-xl border bg-card`) always visible
+    3. `LoadingState` renders INSIDE the container when loading
+    4. Data replaces loading state when ready
+*   **Pattern**:
+    ```tsx
+    // Header and toolbar render immediately - NO loading check here
+    <Header />
+    <Toolbar />
+    
+    // Container always renders, loading inside
+    {error ? (
+        <ErrorState />
+    ) : (
+        <div className="flex-1 ... rounded-xl border border-border bg-card">
+            {isLoading && data.length === 0 ? (
+                <LoadingState message="Loading..." />
+            ) : (
+                <div className={cn("h-full", isLoading && "opacity-50")}>
+                    <Table data={data} />
+                </div>
+            )}
+        </div>
+    )}
+    ```
+*   **Benefits**: Users see the full page layout immediately, understanding the structure before data arrives
+
+
 ## 2. UI Components (Deep Core)
 *   **SidePanel / Sheet Layouts**:
     *   **Standard Structure (Glass Pattern)**:
@@ -443,3 +504,157 @@
         ```
 *   **Collision Detection**:
     *   Perform collision checks against `window.innerWidth` / `window.innerHeight` using the **Visual Coordinates** (unscaled) *before* converting them to CSS positions.
+
+## 15. Unified User Data Model
+
+### Architecture Overview
+The system uses a **Unified Users Table** with **Module-Specific Extension Tables**:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        users (Core Identity)                     │
+│  id, name, email, phone_number, avatar_url, is_active,           │
+│  is_organization_admin, organization_id                          │
+└────────────────────────┬────────────────────────────────────────┘
+                         │ user_id (FK)
+        ┌────────────────┼────────────────┬────────────────┐
+        ▼                ▼                ▼                ▼
+   ┌─────────┐      ┌─────────┐      ┌──────────┐    ┌──────────┐
+   │  staff  │      │customers│      │ vendors  │    │(future)  │
+   │─────────│      │─────────│      │──────────│    │──────────│
+   │user_id  │      │user_id  │      │user_id   │    │user_id   │
+   │position │      │status   │      │ein_number│    │...       │
+   │driver_  │      │total_   │      │insurance │    │          │
+   │ license │      │ value   │      │ docs     │    │          │
+   │guide_   │      │metadata │      │billing   │    │          │
+   │ license │      │prefs    │      │ address  │    │          │
+   └─────────┘      └─────────┘      └──────────┘    └──────────┘
+   (Operations)     (CRM Module)    (Transport)     (New Module)
+```
+
+### Core Principle
+*   **`users` table** = **Identity Data** (name, email, phone, avatar)
+*   **Module tables** (`staff`, `customers`, `vendors`) = **Role/Context-Specific Data**
+
+A single person could potentially exist in multiple modules (e.g., a staff member who is also a customer), all pointing to the same `users` row.
+
+### Query Pattern (CRITICAL)
+
+**NEVER** select `name`, `email`, or `phone` directly from module tables. Always join to `users`:
+
+```typescript
+// ❌ WRONG - These columns don't exist on module tables anymore
+const { data } = await supabase
+    .from('customers')
+    .select('id, name, email, phone');
+
+// ✅ CORRECT - Join to users for identity data
+const { data } = await supabase
+    .from('customers')
+    .select('id, status, total_value, user:users(id, name, email, phone_number)');
+
+// Then flatten the data for easier access:
+const flattenedData = (data || []).map(c => ({
+    id: c.id,
+    name: c.user?.name || 'Unknown',
+    email: c.user?.email || '',
+    phone: c.user?.phone_number || '',
+    status: c.status,
+    total_value: c.total_value
+}));
+```
+
+### Module-Specific Fields
+
+Each module table stores **context-specific** data that only makes sense in that module:
+
+| Module | Table | Custom Fields |
+|--------|-------|---------------|
+| Operations | `staff` | `position_id`, `driver_license`, `guide_license`, `is_available` |
+| CRM | `customers` | `status`, `total_value`, `metadata` (hotel, source), `preferences` |
+| Transportation | `vendors` | `ein_number`, `insurance_docs`, `billing_address`, `license_info` |
+
+### Creating New Records Pattern
+
+When creating a new module record (e.g., customer), you **MUST**:
+1. Create the user first (or find existing by email)
+2. Then create the module record linked via `user_id`
+
+```typescript
+// ✅ CORRECT - Create user first, then link module record
+const handleCreate = async () => {
+    // 1. Check for existing user
+    const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+    let userId = existing?.id;
+
+    // 2. Create user if doesn't exist
+    if (!userId) {
+        const { data: newUser, error } = await supabase
+            .from('users')
+            .insert({ name, email, phone_number: phone })
+            .select('id')
+            .single();
+
+        if (error) throw error;
+        userId = newUser.id;
+    }
+
+    // 3. Create module record linked to user
+    const { error: moduleError } = await supabase
+        .from('customers')
+        .insert({
+            user_id: userId,
+            status: 'active',
+            // Module-specific fields only
+            metadata: { hotel, source },
+            preferences: { dietary: [], marketing_consent: {...} }
+        });
+};
+```
+
+### Staff Query Examples
+
+```typescript
+// Fetching staff for dropdown/lookup
+const { data: staff } = await supabase
+    .from('staff')
+    .select('id, user:users(name)')
+    .eq('is_active', true);
+
+// Build a name lookup map
+const staffMap = Object.fromEntries(
+    (staff || []).map(s => [s.id, s.user?.name || 'Unknown'])
+);
+
+// Using in display: staffMap[booking.driver_id]
+```
+
+### Vendors Query Examples
+
+```typescript
+// Fetching vendors for vehicle assignment
+const { data } = await supabase
+    .from('vendors')
+    .select('id, user:users(name, email, phone_number)')
+    .order('created_at');
+
+// Flatten for display
+const vendors = (data || []).map(v => ({
+    id: v.id,
+    name: v.user?.name || 'Unknown',
+    email: v.user?.email || '',
+    phone: v.user?.phone_number || ''
+}));
+```
+
+### Reference Implementations
+*   **Customer Creation**: `features/crm/customers/components/add-customer-form.tsx`
+*   **Staff Query**: `features/bookings/components/bookings-calendar.tsx`
+*   **Vendor Query**: `app/operations/transportation/vendors/page.tsx`
+*   **Quick Add Customer**: `features/bookings/components/booking-desk/quick-add-customer-dialog.tsx`
+

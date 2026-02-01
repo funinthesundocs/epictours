@@ -99,9 +99,11 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
     // Fetch vendors on mount
     useEffect(() => {
         const fetchVendors = async () => {
-            const { data } = await supabase.from('vendors' as any).select('id, name').order('name');
+            const { data } = await supabase.from('vendors' as any).select('id, user:users(name)').order('created_at');
             if (data) {
-                setVendors(data.map(v => ({ value: v.id, label: v.name })));
+                setVendors((data as any[])
+                    .filter(v => v.user?.name)
+                    .map(v => ({ value: v.id, label: v.user.name })));
             }
         };
         fetchVendors();

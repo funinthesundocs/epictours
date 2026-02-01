@@ -108,7 +108,10 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
     // 1. Init from Availability & Fetch Lists
     useEffect(() => {
-        if (!isOpen || !currentAvailability) return;
+        // In edit mode, we can proceed without availability initially (booking data includes availability_id)
+        // In create mode, we need the availability
+        if (!isOpen) return;
+        if (!currentAvailability && !editingBookingId) return;
 
         // Reset State only for NEW bookings (not edit mode)
         // In edit mode, we'll populate from the fetched booking data
@@ -120,18 +123,35 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             setConfirmationNumber(null);
         }
         setIsSaving(false);
-        // Default Schedule
-        if (currentAvailability.pricing_schedule_id) {
+        // Default Schedule (only if availability is present)
+        if (currentAvailability?.pricing_schedule_id) {
             setSelectedScheduleId(currentAvailability.pricing_schedule_id);
         }
-        if (currentAvailability.booking_option_schedule_id) {
+        if (currentAvailability?.booking_option_schedule_id) {
             setSelectedOptionScheduleId(currentAvailability.booking_option_schedule_id);
         }
 
         const fetchData = async () => {
-            // Customers
-            const { data: custData } = await supabase.from('customers' as any).select('id, name, email').order('name');
-            if (custData) setCustomers(custData as unknown as Customer[]);
+            // Customers - only select id from customers, get name/email from joined users
+            const { data: custData, error: custError } = await supabase
+                .from('customers' as any)
+                .select('id, user_id, user:users(id, name, email)')
+                .order('created_at', { ascending: false });
+
+            if (custError) {
+                console.error("Error fetching customers:", custError);
+            }
+            if (custData) {
+                // Flatten user data - name/email come from the linked user
+                const flattenedCustomers = (custData as any[])
+                    .filter(c => c.user) // Only include customers with linked users
+                    .map(c => ({
+                        id: c.id,
+                        name: c.user?.name || 'Unknown',
+                        email: c.user?.email || ''
+                    }));
+                setCustomers(flattenedCustomers as unknown as Customer[]);
+            }
 
             // Schedules
             const { data: schedData } = await supabase.from('pricing_schedules' as any).select('id, name').order('name');
@@ -174,7 +194,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                 console.log("DEBUG: Edit mode - fetching booking:", editingBookingId);
                 const { data: bookingData, error: bookingError } = await supabase
                     .from('bookings' as any)
-                    .select('*, customers(id, name, email)')
+                    .select('*, customers(id, user:users(id, name, email)), availability:availabilities(id, experience_id, pricing_schedule_id, booking_option_schedule_id, start_date, start_time, max_capacity, experience:experiences(id, name, short_code))')
                     .eq('id', editingBookingId)
                     .single();
 
@@ -189,11 +209,35 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                         setConfirmationNumber(booking.confirmation_number);
                     }
 
+                    // Load availability data including pricing schedule
+                    if (booking.availability) {
+                        console.log("DEBUG: Setting availability from booking:", booking.availability);
+                        const enrichedAvail = {
+                            ...booking.availability,
+                            experience_name: booking.availability.experience?.name || 'Unknown Experience',
+                            experience_short_code: booking.availability.experience?.short_code || 'EXP'
+                        };
+                        delete enrichedAvail.experience;
+                        setCurrentAvailability(enrichedAvail);
+
+                        // Set pricing schedule from availability
+                        if (booking.availability.pricing_schedule_id) {
+                            setSelectedScheduleId(booking.availability.pricing_schedule_id);
+                        }
+                        if (booking.availability.booking_option_schedule_id) {
+                            setSelectedOptionScheduleId(booking.availability.booking_option_schedule_id);
+                        }
+                    }
+
                     let waitingForPaxMap = false;
 
-                    // Populate customer
-                    if (booking.customers) {
-                        setSelectedCustomer(booking.customers as Customer);
+                    // Populate customer - flatten user data
+                    if (booking.customers?.user) {
+                        setSelectedCustomer({
+                            id: booking.customers.id,
+                            name: booking.customers.user.name || 'Unknown',
+                            email: booking.customers.user.email || ''
+                        } as Customer);
                     }
 
                     // Populate pax breakdown (or fallback to simple pax_count)

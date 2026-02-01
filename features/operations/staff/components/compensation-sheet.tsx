@@ -8,6 +8,7 @@ import { SidePanel } from "@/components/ui/side-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface CompensationSheetProps {
     isOpen: boolean;
@@ -155,9 +156,7 @@ export function CompensationSheet({ isOpen, onClose, staffId, staffName }: Compe
             contentClassName="p-0 overflow-hidden flex flex-col"
         >
             {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-primary" size={32} />
-                </div>
+                <LoadingState className="h-64" />
             ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="h-full flex flex-col">
 

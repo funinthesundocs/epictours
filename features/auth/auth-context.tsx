@@ -84,9 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             let subscribedModules: ModuleCode[] = [];
             if (activeOrg?.id) {
                 const { data: subscriptions } = await supabase
-                    .from('tenant_subscriptions')
+                    .from('organization_subscriptions')
                     .select('modules(code)')
-                    .eq('tenant_id', activeOrg.id)
+                    .eq('organization_id', activeOrg.id)
                     .eq('status', 'active');
 
                 subscribedModules = (subscriptions ?? [])
@@ -144,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 memberId: activeOrgMembership?.id ?? null,
                 isOrganizationOwner: activeOrgMembership?.is_organization_owner ?? false,
+                isOrganizationAdmin: activeOrgMembership?.is_organization_owner ?? false, // Alias
                 activePositionId: activePosition?.id ?? null,
                 activePositionName: activePosition?.name ?? null,
 
@@ -293,6 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     organizationSlug: null,
                     memberId: null,
                     isOrganizationOwner: false,
+                    isOrganizationAdmin: false,
                     activePositionId: null,
                     activePositionName: null,
                     subscribedModules: ['crm', 'bookings', 'transportation', 'communications', 'visibility', 'finance', 'settings'],
@@ -334,7 +336,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const isPlatformAdmin = (): boolean => user?.isPlatformAdmin ?? false;
-    const isTenantAdmin = (): boolean => user?.isOrganizationOwner ?? false; // Backward compat for hook name
+    const isTenantAdmin = (): boolean => user?.isOrganizationOwner ?? false; // Deprecated, use isOrganizationAdmin
+    const isOrganizationAdmin = (): boolean => user?.isOrganizationAdmin ?? false;
 
     return (
         <AuthContext.Provider
@@ -349,6 +352,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 can,
                 isPlatformAdmin,
                 isTenantAdmin,
+                isOrganizationAdmin,
             }}
         >
             {children}

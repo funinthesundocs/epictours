@@ -9,7 +9,7 @@ import { getRegisteredModules } from "@/features/modules/registry";
 
 export interface Subscription {
     id: string;
-    tenant_id: string;
+    organization_id: string;
     module_code: ModuleCode;
     is_active: boolean;
     expires_at: string | null;
@@ -23,9 +23,9 @@ export interface SubscriptionUpdate {
 }
 
 /**
- * Hook for managing tenant subscriptions (System Admin only).
+ * Hook for managing organization subscriptions (System Admin only).
  */
-export function useSubscriptions(tenantId: string | null) {
+export function useSubscriptions(organizationId: string | null) {
     const { isPlatformAdmin } = useAuth();
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,7 @@ export function useSubscriptions(tenantId: string | null) {
     const availableModules = getRegisteredModules();
 
     const fetchSubscriptions = useCallback(async () => {
-        if (!tenantId || !isPlatformAdmin()) {
+        if (!organizationId || !isPlatformAdmin()) {
             return;
         }
 
@@ -43,9 +43,9 @@ export function useSubscriptions(tenantId: string | null) {
 
         try {
             const { data, error: fetchError } = await supabase
-                .from("tenant_subscriptions")
+                .from("organization_subscriptions")
                 .select("*")
-                .eq("tenant_id", tenantId)
+                .eq("organization_id", organizationId)
                 .order("module_code");
 
             if (fetchError) throw fetchError;
@@ -57,14 +57,14 @@ export function useSubscriptions(tenantId: string | null) {
         } finally {
             setIsLoading(false);
         }
-    }, [tenantId, isPlatformAdmin]);
+    }, [organizationId, isPlatformAdmin]);
 
     const setModuleSubscription = async (
         moduleCode: ModuleCode,
         isActive: boolean,
         expiresAt?: string | null
     ): Promise<boolean> => {
-        if (!tenantId || !isPlatformAdmin()) {
+        if (!organizationId || !isPlatformAdmin()) {
             toast.error("Access denied");
             return false;
         }
@@ -76,7 +76,7 @@ export function useSubscriptions(tenantId: string | null) {
             if (existingSub) {
                 // Update existing
                 const { error } = await supabase
-                    .from("tenant_subscriptions")
+                    .from("organization_subscriptions")
                     .update({
                         is_active: isActive,
                         expires_at: expiresAt ?? null,
@@ -87,9 +87,9 @@ export function useSubscriptions(tenantId: string | null) {
             } else if (isActive) {
                 // Create new subscription
                 const { error } = await supabase
-                    .from("tenant_subscriptions")
+                    .from("organization_subscriptions")
                     .insert([{
-                        tenant_id: tenantId,
+                        organization_id: organizationId,
                         module_code: moduleCode,
                         is_active: true,
                         expires_at: expiresAt ?? null,
@@ -109,7 +109,7 @@ export function useSubscriptions(tenantId: string | null) {
     };
 
     const updateBulkSubscriptions = async (updates: SubscriptionUpdate[]): Promise<boolean> => {
-        if (!tenantId || !isPlatformAdmin()) {
+        if (!organizationId || !isPlatformAdmin()) {
             toast.error("Access denied");
             return false;
         }

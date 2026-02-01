@@ -6,6 +6,7 @@ import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { LoadingState } from "@/components/ui/loading-state";
 
 // Inner component to consume the context
 function PageLayoutContent({ children }: { children: ReactNode }) {
@@ -19,10 +20,7 @@ function PageLayoutContent({ children }: { children: ReactNode }) {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    <p className="text-muted-foreground text-sm">Loading...</p>
-                </div>
+                <LoadingState message="Loading..." />
             </div>
         );
     }

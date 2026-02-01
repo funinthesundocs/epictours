@@ -137,29 +137,51 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
         const formattedPhone = formatPhoneNumber(data.phone);
 
         try {
-            // Check for duplicate email on Create
+            // Check for duplicate email in users table on Create
             if (!initialData?.id) {
                 const { data: existing } = await supabase
-                    .from("customers")
+                    .from("users")
                     .select("id")
                     .eq("email", data.email)
                     .maybeSingle();
 
                 if (existing) {
-                    setSubmitError("A customer with this email already exists.");
+                    setSubmitError("A user with this email already exists.");
                     setIsSubmitting(false);
                     return;
                 }
             }
 
             if (initialData?.id) {
-                // UPDATE Mode
+                // UPDATE Mode - update both users and customers
+                // Use user_id from initialData if available, otherwise fetch it
+                let userId = (initialData as any).user_id;
+
+                if (!userId) {
+                    const { data: customer } = await supabase
+                        .from("customers")
+                        .select("user_id")
+                        .eq("id", initialData.id)
+                        .single();
+                    userId = customer?.user_id;
+                }
+
+                if (userId) {
+                    // Update user identity data
+                    await supabase
+                        .from("users")
+                        .update({
+                            name: data.name,
+                            email: data.email,
+                            phone_number: formattedPhone,
+                        })
+                        .eq("id", userId);
+                }
+
+                // Update customer module data
                 const { error } = await supabase
                     .from("customers")
                     .update({
-                        name: data.name,
-                        email: data.email,
-                        phone: formattedPhone,
                         status: data.status,
                         tags: data.tags,
                         preferences: data.preferences,
@@ -168,13 +190,24 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
-                // INSERT Mode
+                // INSERT Mode - create user first, then customer with user_id
+                const { data: newUser, error: userError } = await supabase
+                    .from("users")
+                    .insert({
+                        name: data.name,
+                        email: data.email,
+                        phone_number: formattedPhone,
+                    })
+                    .select("id")
+                    .single();
+
+                if (userError) throw userError;
+
+                // Create customer linked to user
                 const { error } = await supabase
                     .from("customers")
                     .insert([{
-                        name: data.name,
-                        email: data.email,
-                        phone: formattedPhone,
+                        user_id: newUser.id,
                         status: data.status,
                         tags: data.tags,
                         preferences: data.preferences,

@@ -6,7 +6,8 @@ import { PageShell } from "@/components/shell/page-shell";
 import { CustomerTypesTable } from "@/features/customer-types/components/customer-types-table";
 import { CustomerTypeSheet } from "@/features/customer-types/components/customer-type-sheet";
 import { supabase } from "@/lib/supabase";
-import { Plus, Loader2, Tags } from "lucide-react";
+import { Plus, Tags } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 
 export default function CustomerTypesPage() {
     const [data, setData] = useState<any[]>([]);
@@ -74,20 +75,17 @@ export default function CustomerTypesPage() {
                 </button>
             }
         >
-            {isLoading ? (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
-                    <Loader2 size={24} className="animate-spin text-primary" />
-                    Loading...
-                </div>
-            ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                {isLoading ? (
+                    <LoadingState />
+                ) : (
                     <CustomerTypesTable
                         data={data}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                     />
-                </div>
-            )}
+                )}
+            </div>
 
             <CustomerTypeSheet
                 isOpen={isSheetOpen}

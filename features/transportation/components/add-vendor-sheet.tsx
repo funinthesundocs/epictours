@@ -223,15 +223,12 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
     const onSubmit = async (data: VendorFormData) => {
         setIsSubmitting(true);
         try {
-            // Strip formatting and create payload
+            // Strip formatting and create payload (no name/email/phone - those go to users table)
             const payload: Record<string, any> = {
-                name: data.name,
                 address: data.address || null,
                 city: data.city || null,
                 state: data.state || null,
                 zip_code: data.zip_code || null,
-                phone: data.phone?.replace(/\D/g, "") || null,
-                email: data.email || null,
                 ein_number: data.ein_number || null,
                 preferred_messaging_app: data.preferred_messaging_app || null,
                 messaging_handle: data.messaging_handle || null
@@ -294,6 +291,25 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             }
 
             if (initialData?.id) {
+                // UPDATE MODE - also update user record with identity data
+                const { data: vendorRecord } = await supabase
+                    .from("vendors")
+                    .select("user_id")
+                    .eq("id", initialData.id)
+                    .single();
+
+                if (vendorRecord?.user_id) {
+                    const userName = data.full_name || data.name;
+                    await supabase
+                        .from("users")
+                        .update({
+                            name: userName,
+                            email: data.email || null,
+                            phone_number: data.phone?.replace(/\D/g, "") || null,
+                        })
+                        .eq("id", vendorRecord.user_id);
+                }
+
                 const { error } = await supabase
                     .from("vendors")
                     .update(payload)

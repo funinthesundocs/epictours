@@ -172,9 +172,9 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
     };
 
     const onSubmit = async (data: RoleFormData) => {
-        // Only require tenant context for creating new groups
-        if (!initialData?.id && !user?.tenantId) {
-            alert("No tenant context");
+        // Only require organization context for creating new groups
+        if (!initialData?.id && !user?.organizationId) {
+            alert("No organization context");
             return;
         }
 
@@ -193,11 +193,11 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
-                // Create role - tenantId is guaranteed to exist from check above
+                // Create role - organizationId is guaranteed to exist from check above
                 const { data: newRole, error } = await supabase
                     .from("roles")
                     .insert([{
-                        tenant_id: user!.tenantId!,
+                        organization_id: user!.organizationId!,
                         name: data.name,
                         description: data.description || null,
                     }])

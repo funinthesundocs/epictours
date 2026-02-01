@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { CustomFieldsTable } from "@/features/settings/custom-fields/components/custom-fields-table";
 import { EditCustomFieldSheet } from "@/features/settings/custom-fields/components/edit-custom-field-sheet";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
 
 // Supabase Setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -161,9 +162,7 @@ export default function CustomFieldsPage() {
                 {/* Table Area */}
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     {isLoading ? (
-                        <div className="flex items-center justify-center h-full text-muted-foreground animate-pulse">
-                            Loading fields...
-                        </div>
+                        <LoadingState message="Loading fields..." />
                     ) : (
                         <CustomFieldsTable
                             data={filteredFields}

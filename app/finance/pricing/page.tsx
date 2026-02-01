@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Coins, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
@@ -110,19 +111,17 @@ export default function PricingPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading ? (
+                        <LoadingState message="Loading pricing schedules..." />
+                    ) : (
                         <PricingSchedulesTable
                             data={filteredSchedules}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                         />
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             <EditPricingSheet

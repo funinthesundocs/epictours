@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Shield, Plus, Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -128,20 +129,20 @@ export default function PermissionsPage() {
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-6"
         >
-            {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-primary" size={32} />
-                </div>
-            ) : (
-                <PermissionGroupsPositionsList
-                    groups={groups}
-                    onEditGroup={handleEditGroup}
-                    onDeleteGroup={handleDeleteGroup}
-                    onAddPosition={handleAddPosition}
-                    onEditPosition={handleEditPosition}
-                    onDeletePosition={handleDeletePosition}
-                />
-            )}
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                {isLoading ? (
+                    <LoadingState message="Loading permissions..." />
+                ) : (
+                    <PermissionGroupsPositionsList
+                        groups={groups}
+                        onEditGroup={handleEditGroup}
+                        onDeleteGroup={handleDeleteGroup}
+                        onAddPosition={handleAddPosition}
+                        onEditPosition={handleEditPosition}
+                        onDeletePosition={handleDeletePosition}
+                    />
+                )}
+            </div>
 
             <AddRoleSheet
                 isOpen={isGroupSheetOpen}

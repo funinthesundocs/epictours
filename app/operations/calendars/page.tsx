@@ -1,7 +1,8 @@
 "use client";
 
 import { PageShell } from "@/components/shell/page-shell";
-import { Calendar, Clock, Loader2 } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { AvailabilityCalendarWrapper } from "@/features/availability/components/availability-calendar-wrapper";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -29,9 +30,7 @@ export default function CalendarsPage() {
             ]}
         >
             {isLoading ? (
-                <div className="flex h-[600px] items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-                </div>
+                <LoadingState className="h-[600px]" />
             ) : (
                 <div className="h-[800px]">
                     <AvailabilityCalendarWrapper experiences={experiences} />

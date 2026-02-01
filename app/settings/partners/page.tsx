@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Handshake, Plus, Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePartners } from "@/features/partners/hooks/use-partners";
@@ -40,18 +41,16 @@ export default function SettingsPartnersPage() {
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-6"
         >
-            {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-primary" size={32} />
-                </div>
-            ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                {isLoading ? (
+                    <LoadingState message="Loading partners..." />
+                ) : (
                     <PartnersTable
                         data={partners}
                         onRevoke={revokeAccess}
                     />
-                </div>
-            )}
+                )}
+            </div>
 
             <PartnerInviteSheet
                 isOpen={isInviteSheetOpen}

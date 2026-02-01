@@ -10,6 +10,7 @@ import { SortCriteria } from "./components/sort-manager";
 import { PresetSettings } from "./components/preset-manager";
 import { Loader2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
 import { BookingDesk } from "@/features/bookings/components/booking-desk";
 import { AddCustomerSheet } from "@/features/crm/customers/components/add-customer-sheet";
 import { EditAvailabilitySheet } from "@/features/availability/components/edit-availability-sheet";
@@ -62,8 +63,9 @@ export function MasterReportPage() {
 
     // Handle cell click - route to appropriate side panel based on column category
     const handleCellClick = useCallback(async (row: MasterReportRow, columnKey: string) => {
+        // Row click passes "booking" directly - otherwise check column category
         const column = REPORT_COLUMNS.find(c => c.key === columnKey);
-        const category = column?.category;
+        const category = columnKey === "booking" ? "booking" : column?.category;
 
         if (!category) return;
 
@@ -71,24 +73,46 @@ export function MasterReportPage() {
             case "booking":
             case "experience":
             case "pickup":
-                // Open BookingDesk - need to fetch availability data
+                // Open BookingDesk - need to fetch availability data with experience info
                 const { data: availData } = await supabase
                     .from("availabilities" as any)
-                    .select("*")
+                    .select("*, experience:experiences(id, name, short_code)")
                     .eq("id", row.availability_id)
                     .single();
-                setBookingPanelData({ availability: availData as Availability, bookingId: row.booking_id });
+
+                // Flatten experience data for BookingDesk
+                const enrichedAvail = availData ? {
+                    ...availData,
+                    experience_name: availData.experience?.name || 'Unknown Experience',
+                    experience_short_code: availData.experience?.short_code || 'EXP'
+                } : null;
+                delete (enrichedAvail as any)?.experience;
+
+                setBookingPanelData({ availability: enrichedAvail as Availability, bookingId: row.booking_id });
                 setBookingPanelOpen(true);
                 break;
 
             case "customer":
-                // Open AddCustomerSheet - fetch customer data
+                // Open AddCustomerSheet - fetch customer data with user identity
                 const { data: custData } = await supabase
                     .from("customers" as any)
-                    .select("*")
+                    .select("*, user:users(id, name, email, phone_number, avatar_url)")
                     .eq("id", row.customer_id)
                     .single();
-                setEditingCustomer(custData as Customer);
+
+                // Flatten user data to match Customer type
+                if (custData) {
+                    const flattenedCustomer = {
+                        ...custData,
+                        name: custData.user?.name || 'Unknown',
+                        email: custData.user?.email || '',
+                        phone: custData.user?.phone_number || '',
+                        avatar_url: custData.user?.avatar_url || null,
+                        user_id: custData.user?.id || null
+                    };
+                    delete (flattenedCustomer as any).user;
+                    setEditingCustomer(flattenedCustomer as Customer);
+                }
                 setCustomerPanelOpen(true);
                 break;
 
@@ -159,7 +183,7 @@ export function MasterReportPage() {
                     .select(`
                         id, status, pax_count, total_amount, amount_paid, payment_status,
                         voucher_numbers, notes, confirmation_number, created_at,
-                        customers(id, name, email, phone, status, total_value, metadata, preferences),
+                        customers(id, status, total_value, metadata, preferences, user:users(name, email, phone_number)),
                         availabilities(
                             id, start_date, start_time, max_capacity, experience_id,
                             experiences(id, name, short_code)
@@ -167,7 +191,7 @@ export function MasterReportPage() {
                     `)
                     .limit(MAX_RECORDS)
                     .order('created_at', { ascending: false }),
-                supabase.from('staff' as any).select('id, name'),
+                supabase.from('staff' as any).select('id, user:users(name)'),
                 supabase.from('vehicles' as any).select('id, name'),
                 supabase.from('schedules' as any).select('id, name')
             ]);
@@ -177,7 +201,7 @@ export function MasterReportPage() {
             // Build lookup maps
             const staffMap: Record<string, string> = {};
             if (staffRes.data) {
-                (staffRes.data as any[]).forEach(s => { staffMap[s.id] = s.name; });
+                (staffRes.data as any[]).forEach(s => { staffMap[s.id] = s.user?.name || 'Unknown'; });
             }
 
             const vehicleMap: Record<string, string> = {};
@@ -193,6 +217,7 @@ export function MasterReportPage() {
             if (bookingsRes.data) {
                 const rows: MasterReportRow[] = bookingsRes.data.map((b: any) => {
                     const customer = b.customers || {};
+                    const customerUser = customer.user || {};
                     const availability = b.availabilities || {};
                     const experience = availability.experiences || {};
                     const metadata = customer.metadata || {};
@@ -213,11 +238,11 @@ export function MasterReportPage() {
                         notes: b.notes,
                         booking_created_at: b.created_at,
 
-                        // Customer fields
+                        // Customer fields - now from user relation
                         customer_id: customer.id || "",
-                        customer_name: customer.name || "Unknown",
-                        customer_email: customer.email,
-                        customer_phone: customer.phone,
+                        customer_name: customerUser.name || "Unknown",
+                        customer_email: customerUser.email || "",
+                        customer_phone: customerUser.phone_number || "",
                         customer_hotel: metadata.hotel || null,
                         customer_source: metadata.source || null,
                         customer_status: customer.status || null,
@@ -419,33 +444,32 @@ export function MasterReportPage() {
                 />
             </div>
 
-            {isLoading && data.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
-                    <Loader2 size={24} className="animate-spin" />
-                    Loading report data...
-                </div>
-            ) : error ? (
+            {error ? (
                 <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">
                     <AlertCircle size={20} />
                     {error}
                 </div>
-            ) : sortedData.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-xl">
-                    {searchQuery ? "No matching records found" : "No booking data available"}
-                </div>
             ) : (
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                    <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
-                        <ReportTable
-                            data={fullyFilteredData}
-                            unfilteredData={sortedData}
-                            visibleColumns={visibleColumns}
-                            searchQuery={searchQuery}
-                            columnFilters={columnFilters}
-                            onColumnFilterChange={handleColumnFilterChange}
-                            onCellClick={handleCellClick}
-                        />
-                    </div>
+                    {isLoading && data.length === 0 ? (
+                        <LoadingState message="Loading report data..." className="h-full" />
+                    ) : sortedData.length === 0 ? (
+                        <div className="flex-1 flex items-center justify-center h-full text-muted-foreground">
+                            {searchQuery ? "No matching records found" : "No booking data available"}
+                        </div>
+                    ) : (
+                        <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                            <ReportTable
+                                data={fullyFilteredData}
+                                unfilteredData={sortedData}
+                                visibleColumns={visibleColumns}
+                                searchQuery={searchQuery}
+                                columnFilters={columnFilters}
+                                onColumnFilterChange={handleColumnFilterChange}
+                                onCellClick={handleCellClick}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 

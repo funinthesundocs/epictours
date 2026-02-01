@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Users, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -27,12 +28,19 @@ export default function StaffPage() {
         try {
             const { data, error } = await supabase
                 .from("staff")
-                .select("*, position:staff_positions(name)")
-                .order("name");
+                .select("*, position:staff_positions(name), user:users(name, email, phone_number)")
+                .order("id");
 
             if (error) throw error;
-            setStaff(data || []);
-            setFilteredStaff(data || []);
+            // Flatten user data for easier access
+            const flattenedData = (data || []).map(s => ({
+                ...s,
+                name: s.user?.name || s.name,
+                email: s.user?.email || s.email,
+                phone: s.user?.phone_number || s.phone
+            }));
+            setStaff(flattenedData);
+            setFilteredStaff(flattenedData);
         } catch (err) {
             console.error("Error loading staff:", err);
         } finally {
@@ -52,9 +60,9 @@ export default function StaffPage() {
         }
         const lowerQ = searchQuery.toLowerCase();
         const filtered = staff.filter(s =>
-            s.name.toLowerCase().includes(lowerQ) ||
+            s.name?.toLowerCase().includes(lowerQ) ||
             s.email?.toLowerCase().includes(lowerQ) ||
-            s.role?.name?.toLowerCase().includes(lowerQ) ||
+            s.position?.name?.toLowerCase().includes(lowerQ) ||
             s.phone?.toLowerCase().includes(lowerQ) ||
             s.messaging_app?.toLowerCase().includes(lowerQ) ||
             s.notes?.toLowerCase().includes(lowerQ)
@@ -126,7 +134,7 @@ export default function StaffPage() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
+                        <LoadingState message="Loading staff..." />
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">

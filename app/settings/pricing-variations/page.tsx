@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Layers, Plus, Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { PricingVariationsTable } from "@/features/settings/pricing-variations/components/pricing-variations-table";
@@ -104,20 +105,18 @@ export default function PricingVariationsPage() {
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
-            {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                    <Loader2 className="animate-spin text-primary" size={32} />
-                </div>
-            ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                {isLoading ? (
+                    <LoadingState message="Loading variations..." />
+                ) : (
                     <PricingVariationsTable
                         data={variations}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onReorder={handleReorder}
                     />
-                </div>
-            )}
+                )}
+            </div>
 
             <EditVariationSheet
                 isOpen={isSheetOpen}

@@ -64,9 +64,9 @@ export interface ModuleResource {
     default_actions: PermissionAction[];
 }
 
-export interface TenantSubscription {
+export interface OrganizationSubscription {
     id: string;
-    tenant_id: string;
+    organization_id: string;
     module_id: string;
     starts_at: string;
     expires_at: string | null;
@@ -80,8 +80,8 @@ export interface User {
     name: string;
     avatar_url: string | null;
     platform_role: PlatformRole | null;
-    tenant_id: string | null;
-    is_tenant_admin: boolean;
+    organization_id: string | null;
+    is_organization_admin: boolean;
     temp_password: boolean;
     created_at: string;
     last_login_at: string | null;
@@ -90,7 +90,7 @@ export interface User {
 
 export interface Role {
     id: string;
-    tenant_id: string;
+    organization_id: string;
     name: string;
     description: string | null;
     color: string;
@@ -163,6 +163,7 @@ export interface AuthenticatedUser {
     // Member details in active organization
     memberId: string | null; // ID in organization_users table
     isOrganizationOwner: boolean;
+    isOrganizationAdmin: boolean; // Alias for isOrganizationOwner for consistency
     activePositionId: string | null;
     activePositionName: string | null;
 
@@ -195,7 +196,8 @@ export interface AuthContextType {
     hasModule: (module: ModuleCode) => boolean;
     can: (action: PermissionAction, module: ModuleCode, resource: string) => boolean;
     isPlatformAdmin: () => boolean;
-    isTenantAdmin: () => boolean;
+    isTenantAdmin: () => boolean; // Deprecated, use isOrganizationAdmin
+    isOrganizationAdmin: () => boolean;
 }
 
 export interface LoginResult {

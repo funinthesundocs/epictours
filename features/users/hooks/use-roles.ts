@@ -8,7 +8,7 @@ import type { ModuleCode, PermissionAction } from "@/features/auth/types";
 
 export interface Role {
     id: string;
-    tenant_id: string;
+    organization_id: string;
     name: string;
     description: string | null;
     color: string | null;
@@ -54,7 +54,7 @@ export function useRoles() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchRoles = useCallback(async () => {
-        if (!currentUser?.tenantId) {
+        if (!currentUser?.organizationId) {
             setRoles([]);
             setIsLoading(false);
             return;
@@ -71,7 +71,7 @@ export function useRoles() {
                     role_permissions(*),
                     user_roles(count)
                 `)
-                .eq("tenant_id", currentUser.tenantId)
+                .eq("organization_id", currentUser.organizationId)
                 .order("name");
 
             if (fetchError) throw fetchError;
@@ -90,15 +90,15 @@ export function useRoles() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentUser?.tenantId]);
+    }, [currentUser?.organizationId]);
 
     useEffect(() => {
         fetchRoles();
     }, [fetchRoles]);
 
     const createRole = async (roleData: CreateRoleData): Promise<string | null> => {
-        if (!currentUser?.tenantId) {
-            toast.error("No tenant context");
+        if (!currentUser?.organizationId) {
+            toast.error("No organization context");
             return null;
         }
 
@@ -106,7 +106,7 @@ export function useRoles() {
             const { data: newRole, error: createError } = await supabase
                 .from("roles")
                 .insert({
-                    tenant_id: currentUser.tenantId,
+                    organization_id: currentUser.organizationId,
                     name: roleData.name,
                     description: roleData.description || null,
                     color: roleData.color || null,

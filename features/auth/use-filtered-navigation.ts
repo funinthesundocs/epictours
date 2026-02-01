@@ -10,18 +10,18 @@ import type { ModuleCode } from "@/features/auth/types";
  * Returns only the navigation items the current user is allowed to see.
  */
 export function useFilteredNavigation(): NavSection[] {
-    const { user, hasModule, isPlatformAdmin, isTenantAdmin } = useAuth();
+    const { user, hasModule, isPlatformAdmin, isOrganizationAdmin } = useAuth();
 
     return useMemo(() => {
         const isAdmin = isPlatformAdmin();
-        const isTenantAdminUser = isTenantAdmin();
+        const isOrgAdmin = isOrganizationAdmin();
 
         // If not authenticated, show only items without requirements
         if (!user) {
             return filterNavigation(navigation, {
                 hasModule: () => false,
                 isPlatformAdmin: false,
-                isTenantAdmin: false
+                isOrganizationAdmin: false
             });
         }
 
@@ -33,15 +33,15 @@ export function useFilteredNavigation(): NavSection[] {
         return filterNavigation(navigation, {
             hasModule,
             isPlatformAdmin: isAdmin,
-            isTenantAdmin: isTenantAdminUser
+            isOrganizationAdmin: isOrgAdmin
         });
-    }, [user, hasModule, isPlatformAdmin, isTenantAdmin]);
+    }, [user, hasModule, isPlatformAdmin, isOrganizationAdmin]);
 }
 
 interface FilterContext {
     hasModule: (module: ModuleCode) => boolean;
     isPlatformAdmin: boolean;
-    isTenantAdmin: boolean;
+    isOrganizationAdmin: boolean;
 }
 
 /**
@@ -82,8 +82,8 @@ function filterItems(items: NavigationItem[], ctx: FilterContext): NavigationIte
                 return null;
             }
 
-            // Check tenant admin requirement
-            if (item.tenantAdminOnly && !ctx.isTenantAdmin && !ctx.isPlatformAdmin) {
+            // Check organization admin requirement
+            if (item.organizationAdminOnly && !ctx.isOrganizationAdmin && !ctx.isPlatformAdmin) {
                 return null;
             }
 

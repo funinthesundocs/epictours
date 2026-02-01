@@ -164,11 +164,12 @@ export function AvailabilityCalendar({
     // 1. Fetch Reference Data (Staff & Routes)
     useEffect(() => {
         const fetchRefs = async () => {
-            const { data: staff } = await supabase.from('staff' as any).select('id, name');
+            const { data: staff } = await supabase.from('staff' as any).select('id, name, user:users(name)');
             const { data: routes } = await supabase.from('schedules' as any).select('id, name');
             const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name');
 
-            if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.name])));
+            // Use user.name if available, fallback to staff.name
+            if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.user?.name || s.name])));
             if (routes) setRouteMap(Object.fromEntries((routes as any[]).map(r => [r.id, r.name])));
             if (vehicles) setVehicleMap(Object.fromEntries((vehicles as any[]).map(v => [v.id, v.name])));
         };

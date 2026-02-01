@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { LoadingState } from "@/components/ui/loading-state";
 
 type ActivityLog = {
     id: string;
@@ -72,9 +73,8 @@ export function RecentActivity() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full text-muted-foreground gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                Loading...
+            <div className="flex items-center justify-center h-full">
+                <LoadingState size="sm" message="Loading..." />
             </div>
         );
     }

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { LoadingState } from "@/components/ui/loading-state";
 import { ColumnOne } from "./edit-availability/column-one";
 import { ColumnTwo } from "./edit-availability/column-two";
 import { ColumnThree } from "./edit-availability/column-three";
@@ -335,9 +336,7 @@ export function EditAvailabilitySheet({
                 <form onSubmit={handleSubmit(onSubmit, (err) => console.error(err))} className="h-full flex flex-col">
                     <div className="flex-1 overflow-hidden">
                         {isLoading ? (
-                            <div className="flex items-center justify-center h-64">
-                                <Loader2 className="animate-spin text-primary" size={32} />
-                            </div>
+                            <LoadingState className="h-64" />
                         ) : (
                             <div className="flex-1 grid grid-cols-[25fr_37.5fr_37.5fr] min-h-0 divide-x divide-border bg-transparent">
                                 {/* COLUMN 1: Schedule */}

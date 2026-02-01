@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Users, Loader2, Search, Shield, ShieldAlert, Plus, Edit2, Trash2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useMemo, useCallback } from "react";
 import { useUsers } from "@/features/admin/hooks/use-users";
 import { cn } from "@/lib/utils";
@@ -106,7 +107,7 @@ function AdminUsersContent() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
+                        <LoadingState message="Loading users..." />
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-auto rounded-xl border border-border bg-card">

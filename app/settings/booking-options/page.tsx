@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
 import { BookingOptionsTable } from "@/features/settings/booking-options/components/booking-options-table";
 import { EditBookingOptionSheet } from "@/features/settings/booking-options/components/edit-booking-option-sheet";
 
@@ -131,9 +132,7 @@ export default function BookingOptionsPage() {
                 {/* Table Area */}
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                     {isLoading ? (
-                        <div className="flex items-center justify-center h-full text-muted-foreground animate-pulse">
-                            Loading schedules...
-                        </div>
+                        <LoadingState message="Loading schedules..." />
                     ) : (
                         <BookingOptionsTable
                             data={filteredSchedules}

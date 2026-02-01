@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { LoadingState } from "@/components/ui/loading-state";
 import {
     Power,
     Users,
@@ -1151,9 +1152,7 @@ export function BulkEditSheet({
         >
             <div className="h-full flex flex-col">
                 {isLoading ? (
-                    <div className="flex-1 flex items-center justify-center">
-                        <Loader2 className="animate-spin text-cyan-400" size={32} />
-                    </div>
+                    <LoadingState className="flex-1" />
                 ) : (
                     <>
                         {/* Three Column Layout */}

@@ -81,12 +81,12 @@ export function BookingsCalendar({
     // 1. Fetch Reference Data
     useEffect(() => {
         const fetchRefs = async () => {
-            const { data: staff } = await supabase.from('staff' as any).select('id, name');
+            const { data: staff } = await supabase.from('staff' as any).select('id, user:users(name)');
             const { data: routes } = await supabase.from('schedules' as any).select('id, name');
             const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name');
             const { data: exps } = await supabase.from('experiences' as any).select('id, name, short_code');
 
-            if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.name])));
+            if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.user?.name || 'Unknown'])));
             if (routes) setRouteMap(Object.fromEntries((routes as any[]).map(r => [r.id, r.name])));
             if (vehicles) setVehicleMap(Object.fromEntries((vehicles as any[]).map(v => [v.id, v.name])));
             if (exps) setExpMap(Object.fromEntries((exps as any[]).map(e => [e.id, { name: e.name, short_code: e.short_code }])));

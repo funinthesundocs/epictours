@@ -43,7 +43,7 @@ export function CustomersPage() {
 
             let query = supabase
                 .from('customers')
-                .select('*', { count: 'exact' });
+                .select('*, user:users(name, email, phone_number)', { count: 'exact' });
 
             // Text Search
             if (searchQuery) {
@@ -70,7 +70,14 @@ export function CustomersPage() {
             if (error) throw error;
 
             if (customers) {
-                setData(customers as unknown as Customer[]);
+                // Flatten user data for compatibility
+                const flattenedData = (customers as any[]).map(c => ({
+                    ...c,
+                    name: c.user?.name || c.name,
+                    email: c.user?.email || c.email,
+                    phone: c.user?.phone_number || c.phone
+                }));
+                setData(flattenedData as unknown as Customer[]);
                 setTotalItems(count || 0);
             }
         } catch (err: any) {
@@ -168,25 +175,27 @@ export function CustomersPage() {
             </div>
 
             {/* Content */}
-            {isLoading && data.length === 0 ? (
-                <LoadingState />
-            ) : error ? (
+            {error ? (
                 <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">
                     <AlertCircle size={20} />
                     {error}
                 </div>
             ) : (
                 <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                    <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
-                        <CustomerTable
-                            data={data}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            sortConfig={sortConfig}
-                            onSort={handleSort}
-                            visibleColumns={visibleColumns}
-                        />
-                    </div>
+                    {isLoading && data.length === 0 ? (
+                        <LoadingState message="Loading customers..." className="h-full" />
+                    ) : (
+                        <div className={cn("h-full", isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                            <CustomerTable
+                                data={data}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                sortConfig={sortConfig}
+                                onSort={handleSort}
+                                visibleColumns={visibleColumns}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 

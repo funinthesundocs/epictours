@@ -181,11 +181,8 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             const validApps = data.messaging_apps?.filter(a => a.app && a.handle) || [];
 
             const payload: Record<string, any> = {
-                name: data.name,
                 position_id: data.position_id,
-                phone: data.phone?.replace(/\D/g, "") || null,
                 messaging_app: validApps.length > 0 ? JSON.stringify(validApps) : null,
-                email: data.email || null,
                 notes: data.notes || null,
             };
 
@@ -209,6 +206,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                         .insert([{
                             email: data.email,
                             name: data.name,
+                            phone_number: data.phone?.replace(/\D/g, "") || null,
                             password_hash: data.temp_password, // In production, hash this
                             temp_password: true,
                         }])
@@ -263,6 +261,24 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             }
 
             if (initialData?.id) {
+                // UPDATE MODE - also update user record with identity data
+                const { data: staffRecord } = await supabase
+                    .from("staff")
+                    .select("user_id")
+                    .eq("id", initialData.id)
+                    .single();
+
+                if (staffRecord?.user_id) {
+                    await supabase
+                        .from("users")
+                        .update({
+                            name: data.name,
+                            email: data.email || null,
+                            phone_number: data.phone?.replace(/\D/g, "") || null,
+                        })
+                        .eq("id", staffRecord.user_id);
+                }
+
                 const { error } = await supabase
                     .from("staff")
                     .update(payload)

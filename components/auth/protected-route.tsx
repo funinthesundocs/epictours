@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/auth-context';
 import { usePermissions } from '@/features/auth/use-permissions';
 import { ModuleCode, PermissionAction } from '@/features/auth/types';
-import { Loader2, ShieldAlert, Lock } from 'lucide-react';
+import { ShieldAlert, Lock } from 'lucide-react';
+import { LoadingState } from '@/components/ui/loading-state';
 
 interface ProtectedRouteProps {
     children: ReactNode;
@@ -26,9 +27,9 @@ interface ProtectedRouteProps {
      */
     requirePlatformAdmin?: boolean;
     /**
-     * Require tenant admin access
+     * Require organization admin access
      */
-    requireTenantAdmin?: boolean;
+    requireOrganizationAdmin?: boolean;
     /**
      * Custom redirect URL when access is denied (default: /login or /)
      */
@@ -50,7 +51,7 @@ interface ProtectedRouteProps {
  * 
  * export default function SettingsPage() {
  *   return (
- *     <ProtectedRoute requireTenantAdmin>
+ *     <ProtectedRoute requireOrganizationAdmin>
  *       <SettingsContent />
  *     </ProtectedRoute>
  *   );
@@ -71,14 +72,14 @@ export function ProtectedRoute({
     module,
     permission,
     requirePlatformAdmin = false,
-    requireTenantAdmin = false,
+    requireOrganizationAdmin = false,
     redirectTo,
     showAccessDenied = false,
     loadingComponent,
 }: ProtectedRouteProps) {
     const router = useRouter();
     const { user, isLoading: authLoading } = useAuth();
-    const { hasModule, can, isPlatformAdmin, isTenantAdmin } = usePermissions();
+    const { hasModule, can, isPlatformAdmin, isOrganizationAdmin } = usePermissions();
     const [accessState, setAccessState] = useState<'loading' | 'allowed' | 'denied' | 'unauthenticated'>('loading');
 
     useEffect(() => {
@@ -100,8 +101,8 @@ export function ProtectedRoute({
             return;
         }
 
-        // Check tenant admin requirement
-        if (requireTenantAdmin && !isTenantAdmin() && !isPlatformAdmin()) {
+        // Check organization admin requirement
+        if (requireOrganizationAdmin && !isOrganizationAdmin() && !isPlatformAdmin()) {
             setAccessState('denied');
             return;
         }
@@ -120,7 +121,7 @@ export function ProtectedRoute({
 
         // All checks passed
         setAccessState('allowed');
-    }, [authLoading, user, module, permission, requirePlatformAdmin, requireTenantAdmin, hasModule, can, isPlatformAdmin, isTenantAdmin]);
+    }, [authLoading, user, module, permission, requirePlatformAdmin, requireOrganizationAdmin, hasModule, can, isPlatformAdmin, isOrganizationAdmin]);
 
     // Handle redirects
     useEffect(() => {
@@ -138,10 +139,7 @@ export function ProtectedRoute({
         }
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
-                    <p className="text-sm text-zinc-500">Loading...</p>
-                </div>
+                <LoadingState message="Loading..." />
             </div>
         );
     }
@@ -171,7 +169,7 @@ export function ProtectedRoute({
                         <p className="text-sm text-zinc-400">
                             You don't have permission to access this page.
                             {requirePlatformAdmin && " This area requires platform administrator access."}
-                            {requireTenantAdmin && " This area requires administrator access."}
+                            {requireOrganizationAdmin && " This area requires administrator access."}
                             {module && ` This feature requires the ${module} module.`}
                         </p>
                         <button
@@ -187,9 +185,7 @@ export function ProtectedRoute({
         // Will redirect, show placeholder
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-zinc-600" />
-                </div>
+                <LoadingState />
             </div>
         );
     }
@@ -202,7 +198,7 @@ export function ProtectedRoute({
  * HOC for protecting pages.
  * 
  * Usage:
- * export default withProtectedRoute(MyPage, { requireTenantAdmin: true });
+ * export default withProtectedRoute(MyPage, { requireOrganizationAdmin: true });
  */
 export function withProtectedRoute<P extends object>(
     Component: React.ComponentType<P>,

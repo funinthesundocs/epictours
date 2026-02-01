@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { UserCog, Shield, Users, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useCallback, useMemo } from "react";
 import { useUsers, type User, type CreateUserData, type UpdateUserData } from "@/features/users/hooks/use-users";
 import { useStaffPositions } from "@/features/settings/hooks/use-staff-positions";
@@ -90,19 +91,17 @@ export default function UsersPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading ? (
+                        <LoadingState message="Loading users..." />
+                    ) : (
                         <UsersTable
                             data={filteredUsers}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                         />
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             <UserFormSheet

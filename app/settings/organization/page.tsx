@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Building2, MapPin, Globe, Loader2, Save } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -82,7 +83,7 @@ export default function OrganizationPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <Loader2 className="animate-spin text-primary" size={32} />
+                <LoadingState message="Loading organization..." size="lg" />
             </div>
         );
     }

@@ -23,9 +23,9 @@ interface PermissionGateProps {
      */
     requirePlatformAdmin?: boolean;
     /**
-     * Require tenant admin access
+     * Require organization admin access
      */
-    requireTenantAdmin?: boolean;
+    requireOrganizationAdmin?: boolean;
     /**
      * Content to show when access is denied (optional)
      */
@@ -62,18 +62,18 @@ export function PermissionGate({
     module,
     permission,
     requirePlatformAdmin = false,
-    requireTenantAdmin = false,
+    requireOrganizationAdmin = false,
     fallback = null,
 }: PermissionGateProps) {
-    const { hasModule, can, isPlatformAdmin, isTenantAdmin } = usePermissions();
+    const { hasModule, can, isPlatformAdmin, isOrganizationAdmin } = usePermissions();
 
     // Check platform admin requirement
     if (requirePlatformAdmin && !isPlatformAdmin()) {
         return <>{fallback}</>;
     }
 
-    // Check tenant admin requirement
-    if (requireTenantAdmin && !isTenantAdmin() && !isPlatformAdmin()) {
+    // Check organization admin requirement
+    if (requireOrganizationAdmin && !isOrganizationAdmin() && !isPlatformAdmin()) {
         return <>{fallback}</>;
     }
 
@@ -105,9 +105,9 @@ export function usePermissionCheck(options: {
         resource: string;
     };
     requirePlatformAdmin?: boolean;
-    requireTenantAdmin?: boolean;
+    requireOrganizationAdmin?: boolean;
 }) {
-    const { hasModule, can, isPlatformAdmin, isTenantAdmin } = usePermissions();
+    const { hasModule, can, isPlatformAdmin, isOrganizationAdmin } = usePermissions();
 
     let isAllowed = true;
 
@@ -115,7 +115,7 @@ export function usePermissionCheck(options: {
         isAllowed = false;
     }
 
-    if (options.requireTenantAdmin && !isTenantAdmin() && !isPlatformAdmin()) {
+    if (options.requireOrganizationAdmin && !isOrganizationAdmin() && !isPlatformAdmin()) {
         isAllowed = false;
     }
 

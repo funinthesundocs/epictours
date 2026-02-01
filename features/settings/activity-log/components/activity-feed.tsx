@@ -437,99 +437,103 @@ export function ActivityFeed() {
 
             {/* Table Container (Matching CustomersPage Structure) */}
             <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                <div className={cn("h-full", loading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
-                    <div className="h-full overflow-auto relative">
-                        {/* Desktop Table */}
-                        <table className="w-full text-left hidden md:table">
-                            <thead className="bg-muted/80 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
-                                <tr>
-                                    <th className="px-6 py-4">What Changed</th>
-                                    <th className="px-6 py-4">User</th>
-                                    <th className="px-6 py-4">Changes</th>
-                                    <th className="px-6 py-4">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border text-base text-muted-foreground">
-                                {logs.length === 0 && !loading ? (
+                {loading && logs.length === 0 ? (
+                    <LoadingState message="Loading activity..." />
+                ) : (
+                    <div className={cn("h-full", loading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity")}>
+                        <div className="h-full overflow-auto relative">
+                            {/* Desktop Table */}
+                            <table className="w-full text-left hidden md:table">
+                                <thead className="bg-muted/80 backdrop-blur-sm text-foreground text-sm uppercase tracking-wider font-semibold sticky top-0 z-20 border-b border-border">
                                     <tr>
-                                        <td colSpan={5} className="text-center py-20 text-muted-foreground">
-                                            {searchQuery ? "No results matching your search." : "No activity recorded yet."}
-                                        </td>
+                                        <th className="px-6 py-4">What Changed</th>
+                                        <th className="px-6 py-4">User</th>
+                                        <th className="px-6 py-4">Changes</th>
+                                        <th className="px-6 py-4">Date</th>
                                     </tr>
-                                ) : logs.map((log) => (
-                                    <tr key={log.id} className="hover:bg-muted transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <ActionIcon action={log.action} />
-                                                <div>
-                                                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{log.table_name.replace(/_/g, ' ')}</div>
-                                                    <div>{getRecordName(log)}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-muted-foreground">
-                                            {log.user_id ? `${log.user_id.substring(0, 8)}...` : <span className="text-muted-foreground italic">System</span>}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm">
-                                            {renderDiff(log)}
-                                        </td>
-                                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap text-sm">
-                                            {format(new Date(log.created_at), "MMM d, h:mm a")}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        {/* Mobile Card View */}
-                        <div className="md:hidden space-y-4 p-4">
-                            {logs.length === 0 && !loading ? (
-                                <div className="text-center py-20 text-muted-foreground">
-                                    {searchQuery ? "No results matching your search." : "No activity recorded yet."}
-                                </div>
-                            ) : logs.map((log) => {
-                                const contentType = log.table_name
-                                    .replace(/_/g, ' ')
-                                    .replace(/\b\w/g, c => c.toUpperCase())
-                                    .replace(/s$/, '');
-                                const recordName = log.new_data?.label || log.new_data?.name || log.old_data?.label || log.old_data?.name || 'Unknown';
-                                const actionText = log.action === 'INSERT' ? 'Created' : log.action === 'UPDATE' ? 'Updated' : 'Deleted';
-
-                                return (
-                                    <div key={log.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
-                                        {/* Header: Icon + Name + Action Badge */}
-                                        <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                </thead>
+                                <tbody className="divide-y divide-border text-base text-muted-foreground">
+                                    {logs.length === 0 && !loading ? (
+                                        <tr>
+                                            <td colSpan={5} className="text-center py-20 text-muted-foreground">
+                                                {searchQuery ? "No results matching your search." : "No activity recorded yet."}
+                                            </td>
+                                        </tr>
+                                    ) : logs.map((log) => (
+                                        <tr key={log.id} className="hover:bg-muted transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
                                                     <ActionIcon action={log.action} />
+                                                    <div>
+                                                        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{log.table_name.replace(/_/g, ' ')}</div>
+                                                        <div>{getRecordName(log)}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="text-xs text-muted-foreground uppercase tracking-wider">{contentType}</div>
-                                                    <h3 className="text-lg font-bold text-foreground leading-tight">{recordName}</h3>
-                                                </div>
-                                            </div>
-                                            <span className={`text-sm font-medium shrink-0 ${log.action === 'INSERT' ? 'text-emerald-500' :
-                                                log.action === 'UPDATE' ? 'text-primary' :
-                                                    'text-destructive'
-                                                }`}>
-                                                {actionText}
-                                            </span>
-                                        </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-muted-foreground">
+                                                {log.user_id ? `${log.user_id.substring(0, 8)}...` : <span className="text-muted-foreground italic">System</span>}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm">
+                                                {renderDiff(log)}
+                                            </td>
+                                            <td className="px-6 py-4 text-muted-foreground whitespace-nowrap text-sm">
+                                                {format(new Date(log.created_at), "MMM d, h:mm a")}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
 
-                                        {/* Body: Changes */}
-                                        <div className="text-muted-foreground">{renderDiff(log)}</div>
-
-                                        {/* Footer: By User + Date (right-justified) */}
-                                        <div className="flex items-center justify-between text-muted-foreground pt-2 border-t border-border">
-                                            <span>By <span className="text-foreground">{log.user_id ? log.user_id.substring(0, 8) + '...' : 'System'}</span></span>
-                                            <span>{format(new Date(log.created_at), "MMM d, h:mm a")}</span>
-                                        </div>
+                            {/* Mobile Card View */}
+                            <div className="md:hidden space-y-4 p-4">
+                                {logs.length === 0 && !loading ? (
+                                    <div className="text-center py-20 text-muted-foreground">
+                                        {searchQuery ? "No results matching your search." : "No activity recorded yet."}
                                     </div>
-                                );
-                            })}
+                                ) : logs.map((log) => {
+                                    const contentType = log.table_name
+                                        .replace(/_/g, ' ')
+                                        .replace(/\b\w/g, c => c.toUpperCase())
+                                        .replace(/s$/, '');
+                                    const recordName = log.new_data?.label || log.new_data?.name || log.old_data?.label || log.old_data?.name || 'Unknown';
+                                    const actionText = log.action === 'INSERT' ? 'Created' : log.action === 'UPDATE' ? 'Updated' : 'Deleted';
+
+                                    return (
+                                        <div key={log.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
+                                            {/* Header: Icon + Name + Action Badge */}
+                                            <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                                        <ActionIcon action={log.action} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{contentType}</div>
+                                                        <h3 className="text-lg font-bold text-foreground leading-tight">{recordName}</h3>
+                                                    </div>
+                                                </div>
+                                                <span className={`text-sm font-medium shrink-0 ${log.action === 'INSERT' ? 'text-emerald-500' :
+                                                    log.action === 'UPDATE' ? 'text-primary' :
+                                                        'text-destructive'
+                                                    }`}>
+                                                    {actionText}
+                                                </span>
+                                            </div>
+
+                                            {/* Body: Changes */}
+                                            <div className="text-muted-foreground">{renderDiff(log)}</div>
+
+                                            {/* Footer: By User + Date (right-justified) */}
+                                            <div className="flex items-center justify-between text-muted-foreground pt-2 border-t border-border">
+                                                <span>By <span className="text-foreground">{log.user_id ? log.user_id.substring(0, 8) + '...' : 'System'}</span></span>
+                                                <span>{format(new Date(log.created_at), "MMM d, h:mm a")}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Record Count Footer */}

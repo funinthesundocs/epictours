@@ -6,6 +6,7 @@ export type CustomerStatus = z.infer<typeof CustomerStatusSchema>;
 
 export const CustomerSchema = z.object({
   id: z.string().uuid().optional(),
+  user_id: z.string().uuid().optional().nullable(), // Link to users table
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional().nullable(),

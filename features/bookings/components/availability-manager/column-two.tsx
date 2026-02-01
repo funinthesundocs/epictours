@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
-import { FileText, ChevronDown, Loader2, Search, Ticket } from "lucide-react";
+import { FileText, ChevronDown, Search, Ticket } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -77,7 +78,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                 .select(`
                     id, status, pax_count, pax_breakdown, payment_status, 
                     amount_paid, total_amount, voucher_numbers, confirmation_number, notes, created_at, check_in_status_id,
-                    customers(name, email, phone)
+                    customers(id, user:users(name, email, phone_number))
                 `)
                 .eq('availability_id', availability.id)
                 .order('created_at', { ascending: false });
@@ -88,9 +89,9 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
                     status: b.status,
                     pax_count: b.pax_count,
                     pax_breakdown: b.pax_breakdown,
-                    customer_name: b.customers?.name || "Unknown",
-                    customer_email: b.customers?.email || "",
-                    customer_phone: b.customers?.phone || "",
+                    customer_name: b.customers?.user?.name || "Unknown",
+                    customer_email: b.customers?.user?.email || "",
+                    customer_phone: b.customers?.user?.phone_number || "",
                     payment_status: b.payment_status || "unpaid",
                     amount_paid: b.amount_paid || 0,
                     total_amount: b.total_amount || 0,
@@ -147,9 +148,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin text-muted-foreground" size={24} />
-            </div>
+            <LoadingState className="h-64" />
         );
     }
 

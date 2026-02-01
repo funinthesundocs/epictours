@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/shell/page-shell";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Building2, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useMemo, useCallback } from "react";
 import { useOrganizations, CreateOrganizationData, UpdateOrganizationData } from "@/features/admin/hooks/use-organizations";
 import { OrganizationFormSheet } from "@/features/admin/components/organizations/organization-form-sheet";
@@ -95,7 +96,7 @@ function OrganizationsContent() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
+                        <LoadingState message="Loading organizations..." />
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-auto rounded-xl border border-border bg-card">

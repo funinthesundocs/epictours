@@ -49,8 +49,22 @@ export function CreateBookingSheet({ isOpen, onClose, onSuccess, availability }:
     useEffect(() => {
         if (!isOpen) return;
         const fetchCustomers = async () => {
-            const { data } = await supabase.from('customers').select('id, name, email').eq('status', 'active').order('name');
-            if (data) setCustomers(data);
+            const { data } = await supabase
+                .from('customers')
+                .select('id, user:users(name, email)')
+                .eq('status', 'active')
+                .order('id');
+            if (data) {
+                // Flatten user data - only include customers with linked users
+                const flattened = (data as any[])
+                    .filter(c => c.user)
+                    .map(c => ({
+                        id: c.id,
+                        name: c.user.name || 'Unknown',
+                        email: c.user.email || ''
+                    }));
+                setCustomers(flattened);
+            }
         };
         fetchCustomers();
     }, [isOpen]);

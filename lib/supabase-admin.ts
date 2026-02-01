@@ -3,7 +3,7 @@ import { Database } from '@/types/supabase_gen'
 
 /**
  * Admin Supabase client that bypasses RLS using service role key.
- * Use this for server-side operations that need to access data across tenants.
+ * Use this for server-side operations that need to access data across organizations.
  * 
  * IMPORTANT: Only use this for internal operations where the calling code
  * has already verified authorization. Never expose this client to user actions

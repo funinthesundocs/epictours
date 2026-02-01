@@ -463,27 +463,32 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                                 <div
                                     key={row.booking_id}
                                     className={cn(
-                                        "absolute top-0 left-0 w-full flex items-center border-b border-border hover:bg-primary/10 transition-colors",
+                                        "absolute top-0 left-0 w-full flex items-center border-b border-border hover:bg-primary/10 transition-colors cursor-pointer",
                                         isOddRow && "bg-muted/30"
                                     )}
                                     style={{
                                         height: `${ROW_HEIGHT}px`,
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
+                                    onClick={() => onCellClick?.(row, "booking")}
                                 >
                                     {visibleColumnConfigs.map((column) => (
                                         <div
                                             key={column.key}
-                                            onClick={() => onCellClick?.(row, column.key)}
                                             className={cn(
                                                 "px-4 text-sm text-foreground truncate shrink-0",
                                                 getColumnAlign(column.key) === "right" && "text-right",
-                                                getColumnAlign(column.key) === "center" && "text-center",
-                                                onCellClick && "cursor-pointer hover:bg-primary/10 transition-colors"
+                                                getColumnAlign(column.key) === "center" && "text-center"
                                             )}
                                             style={{ width: getColumnWidth(column.key) }}
                                         >
-                                            {getCellValue(row, column.key)}
+                                            {column.key === "customer_name" ? (
+                                                <span className="inline-block px-3 py-3 -mx-3 -my-3 rounded-lg hover:bg-primary/20 transition-colors">
+                                                    {getCellValue(row, column.key)}
+                                                </span>
+                                            ) : (
+                                                getCellValue(row, column.key)
+                                            )}
                                         </div>
                                     ))}
                                 </div>

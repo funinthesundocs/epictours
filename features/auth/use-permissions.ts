@@ -39,8 +39,8 @@ export function usePermissions() {
         // Platform admins can do everything
         if (user.isPlatformAdmin) return true;
 
-        // Tenant admins can do everything within their subscribed modules
-        if (user.isTenantAdmin && hasModule(module)) return true;
+        // Organization admins can do everything within their subscribed modules
+        if (user.isOrganizationAdmin && hasModule(module)) return true;
 
         // Check user's resolved permissions
         const permission = user.permissions.find(
@@ -80,10 +80,10 @@ export function usePermissions() {
     };
 
     /**
-     * Check if user is a tenant admin for their organization.
+     * Check if user is an organization admin.
      */
-    const isTenantAdmin = (): boolean => {
-        return user?.isTenantAdmin ?? false;
+    const isOrganizationAdmin = (): boolean => {
+        return user?.isOrganizationAdmin ?? false;
     };
 
     /**
@@ -94,10 +94,10 @@ export function usePermissions() {
     };
 
     /**
-     * Get the user's tenant ID (null for platform admins without tenant).
+     * Get the user's organization ID (null for platform admins without org).
      */
-    const getTenantId = (): string | null => {
-        return user?.tenantId ?? null;
+    const getOrganizationId = (): string | null => {
+        return user?.organizationId ?? null;
     };
 
     /**
@@ -127,11 +127,11 @@ export function usePermissions() {
         isPlatformAdmin,
         isDeveloper,
         isSystemAdmin,
-        isTenantAdmin,
+        isOrganizationAdmin,
         canAccessAdminDashboard,
 
         // Context
-        getTenantId,
+        getOrganizationId,
         user,
     };
 }

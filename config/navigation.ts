@@ -47,8 +47,8 @@ export interface NavigationItem {
     };
     // If true, only platform admins can see this
     platformAdminOnly?: boolean;
-    // If true, only tenant admins can see this
-    tenantAdminOnly?: boolean;
+    // If true, only organization admins can see this
+    organizationAdminOnly?: boolean;
 }
 
 export interface NavSection {
@@ -144,16 +144,16 @@ export const navigation: NavSection[] = [
         title: "Settings",
         requiredModule: "settings",
         items: [
-            { title: "Organization Profile", href: "/settings/organization", icon: Building2, tenantAdminOnly: true },
+            { title: "Organization Profile", href: "/settings/organization", icon: Building2, organizationAdminOnly: true },
             {
                 title: "Users",
                 href: "/settings/users",
                 icon: UserCog,
-                tenantAdminOnly: true,
+                organizationAdminOnly: true,
                 children: [
                     { title: "Staff", href: "/settings/users", icon: Users },
-                    { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, tenantAdminOnly: true },
-                    { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, tenantAdminOnly: true }
+                    { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, organizationAdminOnly: true },
+                    { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, organizationAdminOnly: true }
                 ]
             },
 

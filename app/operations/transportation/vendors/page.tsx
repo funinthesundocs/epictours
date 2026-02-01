@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/shell/page-shell";
 import { Handshake, Plus, Loader2, Search } from "lucide-react";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -21,12 +22,19 @@ export default function VendorsPage() {
         try {
             const { data, error } = await supabase
                 .from("vendors")
-                .select("*")
-                .order("name");
+                .select("*, user:users(name, email, phone_number)")
+                .order("id");
 
             if (error) throw error;
-            setVendors(data || []);
-            setFilteredVendors(data || []);
+            // Flatten user data - all identity data comes from users table
+            const flattenedData = (data || []).map(v => ({
+                ...v,
+                name: v.user?.name || 'Unknown',
+                email: v.user?.email || '',
+                phone: v.user?.phone_number || ''
+            }));
+            setVendors(flattenedData);
+            setFilteredVendors(flattenedData);
         } catch (err) {
             console.error("Error loading vendors:", err);
             // Don't alert here to avoid spamming if table doesn't exist yet
@@ -47,7 +55,7 @@ export default function VendorsPage() {
         }
         const lowerQ = searchQuery.toLowerCase();
         const filtered = vendors.filter(v =>
-            v.name.toLowerCase().includes(lowerQ) ||
+            v.name?.toLowerCase().includes(lowerQ) ||
             v.email?.toLowerCase().includes(lowerQ) ||
             v.phone?.toLowerCase().includes(lowerQ) ||
             v.ein_number?.toLowerCase().includes(lowerQ)
@@ -115,7 +123,7 @@ export default function VendorsPage() {
 
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="animate-spin text-primary" size={32} />
+                        <LoadingState message="Loading vendors..." />
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
