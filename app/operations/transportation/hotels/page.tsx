@@ -117,19 +117,20 @@ export default function HotelsPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
+                {/* Table Container - always visible */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading && hotels.length === 0 ? (
                         <LoadingState message="Loading hotels..." />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                        <HotelsTable
-                            data={filteredHotels}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-                    </div>
-                )}
+                    ) : (
+                        <div className={isLoading ? "opacity-50" : ""}>
+                            <HotelsTable
+                                data={filteredHotels}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <AddHotelSheet

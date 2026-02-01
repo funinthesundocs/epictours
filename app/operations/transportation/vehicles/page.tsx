@@ -112,19 +112,20 @@ export default function VehiclesPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
+                {/* Table Container - always visible */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading && vehicles.length === 0 ? (
                         <LoadingState message="Loading vehicles..." />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                        <VehiclesTable
-                            data={filteredVehicles}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-                    </div>
-                )}
+                    ) : (
+                        <div className={isLoading ? "opacity-50" : ""}>
+                            <VehiclesTable
+                                data={filteredVehicles}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <AddVehicleSheet

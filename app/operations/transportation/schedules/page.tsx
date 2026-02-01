@@ -110,19 +110,20 @@ export default function SchedulesPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
+                {/* Table Container - always visible */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading && schedules.length === 0 ? (
                         <LoadingState message="Loading schedules..." />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                        <SchedulesTable
-                            data={filteredSchedules}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-                    </div>
-                )}
+                    ) : (
+                        <div className={isLoading ? "opacity-50" : ""}>
+                            <SchedulesTable
+                                data={filteredSchedules}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <ScheduleSheet

@@ -121,19 +121,20 @@ export default function VendorsPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64">
+                {/* Table Container - always visible */}
+                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                    {isLoading && vendors.length === 0 ? (
                         <LoadingState message="Loading vendors..." />
-                    </div>
-                ) : (
-                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                        <VendorsTable
-                            data={filteredVendors}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-                    </div>
-                )}
+                    ) : (
+                        <div className={isLoading ? "opacity-50" : ""}>
+                            <VendorsTable
+                                data={filteredVendors}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <AddVendorSheet

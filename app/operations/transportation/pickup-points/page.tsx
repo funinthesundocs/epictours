@@ -80,19 +80,20 @@ export default function PickupPointsPage() {
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
-            {isLoading ? (
-                <div className="flex items-center justify-center h-64">
+            {/* Table Container - always visible */}
+            <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
+                {isLoading && points.length === 0 ? (
                     <LoadingState message="Loading locations..." />
-                </div>
-            ) : (
-                <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
-                    <PickupPointsTable
-                        data={points}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
-                </div>
-            )}
+                ) : (
+                    <div className={isLoading ? "opacity-50" : ""}>
+                        <PickupPointsTable
+                            data={points}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
+                    </div>
+                )}
+            </div>
 
             <AddPickupSheet
                 isOpen={isSheetOpen}
