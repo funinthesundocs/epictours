@@ -11,6 +11,7 @@ import { PresetSettings } from "./components/preset-manager";
 import { Loader2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingState } from "@/components/ui/loading-state";
+import { useAuth } from "@/features/auth/auth-context";
 import { BookingDesk } from "@/features/bookings/components/booking-desk";
 import { AddCustomerSheet } from "@/features/crm/customers/components/add-customer-sheet";
 import { EditAvailabilitySheet } from "@/features/availability/components/edit-availability-sheet";
@@ -20,6 +21,7 @@ import { Customer } from "@/features/crm/customers/types";
 const MAX_RECORDS = 10000;
 
 export function MasterReportPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [data, setData] = useState<MasterReportRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -177,23 +179,38 @@ export function MasterReportPage() {
             setError(null);
 
             // Fetch all lookup data in parallel
+            // Build queries with organization filter
+            let bookingsQuery = supabase
+                .from('bookings' as any)
+                .select(`
+                    id, status, pax_count, total_amount, amount_paid, payment_status,
+                    voucher_numbers, notes, organization_id, confirmation_number, created_at,
+                    customers(id, status, total_value, metadata, preferences, user:users(name, email, phone_number)),
+                    availabilities(
+                        id, start_date, start_time, max_capacity, experience_id,
+                        experiences(id, name, short_code)
+                    )
+                `)
+                .limit(MAX_RECORDS)
+                .order('created_at', { ascending: false });
+
+            let staffQuery = supabase.from('staff' as any).select('id, user:users(name)');
+            let vehiclesQuery = supabase.from('vehicles' as any).select('id, name');
+            let schedulesQuery = supabase.from('schedules' as any).select('id, name');
+
+            // Apply organization filter if we have one
+            if (effectiveOrganizationId) {
+                bookingsQuery = bookingsQuery.eq('organization_id', effectiveOrganizationId);
+                staffQuery = staffQuery.eq('organization_id', effectiveOrganizationId);
+                vehiclesQuery = vehiclesQuery.eq('organization_id', effectiveOrganizationId);
+                schedulesQuery = schedulesQuery.eq('organization_id', effectiveOrganizationId);
+            }
+
             const [bookingsRes, staffRes, vehiclesRes, routesRes] = await Promise.all([
-                supabase
-                    .from('bookings' as any)
-                    .select(`
-                        id, status, pax_count, total_amount, amount_paid, payment_status,
-                        voucher_numbers, notes, confirmation_number, created_at,
-                        customers(id, status, total_value, metadata, preferences, user:users(name, email, phone_number)),
-                        availabilities(
-                            id, start_date, start_time, max_capacity, experience_id,
-                            experiences(id, name, short_code)
-                        )
-                    `)
-                    .limit(MAX_RECORDS)
-                    .order('created_at', { ascending: false }),
-                supabase.from('staff' as any).select('id, user:users(name)'),
-                supabase.from('vehicles' as any).select('id, name'),
-                supabase.from('schedules' as any).select('id, name')
+                bookingsQuery,
+                staffQuery,
+                vehiclesQuery,
+                schedulesQuery
             ]);
 
             if (bookingsRes.error) throw bookingsRes.error;
@@ -288,7 +305,7 @@ export function MasterReportPage() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // Initial fetch
     useEffect(() => {

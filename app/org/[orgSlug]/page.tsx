@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye, Settings2 } from "lucide-react";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { useAuth } from "@/features/auth/auth-context";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 /**
@@ -21,6 +22,67 @@ export default function OrgOverviewPage() {
     if (isLoading) {
         return null;
     }
+
+    // Live Stats State
+    const [stats, setStats] = useState({
+        revenue: 0,
+        activeTours: 0,
+        pendingBookings: 0,
+        waitlist: 0 // Placeholder
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (!effectiveOrganizationId) return;
+
+            try {
+                // 1. Revenue & Pending Bookings & Waitlist
+                const { data: bookings } = await supabase
+                    .from("bookings")
+                    .select("total_amount, status")
+                    .eq("organization_id", effectiveOrganizationId);
+
+                let revenue = 0;
+                let pending = 0;
+                let waiting = 0;
+
+                bookings?.forEach((b: any) => {
+                    if (b.status !== 'cancelled') {
+                        revenue += (b.total_amount || 0);
+                    }
+                    if (b.status === 'pending') pending++;
+                    if (b.status === 'waitlist') waiting++;
+                });
+
+                // 2. Active Tours (Experiences)
+                const { count: tourCount } = await supabase
+                    .from("experiences")
+                    .select("*", { count: 'exact', head: true })
+                    .eq("organization_id", effectiveOrganizationId)
+                    .eq("is_active", true);
+
+                setStats({
+                    revenue,
+                    activeTours: tourCount || 0,
+                    pendingBookings: pending,
+                    waitlist: waiting
+                });
+
+            } catch (error) {
+                console.error("Error fetching dashboard stats:", error);
+            }
+        };
+
+        fetchStats();
+    }, [effectiveOrganizationId]);
+
+    const formatCurrency = (val: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        }).format(val);
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -57,26 +119,57 @@ export default function OrgOverviewPage() {
 
             {/* KPI Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    { label: "Total Revenue", value: "$45,231.89", sub: "+20.1% from last month", icon: DollarSign },
-                    { label: "Active Tours", value: "12", sub: "+2 starting today", icon: Activity },
-                    { label: "Pending Bookings", value: "24", sub: "Action required", icon: Ticket },
-                    { label: "Waitlist", value: "+573", sub: "Since last hour", icon: Users },
-                ].map((stat, i) => (
-                    <div key={i} className="glass-card p-6 rounded-xl hover:border-primary/30 transition-colors group">
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
-                            <stat.icon size={18} className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(var(--color-primary),0.5)] transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <span className="text-2xl font-bold text-foreground">{stat.value}</span>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                {stat.sub}
-                                <ArrowUpRight size={10} className="text-green-500" />
-                            </p>
-                        </div>
+                <div className="glass-card p-6 rounded-xl hover:border-primary/30 transition-colors group">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium text-muted-foreground">Total Revenue</span>
+                        <DollarSign size={18} className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(var(--color-primary),0.5)] transition-all" />
                     </div>
-                ))}
+                    <div className="space-y-1">
+                        <span className="text-2xl font-bold text-foreground">{formatCurrency(stats.revenue)}</span>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            Gross volume
+                        </p>
+                    </div>
+                </div>
+
+                <div className="glass-card p-6 rounded-xl hover:border-primary/30 transition-colors group">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium text-muted-foreground">Active Tours</span>
+                        <Activity size={18} className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(var(--color-primary),0.5)] transition-all" />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-2xl font-bold text-foreground">{stats.activeTours}</span>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            Live experiences
+                        </p>
+                    </div>
+                </div>
+
+                <div className="glass-card p-6 rounded-xl hover:border-primary/30 transition-colors group">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium text-muted-foreground">Pending Bookings</span>
+                        <Ticket size={18} className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(var(--color-primary),0.5)] transition-all" />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-2xl font-bold text-foreground">{stats.pendingBookings}</span>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            Requires action
+                        </p>
+                    </div>
+                </div>
+
+                <div className="glass-card p-6 rounded-xl hover:border-primary/30 transition-colors group">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium text-muted-foreground">Waitlist</span>
+                        <Users size={18} className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(var(--color-primary),0.5)] transition-all" />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-2xl font-bold text-foreground">{stats.waitlist}</span>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            Potential customers
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Main Content / Revenue Chart Placeholder */}

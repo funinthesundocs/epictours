@@ -16,18 +16,24 @@ type ActivityLog = {
     created_at: string;
 };
 
+import { useAuth } from "@/features/auth/auth-context";
+
 export function RecentActivity() {
+    const { effectiveOrganizationId } = useAuth();
     const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchLogs();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     const fetchLogs = async () => {
+        if (!effectiveOrganizationId) return;
+
         const { data, error } = await supabase
             .from("activity_logs")
             .select("*")
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: false })
             .limit(12);
 
