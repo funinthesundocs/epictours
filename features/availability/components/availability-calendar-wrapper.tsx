@@ -47,13 +47,20 @@ export function AvailabilityCalendarWrapper() {
                 .order('name');
 
             if (error) throw error;
-            setExperiences(data || []);
-            if (data && data.length > 0 && !selectedExperience) {
-                setSelectedExperience(data[0].name);
+
+            // Inject "All Experiences" option
+            const allOption = { id: "all", name: "All Experiences", short_code: "ALL" };
+            const loadedExps = data || [];
+
+            setExperiences([allOption, ...loadedExps]);
+
+            // Default to "All Experiences" if nothing selected, or if current selection is invalid (though we keep simple default here)
+            if (!selectedExperience) {
+                setSelectedExperience(allOption.name);
             }
         } catch (err) {
             console.error("Error loading experiences:", err);
-            setExperiences([]);
+            setExperiences([{ id: "all", name: "All Experiences", short_code: "ALL" }]);
         } finally {
             setIsLoading(false);
         }
