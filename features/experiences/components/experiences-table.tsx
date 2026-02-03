@@ -22,6 +22,7 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                         <tr>
                             <th className="px-6 py-4">Name</th>
                             <th className="px-6 py-4">Event Type</th>
+                            <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4">Start Time</th>
                             <th className="px-6 py-4">End Time</th>
                             <th className="px-6 py-4 w-[100px] border-l border-border"></th>
@@ -38,6 +39,13 @@ export function ExperiencesTable({ data, onEdit, onDelete }: ExperiencesTablePro
                                 {/* Type */}
                                 <td className="px-6 py-4 text-muted-foreground">
                                     {item.event_type}
+                                </td>
+
+                                {/* Status */}
+                                <td className="px-6 py-4">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.is_active ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-muted text-muted-foreground"}`}>
+                                        {item.is_active ? "Active" : "Inactive"}
+                                    </span>
                                 </td>
 
                                 {/* Start Time */}

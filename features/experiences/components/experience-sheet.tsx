@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TimePicker } from "@/components/ui/time-picker";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Experience, ExperienceFormData, ExperienceSchema, NewExperience } from "../types";
 import { cn } from "@/lib/utils";
@@ -259,6 +260,23 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                                 <div>
                                     <SectionHeader icon={Info} title="Basic Information" />
                                     <div className="space-y-6">
+                                        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+                                            <div className="space-y-0.5">
+                                                <Label className="text-base text-foreground">Active Status</Label>
+                                                <p className="text-xs text-muted-foreground">Enable this experience for bookings</p>
+                                            </div>
+                                            <Controller
+                                                control={control}
+                                                name="is_active"
+                                                render={({ field }) => (
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+
                                         <div className="space-y-2">
                                             <Label>Experience Name *</Label>
                                             <Input {...register("name")} className="text-lg font-semibold" placeholder="e.g. Grand Circle Island Tour" />

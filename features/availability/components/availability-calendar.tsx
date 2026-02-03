@@ -196,14 +196,20 @@ export function AvailabilityCalendar({
             const startOfMonth = new Date(year, month, 1);
             const endOfMonth = new Date(year, month + 1, 0);
 
-            const { data, error } = await supabase
+            let query = supabase
                 .from('availabilities' as any)
                 .select('*, bookings:bookings(pax_count, status)')
-                .eq('experience_id', currentExp.id)
                 .eq('organization_id', effectiveOrganizationId)
                 .gte('start_date', format(startOfMonth, 'yyyy-MM-dd'))
                 .lte('start_date', format(endOfMonth, 'yyyy-MM-dd'))
                 .order('start_date', { ascending: true });
+
+            // Only filter by experience if NOT "All Experiences"
+            if (currentExp.id !== "all") {
+                query = query.eq('experience_id', currentExp.id);
+            }
+
+            const { data, error } = await query;
 
             if (error) {
                 console.error("Error fetching availabilities:", error);

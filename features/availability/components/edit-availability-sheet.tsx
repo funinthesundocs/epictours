@@ -15,6 +15,7 @@ import { ColumnOne } from "./edit-availability/column-one";
 import { ColumnTwo } from "./edit-availability/column-two";
 import { ColumnThree } from "./edit-availability/column-three";
 import { Assignment } from "./edit-availability/resource-cluster-list";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Schema
 const AvailabilitySchema = z.object({
@@ -70,6 +71,7 @@ export function EditAvailabilitySheet({
     selectedDate,
     onDelete
 }: EditAvailabilitySheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -243,12 +245,17 @@ export function EditAvailabilitySheet({
         }
         return dates;
     };
-
     const onSubmit = async (data: AvailabilityFormData) => {
+        if (!initialData?.id && !effectiveOrganizationId) {
+            toast.error("Organization context missing. Cannot create availability.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             // Base Payload
             const basePayload = {
+                organization_id: effectiveOrganizationId, // Ensure org ownership
                 experience_id: data.experience_id,
                 is_repeating: false,
                 repeat_days: [],
