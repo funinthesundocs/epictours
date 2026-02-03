@@ -117,14 +117,9 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                         {sortedData.map(user => (
                             <tr key={user.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                                 <td className="py-3 px-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                                            {user.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-foreground">{user.name}</span>
-                                            {user.is_organization_owner && <Shield size={14} className="text-amber-500" />}
-                                        </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium text-foreground">{user.name}</span>
+                                        {user.is_organization_owner && <Shield size={14} className="text-amber-500" />}
                                     </div>
                                 </td>
                                 <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
@@ -182,9 +177,6 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                         <div key={user.id} className="bg-card rounded-xl p-4 border border-border">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium">
-                                        {user.name.charAt(0).toUpperCase()}
-                                    </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium text-foreground">{user.name}</span>

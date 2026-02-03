@@ -23,19 +23,33 @@ export default function VendorsPage() {
         if (!effectiveOrganizationId) return;
         setIsLoading(true);
         try {
+            // Cast 'vendors' to any to bypass strict type check for new columns (name, email, phone)
             const { data, error } = await supabase
-                .from("vendors")
-                .select("*, user:users(name, email, phone_number)")
+                .from("vendors" as any)
+                .select("id, name, email, phone, contact_name, address, city, state, zip_code, ein_number, user:users(name, email, phone_number)")
                 .eq("organization_id", effectiveOrganizationId)
                 .order("id");
 
             if (error) throw error;
-            // Flatten user data - all identity data comes from users table
-            const flattenedData = (data || []).map(v => ({
-                ...v,
-                name: v.user?.name || 'Unknown',
-                email: v.user?.email || '',
-                phone: v.user?.phone_number || ''
+
+            // Cast data to any[] to avoid "Spread types may only be created from object types"
+            const rawData = (data as any[]) || [];
+            console.log("DEBUG: Raw Vendor Data [0]:", rawData[0]); // Check if 'id' exists here!
+
+            // Flatten user data - prefer Vendor table data (Business Name), fallback to User table (Contact Name)
+            const flattenedData = rawData.map(v => ({
+                // Prioritize the direct vendor column if it exists/is not null
+                id: v.id,
+                name: v.name || v.contact_name || v.user?.name || 'Unknown',
+                contact_name: v.contact_name || null,
+                email: v.email || v.user?.email || '',
+                phone: v.phone || v.user?.phone_number || '',
+                // Pass through address fields so they populate in edit form
+                address: v.address,
+                city: v.city,
+                state: v.state,
+                zip_code: v.zip_code,
+                ein_number: v.ein_number,
             }));
             setVendors(flattenedData);
             setFilteredVendors(flattenedData);
@@ -74,7 +88,6 @@ export default function VendorsPage() {
                 .delete()
                 .eq("id", id);
 
-            if (error) throw error;
             if (error) throw error;
             toast.success("Vendor deleted");
             fetchVendors();

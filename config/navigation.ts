@@ -165,12 +165,13 @@ export const navigation: NavSection[] = [
             { title: "Organization Profile", href: "/settings/organization", icon: Building2, organizationAdminOnly: true, requiresOrgContext: true },
             {
                 title: "Users",
-                href: "/settings/users",
+                href: "/settings/staff",
                 icon: UserCog,
                 organizationAdminOnly: true,
                 requiresOrgContext: true,
                 children: [
-                    { title: "Staff", href: "/settings/users", icon: Users, requiresOrgContext: true },
+                    { title: "All Users", href: "/settings/all-users", icon: Users, requiresOrgContext: true },
+                    { title: "Staff", href: "/settings/staff", icon: UserCog, requiresOrgContext: true },
                     { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, organizationAdminOnly: true, requiresOrgContext: true },
                     { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, organizationAdminOnly: true, requiresOrgContext: true }
                 ]
