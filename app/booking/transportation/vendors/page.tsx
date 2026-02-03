@@ -143,7 +143,7 @@ export default function VendorsPage() {
                     {isLoading && vendors.length === 0 ? (
                         <LoadingState message="Loading vendors..." />
                     ) : (
-                        <div className={isLoading ? "opacity-50" : ""}>
+                        <div className={`h-full ${isLoading ? "opacity-50" : ""}`}>
                             <VendorsTable
                                 data={filteredVendors}
                                 onEdit={handleEdit}
