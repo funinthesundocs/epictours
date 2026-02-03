@@ -91,7 +91,7 @@ export function EditAvailabilitySheet({
             id: undefined,
             experience_id: null,
             start_date: "",
-            is_repeating: false,
+            is_repeating: true,
             repeat_days: [],
             end_date: null,
             duration_type: "time_range",
@@ -195,8 +195,8 @@ export function EditAvailabilitySheet({
 
         const defaultState = {
             start_date: selectedDate || "",
-            is_repeating: false,
-            duration_type: "all_day" as "all_day" | "time_range",
+            is_repeating: true,
+            duration_type: "time_range" as "all_day" | "time_range",
             max_capacity: 0,
             online_booking_status: "open" as "open" | "closed",
             repeat_days: [],
