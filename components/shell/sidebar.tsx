@@ -130,7 +130,7 @@ export function Sidebar() {
                     {/* Platform Admin Org Context Picker */}
                     {isPlatformAdmin() && !isPlatformAdminOpen && (
                         <div
-                            className="border-b border-border shrink-0"
+                            className="border-b border-border shrink-0 relative z-30 bg-background"
                             style={{ zoom: zoom / 100 }}
                         >
                             <OrgContextPicker isCollapsed={isCollapsed} />
