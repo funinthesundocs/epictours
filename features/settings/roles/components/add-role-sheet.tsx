@@ -15,10 +15,15 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/features/auth/auth-context";
 import { getRegisteredModules, type ModuleDefinition, type ResourceDefinition } from "@/features/modules/registry";
 import type { ModuleCode } from "@/features/auth/types";
+import { isReservedName } from "../constants";
 
 // Zod Schema
 const RoleSchema = z.object({
-    name: z.string().min(2, "Group name is required"),
+    name: z.string()
+        .min(2, "Group name is required")
+        .refine((name) => !isReservedName(name), {
+            message: "This name is reserved for system use. Please choose another."
+        }),
     description: z.string().optional().nullable(),
 });
 
@@ -41,7 +46,7 @@ interface AddRoleSheetProps {
 }
 
 export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRoleSheetProps) {
-    const { user } = useAuth();
+    const { user, effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -197,7 +202,7 @@ export function AddRoleSheet({ isOpen, onClose, onSuccess, initialData }: AddRol
                 const { data: newRole, error } = await supabase
                     .from("roles")
                     .insert([{
-                        organization_id: user!.organizationId!,
+                        organization_id: effectiveOrganizationId!,
                         name: data.name,
                         description: data.description || null,
                     }])

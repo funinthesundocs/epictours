@@ -24,6 +24,7 @@ import {
     ChevronLeft,
 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import type { Organization } from "@/features/auth/types";
 
 type TabId = "overview" | "users" | "modules";
@@ -96,7 +97,74 @@ function OrganizationDetailContent() {
     };
 
     const handleModuleToggle = async (moduleCode: string, currentlyActive: boolean) => {
+        // Toggle Module
         await setModuleSubscription(moduleCode as any, !currentlyActive);
+
+        // Seeding Logic: If enabling "bookings" module, seed default positions
+        if (moduleCode === 'bookings' && !currentlyActive) { // If TURNING ON
+            try {
+                // 1. Ensure "Staff" group exists (or similar default group)
+                let { data: staffGroup } = await supabase
+                    .from("roles")
+                    .select("id")
+                    .eq("organization_id", orgId)
+                    .ilike("name", "Staff")
+                    .maybeSingle();
+
+                if (!staffGroup) {
+                    const { data: newGroup } = await supabase
+                        .from("roles")
+                        .insert({
+                            organization_id: orgId,
+                            name: "Staff",
+                            description: "General staff members"
+                        })
+                        .select()
+                        .single();
+                    staffGroup = newGroup;
+                }
+
+                if (staffGroup) {
+                    // 2. Seed "Driver" position if missing
+                    const { count: driverCount } = await supabase
+                        .from("staff_positions")
+                        .select("*", { count: 'exact', head: true })
+                        .eq("organization_id", orgId)
+                        .eq("name", "Driver");
+
+                    if (driverCount === 0) {
+                        await supabase
+                            .from("staff_positions")
+                            .insert({
+                                organization_id: orgId,
+                                name: "Driver",
+                                default_role_id: staffGroup.id,
+                                color: "#0ea5e9" // Sky Blue
+                            });
+                    }
+
+                    // 3. Seed "Guide" position if missing
+                    const { count: guideCount } = await supabase
+                        .from("staff_positions")
+                        .select("*", { count: 'exact', head: true })
+                        .eq("organization_id", orgId)
+                        .eq("name", "Guide");
+
+                    if (guideCount === 0) {
+                        await supabase
+                            .from("staff_positions")
+                            .insert({
+                                organization_id: orgId,
+                                name: "Guide",
+                                default_role_id: staffGroup.id,
+                                color: "#10b981" // Emerald
+                            });
+                    }
+                }
+            } catch (err) {
+                console.error("Error seeding positions:", err);
+            }
+        }
     };
 
     if (isLoading) {

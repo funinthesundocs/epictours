@@ -46,15 +46,15 @@ export default function PermissionsPage() {
             const { data: rolesData, error: rolesError } = await supabase
                 .from("roles")
                 .select("*")
-                .eq("organization_id", effectiveOrganizationId)
+                .or(`organization_id.eq.${effectiveOrganizationId},organization_id.is.null`)
                 .order("name");
 
             if (rolesError) throw rolesError;
 
             const { data: positionsData, error: positionsError } = await supabase
                 .from("staff_positions")
-                .select("id, name, default_role_id, color")
-                .eq("organization_id", effectiveOrganizationId) as any;
+                .select("id, name, default_role_id, color, organization_id")
+                .or(`organization_id.eq.${effectiveOrganizationId},organization_id.is.null`) as any;
 
             if (positionsError) throw positionsError;
 
@@ -62,7 +62,13 @@ export default function PermissionsPage() {
             const groupsWithPositions = (rolesData || []).map(role => ({
                 ...role,
                 positions: ((positionsData || []) as StaffPosition[]).filter(p => p.default_role_id === role.id)
-            }));
+            })).sort((a, b) => {
+                if (a.name === 'Staff') return -1;
+                if (b.name === 'Staff') return 1;
+                if (a.name === 'Vendor Contact') return -1;
+                if (b.name === 'Vendor Contact') return 1;
+                return a.name.localeCompare(b.name);
+            });
 
             setGroups(groupsWithPositions);
         } catch (err) {
@@ -119,9 +125,13 @@ export default function PermissionsPage() {
             if (error) throw error;
             toast.success("Position deleted");
             fetchData();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error deleting position:", err);
-            toast.error("Failed to delete position");
+            if (err.code === '23503') {
+                toast.error("Cannot delete position: It is currently assigned to staff members.");
+            } else {
+                toast.error("Failed to delete position");
+            }
         }
     };
 
@@ -141,7 +151,7 @@ export default function PermissionsPage() {
             }
             className="flex flex-col"
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
-            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-6"
+            contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
         >
             <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border bg-card">
                 {isLoading ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, Plus, ChevronDown, ChevronRight, Shield, Briefcase } from "lucide-react";
+import { Edit2, Trash2, Plus, ChevronDown, ChevronRight, Shield, Lock } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ interface StaffPosition {
     name: string;
     default_role_id: string | null;
     color?: string | null;
+    organization_id?: string | null;
 }
 
 interface PermissionGroup {
@@ -17,6 +18,7 @@ interface PermissionGroup {
     name: string;
     description: string | null;
     color: string | null;
+    organization_id?: string | null;
     positions?: StaffPosition[];
 }
 
@@ -67,11 +69,15 @@ export function PermissionGroupsPositionsList({
                 {groups.map((group) => {
                     const isExpanded = expandedGroups.has(group.id);
                     const positionCount = group.positions?.length || 0;
+                    const isSystemGroup = !group.organization_id;
 
                     return (
                         <div
                             key={group.id}
-                            className="bg-card border border-border rounded-xl overflow-hidden"
+                            className={cn(
+                                "bg-card border rounded-xl overflow-hidden transition-all",
+                                isSystemGroup ? "border-indigo-500/20 bg-indigo-50/5" : "border-border"
+                            )}
                         >
                             {/* Group Header */}
                             <div
@@ -89,9 +95,13 @@ export function PermissionGroupsPositionsList({
                                         {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                                     </button>
                                     <div>
-                                        <h3 className="font-semibold text-white">{group.name}</h3>
+                                        <div className="flex items-center gap-2">
+                                            {isSystemGroup && <Lock size={12} className="text-indigo-400" />}
+                                            <h3 className="font-semibold text-white">{group.name}</h3>
+                                        </div>
                                         <p className="text-xs text-zinc-500">
                                             {positionCount} {positionCount === 1 ? 'position' : 'positions'}
+                                            {isSystemGroup && " • System Default"}
                                         </p>
                                     </div>
                                 </div>
@@ -107,17 +117,19 @@ export function PermissionGroupsPositionsList({
                                     <button
                                         onClick={() => onEditGroup(group)}
                                         className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                                        title="Edit Permission Group"
+                                        title={isSystemGroup ? "View Permissions" : "Edit Permission Group"}
                                     >
-                                        <Edit2 size={14} />
+                                        {isSystemGroup ? <Lock size={14} /> : <Edit2 size={14} />}
                                     </button>
-                                    <button
-                                        onClick={() => setDeletingGroup(group)}
-                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                        title="Delete Permission Group"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                    {!isSystemGroup && (
+                                        <button
+                                            onClick={() => setDeletingGroup(group)}
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                                            title="Delete Permission Group"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -130,36 +142,44 @@ export function PermissionGroupsPositionsList({
                                         </div>
                                     ) : (
                                         <div className="divide-y divide-border">
-                                            {group.positions?.map((position) => (
-                                                <div
-                                                    key={position.id}
-                                                    className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className="w-3 h-3 rounded-full"
-                                                            style={{ backgroundColor: position.color || '#71717a' }}
-                                                        />
-                                                        <span className="text-foreground">{position.name}</span>
+                                            {group.positions?.map((position) => {
+                                                const isSystemPosition = !position.organization_id;
+                                                return (
+                                                    <div
+                                                        key={position.id}
+                                                        className="flex items-center justify-between px-6 py-3 hover:bg-muted/50 transition-colors"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-3 h-3 rounded-full"
+                                                                style={{ backgroundColor: position.color || '#71717a' }}
+                                                            />
+                                                            <div className="flex items-center gap-2">
+                                                                {isSystemPosition && <Lock size={10} className="text-indigo-400" />}
+                                                                <span className="text-foreground">{position.name}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                onClick={() => onEditPosition(position)}
+                                                                className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                                                                title="Edit Position"
+                                                            >
+                                                                {isSystemPosition ? <Lock size={12} /> : <Edit2 size={12} />}
+                                                            </button>
+                                                            {!isSystemPosition && (
+                                                                <button
+                                                                    onClick={() => setDeletingPosition(position)}
+                                                                    className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                                                                    title="Delete Position"
+                                                                >
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <button
-                                                            onClick={() => onEditPosition(position)}
-                                                            className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                                                            title="Edit Position"
-                                                        >
-                                                            <Edit2 size={12} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setDeletingPosition(position)}
-                                                            className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                                            title="Delete Position"
-                                                        >
-                                                            <Trash2 size={12} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

@@ -16,9 +16,15 @@ import { cn } from "@/lib/utils";
 import { getRegisteredModules, type ModuleDefinition } from "@/features/modules/registry";
 import type { ModuleCode } from "@/features/auth/types";
 import { useAuth } from "@/features/auth/auth-context";
+import { isReservedName } from "../constants";
 
 const positionSchema = z.object({
-    name: z.string().min(1, "Position name is required").max(100, "Name too long"),
+    name: z.string()
+        .min(1, "Position name is required")
+        .max(100, "Name too long")
+        .refine((name) => !isReservedName(name), {
+            message: "This name is reserved for system use. Please choose another."
+        }),
     default_role_id: z.string().min(1, "Permission group is required"),
 });
 
@@ -134,9 +140,11 @@ export function StaffPositionFormSheet({
     // Fetch permission groups
     useEffect(() => {
         const fetchGroups = async () => {
+            if (!effectiveOrganizationId) return;
             const { data } = await supabase
                 .from("roles")
                 .select("id, name")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("name");
             if (data) {
                 setPermissionGroups(data.map(r => ({ value: r.id, label: r.name })));
