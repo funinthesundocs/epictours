@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Schema
 const HotelSchema = z.object({
@@ -30,6 +31,7 @@ interface AddHotelSheetProps {
 }
 
 export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHotelSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [pickupOptions, setPickupOptions] = useState<{ value: string; label: string }[]>([]);
 
@@ -53,14 +55,16 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
 
     // Load Pickup Options
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchPickups = async () => {
-            const { data } = await supabase.from("pickup_points").select("id, name").order("name");
+            const { data } = await supabase.from("pickup_points").select("id, name").eq("organization_id", effectiveOrganizationId).order("name");
             if (data) {
                 setPickupOptions(data.map(p => ({ value: p.id, label: p.name })));
             }
         };
         fetchPickups();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // Load Initial Data
     useEffect(() => {
@@ -89,7 +93,7 @@ export function AddHotelSheet({ isOpen, onClose, onSuccess, initialData }: AddHo
                 // Insert
                 const { error } = await supabase
                     .from("hotels")
-                    .insert([data]);
+                    .insert([{ ...data, organization_id: effectiveOrganizationId }]);
                 if (error) throw error;
             }
             onSuccess();

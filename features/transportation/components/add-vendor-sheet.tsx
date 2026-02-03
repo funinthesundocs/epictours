@@ -15,6 +15,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Brand icons for messaging apps
 import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine } from "react-icons/fa";
@@ -124,6 +125,7 @@ interface AddVendorSheetProps {
 }
 
 export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddVendorSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [vendorContactRoleId, setVendorContactRoleId] = useState<string | null>(null);
@@ -267,6 +269,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                             messaging_apps: data.preferred_messaging_app
                                 ? [{ type: data.preferred_messaging_app, handle: data.messaging_handle || "" }]
                                 : [],
+                            organization_id: effectiveOrganizationId,
                         }])
                         .select()
                         .single();
@@ -318,7 +321,7 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             } else {
                 const { error } = await supabase
                     .from("vendors")
-                    .insert([payload] as any);
+                    .insert([{ ...payload, organization_id: effectiveOrganizationId }] as any);
                 if (error) throw error;
             }
             onSuccess();

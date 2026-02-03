@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { PermissionGroupsPositionsList } from "@/features/settings/roles/components/permission-groups-list";
 import { AddRoleSheet } from "@/features/settings/roles/components/add-role-sheet";
 import { StaffPositionFormSheet } from "@/features/settings/roles/components/staff-position-form-sheet";
+import { useAuth } from "@/features/auth/auth-context";
 
 interface StaffPosition {
     id: string;
@@ -26,6 +27,7 @@ interface PermissionGroup {
 }
 
 export default function PermissionsPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [groups, setGroups] = useState<PermissionGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -37,27 +39,39 @@ export default function PermissionsPage() {
     const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
+        if (!effectiveOrganizationId) return;
         setIsLoading(true);
         try {
-            // Fetch roles and join with positions
-            // Note: Assuming foreign key relationship exists from staff_positions.default_role_id -> roles.id
-            const { data, error } = await supabase
+            // Fetch roles and positions separately, filter positions by org
+            const { data: rolesData, error: rolesError } = await supabase
                 .from("roles")
-                .select(`
-                    *,
-                    positions:staff_positions(*)
-                `)
+                .select("*")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("name");
 
-            if (error) throw error;
-            setGroups(data || []);
+            if (rolesError) throw rolesError;
+
+            const { data: positionsData, error: positionsError } = await supabase
+                .from("staff_positions")
+                .select("id, name, default_role_id, color")
+                .eq("organization_id", effectiveOrganizationId) as any;
+
+            if (positionsError) throw positionsError;
+
+            // Map positions to their roles
+            const groupsWithPositions = (rolesData || []).map(role => ({
+                ...role,
+                positions: ((positionsData || []) as StaffPosition[]).filter(p => p.default_role_id === role.id)
+            }));
+
+            setGroups(groupsWithPositions);
         } catch (err) {
             console.error("PermissionsPage: Error fetching permissions data:", JSON.stringify(err, null, 2));
             toast.error("Failed to load permission groups");
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
         fetchData();

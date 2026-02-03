@@ -15,6 +15,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 import { cn } from "@/lib/utils";
 import { getRegisteredModules, type ModuleDefinition } from "@/features/modules/registry";
 import type { ModuleCode } from "@/features/auth/types";
+import { useAuth } from "@/features/auth/auth-context";
 
 const positionSchema = z.object({
     name: z.string().min(1, "Position name is required").max(100, "Name too long"),
@@ -83,6 +84,7 @@ export function StaffPositionFormSheet({
     initialData,
     onEditParentGroup
 }: StaffPositionFormSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [permissionGroups, setPermissionGroups] = useState<PermissionGroupOption[]>([]);
     const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -315,7 +317,8 @@ export function StaffPositionFormSheet({
                     .insert({
                         name: data.name,
                         default_role_id: data.default_role_id,
-                        color: selectedColor
+                        color: selectedColor,
+                        organization_id: effectiveOrganizationId
                     })
                     .select()
                     .single();

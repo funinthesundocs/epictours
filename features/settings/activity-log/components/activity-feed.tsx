@@ -11,6 +11,7 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { LoadingState } from "@/components/ui/loading-state";
+import { useAuth } from "@/features/auth/auth-context";
 
 type ActivityLog = {
     id: string;
@@ -36,6 +37,7 @@ const formatPhoneNumber = (phone: string): string => {
 };
 
 export function ActivityFeed() {
+    const { effectiveOrganizationId } = useAuth();
     const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
@@ -52,11 +54,13 @@ export function ActivityFeed() {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const fetchLogs = useCallback(async () => {
+        if (!effectiveOrganizationId) return;
         setLoading(true);
 
         let query = supabase
             .from("activity_logs")
             .select("*", { count: 'exact' })
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: false });
 
         // Apply search filter - searches Item (table_name), Action, and Record Name (in JSONB)
@@ -119,7 +123,7 @@ export function ActivityFeed() {
             }
         }
         setLoading(false);
-    }, [searchQuery]);
+    }, [searchQuery, effectiveOrganizationId]);
 
     // Effect: Trigger Fetch on changes (Debounced Search)
     useEffect(() => {
@@ -136,9 +140,11 @@ export function ActivityFeed() {
 
     // Fetch oldest log date for purge countdown
     const fetchOldestLog = useCallback(async () => {
+        if (!effectiveOrganizationId) return;
         const { data } = await supabase
             .from("activity_logs")
             .select("created_at")
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: true })
             .limit(1)
             .single();
@@ -146,7 +152,7 @@ export function ActivityFeed() {
         if (data?.created_at) {
             setOldestLogDate(new Date(data.created_at));
         }
-    }, []);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
         fetchOldestLog();

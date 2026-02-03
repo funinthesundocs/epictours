@@ -16,6 +16,7 @@ import { TimePicker } from "@/components/ui/time-picker";
 import { toast } from "sonner";
 import { Experience, ExperienceFormData, ExperienceSchema, NewExperience } from "../types";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 interface ExperienceSheetProps {
     isOpen: boolean;
@@ -28,6 +29,7 @@ interface ExperienceSheetProps {
 // const timeOptions = ... (Removed in favor of TimePicker)
 
 export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: ExperienceSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Custom Time Picker State
@@ -180,7 +182,7 @@ export function ExperienceSheet({ isOpen, onClose, onSuccess, initialData }: Exp
                     const { error } = await supabase.from("experiences").update(dbData).eq("id", initialData.id);
                     if (error) throw error;
                 } else {
-                    const { error } = await supabase.from("experiences").insert([dbData]);
+                    const { error } = await supabase.from("experiences").insert([{ ...dbData, organization_id: effectiveOrganizationId }]);
                     if (error) throw error;
                 }
 

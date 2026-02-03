@@ -14,6 +14,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Brand icons for messaging apps
 import { FaWhatsapp, FaFacebookMessenger, FaTelegram, FaViber, FaWeixin, FaLine, FaApple } from "react-icons/fa";
@@ -65,6 +66,7 @@ const APP_OPTIONS = [
 ];
 
 export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddStaffSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [positions, setPositions] = useState<{ value: string; label: string; default_role_id: string | null }[]>([]);
     const [showPassword, setShowPassword] = useState(false);
@@ -106,10 +108,13 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
 
     // Fetch Positions with their default_role_id on mount
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchPositions = async () => {
             const { data } = await supabase
                 .from("staff_positions")
                 .select("id, name, default_role_id")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("name");
             if (data) {
                 // Type assertion since default_role_id may not exist pre-migration
@@ -126,7 +131,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
             }
         };
         fetchPositions();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // Reset when opening/changing mode
     useEffect(() => {
@@ -184,6 +189,7 @@ export function AddStaffSheet({ isOpen, onClose, onSuccess, initialData }: AddSt
                 position_id: data.position_id,
                 messaging_app: validApps.length > 0 ? JSON.stringify(validApps) : null,
                 notes: data.notes || null,
+                organization_id: effectiveOrganizationId,
             };
 
             // Create user account if requested

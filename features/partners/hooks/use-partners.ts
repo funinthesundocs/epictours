@@ -21,12 +21,12 @@ export interface PartnerUser {
 }
 
 export function usePartners() {
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, effectiveOrganizationId } = useAuth();
     const [partners, setPartners] = useState<PartnerUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchPartners = useCallback(async () => {
-        if (!currentUser?.organizationId) {
+        if (!effectiveOrganizationId) {
             setPartners([]);
             setIsLoading(false);
             return;
@@ -53,7 +53,7 @@ export function usePartners() {
                         name
                     )
                 `)
-                .eq("host_organization_id", currentUser.organizationId)
+                .eq("host_organization_id", effectiveOrganizationId)
                 .neq("status", "revoked") // Optionally hide revoked, or show them? Let's hide for now or filter in UI
                 .order("created_at", { ascending: false });
 
@@ -78,14 +78,14 @@ export function usePartners() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentUser?.organizationId]);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
         fetchPartners();
     }, [fetchPartners]);
 
     const invitePartner = async (email: string, permissionGroupId: string, relationshipType: 'partner' | 'affiliate') => {
-        if (!currentUser?.organizationId) return false;
+        if (!effectiveOrganizationId) return false;
 
         try {
             // 1. Check if user exists
@@ -120,7 +120,7 @@ export function usePartners() {
             const { error: inviteError } = await supabase
                 .from("cross_organization_access")
                 .insert({
-                    host_organization_id: currentUser.organizationId,
+                    host_organization_id: effectiveOrganizationId,
                     user_id: userId,
                     permission_group_id: permissionGroupId,
                     relationship_type: relationshipType,

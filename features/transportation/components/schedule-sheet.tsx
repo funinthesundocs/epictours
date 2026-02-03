@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth/auth-context";
 
 // DnD Imports
 import {
@@ -179,6 +180,7 @@ function SortableStop({ id, index, control, remove, insert, pickupOptions }: Sor
 
 
 export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: ScheduleSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [pickupOptions, setPickupOptions] = useState<{ value: string; label: string }[]>([]);
 
@@ -228,14 +230,15 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
 
     // Load Pickup Options
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
         const fetchPickups = async () => {
-            const { data } = await supabase.from("pickup_points").select("id, name").order("name");
+            const { data } = await supabase.from("pickup_points").select("id, name").eq("organization_id", effectiveOrganizationId).order("name");
             if (data) {
                 setPickupOptions(data.map(p => ({ value: p.id, label: p.name })));
             }
         };
         fetchPickups();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // Load Data
     useEffect(() => {
@@ -284,7 +287,7 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
             } else {
                 const { data: newData, error } = await supabase
                     .from("schedules")
-                    .insert([{ name: data.name, start_time: data.start_time }])
+                    .insert([{ name: data.name, start_time: data.start_time, organization_id: effectiveOrganizationId }])
                     .select()
                     .single();
                 scheduleError = error;

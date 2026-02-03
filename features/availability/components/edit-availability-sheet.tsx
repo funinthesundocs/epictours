@@ -130,14 +130,17 @@ export function EditAvailabilitySheet({
                     { data: variations },
                     { data: transSchedules },
                     { data: vehs },
-                    { data: staffData }
+                    { data: staffData },
+                    { data: rolesData } // Fetch roles separately
                 ] = await Promise.all([
                     supabase.from("booking_option_schedules" as any).select("id, name").order("name"),
                     supabase.from("pricing_schedules" as any).select("id, name").order("name"),
                     supabase.from("pricing_variations" as any).select("id, name").order("sort_order"),
                     supabase.from("schedules" as any).select("id, name").order("name"),
                     supabase.from("vehicles" as any).select("id, name, capacity").eq("status", "active").order("name"),
-                    supabase.from("staff" as any).select("*, role:roles(name)").order("name")
+                    // Removed 'role:roles(name)' to avoid 400 bad request with join
+                    supabase.from("staff" as any).select("*, user:users(name)"),
+                    supabase.from("roles" as any).select("id, name")
                 ]);
 
                 setBookingSchedules((bookings as any) || []);
@@ -146,11 +149,21 @@ export function EditAvailabilitySheet({
                 setTransportationSchedules((transSchedules as any) || []);
                 setVehicles((vehs as any) || []);
 
-                // Filter Staff
-                const filteredStaff = (staffData || []).filter((s: any) =>
-                    s.role?.name && ['Driver', 'Guide'].includes(s.role.name)
-                );
-                setStaff(filteredStaff as any);
+                // Map roles manually
+                const roleMap = new Map((rolesData as any[] || []).map(r => [r.id, r.name]));
+
+                // Pass all staff and let UI handle display/filtering, ensure Name is mapped
+                const mappedStaff = (staffData || []).map((s: any) => {
+                    const rName = s.role_id ? roleMap.get(s.role_id) : null;
+                    return {
+                        ...s,
+                        name: s.user?.name || s.name || 'Unknown Staff',
+                        role: { name: rName }
+                    };
+                })
+                    .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+                setStaff(mappedStaff as any);
 
                 // Fetch Existing Assignments if Edit Mode
                 if (initialData?.id) {

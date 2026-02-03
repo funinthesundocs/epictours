@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Helper to handle empty inputs -> null
 const emptyToNull = (val: unknown): number | null => {
@@ -68,6 +69,7 @@ const statusOptions = [
 ];
 
 export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: AddVehicleSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [vendors, setVendors] = useState<{ value: string; label: string }[]>([]);
 
@@ -98,8 +100,10 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
 
     // Fetch vendors on mount
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchVendors = async () => {
-            const { data } = await supabase.from('vendors' as any).select('id, user:users(name)').order('created_at');
+            const { data } = await supabase.from('vendors' as any).select('id, user:users(name)').eq('organization_id', effectiveOrganizationId).order('created_at');
             if (data) {
                 setVendors((data as any[])
                     .filter(v => v.user?.name)
@@ -107,7 +111,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
             }
         };
         fetchVendors();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // Reset when opening/changing mode
     useEffect(() => {
@@ -162,7 +166,7 @@ export function AddVehicleSheet({ isOpen, onClose, onSuccess, initialData }: Add
                 // Create
                 const { error } = await supabase
                     .from("vehicles")
-                    .insert([data]);
+                    .insert([{ ...data, organization_id: effectiveOrganizationId }]);
                 if (error) throw error;
             }
             onSuccess();

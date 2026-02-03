@@ -69,21 +69,14 @@ registerModule({
 
 registerModule({
     code: 'bookings',
-    name: 'Bookings Platform',
-    description: 'Experience booking and availability management',
+    name: 'Booking Platform',
+    description: 'Experience booking, availability, and transportation management',
     resources: [
         { code: 'bookings', name: 'Bookings', actions: ['create', 'read', 'update', 'delete'] },
         { code: 'experiences', name: 'Experiences', actions: ['create', 'read', 'update', 'delete'] },
         { code: 'availabilities', name: 'Availabilities', actions: ['create', 'read', 'update', 'delete'] },
         { code: 'booking_options', name: 'Booking Options', actions: ['create', 'read', 'update', 'delete'] },
-    ]
-});
-
-registerModule({
-    code: 'transportation',
-    name: 'Transportation',
-    description: 'Vehicles, vendors, and logistics',
-    resources: [
+        // Transportation resources (merged)
         { code: 'vehicles', name: 'Vehicles', actions: ['create', 'read', 'update', 'delete'] },
         { code: 'vendors', name: 'Vendors', actions: ['create', 'read', 'update', 'delete'] },
         { code: 'pickup_points', name: 'Pickup Points', actions: ['create', 'read', 'update', 'delete'] },

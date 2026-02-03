@@ -49,6 +49,8 @@ export interface NavigationItem {
     platformAdminOnly?: boolean;
     // If true, only organization admins can see this
     organizationAdminOnly?: boolean;
+    // If true, this item requires an org context to be visible (for platform admins)
+    requiresOrgContext?: boolean;
 }
 
 export interface NavSection {
@@ -80,32 +82,48 @@ export const navigation: NavSection[] = [
         ]
     },
     {
-        title: "Operations",
+        title: "Booking Platform",
         requiredModule: "bookings",
         items: [
             {
                 title: "Availabilities",
-                href: "/operations/availability",
+                href: "/booking/availability",
                 icon: Calendar,
                 requiredModule: "bookings"
             },
             {
                 title: "Bookings",
-                href: "/operations/bookings",
+                href: "/booking/bookings",
                 icon: CalendarRange,
                 requiredModule: "bookings"
             },
+            { title: "Experiences", href: "/booking/tours", icon: Map, requiredModule: "bookings", requiresOrgContext: true },
             {
                 title: "Transportation",
-                href: "/operations/transportation",
+                href: "/booking/transportation",
                 icon: Bus,
-                requiredModule: "transportation",
+                requiredModule: "bookings",
                 children: [
-                    { title: "Vehicles", href: "/operations/transportation/vehicles", icon: Bus, requiredModule: "transportation" },
-                    { title: "Vendors", href: "/operations/transportation/vendors", icon: Handshake, requiredModule: "transportation" },
-                    { title: "Pickup Points", href: "/operations/transportation/pickup-points", icon: MapPin, requiredModule: "transportation" },
-                    { title: "Hotel List", href: "/operations/transportation/hotels", icon: Building2, requiredModule: "transportation" },
-                    { title: "Schedules", href: "/operations/transportation/schedules", icon: CalendarClock, requiredModule: "transportation" }
+                    { title: "Vehicles", href: "/booking/transportation/vehicles", icon: Bus, requiredModule: "bookings" },
+                    { title: "Vendors", href: "/booking/transportation/vendors", icon: Handshake, requiredModule: "bookings" },
+                    { title: "Pickup Points", href: "/booking/transportation/pickup-points", icon: MapPin, requiredModule: "bookings" },
+                    { title: "Hotel List", href: "/booking/transportation/hotels", icon: Building2, requiredModule: "bookings" },
+                    { title: "Schedules", href: "/booking/transportation/schedules", icon: CalendarClock, requiredModule: "bookings" }
+                ]
+            },
+            {
+                title: "Booking Setup",
+                href: "/booking/custom-fields",
+                icon: Settings,
+                requiredModule: "bookings",
+                requiresOrgContext: true,
+                children: [
+                    { title: "Custom Fields", href: "/booking/custom-fields", icon: Settings, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Booking Options", href: "/booking/booking-options", icon: List, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Check-In Statuses", href: "/booking/check-in-statuses", icon: UserCheck, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Customer Types", href: "/booking/customer-types", icon: Users, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Pricing Schedules", href: "/booking/pricing", icon: Coins, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Pricing Variations", href: "/booking/pricing-variations", icon: Layers, requiredModule: "bookings", requiresOrgContext: true },
                 ]
             },
         ]
@@ -144,27 +162,21 @@ export const navigation: NavSection[] = [
         title: "Settings",
         requiredModule: "settings",
         items: [
-            { title: "Organization Profile", href: "/settings/organization", icon: Building2, organizationAdminOnly: true },
+            { title: "Organization Profile", href: "/settings/organization", icon: Building2, organizationAdminOnly: true, requiresOrgContext: true },
             {
                 title: "Users",
                 href: "/settings/users",
                 icon: UserCog,
                 organizationAdminOnly: true,
+                requiresOrgContext: true,
                 children: [
-                    { title: "Staff", href: "/settings/users", icon: Users },
-                    { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, organizationAdminOnly: true },
-                    { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, organizationAdminOnly: true }
+                    { title: "Staff", href: "/settings/users", icon: Users, requiresOrgContext: true },
+                    { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, organizationAdminOnly: true, requiresOrgContext: true },
+                    { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, organizationAdminOnly: true, requiresOrgContext: true }
                 ]
             },
-
-            { title: "Experiences", href: "/operations/tours", icon: Map, requiredModule: "bookings" },
-            { title: "Custom Fields", href: "/settings/custom-fields", icon: Settings },
-            { title: "Booking Options", href: "/settings/booking-options", icon: List, requiredModule: "bookings" },
-            { title: "Check-In Statuses", href: "/settings/check-in-statuses", icon: UserCheck, requiredModule: "bookings" },
-            { title: "Customer Types", href: "/customers/types", icon: Users, requiredModule: "crm" },
-            { title: "Pricing Schedules", href: "/finance/pricing", icon: Coins, requiredModule: "finance" },
-            { title: "Pricing Variations", href: "/settings/pricing-variations", icon: Layers, requiredModule: "finance" },
-            { title: "Activity Log", href: "/settings/activity-log", icon: Activity },
+            { title: "Style Manager", href: "/admin/theme", icon: Palette, requiresOrgContext: true },
+            { title: "Activity Log", href: "/settings/activity-log", icon: Activity, requiresOrgContext: true },
         ]
     },
     {
@@ -180,12 +192,6 @@ export const navigation: NavSection[] = [
                 title: "Organizations",
                 href: "/admin/organizations",
                 icon: Building2,
-                platformAdminOnly: true
-            },
-            {
-                title: "Style Manager",
-                href: "/admin/theme",
-                icon: Palette,
                 platformAdminOnly: true
             },
         ]

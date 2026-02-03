@@ -208,9 +208,9 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                         </button>
                     </DialogTrigger>
                     <DialogContent
-                        portal={false}
-                        overlayClassName="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm"
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-popover border-border text-foreground sm:max-w-[425px] shadow-2xl"
+                        portal={true}
+                        overlayClassName="fixed inset-0 z-[150] bg-background/50 backdrop-blur-sm"
+                        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[150] bg-popover border-border text-foreground sm:max-w-[425px] shadow-2xl"
                     >
                         <DialogHeader>
                             <DialogTitle>Add Vehicle Cluster</DialogTitle>
@@ -241,7 +241,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 <CustomSelect
                                     value={newCluster.driver_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, driver_id: val })}
-                                    options={[{ value: "", label: "No Driver" }, ...staff.filter(s => s.role?.name === 'Driver').map(s => ({ value: s.id, label: s.name }))]}
+                                    options={[{ value: "", label: "No Driver" }, ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))]}
                                     placeholder="Select Driver..."
                                 />
                             </div>
@@ -251,7 +251,7 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 <CustomSelect
                                     value={newCluster.guide_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, guide_id: val })}
-                                    options={[{ value: "", label: "No Guide" }, ...staff.filter(s => s.role?.name === 'Guide' || s.role?.name === 'Driver').map(s => ({ value: s.id, label: s.name }))]}
+                                    options={[{ value: "", label: "No Guide" }, ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))]}
                                     placeholder="Select Guide..."
                                 />
                             </div>

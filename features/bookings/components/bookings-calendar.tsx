@@ -18,6 +18,7 @@ import {
     X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/features/auth/auth-context";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { BookingsListTable } from "./bookings-list-table";
 import { BookingColumnPicker, useBookingColumnVisibility } from "./bookings-column-picker";
@@ -37,6 +38,7 @@ export function BookingsCalendar({
     selectedAvailabilityId?: string | null;
     onBookingEdit?: (bookingId: string) => void;
 }) {
+    const { effectiveOrganizationId } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
 
@@ -78,13 +80,15 @@ export function BookingsCalendar({
 
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-    // 1. Fetch Reference Data
+    // 1. Fetch Reference Data - filtered by org
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchRefs = async () => {
-            const { data: staff } = await supabase.from('staff' as any).select('id, user:users(name)');
-            const { data: routes } = await supabase.from('schedules' as any).select('id, name');
-            const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name');
-            const { data: exps } = await supabase.from('experiences' as any).select('id, name, short_code');
+            const { data: staff } = await supabase.from('staff' as any).select('id, user:users(name)').eq('organization_id', effectiveOrganizationId);
+            const { data: routes } = await supabase.from('schedules' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
+            const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
+            const { data: exps } = await supabase.from('experiences' as any).select('id, name, short_code').eq('organization_id', effectiveOrganizationId);
 
             if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.user?.name || 'Unknown'])));
             if (routes) setRouteMap(Object.fromEntries((routes as any[]).map(r => [r.id, r.name])));
@@ -92,10 +96,15 @@ export function BookingsCalendar({
             if (exps) setExpMap(Object.fromEntries((exps as any[]).map(e => [e.id, { name: e.name, short_code: e.short_code }])));
         };
         fetchRefs();
-    }, []);
+    }, [effectiveOrganizationId]);
 
-    // 2. Fetch Availabilities
+    // 2. Fetch Availabilities - filtered by org
     useEffect(() => {
+        if (!effectiveOrganizationId) {
+            setAvailabilities([]);
+            return;
+        }
+
         const fetchAvail = async () => {
             setIsLoading(true);
 
@@ -119,6 +128,7 @@ export function BookingsCalendar({
             const { data, error } = await supabase
                 .from('availabilities' as any)
                 .select('*, bookings:bookings(pax_count, status), bookings_count:bookings(count), assignments:availability_assignments(*)')
+                .eq('organization_id', effectiveOrganizationId)
                 .gte('start_date', startRange.toISOString().split('T')[0])
                 .lte('start_date', endRange.toISOString().split('T')[0])
                 .order('start_date', { ascending: true });
@@ -187,7 +197,7 @@ export function BookingsCalendar({
         }
 
         fetchAvail();
-    }, [currentDate, viewMode, staffMap, routeMap, vehicleMap]);
+    }, [currentDate, viewMode, staffMap, routeMap, vehicleMap, effectiveOrganizationId]);
 
     // --- NAVIGATION LOGIC ---
     const handlePrev = () => {

@@ -55,7 +55,8 @@ type UpdateType =
     | 'vehicle_id'
     | 'pricing_schedule_id'
     | 'booking_option_schedule_id'
-    | 'staff_ids'
+    | 'driver_id'
+    | 'guide_id'
     | 'private_announcement'
     | 'delete';
 
@@ -68,7 +69,8 @@ const UPDATE_OPTIONS: { type: UpdateType; label: string; icon: any; description:
     { type: 'vehicle_id', label: 'Vehicle', icon: Bus, description: 'Assign vehicle' },
     { type: 'pricing_schedule_id', label: 'Pricing Schedule', icon: DollarSign, description: 'Change pricing' },
     { type: 'booking_option_schedule_id', label: 'Booking Options', icon: DollarSign, description: 'Change booking options' },
-    { type: 'staff_ids', label: 'Assigned Staff', icon: Users, description: 'Add or replace staff' },
+    { type: 'driver_id', label: 'Assigned Driver', icon: Users, description: 'Assign driver to slots' },
+    { type: 'guide_id', label: 'Assigned Guide', icon: Users, description: 'Assign guide to slots' },
     { type: 'private_announcement', label: 'Private Notes', icon: MessageSquare, description: 'Update internal notes' },
     { type: 'delete', label: 'Delete Availabilities', icon: Trash2, description: 'Remove selected slots' },
 ];
@@ -180,8 +182,8 @@ export function BulkEditSheet({
         vehicle_id: "",
         pricing_schedule_id: "",
         booking_option_schedule_id: "",
-        staff_ids: [] as string[],
-        staff_mode: "replace" as "replace" | "add" | "remove",
+        driver_id: "",
+        guide_id: "",
         private_announcement: ""
     });
 
@@ -233,25 +235,25 @@ export function BulkEditSheet({
                 const roleMap = new Map((rolesData as any[] || []).map(r => [r.id, r.name]));
 
                 // Fetch Staff (without inner join reliance)
+                // Fetch Staff (without inner join reliance) and Link to Users for Name
                 const { data: staffData, error: staffError } = await supabase
                     .from("staff" as any)
-                    .select("*")
-                    .order("name");
+                    .select("*, user:users(name)")
+                    .order("created_at"); // fall back to created_at or remove order
 
                 if (staffError) {
                     console.error("Bulk Edit Staff Fetch Error:", staffError);
                 }
 
-                // Manually map and filter
-                const filteredStaff = (staffData || []).map((s: any) => {
+                const mappedStaff = (staffData || []).map((s: any) => {
                     const rName = s.role_id ? roleMap.get(s.role_id) : null;
-                    return { ...s, role: { name: rName } };
-                }).filter((s: any) => {
-                    const rName = s.role?.name;
-                    return rName && ['driver', 'guide'].includes(rName.toLowerCase());
-                });
+                    // Provide name from user link if missing on staff
+                    const displayName = s.user?.name || s.name || 'Unknown Staff';
+                    return { ...s, name: displayName, role: { name: rName } };
+                })
+                    .sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-                setStaff(filteredStaff as any);
+                setStaff(mappedStaff as any);
 
                 // Fetch customer types for filter
                 const { data: custTypes } = await supabase
@@ -317,8 +319,8 @@ export function BulkEditSheet({
                 vehicle_id: "",
                 pricing_schedule_id: "",
                 booking_option_schedule_id: "",
-                staff_ids: [],
-                staff_mode: "replace",
+                driver_id: "",
+                guide_id: "",
                 private_announcement: ""
             });
         }
@@ -395,24 +397,24 @@ export function BulkEditSheet({
 
             let fetchedData = data || [];
 
-            // Manual Fetch of Crew Assignments
+            // Manual Fetch of Availability Assignments (Assignments)
             if (fetchedData.length > 0) {
                 const ids = fetchedData.map((d: any) => d.id);
-                const { data: crewData } = await supabase
-                    .from('crew_assignments' as any)
-                    .select('availability_id, staff_id')
+                const { data: assignData } = await supabase
+                    .from('availability_assignments' as any)
+                    .select('availability_id, driver_id, guide_id')
                     .in('availability_id', ids);
 
-                // Merge crew data
-                const crewMap = new Map(); // availability_id -> [ { staff_id } ]
-                (crewData || []).forEach((c: any) => {
-                    if (!crewMap.has(c.availability_id)) crewMap.set(c.availability_id, []);
-                    crewMap.get(c.availability_id).push({ staff_id: c.staff_id });
+                // Merge assignment data
+                const assignMap = new Map();
+                (assignData || []).forEach((a: any) => {
+                    if (!assignMap.has(a.availability_id)) assignMap.set(a.availability_id, []);
+                    assignMap.get(a.availability_id).push(a);
                 });
 
                 fetchedData = fetchedData.map((d: any) => ({
                     ...d,
-                    crew_assignments: crewMap.get(d.id) || []
+                    assignments: assignMap.get(d.id) || []
                 }));
             }
 
@@ -471,23 +473,23 @@ export function BulkEditSheet({
 
             let fetchedData = data || [];
 
-            // Manual Fetch of Crew Assignments
+            // Manual Fetch of Assignment Data
             if (fetchedData.length > 0) {
-                const { data: crewData } = await supabase
-                    .from('crew_assignments' as any)
-                    .select('availability_id, staff_id')
+                const { data: assignData } = await supabase
+                    .from('availability_assignments' as any)
+                    .select('availability_id, driver_id, guide_id')
                     .in('availability_id', ids);
 
-                // Merge crew data
-                const crewMap = new Map(); // availability_id -> [ { staff_id } ]
-                (crewData || []).forEach((c: any) => {
-                    if (!crewMap.has(c.availability_id)) crewMap.set(c.availability_id, []);
-                    crewMap.get(c.availability_id).push({ staff_id: c.staff_id });
+                // Merge matches
+                const assignMap = new Map();
+                (assignData || []).forEach((a: any) => {
+                    if (!assignMap.has(a.availability_id)) assignMap.set(a.availability_id, []);
+                    assignMap.get(a.availability_id).push(a);
                 });
 
                 fetchedData = fetchedData.map((d: any) => ({
                     ...d,
-                    crew_assignments: crewMap.get(d.id) || []
+                    assignments: assignMap.get(d.id) || []
                 }));
             }
 
@@ -503,14 +505,7 @@ export function BulkEditSheet({
     // Effective IDs: use filteredIds if showDateRangeSelector, otherwise use selectedIds
     const effectiveIds = showDateRangeSelector ? filteredIds : selectedIds;
 
-    const toggleStaff = (id: string) => {
-        const current = values.staff_ids;
-        if (current.includes(id)) {
-            setValues(prev => ({ ...prev, staff_ids: current.filter(s => s !== id) }));
-        } else {
-            setValues(prev => ({ ...prev, staff_ids: [...current, id] }));
-        }
-    };
+
 
     const getPreviewText = () => {
         if (selectedUpdateTypes.length === 0) return "Select fields to update";
@@ -537,10 +532,13 @@ export function BulkEditSheet({
             if (selectedData.length > 0 && type !== 'delete') {
                 let isConsistent = true;
 
-                // Helper to extract comparable value
                 const getVal = (d: any) => {
-                    if (type === 'staff_ids') {
-                        return JSON.stringify((d.crew_assignments || []).map((c: any) => c.staff_id).sort());
+                    if (type === 'driver_id' || type === 'guide_id') {
+                        // Use unique set of drivers/guides for this availability (comma separated sort)
+                        const assigns = d.assignments || [];
+                        const ids = assigns.map((a: any) => type === 'driver_id' ? a.driver_id : a.guide_id).filter(Boolean);
+                        // Sort to compare consistency
+                        return JSON.stringify(ids.sort());
                     }
                     return d[type];
                 };
@@ -557,9 +555,14 @@ export function BulkEditSheet({
                 if (isConsistent) {
                     let valueToSet = selectedData[0][type];
 
-                    // Transform for form state
-                    if (type === 'staff_ids') {
-                        valueToSet = (selectedData[0].crew_assignments || []).map((c: any) => c.staff_id);
+                    if (type === 'driver_id') {
+                        // Use first assignment's driver
+                        const assigns = selectedData[0].assignments || [];
+                        valueToSet = assigns.length > 0 ? assigns[0].driver_id : "";
+                    }
+                    if (type === 'guide_id') {
+                        const assigns = selectedData[0].assignments || [];
+                        valueToSet = assigns.length > 0 ? assigns[0].guide_id : "";
                     }
 
                     // Handle nulls
@@ -599,7 +602,7 @@ export function BulkEditSheet({
     const canApply = useMemo(() => {
         if (selectedUpdateTypes.length === 0 || effectiveIds.size === 0) return false;
         if (selectedUpdateTypes.includes('delete')) return true;
-        if (selectedUpdateTypes.includes('staff_ids') && values.staff_ids.length === 0) return false;
+        // if (selectedUpdateTypes.includes('staff_ids') && values.staff_ids.length === 0) return false;
         return true;
     }, [selectedUpdateTypes, effectiveIds, values]);
 
@@ -648,22 +651,35 @@ export function BulkEditSheet({
                         case 'booking_option_schedule_id':
                             updatePayload.booking_option_schedule_id = values.booking_option_schedule_id || null;
                             break;
-                        case 'staff_ids':
-                            updatePayload.staff_ids = values.staff_ids;
-                            break;
                         case 'private_announcement':
                             updatePayload.private_announcement = values.private_announcement || null;
                             break;
                     }
                 }
 
-                const { error } = await supabase
-                    .from('availabilities' as any)
-                    .update(updatePayload)
-                    .in('id', ids);
+                if (Object.keys(updatePayload).length > 0) {
+                    const { error } = await supabase
+                        .from('availabilities' as any)
+                        .update(updatePayload)
+                        .in('id', ids);
+                    if (error) throw error;
+                }
 
-                if (error) throw error;
-                toast.success(`Updated ${ids.length} availabilities (${selectedUpdateTypes.length} field(s))`);
+                // Handle Driver/Guide updates (availability_assignments)
+                if (selectedUpdateTypes.includes('driver_id')) {
+                    const val = values.driver_id || null;
+                    await supabase.from('availability_assignments' as any)
+                        .update({ driver_id: val })
+                        .in('availability_id', ids);
+                }
+                if (selectedUpdateTypes.includes('guide_id')) {
+                    const val = values.guide_id || null;
+                    await supabase.from('availability_assignments' as any)
+                        .update({ guide_id: val })
+                        .in('availability_id', ids);
+                }
+
+                toast.success(`Updated ${ids.length} availabilities`);
             }
 
             onSuccess();
@@ -682,14 +698,13 @@ export function BulkEditSheet({
         const values = new Set();
         selectedData.forEach(d => {
             let val = d[type];
-            // Handle staff_ids logic (crew_assignments)
-            if (type === 'staff_ids') {
-                if (d.crew_assignments && Array.isArray(d.crew_assignments)) {
-                    const ids = d.crew_assignments.map((ca: any) => ca.staff_id).sort().join(',');
-                    val = ids;
-                } else {
-                    val = '';
-                }
+            // Handle driver/guide logic
+            if (type === 'driver_id' || type === 'guide_id') {
+                const assigns = d.assignments || [];
+                const ids = assigns.map((a: any) => type === 'driver_id' ? a.driver_id : a.guide_id).filter(Boolean);
+                // Unique
+                const uniqueIds = Array.from(new Set(ids));
+                val = uniqueIds.sort().join(',');
             }
             if (val === null || val === undefined || val === '') val = '__EMPTY__';
             values.add(val);
@@ -717,9 +732,19 @@ export function BulkEditSheet({
                 const found = bookingSchedules.find(s => s.id === val);
                 return found ? found.name : String(val);
             }
-            if (type === 'staff_ids') {
+            if (type === 'driver_id' || type === 'guide_id') {
+                if (val === '__EMPTY__') return 'Empty';
                 if (!val) return 'Empty';
-                const ids = (val as string).split(',');
+                // Value from set loop is "driver_id_string" or array string from getVal?
+                // Wait, getCurrentValueDisplay uses d[type] but for Driver/Guide d[type] doesn't exist on d directly.
+                // We need custom logic in the loop above (Line ~701).
+
+                // Assuming 'val' passed here is a single ID because logic below handles d[type].
+                // But d[type] is undefined for driver_id.
+                // So the loop logic (Lines 703+) needs to extract it.
+                // Let's assume the loop extracted it.
+                // If val is a comma-separated list of IDs:
+                const ids = String(val).split(',');
                 return ids.map(id => staff.find(s => s.id === id)?.name || 'Unknown').join(', ');
             }
             if (type === 'private_announcement') {
@@ -1636,45 +1661,30 @@ export function BulkEditSheet({
                                                             />
                                                         )}
 
-                                                        {/* Staff */}
-                                                        {type === 'staff_ids' && (
-                                                            <div className="space-y-3">
-                                                                <div className="flex gap-2">
-                                                                    {(['replace', 'add', 'remove'] as const).map(mode => (
-                                                                        <button
-                                                                            key={mode}
-                                                                            onClick={() => setValues(prev => ({ ...prev, staff_mode: mode }))}
-                                                                            className={cn(
-                                                                                "flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all capitalize",
-                                                                                values.staff_mode === mode
-                                                                                    ? "bg-cyan-400/20 border-cyan-400 text-cyan-400"
-                                                                                    : "bg-black/30 border-white/10 text-zinc-400"
-                                                                            )}
-                                                                        >
-                                                                            {mode}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                                <div className="flex flex-wrap gap-2">
-                                                                    {staff.map(member => (
-                                                                        <button
-                                                                            key={member.id}
-                                                                            onClick={() => toggleStaff(member.id)}
-                                                                            className={cn(
-                                                                                "px-3 py-2 rounded-lg border text-sm font-medium transition-all",
-                                                                                values.staff_ids.includes(member.id)
-                                                                                    ? "bg-cyan-400/20 border-cyan-400 text-cyan-400"
-                                                                                    : "bg-black/30 border-white/10 text-zinc-400"
-                                                                            )}
-                                                                        >
-                                                                            {member.name}
-                                                                        </button>
-                                                                    ))}
-                                                                    {staff.length === 0 && (
-                                                                        <span className="text-zinc-500 text-sm">No staff configured</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
+                                                        {/* Assigned Driver */}
+                                                        {type === 'driver_id' && (
+                                                            <Combobox
+                                                                value={values.driver_id}
+                                                                onChange={(val) => setValues(prev => ({ ...prev, driver_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                                                ]}
+                                                                placeholder="Select driver..."
+                                                            />
+                                                        )}
+
+                                                        {/* Assigned Guide */}
+                                                        {type === 'guide_id' && (
+                                                            <Combobox
+                                                                value={values.guide_id}
+                                                                onChange={(val) => setValues(prev => ({ ...prev, guide_id: val }))}
+                                                                options={[
+                                                                    { value: '', label: 'None' },
+                                                                    ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                                                ]}
+                                                                placeholder="Select guide..."
+                                                            />
                                                         )}
 
                                                         {/* Notes */}

@@ -7,6 +7,7 @@ import { FileText, ChevronDown, Search, Ticket } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Color options (70% opacity for soft effect)
 const COLOR_MAP: Record<string, string> = {
@@ -50,6 +51,7 @@ interface ColumnTwoProps {
 }
 
 export function ColumnTwo({ availability, onBookingClick, onManifestClick }: ColumnTwoProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [bookings, setBookings] = useState<BookingItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeExpanded, setActiveExpanded] = useState(true);
@@ -59,10 +61,12 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
     const [checkInStatuses, setCheckInStatuses] = useState<CheckInStatus[]>([]);
 
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchBookings = async () => {
             setIsLoading(true);
 
-            const { data: ctData } = await supabase.from('customer_types' as any).select('id, name');
+            const { data: ctData } = await supabase.from('customer_types' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
             if (ctData) {
                 const map: Record<string, string> = {};
                 ctData.forEach((ct: any) => map[ct.id] = ct.name);
@@ -108,7 +112,7 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
         };
 
         fetchBookings();
-    }, [availability.id]);
+    }, [availability.id, effectiveOrganizationId]);
 
     const handleCheckInChange = async (bookingId: string, statusId: string | null) => {
         const { error } = await supabase.from('bookings').update({ check_in_status_id: statusId }).eq('id', bookingId);

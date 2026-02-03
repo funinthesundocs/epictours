@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Building2, Plus, Loader2, Search } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useOrganizations, CreateOrganizationData, UpdateOrganizationData } from "@/features/admin/hooks/use-organizations";
 import { OrganizationFormSheet } from "@/features/admin/components/organizations/organization-form-sheet";
 import { OrganizationsTable } from "@/features/admin/components/organizations/organizations-table";
@@ -19,10 +20,15 @@ export default function OrganizationsPage() {
 }
 
 function OrganizationsContent() {
+    const router = useRouter();
     const { organizations, isLoading, createOrganization, updateOrganization, toggleOrganizationStatus } = useOrganizations();
     const [searchQuery, setSearchQuery] = useState("");
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+
+    const handleRowClick = useCallback((org: Organization) => {
+        router.push(`/admin/organizations/${org.slug}`);
+    }, [router]);
 
     // Filter by search
     const filteredOrgs = useMemo(() => {
@@ -104,6 +110,7 @@ function OrganizationsContent() {
                             data={filteredOrgs}
                             onEdit={handleEdit}
                             onToggleStatus={toggleOrganizationStatus}
+                            onRowClick={handleRowClick}
                         />
                     </div>
                 )}

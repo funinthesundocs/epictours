@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/features/auth/auth-context";
 import { Customer } from "./types";
 import { CustomerTable } from "./components/customer-table";
 import { Loader2, AlertCircle, Plus, Users } from "lucide-react";
@@ -16,6 +17,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 const MAX_RECORDS = 10000; // Maximum records to fetch for virtual scrolling
 
 export function CustomersPage() {
+    const { user, effectiveOrganizationId } = useAuth();
     const [data, setData] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,12 +40,20 @@ export function CustomersPage() {
     const searchTimeoutRef = useRef<NodeJS.Timeout>(null);
 
     const fetchCustomers = useCallback(async () => {
+        // Don't fetch if no organization context
+        if (!effectiveOrganizationId) {
+            setData([]);
+            setIsLoading(false);
+            return;
+        }
+
         try {
             setIsLoading(true);
 
             let query = supabase
                 .from('customers')
-                .select('*, user:users(name, email, phone_number)', { count: 'exact' });
+                .select('*, user:users(name, email, phone_number)', { count: 'exact' })
+                .eq('organization_id', effectiveOrganizationId);
 
             // Text Search
             if (searchQuery) {
@@ -86,7 +96,7 @@ export function CustomersPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [searchQuery, sortConfig]);
+    }, [user?.organizationId, searchQuery, sortConfig]);
 
     // Effect: Trigger Fetch on changes (Debounced Search)
     useEffect(() => {

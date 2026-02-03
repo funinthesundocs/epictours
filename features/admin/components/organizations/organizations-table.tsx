@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, ArrowUpDown, ArrowUp, ArrowDown, Building2, Power } from "lucide-react";
+import { Edit2, ArrowUpDown, ArrowUp, ArrowDown, Building2, Power, ChevronRight } from "lucide-react";
 import type { Organization } from "@/features/auth/types";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ interface OrganizationsTableProps {
     data: Organization[];
     onEdit: (org: Organization) => void;
     onToggleStatus: (id: string) => void;
+    onRowClick?: (org: Organization) => void;
 }
 
 type SortKey = 'name' | 'slug' | 'status' | 'created_at';
@@ -18,7 +19,7 @@ interface SortConfig {
     direction: 'asc' | 'desc';
 }
 
-export function OrganizationsTable({ data, onEdit, onToggleStatus }: OrganizationsTableProps) {
+export function OrganizationsTable({ data, onEdit, onToggleStatus, onRowClick }: OrganizationsTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'name', direction: 'asc' });
 
     const handleSort = (key: SortKey) => {
@@ -92,7 +93,14 @@ export function OrganizationsTable({ data, onEdit, onToggleStatus }: Organizatio
                 </thead>
                 <tbody>
                     {sortedData.map(org => (
-                        <tr key={org.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                        <tr
+                            key={org.id}
+                            className={cn(
+                                "border-b border-border hover:bg-muted/50 transition-colors",
+                                onRowClick && "cursor-pointer"
+                            )}
+                            onClick={() => onRowClick?.(org)}
+                        >
                             <td className="py-3 px-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
@@ -116,14 +124,14 @@ export function OrganizationsTable({ data, onEdit, onToggleStatus }: Organizatio
                             <td className="py-3 px-4 border-l border-border">
                                 <div className="flex items-center justify-center gap-1">
                                     <button
-                                        onClick={() => onEdit(org)}
+                                        onClick={(e) => { e.stopPropagation(); onEdit(org); }}
                                         className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                         title="Edit"
                                     >
                                         <Edit2 size={14} />
                                     </button>
                                     <button
-                                        onClick={() => onToggleStatus(org.id)}
+                                        onClick={(e) => { e.stopPropagation(); onToggleStatus(org.id); }}
                                         className={cn(
                                             "p-1.5 rounded-lg transition-colors",
                                             org.status === 'active'
@@ -134,6 +142,9 @@ export function OrganizationsTable({ data, onEdit, onToggleStatus }: Organizatio
                                     >
                                         <Power size={14} />
                                     </button>
+                                    {onRowClick && (
+                                        <ChevronRight size={16} className="text-muted-foreground ml-1" />
+                                    )}
                                 </div>
                             </td>
                         </tr>

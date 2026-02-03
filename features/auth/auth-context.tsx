@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, Suspense } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import {
     AuthContextType,
@@ -10,22 +10,25 @@ import {
     ModuleCode,
     PermissionAction,
     ResolvedPermission,
+    Organization,
 } from "./types";
 
-// Dev accounts for localhost bypass
-const DEV_ACCOUNTS = [
-    { email: "funinthesundocs", name: "Admin" },
-    { email: "denis@crodesign.com", name: "Denis" },
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Internal provider that uses useSearchParams (requires Suspense)
+function AuthProviderInner({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<AuthenticatedUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Platform Admin org context switching
+    const [adminSelectedOrgId, setAdminSelectedOrgId] = useState<string | null>(null);
+    const [adminSelectedOrg, setAdminSelectedOrg] = useState<Organization | null>(null);
+
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     /**
      * Fetch user data from database and resolve permissions
@@ -182,22 +185,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         checkSession();
     }, [fetchUserData]);
 
+    // Load org context from URL for platform admins
+    useEffect(() => {
+        if (isLoading || !user?.isPlatformAdmin) return;
+
+        const orgSlug = searchParams.get('org');
+        if (orgSlug && !adminSelectedOrgId) {
+            // Fetch org by slug and set context
+            const loadOrgFromUrl = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('organizations')
+                        .select('*')
+                        .eq('slug', orgSlug)
+                        .single();
+
+                    if (!error && data) {
+                        setAdminSelectedOrgId(data.id);
+                        setAdminSelectedOrg(data as Organization);
+                    }
+                } catch (err) {
+                    console.error('Failed to load org from URL:', err);
+                }
+            };
+            loadOrgFromUrl();
+        }
+    }, [isLoading, user?.isPlatformAdmin, searchParams, adminSelectedOrgId]);
+
     // Redirect logic
     useEffect(() => {
         if (isLoading) return;
 
         const isLoginPage = pathname === "/login";
         const isAdminPage = pathname?.startsWith("/admin");
+        const isHomePage = pathname === "/";
 
         if (!isAuthenticated && !isLoginPage) {
             router.push("/login");
         } else if (isAuthenticated && isLoginPage) {
-            router.push("/");
+            // Redirect after login
+            if (user?.isPlatformAdmin && !adminSelectedOrgId) {
+                // Platform admin without org selected -> go to organizations
+                router.push("/admin/organizations");
+            } else {
+                router.push("/");
+            }
         } else if (isAuthenticated && isAdminPage && !user?.isPlatformAdmin) {
             // Non-platform users trying to access admin area
             router.push("/");
+        } else if (isAuthenticated && isHomePage && user?.isPlatformAdmin && !adminSelectedOrgId) {
+            // Platform admin on home without org selected -> go to organizations
+            router.push("/admin/organizations");
         }
-    }, [isAuthenticated, isLoading, pathname, router, user?.isPlatformAdmin]);
+    }, [isAuthenticated, isLoading, pathname, router, user?.isPlatformAdmin, adminSelectedOrgId]);
 
     const login = async (emailOrNickname: string, password: string): Promise<LoginResult> => {
         try {
@@ -272,41 +312,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/login");
     };
 
-    const devLogin = () => {
-        // Auto-login as first dev account
-        const devAccount = DEV_ACCOUNTS[0];
-        fetchUserData(devAccount.email).then(fullUser => {
-            if (fullUser) {
-                setUser(fullUser);
-                setIsAuthenticated(true);
-                localStorage.setItem("epictours_user", JSON.stringify({ email: fullUser.email }));
-            } else {
-                // Fallback if database user doesn't exist yet
-                const fallbackUser: AuthenticatedUser = {
-                    id: 'dev-user',
-                    email: devAccount.email,
-                    name: devAccount.name,
-                    isPlatformSuperAdmin: true,
-                    isPlatformSystemAdmin: false,
-                    isPlatformAdmin: true,
-                    organizationId: null,
-                    organizationName: null,
-                    organizationSlug: null,
-                    memberId: null,
-                    isOrganizationOwner: false,
-                    isOrganizationAdmin: false,
-                    activePositionId: null,
-                    activePositionName: null,
-                    subscribedModules: ['crm', 'bookings', 'transportation', 'communications', 'visibility', 'finance', 'settings'],
-                    permissions: [],
-                    requiresPasswordChange: false,
-                };
-                setUser(fallbackUser);
-                setIsAuthenticated(true);
-                localStorage.setItem("epictours_user", JSON.stringify({ email: devAccount.email }));
+    const devLogin = async () => {
+        // Auto-login as first available platform super admin from database
+        try {
+            const { data: adminUser, error } = await supabase
+                .from('users')
+                .select('email')
+                .eq('is_platform_super_admin', true)
+                .eq('is_active', true)
+                .limit(1)
+                .single();
+
+            if (adminUser && !error) {
+                const fullUser = await fetchUserData(adminUser.email);
+                if (fullUser) {
+                    setUser(fullUser);
+                    setIsAuthenticated(true);
+                    localStorage.setItem("epictours_user", JSON.stringify({ email: fullUser.email }));
+                    return;
+                }
             }
-        });
+
+            // Fallback if no database user exists yet (fresh install)
+            console.warn('No platform super admin found in database, using fallback');
+            const fallbackUser: AuthenticatedUser = {
+                id: 'dev-user',
+                email: 'dev@localhost',
+                name: 'Developer',
+                isPlatformSuperAdmin: true,
+                isPlatformSystemAdmin: false,
+                isPlatformAdmin: true,
+                organizationId: null,
+                organizationName: null,
+                organizationSlug: null,
+                memberId: null,
+                isOrganizationOwner: false,
+                isOrganizationAdmin: false,
+                activePositionId: null,
+                activePositionName: null,
+                subscribedModules: ['crm', 'bookings', 'communications', 'visibility', 'finance', 'settings'],
+                permissions: [],
+                requiresPasswordChange: false,
+            };
+            setUser(fallbackUser);
+            setIsAuthenticated(true);
+            localStorage.setItem("epictours_user", JSON.stringify({ email: 'dev@localhost' }));
+        } catch (error) {
+            console.error('Dev login error:', error);
+        }
     };
+
+    // Sync URL ?org= param to admin org context (for page refreshes/direct navigation)
+    useEffect(() => {
+        if (!user?.isPlatformAdmin) return;
+
+        const orgSlug = searchParams.get('org');
+
+        // If URL has org param but we don't have it selected, sync it
+        if (orgSlug && !adminSelectedOrgId) {
+            const syncOrgFromUrl = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('organizations')
+                        .select('id')
+                        .eq('slug', orgSlug)
+                        .single();
+
+                    if (!error && data) {
+                        setAdminSelectedOrgId(data.id);
+                        // Also fetch full org data
+                        const { data: fullOrg } = await supabase
+                            .from('organizations')
+                            .select('*')
+                            .eq('id', data.id)
+                            .single();
+                        if (fullOrg) {
+                            setAdminSelectedOrg(fullOrg as Organization);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to sync org from URL:', err);
+                }
+            };
+            syncOrgFromUrl();
+        }
+    }, [user?.isPlatformAdmin, searchParams, adminSelectedOrgId]);
 
     // Permission helper functions
     const hasModule = (module: ModuleCode): boolean => {
@@ -339,12 +429,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isTenantAdmin = (): boolean => user?.isOrganizationOwner ?? false; // Deprecated, use isOrganizationAdmin
     const isOrganizationAdmin = (): boolean => user?.isOrganizationAdmin ?? false;
 
+    /**
+     * Set the organization context for platform admins.
+     * This allows admins to view navigation/data as if they were in a specific org.
+     */
+    const setAdminOrgContext = useCallback(async (orgId: string | null) => {
+        if (!user?.isPlatformAdmin) {
+            console.warn('setAdminOrgContext called for non-admin user');
+            return;
+        }
+
+        if (!orgId) {
+            setAdminSelectedOrgId(null);
+            setAdminSelectedOrg(null);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('organizations')
+                .select('*')
+                .eq('id', orgId)
+                .single();
+
+            if (error || !data) {
+                console.error('Failed to fetch org for context:', error);
+                return;
+            }
+
+            setAdminSelectedOrgId(orgId);
+            setAdminSelectedOrg(data as Organization);
+        } catch (err) {
+            console.error('Error setting admin org context:', err);
+        }
+    }, [user?.isPlatformAdmin]);
+
+    // Computed: effective organization ID (admin-selected or user's actual)
+    const effectiveOrganizationId = user?.isPlatformAdmin
+        ? adminSelectedOrgId
+        : user?.organizationId ?? null;
+
     return (
         <AuthContext.Provider
             value={{
                 isAuthenticated,
                 isLoading,
                 user,
+                adminSelectedOrgId,
+                adminSelectedOrg,
+                setAdminOrgContext,
+                effectiveOrganizationId,
                 login,
                 logout,
                 devLogin,
@@ -357,6 +491,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         >
             {children}
         </AuthContext.Provider>
+    );
+}
+
+// Exported wrapper with Suspense for useSearchParams
+export function AuthProvider({ children }: { children: ReactNode }) {
+    return (
+        <Suspense fallback={null}>
+            <AuthProviderInner>{children}</AuthProviderInner>
+        </Suspense>
     );
 }
 

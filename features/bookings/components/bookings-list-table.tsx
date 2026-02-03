@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/auth-context";
 import {
     BOOKING_COLUMNS
 } from "./bookings-column-picker";
@@ -101,6 +102,7 @@ function formatPhoneNumber(phone: string | null | undefined): string {
 }
 
 export function BookingsListTable({ startDate, endDate, searchQuery = "", onBookingClick, visibleColumns }: BookingsListTableProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -114,9 +116,11 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
     const [scheduleStopMap, setScheduleStopMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchReferenceData = async () => {
             // Fetch Customer Types for Pax Labels
-            const { data: ctData } = await supabase.from('customer_types' as any).select('id, name');
+            const { data: ctData } = await supabase.from('customer_types' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
             if (ctData) {
                 const map: Record<string, string> = {};
                 ctData.forEach((ct: any) => map[ct.id] = ct.name);
@@ -124,7 +128,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
             }
 
             // Fetch Custom Field Defs (for smart_pickup detection)
-            const { data: cfData } = await supabase.from('custom_field_definitions' as any).select('id, label, type, options');
+            const { data: cfData } = await supabase.from('custom_field_definitions' as any).select('id, label, type, options').eq('organization_id', effectiveOrganizationId);
             if (cfData) {
                 const map: Record<string, { label: string, type?: string, options?: any[] }> = {};
                 cfData.forEach((cf: any) => map[cf.id] = { label: cf.label, type: cf.type, options: cf.options });
@@ -132,7 +136,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
             }
 
             // Fetch Hotels (for smart_pickup resolution)
-            const { data: hotelData } = await supabase.from('hotels').select('id, name, pickup_point_id');
+            const { data: hotelData } = await supabase.from('hotels').select('id, name, pickup_point_id').eq('organization_id', effectiveOrganizationId);
             if (hotelData) {
                 const map: Record<string, { name: string, pickup_point_id: string }> = {};
                 hotelData.forEach((h: any) => map[h.id] = { name: h.name, pickup_point_id: h.pickup_point_id });
@@ -140,14 +144,14 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
             }
 
             // Fetch Pickup Points
-            const { data: ppData } = await supabase.from('pickup_points').select('id, name');
+            const { data: ppData } = await supabase.from('pickup_points').select('id, name').eq('organization_id', effectiveOrganizationId);
             if (ppData) {
                 const map: Record<string, string> = {};
                 ppData.forEach((pp: any) => map[pp.id] = pp.name);
                 setPickupPointMap(map);
             }
 
-            // Fetch Schedule Stops
+            // Fetch Schedule Stops (filter via schedules -> organization_id)
             const { data: ssData } = await supabase.from('schedule_stops').select('schedule_id, pickup_point_id, pickup_time');
             if (ssData) {
                 const map: Record<string, string> = {};
@@ -190,6 +194,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                             experiences!inner(short_code)
                         )
                     `)
+                    .eq('organization_id', effectiveOrganizationId)
                     .gte('availabilities.start_date', format(startDate, 'yyyy-MM-dd'))
                     .lte('availabilities.start_date', format(endDate, 'yyyy-MM-dd'))
                     .order('availabilities(start_date)', { ascending: true });
@@ -234,7 +239,7 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
         };
 
         fetchBookings();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, effectiveOrganizationId]);
 
     // Helper function to resolve pickup details from option_values
     const resolvePickupDetails = (booking: Booking): string => {

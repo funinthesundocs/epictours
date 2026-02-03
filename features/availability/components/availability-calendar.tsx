@@ -20,6 +20,7 @@ import {
     CopyCheck
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/features/auth/auth-context";
 import { Availability, AvailabilityListTable } from "./availability-list-table";
 import { BulkActionToolbar } from "./bulk-action-toolbar";
 import { BulkEditSheet } from "./bulk-edit-sheet";
@@ -43,6 +44,9 @@ export function AvailabilityCalendar({
     selectedExperience: string,
     onExperienceChange: (expName: string) => void
 }) {
+    // Get organization context for filtering
+    const { effectiveOrganizationId } = useAuth();
+
     // State lifted to parent
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
@@ -161,12 +165,14 @@ export function AvailabilityCalendar({
     // Note: Re-implementing Data Fetching hook here to be safe and complete, or just keep header and change return.
     // To be safe, I will include the full updated function body structure or use precise targeting.
 
-    // 1. Fetch Reference Data (Staff & Routes)
+    // 1. Fetch Reference Data (Staff & Routes) - filtered by org
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchRefs = async () => {
-            const { data: staff } = await supabase.from('staff' as any).select('id, name, user:users(name)');
-            const { data: routes } = await supabase.from('schedules' as any).select('id, name');
-            const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name');
+            const { data: staff } = await supabase.from('staff' as any).select('id, name, user:users(name)').eq('organization_id', effectiveOrganizationId);
+            const { data: routes } = await supabase.from('schedules' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
+            const { data: vehicles } = await supabase.from('vehicles' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
 
             // Use user.name if available, fallback to staff.name
             if (staff) setStaffMap(Object.fromEntries((staff as any[]).map(s => [s.id, s.user?.name || s.name])));
@@ -174,11 +180,14 @@ export function AvailabilityCalendar({
             if (vehicles) setVehicleMap(Object.fromEntries((vehicles as any[]).map(v => [v.id, v.name])));
         };
         fetchRefs();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     // 2. Fetch Availabilities for Current Month & Experience
     useEffect(() => {
-        if (!currentExp?.id) return;
+        if (!currentExp?.id || !effectiveOrganizationId) {
+            setAvailabilities([]);
+            return;
+        }
 
         const fetchAvail = async () => {
             setIsLoading(true);
@@ -191,6 +200,7 @@ export function AvailabilityCalendar({
                 .from('availabilities' as any)
                 .select('*, bookings:bookings(pax_count, status)')
                 .eq('experience_id', currentExp.id)
+                .eq('organization_id', effectiveOrganizationId)
                 .gte('start_date', format(startOfMonth, 'yyyy-MM-dd'))
                 .lte('start_date', format(endOfMonth, 'yyyy-MM-dd'))
                 .order('start_date', { ascending: true });
@@ -225,7 +235,7 @@ export function AvailabilityCalendar({
         }
 
         fetchAvail();
-    }, [currentExp, currentDate, staffMap, routeMap]);
+    }, [currentExp, currentDate, staffMap, routeMap, effectiveOrganizationId]);
 
     const handleDelete = async (id: string) => {
         const { error } = await supabase.from('availabilities' as any).delete().eq('id', id);

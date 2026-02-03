@@ -1,11 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, DollarSign, Users, Activity, Ticket, Eye, LogOut } from "lucide-react";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { useAuth } from "@/features/auth/auth-context";
 
 export default function Home() {
-    const { logout, user } = useAuth();
+    const router = useRouter();
+    const { logout, user, isPlatformAdmin, effectiveOrganizationId, isLoading } = useAuth();
+
+    // Redirect platform admins without org context to organizations page
+    useEffect(() => {
+        if (isLoading) return;
+        if (isPlatformAdmin() && !effectiveOrganizationId) {
+            router.push("/admin/organizations");
+        }
+    }, [isPlatformAdmin, effectiveOrganizationId, isLoading, router]);
+
+    // Show nothing while redirecting
+    if (isPlatformAdmin() && !effectiveOrganizationId) {
+        return null;
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">

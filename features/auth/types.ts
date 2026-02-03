@@ -12,7 +12,6 @@ export type PermissionAction = 'create' | 'read' | 'update' | 'delete';
 export type ModuleCode =
     | 'crm'
     | 'bookings'
-    | 'transportation'
     | 'communications'
     | 'visibility'
     | 'finance'
@@ -186,6 +185,13 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     user: AuthenticatedUser | null;
+
+    // Platform Admin Org Context (for viewing as different org)
+    adminSelectedOrgId: string | null;
+    adminSelectedOrg: Organization | null;
+    setAdminOrgContext: (orgId: string | null) => Promise<void>;
+    // Returns admin-selected org if platform admin, else user's actual org
+    effectiveOrganizationId: string | null;
 
     // Actions
     login: (email: string, password: string) => Promise<LoginResult>;

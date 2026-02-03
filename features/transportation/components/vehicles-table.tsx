@@ -17,7 +17,7 @@ interface Vehicle {
     fixed_rate: number;
     per_pax_rate: number;
     status: string;
-    vendor?: { name: string } | null; // Joined vendor data
+    vendor?: { id: string; user: { name: string } | null } | null; // Joined vendor data
 }
 
 interface VehiclesTableProps {
@@ -51,8 +51,8 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
         let valB: any = b[sortConfig.key as keyof Vehicle];
 
         if (sortConfig.key === 'vendor') {
-            valA = a.vendor?.name || '';
-            valB = b.vendor?.name || '';
+            valA = a.vendor?.user?.name || '';
+            valB = b.vendor?.user?.name || '';
         }
 
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -131,7 +131,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
                                     {v.name}
                                 </td>
                                 <td className="px-6 py-4 text-muted-foreground align-middle">
-                                    {v.vendor?.name || <span className="text-muted-foreground italic">Internal</span>}
+                                    {v.vendor?.user?.name || <span className="text-muted-foreground italic">Internal</span>}
                                 </td>
                                 <td className="px-6 py-4 text-muted-foreground align-middle">{v.capacity}</td>
                                 <td className="px-6 py-4 text-muted-foreground align-middle">{v.license_requirement}</td>
@@ -232,7 +232,7 @@ export function VehiclesTable({ data, onEdit, onDelete }: VehiclesTableProps) {
 
                                 <div className="text-muted-foreground">Vendor</div>
                                 <div className="text-foreground">
-                                    {v.vendor?.name || <span className="text-muted-foreground italic">Internal</span>}
+                                    {v.vendor?.user?.name || <span className="text-muted-foreground italic">Internal</span>}
                                 </div>
 
                                 <div className="text-muted-foreground">Capacity</div>

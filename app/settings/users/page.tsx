@@ -16,23 +16,29 @@ export default function UsersPage() {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
 
-    // Filter users by search
+    // Filter users by search and position
     const filteredUsers = useMemo(() => {
-        if (!searchQuery.trim()) return users;
+        // Strict Requirement: Only show users with a position assigned
+        const staffUsers = users.filter(u => u.position !== null);
+
+        if (!searchQuery.trim()) return staffUsers;
         const lowerQ = searchQuery.toLowerCase();
-        return users.filter(u =>
+        return staffUsers.filter(u =>
             u.name.toLowerCase().includes(lowerQ) ||
             u.email.toLowerCase().includes(lowerQ) ||
             u.position?.name.toLowerCase().includes(lowerQ)
         );
     }, [users, searchQuery]);
 
-    // Stats
-    const stats = useMemo(() => [
-        { label: "Total Users", value: users.length.toString(), icon: Users },
-        { label: "Active Users", value: users.filter(u => u.status === 'active').length.toString(), icon: UserCog },
-        { label: "Owners", value: users.filter(u => u.is_organization_owner).length.toString(), icon: Shield },
-    ], [users]);
+    // Stats (Based on Staff Only)
+    const stats = useMemo(() => {
+        const staffUsers = users.filter(u => u.position !== null);
+        return [
+            { label: "Total Staff", value: staffUsers.length.toString(), icon: Users },
+            { label: "Active", value: staffUsers.filter(u => u.status === 'active').length.toString(), icon: UserCog },
+            { label: "Owners", value: staffUsers.filter(u => u.is_organization_owner).length.toString(), icon: Shield },
+        ];
+    }, [users]);
 
     const handleEdit = useCallback((user: User) => {
         setEditingUser(user);

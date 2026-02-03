@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserCog, Shield, MoreHorizontal, UserX } from "lucide-react";
+import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, UserCog, Shield } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import type { User } from "@/features/users/hooks/use-users";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'name', direction: 'asc' });
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<string | null>(null);
-    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
 
     const handleSort = (key: SortKey) => {
         setSortConfig(current => ({
@@ -99,9 +99,7 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                             <th className="text-left py-3 px-4">
                                 <span className="text-xs uppercase tracking-wider text-muted-foreground">Position</span>
                             </th>
-                            <th className="text-center py-3 px-4">
-                                <span className="text-xs uppercase tracking-wider text-muted-foreground">Role</span>
-                            </th>
+
                             <th className="text-center py-3 px-4">
                                 <button onClick={() => handleSort('status')} className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mx-auto">
                                     Status <SortIcon column="status" />
@@ -123,7 +121,10 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                                         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
                                             {user.name.charAt(0).toUpperCase()}
                                         </div>
-                                        <span className="font-medium text-foreground">{user.name}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-foreground">{user.name}</span>
+                                            {user.is_organization_owner && <Shield size={14} className="text-amber-500" />}
+                                        </div>
                                     </div>
                                 </td>
                                 <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
@@ -138,13 +139,7 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                                         <span className="text-muted-foreground text-sm italic">No position</span>
                                     )}
                                 </td>
-                                <td className="py-3 px-4 text-center">
-                                    {user.is_organization_owner && (
-                                        <span title="Owner" className="inline-flex items-center gap-1 text-amber-500 text-xs font-medium">
-                                            <Shield size={14} /> Owner
-                                        </span>
-                                    )}
-                                </td>
+
                                 <td className="py-3 px-4 text-center">
                                     <span className={cn(
                                         "px-2 py-0.5 text-xs rounded-full",
@@ -157,32 +152,21 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                                 </td>
                                 <td className="py-3 px-4 text-muted-foreground text-sm">{formatDate(user.created_at)}</td>
                                 <td className="py-3 px-4">
-                                    <div className="relative">
+                                    <div className="flex items-center gap-1">
                                         <button
-                                            onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                                            onClick={() => onEdit(user)}
                                             className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                            title="Edit User"
                                         >
-                                            <MoreHorizontal size={16} />
+                                            <Edit2 size={16} />
                                         </button>
-                                        {openMenuId === user.id && (
-                                            <>
-                                                <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
-                                                <div className="absolute right-0 top-full mt-1 z-50 w-48 bg-popover border border-border rounded-lg shadow-xl overflow-hidden">
-                                                    <button
-                                                        onClick={() => { onEdit(user); setOpenMenuId(null); }}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                                                    >
-                                                        <Edit2 size={14} /> Edit User
-                                                    </button>
-                                                    <button
-                                                        onClick={() => { confirmDelete(user.id); setOpenMenuId(null); }}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                                                    >
-                                                        <UserX size={14} /> Remove User
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
+                                        <button
+                                            onClick={() => confirmDelete(user.id)}
+                                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                            title="Remove User"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -241,7 +225,7 @@ export function UsersTable({ data, onEdit, onDelete }: UsersTableProps) {
                                         onClick={() => confirmDelete(user.id)}
                                         className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                                     >
-                                        <UserX size={16} />
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>

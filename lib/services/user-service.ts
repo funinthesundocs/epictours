@@ -8,16 +8,25 @@ export class UserService {
      */
     static async inviteUserToOrganization(
         organizationId: string,
-        email: string,
-        name: string,
-        positionId?: string,
-        nickname?: string
+        data: {
+            email: string;
+            name: string;
+            nickname?: string;
+            phone_number?: string;
+            notes?: string;
+            position_id?: string;
+            messaging_apps?: { type: string; handle: string }[];
+            address?: string;
+            city?: string;
+            state?: string;
+            zip_code?: string;
+        }
     ) {
         // 1. Check if user exists
         const { data: existingUser } = await supabase
             .from('users')
             .select('id')
-            .eq('email', email)
+            .eq('email', data.email)
             .single();
 
         let userId = existingUser?.id;
@@ -27,9 +36,16 @@ export class UserService {
             const { data: newUser, error: createError } = await supabase
                 .from('users')
                 .insert({
-                    email,
-                    name,
-                    nickname: nickname || null,
+                    email: data.email,
+                    name: data.name,
+                    nickname: data.nickname || null,
+                    phone_number: data.phone_number || null,
+                    notes: data.notes || null,
+                    messaging_apps: data.messaging_apps || [],
+                    address: data.address || null,
+                    city: data.city || null,
+                    state: data.state || null,
+                    zip_code: data.zip_code || null,
                     temp_password: true, // Flag to force password setup
                     is_active: true
                 })
@@ -38,6 +54,10 @@ export class UserService {
 
             if (createError) throw createError;
             userId = newUser.id;
+        } else {
+            // 2.1 Update existing user with new details?
+            // Optional: Update profile if fields are provided?
+            // For now, let's respect existing data to avoid overwriting.
         }
 
         // 3. Add to Organization
@@ -46,7 +66,7 @@ export class UserService {
             .insert({
                 organization_id: organizationId,
                 user_id: userId,
-                primary_position_id: positionId || null,
+                primary_position_id: data.position_id || null,
                 status: 'active' // Auto-activate for now
             });
 

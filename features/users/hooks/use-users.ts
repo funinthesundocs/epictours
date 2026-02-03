@@ -58,6 +58,7 @@ export interface UpdateUserData {
     password?: string;
     phone_number?: string;
     notes?: string;
+    position_id?: string;
     address?: string;
     city?: string;
     state?: string;
@@ -66,13 +67,13 @@ export interface UpdateUserData {
 }
 
 export function useUsers() {
-    const { user: currentUser } = useAuth(); // currentUser is AuthenticatedUser
+    const { user: currentUser, effectiveOrganizationId } = useAuth(); // currentUser is AuthenticatedUser
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchUsers = useCallback(async () => {
-        if (!currentUser?.organizationId) {
+        if (!effectiveOrganizationId) {
             setUsers([]);
             setIsLoading(false);
             return;
@@ -82,7 +83,7 @@ export function useUsers() {
         setError(null);
 
         try {
-            const members = await OrganizationService.getOrganizationMembers(currentUser.organizationId);
+            const members = await OrganizationService.getOrganizationMembers(effectiveOrganizationId);
 
             const transformedUsers: User[] = members.map(m => ({
                 id: m.id, // organization_users.id
@@ -116,25 +117,22 @@ export function useUsers() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentUser?.organizationId]);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
 
     const createUser = async (userData: CreateUserData): Promise<boolean> => {
-        if (!currentUser?.organizationId) {
+        if (!effectiveOrganizationId) {
             toast.error("No organization context");
             return false;
         }
 
         try {
             const result = await UserService.inviteUserToOrganization(
-                userData.organizationId, // Wait, createPlatformUser args? No this is inviteUserToOrganization
-                userData.email,
-                userData.name,
-                userData.position_id,
-                userData.nickname
+                effectiveOrganizationId,
+                userData
             );
 
             if (!result.success && result.message) {
@@ -154,29 +152,33 @@ export function useUsers() {
 
     const updateUser = async (memberId: string, userData: UpdateUserData): Promise<boolean> => {
         try {
-            // 1. Update Profile (if name, email, nickname, or password provided)
-            if (userData.name || userData.email || userData.nickname || userData.password) {
-                // accessing user.userId from the list is hard without iterating
-                // Hack: We need the userId. We can find it in the users list using memberId.
-                const user = users.find(u => u.id === memberId);
-                if (user) {
-                    await UserService.updateUser(user.userId, {
-                        name: userData.name,
-                        email: userData.email,
-                        nickname: userData.nickname,
-                        password: userData.password,
-                        phone_number: userData.phone_number,
-                        notes: userData.notes,
-                        messaging_apps: userData.messaging_apps,
-                        address: userData.address,
-                        city: userData.city,
-                        state: userData.state,
-                        zip_code: userData.zip_code
-                    });
-                }
+            // Find the user to get their actual user.id
+            const user = users.find(u => u.id === memberId);
+
+            console.log("updateUser called:", { memberId, userData, foundUser: user });
+
+            if (!user) {
+                console.error("User not found in list for memberId:", memberId);
+                toast.error("User not found");
+                return false;
             }
 
-            // 2. Update Position
+            // 1. Update User Profile
+            await UserService.updateUser(user.userId, {
+                name: userData.name,
+                email: userData.email,
+                nickname: userData.nickname,
+                password: userData.password,
+                phone_number: userData.phone_number,
+                notes: userData.notes,
+                messaging_apps: userData.messaging_apps,
+                address: userData.address,
+                city: userData.city,
+                state: userData.state,
+                zip_code: userData.zip_code
+            });
+
+            // 2. Update Position (organization_users.primary_position_id)
             if (userData.position_id !== undefined) {
                 await UserService.updateMemberPosition(memberId, userData.position_id || null);
             }

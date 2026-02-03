@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Trash2, Loader2, Save } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { useAuth } from "@/features/auth/auth-context";
 
 interface BookingDeskProps {
     isOpen: boolean;
@@ -27,6 +28,7 @@ interface BookingDeskProps {
 }
 
 export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingBookingId }: BookingDeskProps) {
+    const { effectiveOrganizationId } = useAuth();
     const isEditMode = !!editingBookingId;
     // --- State ---
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -154,11 +156,11 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             }
 
             // Schedules
-            const { data: schedData } = await supabase.from('pricing_schedules' as any).select('id, name').order('name');
+            const { data: schedData } = await supabase.from('pricing_schedules' as any).select('id, name').eq('organization_id', effectiveOrganizationId).order('name');
             if (schedData) setSchedules(schedData as unknown as PricingSchedule[]);
 
             // Tiers
-            const { data: tierData } = await supabase.from('pricing_variations' as any).select('name, sort_order').order('sort_order');
+            const { data: tierData } = await supabase.from('pricing_variations' as any).select('name, sort_order').eq('organization_id', effectiveOrganizationId).order('sort_order');
             if (tierData) {
                 const typedTiers = tierData as unknown as PricingTier[];
                 setTiers(typedTiers);
@@ -168,12 +170,12 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             }
 
             // Booking Option Schedules
-            const { data: optSchedData } = await supabase.from('booking_option_schedules' as any).select('*').order('name');
+            const { data: optSchedData } = await supabase.from('booking_option_schedules' as any).select('*').eq('organization_id', effectiveOrganizationId).order('name');
             if (optSchedData) setOptionSchedules(optSchedData as unknown as BookingOptionSchedule[]);
 
             // Custom Fields for Options
             console.log("DEBUG: Fetching custom_field_definitions...");
-            const { data: cfData, error: cfError } = await supabase.from('custom_field_definitions' as any).select('*');
+            const { data: cfData, error: cfError } = await supabase.from('custom_field_definitions' as any).select('*').eq('organization_id', effectiveOrganizationId);
 
             if (cfError) {
                 console.error("DEBUG: Error fetching CFs:", cfError);
@@ -298,7 +300,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
             if (rateData) {
                 // Enrich with Customer Type Names
-                const { data: typeData } = await supabase.from('customer_types' as any).select('id, name');
+                const { data: typeData } = await supabase.from('customer_types' as any).select('id, name').eq('organization_id', effectiveOrganizationId);
                 const typeMap = Object.fromEntries(typeData?.map((t: any) => [t.id, t.name]) || []);
 
                 const typedRates = rateData as unknown as PricingRate[];
@@ -383,6 +385,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             const bookingData = {
                 availability_id: currentAvailability.id,
                 customer_id: selectedCustomer.id,
+                organization_id: effectiveOrganizationId,
                 status: 'confirmed',
                 pax_count: totalPax,
                 pax_breakdown: paxCounts, // JSONB column

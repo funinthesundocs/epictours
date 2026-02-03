@@ -13,6 +13,7 @@ import { Menu, ChevronDown, ChevronLeft, ChevronRight, Settings, X, Shield, Minu
 import { AnimatePresence, motion } from "framer-motion";
 import { useSidebar } from "@/components/shell/sidebar-context";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { OrgContextPicker } from "@/components/shell/org-context-picker";
 
 export function Sidebar() {
     const pathname = usePathname();
@@ -23,12 +24,13 @@ export function Sidebar() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(() =>
         pathname.startsWith('/settings')
     );
-    // Auto-open Platform Admin panel if on an admin page
+    // Auto-open Platform Admin panel if on an admin page AND org is selected
+    // When no org is selected, keep collapsed unless user clicks
+    const { isPlatformAdmin, logout, user, effectiveOrganizationId } = useAuth();
     const [isPlatformAdminOpen, setIsPlatformAdminOpen] = useState(() =>
-        pathname.startsWith('/admin')
+        pathname.startsWith('/admin') && !!effectiveOrganizationId
     );
     const [isZoomSliderOpen, setIsZoomSliderOpen] = useState(false);
-    const { isPlatformAdmin, logout, user } = useAuth();
 
     // Ref for zoom slider click-outside detection
     const zoomSliderRef = useRef<HTMLDivElement>(null);
@@ -124,6 +126,16 @@ export function Sidebar() {
                             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                         </button>
                     </div>
+
+                    {/* Platform Admin Org Context Picker */}
+                    {isPlatformAdmin() && !isPlatformAdminOpen && (
+                        <div
+                            className="border-b border-border shrink-0"
+                            style={{ zoom: zoom / 100 }}
+                        >
+                            <OrgContextPicker isCollapsed={isCollapsed} />
+                        </div>
+                    )}
 
                     {/* Navigation Items */}
                     <div
@@ -539,14 +551,17 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
     // Expanded Mode: Recursive with Submenus
     if (hasChildren) {
         return (
-            <div className="space-y-1">
+            <div className={cn(
+                "space-y-1 rounded-lg transition-colors",
+                (isOpen || isChildActive) && "bg-muted/50"
+            )}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
                         "w-full group flex items-center justify-between px-3 py-2.5 rounded-lg text-base transition-all duration-200",
                         (isActive || isChildActive)
                             ? "text-primary font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     )}
                     style={{ paddingLeft: `${12 + (depth * 12)}px` }}
                 >
@@ -565,7 +580,7 @@ function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemC
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                         >
-                            <div className="space-y-1">
+                            <div className="space-y-1 pb-1">
                                 {item.children.map((child: any) => (
                                     <NavItem key={child.href} item={child} pathname={pathname} depth={depth + 1} isCollapsed={false} onMobileItemClick={onMobileItemClick} />
                                 ))}
@@ -698,7 +713,10 @@ function CollapsibleSection({
     const isChildActive = section.items.some(item => pathname.startsWith(item.href));
 
     return (
-        <div className="mb-2">
+        <div className={cn(
+            "mb-2 rounded-lg transition-colors",
+            (isOpen || isChildActive) && "bg-muted/30"
+        )}>
             <button
                 onClick={onToggle}
                 className={cn(

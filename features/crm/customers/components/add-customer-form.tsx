@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Options Lists with icons
 const MESSAGING_OPTIONS = [
@@ -58,6 +59,7 @@ interface AddCustomerFormProps {
 type FormData = z.infer<typeof CustomerSchema>;
 
 export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustomerFormProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -197,6 +199,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                         name: data.name,
                         email: data.email,
                         phone_number: formattedPhone,
+                        organization_id: effectiveOrganizationId,
                     })
                     .select("id")
                     .single();
@@ -208,6 +211,7 @@ export function AddCustomerForm({ onSuccess, onCancel, initialData }: AddCustome
                     .from("customers")
                     .insert([{
                         user_id: newUser.id,
+                        organization_id: effectiveOrganizationId,
                         status: data.status,
                         tags: data.tags,
                         preferences: data.preferences,

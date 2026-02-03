@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Schema
 const CustomerTypeSchema = z.object({
@@ -30,6 +31,7 @@ interface CustomerTypeSheetProps {
 }
 
 export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: CustomerTypeSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
@@ -73,7 +75,7 @@ export function CustomerTypeSheet({ isOpen, onClose, onSuccess, initialData }: C
                 // Insert
                 const { error } = await supabase
                     .from("customer_types" as any)
-                    .insert([data]);
+                    .insert([{ ...data, organization_id: effectiveOrganizationId }]);
                 if (error) throw error;
             }
             onSuccess();

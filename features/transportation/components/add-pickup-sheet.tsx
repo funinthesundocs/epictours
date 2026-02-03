@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Schema
 const PickupSchema = z.object({
@@ -30,6 +31,7 @@ interface AddPickupSheetProps {
 }
 
 export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddPickupSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
@@ -73,7 +75,7 @@ export function AddPickupSheet({ isOpen, onClose, onSuccess, initialData }: AddP
                 // Insert
                 const { error } = await supabase
                     .from("pickup_points")
-                    .insert([data]);
+                    .insert([{ ...data, organization_id: effectiveOrganizationId }]);
                 if (error) throw error;
             }
             onSuccess();

@@ -7,6 +7,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Settings, Plus, Minus, MapPin, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/features/auth/auth-context";
 
 interface ColumnTwoProps {
     availability: Availability;
@@ -31,23 +32,26 @@ export function ColumnTwo({
     currentOptions,
     optionValues, setOptionValues
 }: ColumnTwoProps) {
+    const { effectiveOrganizationId } = useAuth();
 
     // --- Smart Pickup Logic ---
-    const [hotels, setHotels] = useState<any[]>([]);
+    const [hotels, setHotels] = useState<any[]>([]);;
     const [pickupPoints, setPickupPoints] = useState<any[]>([]);
     const [scheduleStops, setScheduleStops] = useState<any[]>([]);
     const [isLoadingSmartData, setIsLoadingSmartData] = useState(false);
 
     useEffect(() => {
+        if (!effectiveOrganizationId) return;
+
         const fetchSmartData = async () => {
             setIsLoadingSmartData(true);
             try {
                 // 1. Fetch Hotels
-                const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').order('name');
+                const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').eq('organization_id', effectiveOrganizationId).order('name');
                 if (hotelsData) setHotels(hotelsData);
 
                 // 2. Fetch Pickup Points
-                const { data: ppData } = await supabase.from('pickup_points' as any).select('id, name, map_link');
+                const { data: ppData } = await supabase.from('pickup_points' as any).select('id, name, map_link').eq('organization_id', effectiveOrganizationId);
                 if (ppData) setPickupPoints(ppData);
 
                 // 3. Fetch Schedule Stops if route exists
@@ -67,7 +71,7 @@ export function ColumnTwo({
         };
 
         fetchSmartData();
-    }, [availability.transportation_route_id]);
+    }, [availability.transportation_route_id, effectiveOrganizationId]);
 
     const resolvePickupDetails = (hotelId: string) => {
         if (!hotelId) return null;
