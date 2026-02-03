@@ -142,7 +142,7 @@ export function EditAvailabilitySheet({
                     supabase.from("vehicles" as any).select("id, name, capacity").eq("status", "active").order("name"),
                     // Removed 'role:roles(name)' to avoid 400 bad request with join
                     supabase.from("staff" as any).select("*, user:users(name)"),
-                    supabase.from("roles" as any).select("id, name")
+                    supabase.from("staff_positions" as any).select("id, name")
                 ]);
 
                 setBookingSchedules((bookings as any) || []);
@@ -156,7 +156,8 @@ export function EditAvailabilitySheet({
 
                 // Pass all staff and let UI handle display/filtering, ensure Name is mapped
                 const mappedStaff = (staffData || []).map((s: any) => {
-                    const rName = s.role_id ? roleMap.get(s.role_id) : null;
+                    // DB uses position_id, mapped to staff_positions
+                    const rName = s.position_id ? roleMap.get(s.position_id) : (s.role_id ? roleMap.get(s.role_id) : null);
                     return {
                         ...s,
                         name: s.user?.name || s.name || 'Unknown Staff',
