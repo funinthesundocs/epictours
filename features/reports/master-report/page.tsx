@@ -184,11 +184,12 @@ export function MasterReportPage() {
                 .from('bookings' as any)
                 .select(`
                     id, status, pax_count, total_amount, amount_paid, payment_status,
-                    voucher_numbers, notes, organization_id, confirmation_number, created_at,
+                    voucher_numbers, notes, organization_id, confirmation_number, created_at, option_values,
                     customers(id, status, total_value, metadata, preferences, user:users(name, email, phone_number)),
                     availabilities(
-                        id, start_date, start_time, max_capacity, experience_id,
-                        experiences(id, name, short_code)
+                        id, start_date, start_time, max_capacity, experience_id, transportation_route_id,
+                        experiences(id, name, short_code),
+                        availability_assignments(driver_id, guide_id, vehicle_id, transportation_route_id)
                     )
                 `)
                 .limit(MAX_RECORDS)
@@ -197,6 +198,9 @@ export function MasterReportPage() {
             let staffQuery = supabase.from('staff' as any).select('id, user:users(name)');
             let vehiclesQuery = supabase.from('vehicles' as any).select('id, name');
             let schedulesQuery = supabase.from('schedules' as any).select('id, name');
+            let hotelsQuery = supabase.from('hotels' as any).select('id, name, pickup_point_id');
+            let pickupPointsQuery = supabase.from('pickup_points' as any).select('id, name');
+            let scheduleStopsQuery = supabase.from('schedule_stops' as any).select('schedule_id, pickup_point_id, pickup_time');
 
             // Apply organization filter if we have one
             if (effectiveOrganizationId) {
@@ -204,13 +208,18 @@ export function MasterReportPage() {
                 staffQuery = staffQuery.eq('organization_id', effectiveOrganizationId);
                 vehiclesQuery = vehiclesQuery.eq('organization_id', effectiveOrganizationId);
                 schedulesQuery = schedulesQuery.eq('organization_id', effectiveOrganizationId);
+                hotelsQuery = hotelsQuery.eq('organization_id', effectiveOrganizationId);
+                pickupPointsQuery = pickupPointsQuery.eq('organization_id', effectiveOrganizationId);
             }
 
-            const [bookingsRes, staffRes, vehiclesRes, routesRes] = await Promise.all([
+            const [bookingsRes, staffRes, vehiclesRes, routesRes, hotelsRes, pickupPointsRes, scheduleStopsRes] = await Promise.all([
                 bookingsQuery,
                 staffQuery,
                 vehiclesQuery,
-                schedulesQuery
+                schedulesQuery,
+                hotelsQuery,
+                pickupPointsQuery,
+                scheduleStopsQuery
             ]);
 
             if (bookingsRes.error) throw bookingsRes.error;
@@ -231,6 +240,33 @@ export function MasterReportPage() {
                 (routesRes.data as any[]).forEach(r => { routeMap[r.id] = r.name; });
             }
 
+            // Hotel mappings
+            const hotelToPpMap: Record<string, string> = {};
+            const hotelNameMap: Record<string, string> = {};
+            if (hotelsRes.data) {
+                (hotelsRes.data as any[]).forEach(h => {
+                    hotelToPpMap[h.id] = h.pickup_point_id;
+                    hotelNameMap[h.id] = h.name;
+                });
+            }
+
+            // Pickup point name map
+            const pickupPointMap: Record<string, string> = {};
+            if (pickupPointsRes.data) {
+                (pickupPointsRes.data as any[]).forEach(pp => { pickupPointMap[pp.id] = pp.name; });
+            }
+
+            // Schedule stops: Map of schedule_id -> { pickup_point_id -> pickup_time }
+            const scheduleStopsMap: Record<string, Record<string, string>> = {};
+            if (scheduleStopsRes.data) {
+                (scheduleStopsRes.data as any[]).forEach(stop => {
+                    if (!scheduleStopsMap[stop.schedule_id]) {
+                        scheduleStopsMap[stop.schedule_id] = {};
+                    }
+                    scheduleStopsMap[stop.schedule_id][stop.pickup_point_id] = stop.pickup_time;
+                });
+            }
+
             if (bookingsRes.data) {
                 const rows: MasterReportRow[] = bookingsRes.data.map((b: any) => {
                     const customer = b.customers || {};
@@ -240,6 +276,49 @@ export function MasterReportPage() {
                     const metadata = customer.metadata || {};
                     const preferences = customer.preferences || {};
                     const emergencyContact = preferences.emergency_contact || {};
+
+                    // Get assignment data (first assignment)
+                    const assignment = (availability.availability_assignments || [])[0] || {};
+                    const driverId = assignment.driver_id || null;
+                    const guideId = assignment.guide_id || null;
+                    const vehicleId = assignment.vehicle_id || null;
+                    const routeId = assignment.transportation_route_id || availability.transportation_route_id || null;
+
+                    // Get pickup info from booking's option_values
+                    const optionValues = b.option_values || {};
+                    // Look for smart_pickup hotel_id in option_values
+                    let pickupHotelId: string | null = null;
+                    let pickedHotelName: string | null = null;
+                    let pickupLocation: string | null = metadata.hotel || null;
+                    let pickupTime: string | null = null;
+
+                    // Find hotel ID from option_values (smart_pickup stores hotel ID)
+                    for (const [key, value] of Object.entries(optionValues)) {
+                        // If value looks like a UUID, it might be a hotel ID
+                        if (typeof value === 'string' && value.match(/^[0-9a-f-]{36}$/i)) {
+                            const ppId = hotelToPpMap[value];
+                            if (ppId) {
+                                pickupHotelId = value;
+                                pickedHotelName = hotelNameMap[value] || null;
+                                pickupLocation = pickupPointMap[ppId] || pickupLocation;
+
+                                // Try to get pickup time from schedule stops
+                                // First try route-specific lookup
+                                if (routeId && scheduleStopsMap[routeId] && scheduleStopsMap[routeId][ppId]) {
+                                    pickupTime = scheduleStopsMap[routeId][ppId];
+                                } else {
+                                    // Fallback: search all schedules for this pickup point's time
+                                    for (const scheduleId of Object.keys(scheduleStopsMap)) {
+                                        if (scheduleStopsMap[scheduleId][ppId]) {
+                                            pickupTime = scheduleStopsMap[scheduleId][ppId];
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
 
                     return {
                         // Booking fields
@@ -260,7 +339,7 @@ export function MasterReportPage() {
                         customer_name: customerUser.name || "Unknown",
                         customer_email: customerUser.email || "",
                         customer_phone: customerUser.phone_number || "",
-                        customer_hotel: metadata.hotel || null,
+                        customer_hotel: pickedHotelName || metadata.hotel || null,
                         customer_source: metadata.source || null,
                         customer_status: customer.status || null,
                         customer_total_value: customer.total_value || 0,
@@ -281,19 +360,19 @@ export function MasterReportPage() {
                         start_time: availability.start_time || "",
                         max_capacity: availability.max_capacity || 0,
 
-                        // Staff & Resources (not directly on availabilities - would need assignments lookup)
-                        driver_id: null,
-                        driver_name: null,
-                        guide_id: null,
-                        guide_name: null,
-                        vehicle_id: null,
-                        vehicle_name: null,
-                        route_id: null,
-                        route_name: null,
+                        // Staff & Resources - now from assignments
+                        driver_id: driverId,
+                        driver_name: driverId ? staffMap[driverId] || null : null,
+                        guide_id: guideId,
+                        guide_name: guideId ? staffMap[guideId] || null : null,
+                        vehicle_id: vehicleId,
+                        vehicle_name: vehicleId ? vehicleMap[vehicleId] || null : null,
+                        route_id: routeId,
+                        route_name: routeId ? routeMap[routeId] || null : null,
 
                         // Pickup info
-                        pickup_location: metadata.hotel || null,
-                        pickup_time: null
+                        pickup_location: pickupLocation,
+                        pickup_time: pickupTime
                     };
                 });
 
@@ -312,13 +391,11 @@ export function MasterReportPage() {
         fetchReportData();
     }, [fetchReportData]);
 
-    // Handle sorting
-    const handleSort = (key: string) => {
-        setSortConfig(current => ({
-            key,
-            direction: current?.key === key && current.direction === "asc" ? "desc" : "asc"
-        }));
-    };
+    // Handle sorting - note: this function is not currently used as sorting is handled by toolbar
+    // Keeping for potential future use
+    // const handleSort = (key: string) => {
+    //     setSortCriteria(current => [{ key, direction: current[0]?.key === key && current[0]?.direction === "asc" ? "desc" : "asc" }]);
+    // };
 
     // Handle reset
     const handleReset = () => {
@@ -500,7 +577,7 @@ export function MasterReportPage() {
                 onSuccess={() => {
                     setBookingPanelOpen(false);
                     setBookingPanelData({ availability: null, bookingId: null });
-                    fetchData();
+                    fetchReportData();
                 }}
                 availability={bookingPanelData.availability}
                 editingBookingId={bookingPanelData.bookingId}
@@ -516,7 +593,7 @@ export function MasterReportPage() {
                 onCustomerAdded={() => {
                     setCustomerPanelOpen(false);
                     setEditingCustomer(undefined);
-                    fetchData();
+                    fetchReportData();
                 }}
                 editingCustomer={editingCustomer}
             />
@@ -531,7 +608,7 @@ export function MasterReportPage() {
                 onSuccess={() => {
                     setAvailabilityPanelOpen(false);
                     setEditingAvailability(undefined);
-                    fetchData();
+                    fetchReportData();
                 }}
                 initialData={editingAvailability}
             />

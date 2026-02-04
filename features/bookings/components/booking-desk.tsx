@@ -125,13 +125,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             setConfirmationNumber(null);
         }
         setIsSaving(false);
-        // Default Schedule (only if availability is present)
-        if (currentAvailability?.pricing_schedule_id) {
-            setSelectedScheduleId(currentAvailability.pricing_schedule_id);
-        }
-        if (currentAvailability?.booking_option_schedule_id) {
-            setSelectedOptionScheduleId(currentAvailability.booking_option_schedule_id);
-        }
+        // Note: Schedule selections are now done AFTER data is fetched (see below)
 
         const fetchData = async () => {
             // Customers - only select id from customers, get name/email from joined users
@@ -172,7 +166,20 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
 
             // Booking Option Schedules
             const { data: optSchedData } = await supabase.from('booking_option_schedules' as any).select('*').eq('organization_id', effectiveOrganizationId).order('name');
-            if (optSchedData) setOptionSchedules(optSchedData as unknown as BookingOptionSchedule[]);
+            if (optSchedData) {
+                setOptionSchedules(optSchedData as unknown as BookingOptionSchedule[]);
+                console.log("DEBUG: Loaded optionSchedules:", optSchedData.length);
+            }
+
+            // NOW set the schedule selections (after schedules are loaded)
+            // This ensures column-two can find the matching schedule
+            if (currentAvailability?.pricing_schedule_id && !editingBookingId) {
+                setSelectedScheduleId(currentAvailability.pricing_schedule_id);
+            }
+            if (currentAvailability?.booking_option_schedule_id && !editingBookingId) {
+                setSelectedOptionScheduleId(currentAvailability.booking_option_schedule_id);
+                console.log("DEBUG: Set selectedOptionScheduleId:", currentAvailability.booking_option_schedule_id);
+            }
 
             // Custom Fields for Options
             console.log("DEBUG: Fetching custom_field_definitions...");
