@@ -64,17 +64,18 @@ export function ColumnTwo({
                 // 3. Fetch Schedule Stops if route exists
                 if (availability.transportation_route_id) {
                     console.log("DEBUG: Fetching stops for schedule:", availability.transportation_route_id);
-                    // Assumption: route_id maps to schedule_id
+                    // Query by schedule_id only - schedule is already org-specific
                     const { data: stopsData, error: stopsError } = await supabase
                         .from('schedule_stops' as any)
                         .select('pickup_point_id, pickup_time')
-                        .eq('organization_id', effectiveOrganizationId) // Robustness
                         .eq('schedule_id', availability.transportation_route_id);
 
                     if (stopsError) console.error("DEBUG: Error fetching stops:", stopsError);
                     if (stopsData) {
                         setScheduleStops(stopsData);
                         console.log("DEBUG: ScheduleStops fetched:", stopsData.length, stopsData);
+                    } else {
+                        console.warn("DEBUG: No stops found for route:", availability.transportation_route_id);
                     }
                 } else {
                     console.warn("DEBUG: No transportation_route_id in availability!");
@@ -140,7 +141,17 @@ export function ColumnTwo({
                         disabled={isLoadingSmartData}
                     />
 
-                    {currentValue && pickupDetails && (
+                    {currentValue && isLoadingSmartData && (
+                        <div className="p-3 bg-muted/50 border border-border rounded-lg flex items-center gap-3 animate-pulse">
+                            <div className="w-4 h-4 rounded-full bg-muted-foreground/20" />
+                            <div className="space-y-1.5 flex-1">
+                                <div className="h-2.5 w-20 bg-muted-foreground/20 rounded" />
+                                <div className="h-3 w-32 bg-muted-foreground/20 rounded" />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentValue && !isLoadingSmartData && pickupDetails && (
                         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
                             <div className="mt-0.5 text-primary flex-shrink-0">
                                 <MapPin size={16} />

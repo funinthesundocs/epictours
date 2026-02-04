@@ -8,8 +8,10 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { PricingSchedulesTable } from "@/features/finance/pricing/components/pricing-table";
 import { EditPricingSheet } from "@/features/finance/pricing/components/edit-pricing-sheet";
+import { useAuth } from "@/features/auth/auth-context";
 
 export default function PricingPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [schedules, setSchedules] = useState<any[]>([]);
     const [filteredSchedules, setFilteredSchedules] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -19,11 +21,18 @@ export default function PricingPage() {
     const [editingSchedule, setEditingSchedule] = useState<any>(null);
 
     const fetchSchedules = useCallback(async () => {
+        if (!effectiveOrganizationId) {
+            setSchedules([]);
+            setFilteredSchedules([]);
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
         try {
             const { data, error } = await supabase
                 .from("pricing_schedules" as any)
                 .select("*")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("name");
 
             if (error) throw error;
@@ -34,7 +43,7 @@ export default function PricingPage() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
         fetchSchedules();

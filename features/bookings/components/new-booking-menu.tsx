@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { Availability } from "@/features/availability/components/availability-list-table";
+import { useAuth } from "@/features/auth/auth-context";
 import { Loader2, CalendarDays, Clock, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ interface NewBookingMenuProps {
 
 export function NewBookingMenu({ children, onSelectAvailability, defaultExperienceId }: NewBookingMenuProps) {
     const { zoom } = useSidebar();
+    const { effectiveOrganizationId } = useAuth();
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [availabilities, setAvailabilities] = useState<Availability[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +57,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
 
     // Fetch Experiences on Mount
     useEffect(() => {
-        if (!isOpen) {
+        if (!isOpen || !effectiveOrganizationId) {
             setIsInitializing(true);
             return;
         }
@@ -64,16 +66,17 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
             const { data } = await supabase
                 .from("experiences" as any)
                 .select("id, name")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("name");
             if (data) setExperiences(data as unknown as { id: string; name: string }[]);
             setIsInitializing(false);
         };
         fetchExperiences();
-    }, [isOpen]);
+    }, [isOpen, effectiveOrganizationId]);
 
     // Fetch available dates for the current month view
     useEffect(() => {
-        if (!isOpen || !selectedExperienceId) {
+        if (!isOpen || !selectedExperienceId || !effectiveOrganizationId) {
             setAvailableIsoDates(new Set());
             return;
         }
@@ -85,6 +88,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
             let query = supabase
                 .from("availabilities" as any)
                 .select("start_date")
+                .eq("organization_id", effectiveOrganizationId)
                 .gte("start_date", format(startOfMonth, "yyyy-MM-dd"))
                 .lte("start_date", format(endOfMonth, "yyyy-MM-dd"))
                 .eq("experience_id", selectedExperienceId);
@@ -98,11 +102,11 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
         };
 
         fetchMonthAvailability();
-    }, [currentMonth, isOpen, selectedExperienceId]);
+    }, [currentMonth, isOpen, selectedExperienceId, effectiveOrganizationId]);
 
     // Fetch Availabilities when selected date changes
     useEffect(() => {
-        if (!date || !isOpen || !selectedExperienceId) {
+        if (!date || !isOpen || !selectedExperienceId || !effectiveOrganizationId) {
             setAvailabilities([]);
             return;
         }
@@ -116,8 +120,10 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                 .select(`
                     *,
                     bookings:bookings(pax_count, status),
-                    experience:experiences(name, short_code)
+                    experience:experiences(name, short_code),
+                    assignments:availability_assignments(transportation_route_id)
                 `)
+                .eq("organization_id", effectiveOrganizationId)
                 .eq("start_date", dateStr)
                 .eq("experience_id", selectedExperienceId)
                 .order("start_time");
@@ -131,12 +137,26 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
                     const validBookings = (item.bookings || []).filter((b: any) => b.status?.toLowerCase() !== 'cancelled');
                     const totalPax = validBookings.reduce((sum: number, b: any) => sum + Number(b.pax_count || 0), 0);
 
-                    return {
+                    // Extract transportation_route_id from first assignment (for smart pickup)
+                    const primaryAssignment = item.assignments?.[0] || null;
+
+                    const result = {
                         ...item,
                         experience_name: item.experience?.name,
                         experience_short_code: item.experience?.short_code,
-                        booked_count: totalPax
+                        booked_count: totalPax,
+                        transportation_route_id: primaryAssignment?.transportation_route_id || item.transportation_route_id,
+                        // Ensure these fields are explicitly included for BookingDesk compatibility
+                        booking_option_schedule_id: item.booking_option_schedule_id,
+                        pricing_schedule_id: item.pricing_schedule_id,
                     };
+                    console.log("DEBUG NewBookingMenu: Processed availability:", {
+                        id: result.id,
+                        booking_option_schedule_id: result.booking_option_schedule_id,
+                        pricing_schedule_id: result.pricing_schedule_id,
+                        transportation_route_id: result.transportation_route_id
+                    });
+                    return result;
                 });
                 setAvailabilities(processed);
             }
@@ -144,7 +164,7 @@ export function NewBookingMenu({ children, onSelectAvailability, defaultExperien
         };
 
         fetchAvailabilities();
-    }, [date, isOpen, selectedExperienceId]);
+    }, [date, isOpen, selectedExperienceId, effectiveOrganizationId]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
