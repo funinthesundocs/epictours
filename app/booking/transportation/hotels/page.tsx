@@ -20,7 +20,14 @@ export default function HotelsPage() {
     const [editingItem, setEditingItem] = useState<any>(null);
 
     const fetchHotels = useCallback(async () => {
-        if (!effectiveOrganizationId) return;
+        console.log("Fetching hotels. effectiveOrganizationId:", effectiveOrganizationId);
+        if (!effectiveOrganizationId) {
+            console.warn("No Organization ID selected. Aborting fetch.");
+            setHotels([]);
+            setFilteredHotels([]);
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
         try {
             // Join with pickup_points to get the name

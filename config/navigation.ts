@@ -104,11 +104,11 @@ export const navigation: NavSection[] = [
                 icon: Bus,
                 requiredModule: "bookings",
                 children: [
-                    { title: "Vehicles", href: "/booking/transportation/vehicles", icon: Bus, requiredModule: "bookings" },
-                    { title: "Vendors", href: "/booking/transportation/vendors", icon: Handshake, requiredModule: "bookings" },
-                    { title: "Pickup Points", href: "/booking/transportation/pickup-points", icon: MapPin, requiredModule: "bookings" },
-                    { title: "Hotel List", href: "/booking/transportation/hotels", icon: Building2, requiredModule: "bookings" },
-                    { title: "Schedules", href: "/booking/transportation/schedules", icon: CalendarClock, requiredModule: "bookings" }
+                    { title: "Vehicles", href: "/booking/transportation/vehicles", icon: Bus, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Vendors", href: "/booking/transportation/vendors", icon: Handshake, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Pickup Points", href: "/booking/transportation/pickup-points", icon: MapPin, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Hotel List", href: "/booking/transportation/hotels", icon: Building2, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Schedules", href: "/booking/transportation/schedules", icon: CalendarClock, requiredModule: "bookings", requiresOrgContext: true }
                 ]
             },
             {
