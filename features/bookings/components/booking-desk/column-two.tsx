@@ -45,23 +45,39 @@ export function ColumnTwo({
 
         const fetchSmartData = async () => {
             setIsLoadingSmartData(true);
+            console.log("DEBUG: fetchSmartData started. RouteID:", availability.transportation_route_id, "OrgID:", effectiveOrganizationId);
             try {
                 // 1. Fetch Hotels
                 const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').eq('organization_id', effectiveOrganizationId).order('name');
-                if (hotelsData) setHotels(hotelsData);
+                if (hotelsData) {
+                    setHotels(hotelsData);
+                    console.log("DEBUG: Hotels fetched:", hotelsData.length);
+                }
 
                 // 2. Fetch Pickup Points
                 const { data: ppData } = await supabase.from('pickup_points' as any).select('id, name, map_link').eq('organization_id', effectiveOrganizationId);
-                if (ppData) setPickupPoints(ppData);
+                if (ppData) {
+                    setPickupPoints(ppData);
+                    console.log("DEBUG: PickupPoints fetched:", ppData.length);
+                }
 
                 // 3. Fetch Schedule Stops if route exists
                 if (availability.transportation_route_id) {
+                    console.log("DEBUG: Fetching stops for schedule:", availability.transportation_route_id);
                     // Assumption: route_id maps to schedule_id
-                    const { data: stopsData } = await supabase
+                    const { data: stopsData, error: stopsError } = await supabase
                         .from('schedule_stops' as any)
                         .select('pickup_point_id, pickup_time')
+                        .eq('organization_id', effectiveOrganizationId) // Robustness
                         .eq('schedule_id', availability.transportation_route_id);
-                    if (stopsData) setScheduleStops(stopsData);
+
+                    if (stopsError) console.error("DEBUG: Error fetching stops:", stopsError);
+                    if (stopsData) {
+                        setScheduleStops(stopsData);
+                        console.log("DEBUG: ScheduleStops fetched:", stopsData.length, stopsData);
+                    }
+                } else {
+                    console.warn("DEBUG: No transportation_route_id in availability!");
                 }
             } catch (err) {
                 console.error("Error fetching smart pickup data", err);
@@ -76,10 +92,17 @@ export function ColumnTwo({
     const resolvePickupDetails = (hotelId: string) => {
         if (!hotelId) return null;
         const hotel = hotels.find(h => h.id === hotelId);
-        if (!hotel || !hotel.pickup_point_id) return null;
+        if (!hotel || !hotel.pickup_point_id) {
+            console.log("DEBUG: Hotel not found or no pickup_point_id. HotelID:", hotelId, "Found:", !!hotel);
+            return null;
+        }
 
         const pickupPoint = pickupPoints.find(p => p.id === hotel.pickup_point_id);
         const stop = scheduleStops.find(s => s.pickup_point_id === hotel.pickup_point_id);
+
+        if (!stop) {
+            console.log("DEBUG: Stop not found for hotel/pp.", "Hotel:", hotel.name, "PP_ID:", hotel.pickup_point_id, "Available Stops:", scheduleStops.length);
+        }
 
         return {
             locationName: pickupPoint?.name || "Unknown Location",

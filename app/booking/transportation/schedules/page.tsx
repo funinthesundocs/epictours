@@ -20,7 +20,11 @@ export default function SchedulesPage() {
     const [editingItem, setEditingItem] = useState<any>(null);
 
     const fetchSchedules = useCallback(async () => {
-        if (!effectiveOrganizationId) return;
+        if (!effectiveOrganizationId) {
+            console.log("DEBUG: No effectiveOrganizationId");
+            return;
+        }
+        console.log("DEBUG: Fetching schedules for Org:", effectiveOrganizationId);
         setIsLoading(true);
         try {
             const { data, error } = await supabase
@@ -29,7 +33,11 @@ export default function SchedulesPage() {
                 .eq("organization_id", effectiveOrganizationId)
                 .order("start_time");
 
-            if (error) throw error;
+            if (error) {
+                console.error("DEBUG: Supabase Error:", error);
+                throw error;
+            }
+            console.log("DEBUG: Schedules fetched:", data);
             setSchedules(data || []);
             setFilteredSchedules(data || []);
         } catch (err) {

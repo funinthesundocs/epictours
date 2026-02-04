@@ -138,6 +138,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
             const { data: custData, error: custError } = await supabase
                 .from('customers' as any)
                 .select('id, user_id, user:users(id, name, email)')
+                .eq('organization_id', effectiveOrganizationId) // Filter by Org
                 .order('created_at', { ascending: false });
 
             if (custError) {
@@ -196,7 +197,7 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                 console.log("DEBUG: Edit mode - fetching booking:", editingBookingId);
                 const { data: bookingData, error: bookingError } = await supabase
                     .from('bookings' as any)
-                    .select('*, customers(id, user:users(id, name, email)), availability:availabilities(id, experience_id, pricing_schedule_id, booking_option_schedule_id, start_date, start_time, max_capacity, experience:experiences(id, name, short_code))')
+                    .select('*, customers(id, user:users(id, name, email)), availability:availabilities(id, experience_id, pricing_schedule_id, booking_option_schedule_id, transportation_route_id, start_date, start_time, max_capacity, experience:experiences(id, name, short_code), availability_assignments(transportation_route_id))')
                     .eq('id', editingBookingId)
                     .single();
 
@@ -217,7 +218,8 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                         const enrichedAvail = {
                             ...booking.availability,
                             experience_name: booking.availability.experience?.name || 'Unknown Experience',
-                            experience_short_code: booking.availability.experience?.short_code || 'EXP'
+                            experience_short_code: booking.availability.experience?.short_code || 'EXP',
+                            transportation_route_id: booking.availability.availability_assignments?.[0]?.transportation_route_id || booking.availability.transportation_route_id
                         };
                         delete enrichedAvail.experience;
                         setCurrentAvailability(enrichedAvail);

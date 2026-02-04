@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { RequiredIndicator } from "@/components/ui/required-indicator";
+import { useAuth } from "@/features/auth/auth-context";
 
 const VariationSchema = z.object({
     id: z.string().optional(),
@@ -29,6 +30,7 @@ interface EditVariationSheetProps {
 }
 
 export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: EditVariationSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
@@ -57,7 +59,7 @@ export function EditVariationSheet({ isOpen, onClose, onSuccess, initialData }: 
     const onSubmit = async (data: VariationFormData) => {
         setIsSubmitting(true);
         try {
-            const payload = { name: data.name };
+            const payload = { name: data.name, organization_id: effectiveOrganizationId };
 
             if (data.id) {
                 const { error } = await supabase

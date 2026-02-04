@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Zod Schemas - tier is now dynamic string
 const PricingRateSchema = z.object({
@@ -40,6 +41,7 @@ interface EditPricingSheetProps {
 }
 
 export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: EditPricingSheetProps) {
+    const { effectiveOrganizationId } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<string>(""); // Dynamic - will be set from first variation
     const [customerTypes, setCustomerTypes] = useState<{ id: string, name: string, description: string }[]>([]);
@@ -80,6 +82,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 const { data: variations } = await supabase
                     .from("pricing_variations" as any)
                     .select("id, name, sort_order")
+                    .eq("organization_id", effectiveOrganizationId)
                     .order("sort_order", { ascending: true });
 
                 if (variations && variations.length > 0) {
@@ -92,6 +95,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                 const { data: types } = await supabase
                     .from("customer_types" as any)
                     .select("id, name, description")
+                    .eq("organization_id", effectiveOrganizationId)
                     .order("name");
 
                 if (types) setCustomerTypes(types as any);
@@ -148,7 +152,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
             } else {
                 const { data: newSchedule, error } = await supabase
                     .from("pricing_schedules" as any)
-                    .insert([{ name: data.name, notes: data.notes }])
+                    .insert([{ name: data.name, notes: data.notes, organization_id: effectiveOrganizationId }])
                     .select()
                     .single();
                 if (error) throw error;
@@ -171,6 +175,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                         for (const rate of currentTabRates) {
                             ratesToInsert.push({
                                 schedule_id: scheduleId,
+                                organization_id: effectiveOrganizationId, // Secure Rate
                                 customer_type_id: rate.customer_type_id,
                                 tier: variation.name, // Set tier to each variation name
                                 price: rate.price,
@@ -182,6 +187,7 @@ export function EditPricingSheet({ isOpen, onClose, onSuccess, initialData }: Ed
                     // Normal save - only save configured rates
                     ratesToInsert = data.rates.map(r => ({
                         schedule_id: scheduleId,
+                        organization_id: effectiveOrganizationId, // Secure Rate
                         customer_type_id: r.customer_type_id,
                         tier: r.tier,
                         price: r.price,
