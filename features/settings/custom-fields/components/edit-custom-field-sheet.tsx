@@ -38,6 +38,7 @@ import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 
 // Supabase Setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -236,6 +237,7 @@ function SortableOptionItem({
 
 
 export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }: EditCustomFieldSheetProps) {
+    const { effectiveOrganizationId } = useAuth(); // Get Org ID
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Preview State
@@ -415,7 +417,8 @@ export function EditCustomFieldSheet({ isOpen, onClose, onSuccess, fieldToEdit }
                         is_internal: values.is_internal,
                         options: values.options,
                         settings: values.settings,
-                        default_value: values.default_value // Save default value
+                        default_value: values.default_value, // Save default value
+                        organization_id: effectiveOrganizationId // Save Org ID
                     }]);
                 if (error) throw error;
             }

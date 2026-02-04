@@ -121,8 +121,12 @@ export function BookingsCalendar({
                 endRange = addDays(startOfDay(currentDate), 1);
             } else {
                 // Month or List (default to month context)
+                // ROBUST FIX: Fetch +/- 7 days to account for Timezone overlaps and "end of month" issues
                 startRange = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                startRange.setDate(startRange.getDate() - 7);
+
                 endRange = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                endRange.setDate(endRange.getDate() + 7);
             }
 
             const { data, error } = await supabase
@@ -136,6 +140,7 @@ export function BookingsCalendar({
             if (error) {
                 console.error("Error fetching availabilities:", error);
             } else if (data) {
+                console.log("DEBUG: Calendar Fetch Raw Count:", data.length);
                 const enriched: Availability[] = data.map((item: any) => {
                     // Resource Clustering Logic - Determine Primary Assignment
                     const assignments = item.assignments || [];
@@ -188,7 +193,9 @@ export function BookingsCalendar({
                         guide_name: guideName,
                         experience_name: expMap[item.experience_id || ""]?.name || "",
                         experience_short_code: expMap[item.experience_id || ""]?.short_code || "EXP",
-                        assignments: assignments
+                        assignments: assignments,
+                        // Fix for Smart Pickup: Polyfill route_id from assignment
+                        transportation_route_id: primaryAssignment?.transportation_route_id || item.transportation_route_id
                     };
                 });
                 setAvailabilities(enriched);

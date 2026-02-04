@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { CustomFieldsTable } from "@/features/settings/custom-fields/components/custom-fields-table";
 import { EditCustomFieldSheet } from "@/features/settings/custom-fields/components/edit-custom-field-sheet";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/auth-context";
 import { LoadingState } from "@/components/ui/loading-state";
 
 // Supabase Setup
@@ -19,6 +20,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function CustomFieldsPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [fields, setFields] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -28,10 +30,12 @@ export default function CustomFieldsPage() {
     const [editingField, setEditingField] = useState<any | null>(null);
 
     const fetchFields = async () => {
+        if (!effectiveOrganizationId) return;
         setIsLoading(true);
         const { data, error } = await supabase
             .from("custom_field_definitions")
             .select("*")
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -45,7 +49,7 @@ export default function CustomFieldsPage() {
 
     useEffect(() => {
         fetchFields();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     const handleCreate = () => {
         setEditingField(null);
@@ -70,7 +74,8 @@ export default function CustomFieldsPage() {
             .insert([{
                 ...rest,
                 name: newName,
-                label: newLabel
+                label: newLabel,
+                organization_id: effectiveOrganizationId
             }]);
 
         if (error) {

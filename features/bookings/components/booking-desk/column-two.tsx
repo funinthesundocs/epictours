@@ -45,36 +45,40 @@ export function ColumnTwo({
 
         const fetchSmartData = async () => {
             setIsLoadingSmartData(true);
-            console.log("DEBUG [ColumnTwo]: fetchSmartData starting", {
-                transportation_route_id: availability.transportation_route_id
-            });
+            console.log("DEBUG: fetchSmartData started. RouteID:", availability.transportation_route_id, "OrgID:", effectiveOrganizationId);
 
             try {
                 // 1. Fetch Hotels
                 const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').eq('organization_id', effectiveOrganizationId).order('name');
-                if (hotelsData) setHotels(hotelsData);
+                if (hotelsData) {
+                    setHotels(hotelsData);
+                    console.log("DEBUG: Hotels fetched:", hotelsData.length);
+                }
 
                 // 2. Fetch Pickup Points
                 const { data: ppData } = await supabase.from('pickup_points' as any).select('id, name, map_link').eq('organization_id', effectiveOrganizationId);
-                if (ppData) setPickupPoints(ppData);
+                if (ppData) {
+                    setPickupPoints(ppData);
+                    console.log("DEBUG: PickupPoints fetched:", ppData.length);
+                }
 
                 // 3. Fetch Schedule Stops if route exists
                 if (availability.transportation_route_id) {
-                    console.log("DEBUG [ColumnTwo]: Querying schedule_stops for schedule_id:", availability.transportation_route_id);
+                    console.log("DEBUG: Fetching stops for schedule:", availability.transportation_route_id);
                     const { data: stopsData, error: stopsError } = await supabase
                         .from('schedule_stops' as any)
                         .select('pickup_point_id, pickup_time')
+                        .eq('organization_id', effectiveOrganizationId)
                         .eq('schedule_id', availability.transportation_route_id);
 
-                    if (stopsError) {
-                        console.error("DEBUG [ColumnTwo]: schedule_stops query error:", stopsError);
-                    } else {
-                        console.log("DEBUG [ColumnTwo]: schedule_stops returned", stopsData?.length, "stops:", stopsData);
-                        if (stopsData) setScheduleStops(stopsData);
+                    if (stopsError) console.error("DEBUG: Error fetching stops:", stopsError);
+                    if (stopsData) {
+                        setScheduleStops(stopsData);
+                        console.log("DEBUG: ScheduleStops fetched:", stopsData.length, stopsData);
                     }
                 } else {
-                    console.log("DEBUG [ColumnTwo]: No transportation_route_id on availability");
-                    setScheduleStops([]); // Clear if no route
+                    console.warn("DEBUG: No transportation_route_id in availability!");
+                    setScheduleStops([]);
                 }
             } catch (err) {
                 console.error("Error fetching smart pickup data", err);
@@ -88,18 +92,18 @@ export function ColumnTwo({
 
 
     const resolvePickupDetails = (hotelId: string) => {
-        console.log("DEBUG [ColumnTwo]: resolvePickupDetails called", { hotelId, scheduleStopsCount: scheduleStops.length });
+        console.log("DEBUG: resolvePickupDetails called", { hotelId, scheduleStopsCount: scheduleStops.length });
         if (!hotelId) return null;
         const hotel = hotels.find(h => h.id === hotelId);
         if (!hotel || !hotel.pickup_point_id) {
-            console.log("DEBUG [ColumnTwo]: Hotel not found or no pickup_point_id", { hotel });
+            console.log("DEBUG: Hotel not found or no pickup_point_id", { hotel });
             return null;
         }
 
         const pickupPoint = pickupPoints.find(p => p.id === hotel.pickup_point_id);
         const stop = scheduleStops.find(s => s.pickup_point_id === hotel.pickup_point_id);
 
-        console.log("DEBUG [ColumnTwo]: Pickup resolution", {
+        console.log("DEBUG: Pickup resolution", {
             hotel_pickup_point_id: hotel.pickup_point_id,
             pickupPointName: pickupPoint?.name,
             stopFound: !!stop,
@@ -121,301 +125,241 @@ export function ColumnTwo({
         setOptionValues({ ...optionValues, [optionId]: value });
     };
 
-    // Render the appropriate input based on field type
-    const renderFieldInput = (opt: BookingOption) => {
-        const optId = opt.id || opt.field_id || String(Math.random());
-        const currentValue = optionValues[optId];
+    // Get current option schedule
+    const currentSchedule = optionSchedules.find(s => s.id === selectedOptionScheduleId);
+    const variations = ['retail', 'online'];
+    const currentConfig = selectedVariation === 'retail' ? currentSchedule?.config_retail : currentSchedule?.config_online;
 
-        // inputStyles defined at top
-        const selectClasses = cn(inputStyles, "appearance-none cursor-pointer");
-
-        if (opt.type === 'smart_pickup') {
-            const pickupDetails = resolvePickupDetails(currentValue);
-
-            return (
-                <div className="space-y-3">
-                    <Combobox
-                        value={currentValue || ""}
-                        onChange={(val) => handleValueChange(optId, val)}
-                        options={hotels.map(h => ({ label: h.name, value: h.id }))}
-                        placeholder={isLoadingSmartData ? "Loading..." : "Select Pickup Hotel"}
-                        inputClassName={inputStyles}
-                        disabled={isLoadingSmartData}
-                    />
-
-                    {currentValue && pickupDetails && (
-                        <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                            <div className="mt-0.5 text-primary flex-shrink-0">
-                                <MapPin size={16} />
-                            </div>
-                            <div className="space-y-1 min-w-0">
-                                <div className="text-[10px] font-bold text-primary uppercase tracking-wider">Pickup Location</div>
-                                <div className="text-sm text-foreground font-medium truncate">{pickupDetails.locationName}</div>
-                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                    <span className="bg-background/80 px-1.5 py-0.5 rounded text-foreground border border-border">{pickupDetails.time}</span>
-                                    {pickupDetails.mapLink && (
-                                        <a
-                                            href={pickupDetails.mapLink}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="flex items-center gap-1 hover:text-primary transition-colors"
-                                        >
-                                            Map <ExternalLink size={10} />
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        switch (opt.type) {
-            case 'select':
-            case 'quantity':
-                // Dropdown select
-                return (
-                    <Combobox
-                        value={currentValue || ""}
-                        onChange={(val) => handleValueChange(optId, val)}
-                        options={opt.options?.map((o: any) => ({
-                            label: o.label,
-                            value: o.value
-                        })) || []}
-                        placeholder="-- Select --"
-                        inputClassName={inputStyles}
-                    />
-                );
-
-            case 'checkbox':
-                // Determine if multi-select or single-select (radio)
-                const isMulti = opt.options?.settings?.allow_multiselect;
-                const selectedValues = Array.isArray(currentValue) ? currentValue : [];
-
-                return (
-                    <div className="flex flex-col gap-2">
-                        {opt.options?.filter((o: any) => o.value !== undefined).map((o: any, i: number) => {
-                            const isSelected = isMulti
-                                ? selectedValues.includes(o.value)
-                                : currentValue === o.value;
-
-                            const handleClick = () => {
-                                if (isMulti) {
-                                    // Toggle in array
-                                    const newValues = isSelected
-                                        ? selectedValues.filter((v: string) => v !== o.value)
-                                        : [...selectedValues, o.value];
-                                    handleValueChange(optId, newValues);
-                                } else {
-                                    // Single select (radio behavior)
-                                    handleValueChange(optId, o.value);
-                                }
-                            };
-
-                            return (
-                                <button
-                                    key={o.value || i}
-                                    type="button"
-                                    onClick={handleClick}
-                                    className={cn(
-                                        "flex items-center gap-3 px-3 py-2 rounded-lg border text-left text-sm transition-colors",
-                                        isSelected
-                                            ? "bg-primary/10 border-primary/50 text-primary"
-                                            : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "w-4 h-4 border flex items-center justify-center flex-shrink-0",
-                                        isMulti ? "rounded" : "rounded-full",
-                                        isSelected ? "border-primary bg-primary" : "border-border"
-                                    )}>
-                                        {isSelected && (
-                                            <div className={cn(
-                                                "bg-primary-foreground",
-                                                isMulti ? "w-2 h-2 rounded-sm" : "w-1.5 h-1.5 rounded-full"
-                                            )} />
-                                        )}
-                                    </div>
-                                    <span>{o.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                );
-
-            case 'number':
-                // Numeric stepper
-                const numValue = Number(currentValue) || 0;
-                return (
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => handleValueChange(optId, Math.max(0, numValue - 1))}
-                            className="p-2 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors"
-                        >
-                            <Minus size={14} className="text-muted-foreground" />
-                        </button>
-                        <input
-                            type="number"
-                            value={numValue}
-                            onChange={(e) => handleValueChange(optId, Number(e.target.value) || 0)}
-                            className={cn(inputStyles, "w-20 text-center")}
-                            min={0}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => handleValueChange(optId, numValue + 1)}
-                            className="p-2 bg-muted/50 border border-border rounded-lg hover:border-primary/50 transition-colors"
-                        >
-                            <Plus size={14} className="text-muted-foreground" />
-                        </button>
-                    </div>
-                );
-
-            case 'date':
-                return (
-                    <input
-                        type="date"
-                        value={currentValue || ""}
-                        onChange={(e) => handleValueChange(optId, e.target.value)}
-                        className={inputStyles}
-                    />
-                );
-
-            case 'text':
-            case 'textarea':
-            default:
-                // Text input
-                if (opt.type === 'textarea') {
-                    return (
-                        <textarea
-                            value={currentValue || ""}
-                            onChange={(e) => handleValueChange(optId, e.target.value)}
-                            placeholder="Enter details..."
-                            className={cn(inputStyles, "min-h-[80px] resize-none")}
-                        />
-                    );
-                }
-                return (
-                    <input
-                        type="text"
-                        value={currentValue || ""}
-                        onChange={(e) => handleValueChange(optId, e.target.value)}
-                        placeholder="Enter value..."
-                        className={inputStyles}
-                    />
-                );
-        }
-    };
+    // Match field IDs from config to actual option definitions
+    const resolvedFields: BookingOption[] = [];
+    if (currentConfig && Array.isArray(currentConfig)) {
+        currentConfig.forEach((cfg: any) => {
+            const match = currentOptions.find(opt => opt.id === cfg.field_id);
+            if (match) {
+                resolvedFields.push({ ...match, required: cfg.required ?? false });
+            }
+        });
+    }
 
     return (
-        <div className="flex flex-col h-full bg-transparent animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-            {/* Header */}
-            <div className="shrink-0 flex items-center gap-2 px-6 py-4 bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-10">
-                <Settings size={16} className="text-primary" />
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Options & Notes</span>
+        <div className="space-y-4">
+            {/* Section Header */}
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                <Settings size={14} />
+                <span className="text-xs font-medium uppercase tracking-wider">Options & Notes</span>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 flex flex-col min-h-0">
-                {/* Controls */}
-                <div className="px-6 py-6 grid grid-cols-2 gap-4 shrink-0 border-b border-border">
-                    {/* Schedule Selector */}
-                    <div className={cn("space-y-1.5", !selectedOptionScheduleId ? "col-span-2" : "col-span-1")}>
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Option Schedule</label>
-                        <div className="relative">
+            {/* Option Schedule & Variation Selector */}
+            <div className="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div>
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">Option Schedule</span>
+                    <Combobox
+                        value={selectedOptionScheduleId || ""}
+                        onChange={(val) => setSelectedOptionScheduleId(val || null)}
+                        options={optionSchedules.map(s => ({ value: s.id, label: s.name + (s.is_default ? " (Default)" : "") }))}
+                        placeholder="Select schedule..."
+                    />
+                </div>
+                <div>
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">Variation</span>
+                    <Combobox
+                        value={selectedVariation}
+                        onChange={setSelectedVariation}
+                        options={variations.map(v => ({ value: v, label: v.charAt(0).toUpperCase() + v.slice(1) + (v === 'retail' ? ' (Default)' : '') }))}
+                    />
+                </div>
+            </div>
+
+            {/* Dynamic Fields */}
+            {resolvedFields.map((opt) => {
+                const optId = opt.id || opt.field_id;
+                const currentValue = optionValues[optId];
+
+                // --- SMART PICKUP FIELD ---
+                if (opt.type === 'smart_pickup') {
+                    const pickupDetails = currentValue ? resolvePickupDetails(currentValue) : null;
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                                {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                            </div>
                             <Combobox
-                                value={selectedOptionScheduleId || undefined}
-                                onChange={(val) => setSelectedOptionScheduleId(val || null)}
-                                options={optionSchedules.map(sch => ({
-                                    label: sch.name + (sch.id === availability.booking_option_schedule_id ? " (Default)" : ""),
-                                    value: sch.id
-                                }))}
-                                placeholder="-- No Options --"
-                                inputClassName={inputStyles}
+                                value={currentValue || ""}
+                                onChange={(val) => handleValueChange(optId, val)}
+                                options={[
+                                    ...hotels.map(h => ({ value: h.id, label: h.name })),
+                                    { value: 'self_drive', label: 'Self Drive' }
+                                ]}
+                                placeholder={isLoadingSmartData ? "Loading hotels..." : "Select hotel..."}
+                            />
+                            {pickupDetails && currentValue !== 'self_drive' && (
+                                <div className="mt-2 p-2 bg-card/50 rounded border border-primary/20">
+                                    <div className="flex items-start gap-2">
+                                        <MapPin size={14} className="text-primary mt-0.5 shrink-0" />
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-medium text-primary uppercase tracking-wider">Pickup Location</p>
+                                            <p className="text-sm font-medium text-foreground">{pickupDetails.locationName}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn(
+                                                    "text-xs px-2 py-0.5 rounded",
+                                                    pickupDetails.time === "Not Scheduled"
+                                                        ? "bg-muted text-muted-foreground"
+                                                        : "bg-primary/20 text-primary"
+                                                )}>
+                                                    {pickupDetails.time}
+                                                </span>
+                                                {pickupDetails.mapLink && (
+                                                    <a href={pickupDetails.mapLink} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                                                        Map <ExternalLink size={10} />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                // --- HEADER (display-only) ---
+                if (opt.type === 'header') {
+                    return (
+                        <div key={optId} className="pt-2">
+                            <p className="text-sm font-semibold text-primary uppercase tracking-wide">{opt.label}</p>
+                        </div>
+                    );
+                }
+
+                // --- SELECT ---
+                if (opt.type === 'select') {
+                    const selectOptions = Array.isArray(opt.options) ? opt.options.map((o: any) => ({
+                        value: typeof o === 'object' ? (o.value || o.label) : o,
+                        label: typeof o === 'object' ? o.label : o
+                    })) : [];
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                                {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                            </div>
+                            <Combobox
+                                value={currentValue || ""}
+                                onChange={(val) => handleValueChange(optId, val)}
+                                options={selectOptions}
+                                placeholder={`Select ${opt.label}...`}
                             />
                         </div>
-                    </div>
+                    );
+                }
 
-                    {/* Variation Selector (Only show if schedule selected) */}
-                    {selectedOptionScheduleId && (
-                        <div className="space-y-1.5 col-span-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Variation</label>
-                            <div className="relative">
-                                <Combobox
-                                    value={selectedVariation}
-                                    onChange={(val) => setSelectedVariation(val)}
-                                    options={[
-                                        { label: "Retail (Default)", value: "retail" },
-                                        { label: "Online", value: "online" },
-                                        { label: "Special", value: "special" },
-                                        { label: "Custom", value: "custom" }
-                                    ]}
-                                    placeholder="Select variation..."
-                                    inputClassName={inputStyles}
-                                />
+                // --- QUANTITY ---
+                if (opt.type === 'quantity') {
+                    const qty = typeof currentValue === 'number' ? currentValue : 0;
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                                {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => handleValueChange(optId, Math.max(0, qty - 1))} className="w-7 h-7 rounded bg-muted hover:bg-muted-foreground/20 flex items-center justify-center"><Minus size={14} /></button>
+                                <span className="w-8 text-center text-sm font-medium">{qty}</span>
+                                <button onClick={() => handleValueChange(optId, qty + 1)} className="w-7 h-7 rounded bg-muted hover:bg-muted-foreground/20 flex items-center justify-center"><Plus size={14} /></button>
                             </div>
                         </div>
-                    )}
-                </div>
+                    );
+                }
 
-                {/* Options List */}
-                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3 custom-scrollbar">
-                    {selectedOptionScheduleId && currentOptions.length === 0 && (
-                        <div className="text-muted-foreground text-xs italic p-2 border border-dashed border-border rounded">
-                            No options configured for this variation.
-                        </div>
-                    )}
-
-                    {currentOptions.map(opt => {
-                        const optId = opt.id || opt.field_id || String(Math.random());
-
-                        // Special Handling: Section Headers
-                        if (opt.type === 'header') {
-                            return (
-                                <div key={optId} className="pt-4 pb-2">
-                                    <h4 className="text-sm font-bold text-primary uppercase tracking-widest border-b border-primary/30 pb-1 mb-1">
-                                        {opt.label}
-                                    </h4>
-                                    {opt.description && (
-                                        <p className="text-xs text-muted-foreground italic">
-                                            {opt.description}
-                                        </p>
-                                    )}
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <div key={optId} className="p-3 bg-card border border-border rounded-lg hover:border-primary/20 transition-colors shadow-sm">
-                                {/* Label and Price */}
-                                <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                        <div className="text-sm font-medium text-foreground flex items-center gap-2">
-                                            {opt.label || "Unnamed Option"}
-                                            {opt.required && (
-                                                <span className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Required</span>
+                // --- CHECKBOX ---
+                if (opt.type === 'checkbox') {
+                    const checkOptions = Array.isArray(opt.options) ? opt.options : [];
+                    const selectedSet = new Set(Array.isArray(currentValue) ? currentValue : []);
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                                {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {checkOptions.map((chk: any, idx: number) => {
+                                    const val = typeof chk === 'object' ? (chk.value || chk.label) : chk;
+                                    const label = typeof chk === 'object' ? chk.label : chk;
+                                    const isChecked = selectedSet.has(val);
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                const newSet = new Set(selectedSet);
+                                                isChecked ? newSet.delete(val) : newSet.add(val);
+                                                handleValueChange(optId, Array.from(newSet));
+                                            }}
+                                            className={cn(
+                                                "text-xs px-2 py-1 rounded border transition-colors",
+                                                isChecked ? "bg-primary/20 border-primary text-primary" : "bg-muted/50 border-border text-muted-foreground hover:border-primary/50"
                                             )}
-                                        </div>
-                                        {opt.description && (
-                                            <div className="text-xs text-muted-foreground mt-0.5">{opt.description}</div>
-                                        )}
-                                    </div>
-                                    {opt.price > 0 && (
-                                        <div className="text-sm font-semibold text-primary">
-                                            ${opt.price}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Field Input */}
-                                {renderFieldInput(opt)}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
+                        </div>
+                    );
+                }
+
+                // --- TEXTAREA ---
+                if (opt.type === 'textarea') {
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-1">
+                            <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                            <textarea
+                                value={currentValue || ""}
+                                onChange={(e) => handleValueChange(optId, e.target.value)}
+                                rows={3}
+                                className={inputStyles}
+                                placeholder={`Enter ${opt.label.toLowerCase()}...`}
+                            />
+                        </div>
+                    );
+                }
+
+                // --- DATE ---
+                if (opt.type === 'date') {
+                    return (
+                        <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                                {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                            </div>
+                            <input
+                                type="date"
+                                value={currentValue || ""}
+                                onChange={(e) => handleValueChange(optId, e.target.value)}
+                                className={inputStyles}
+                            />
+                        </div>
+                    );
+                }
+
+                // --- DEFAULT (text) ---
+                return (
+                    <div key={optId} className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                            {opt.required && <span className="text-[10px] bg-cyan-600/30 text-cyan-400 px-1.5 py-0.5 rounded">Required</span>}
+                        </div>
+                        <input
+                            type="text"
+                            value={currentValue || ""}
+                            onChange={(e) => handleValueChange(optId, e.target.value)}
+                            className={inputStyles}
+                            placeholder={`Enter ${opt.label.toLowerCase()}...`}
+                        />
+                    </div>
+                );
+            })}
         </div>
     );
 }

@@ -8,8 +8,10 @@ import { supabase } from "@/lib/supabase";
 import { PricingVariationsTable } from "@/features/settings/pricing-variations/components/pricing-variations-table";
 import { EditVariationSheet } from "@/features/settings/pricing-variations/components/edit-variation-sheet";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/auth-context";
 
 export default function PricingVariationsPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [variations, setVariations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -22,6 +24,7 @@ export default function PricingVariationsPage() {
             const { data, error } = await supabase
                 .from("pricing_variations" as any)
                 .select("*")
+                .eq("organization_id", effectiveOrganizationId)
                 .order("sort_order", { ascending: true });
 
             if (error) throw error;
@@ -31,11 +34,11 @@ export default function PricingVariationsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [effectiveOrganizationId]);
 
     useEffect(() => {
-        fetchVariations();
-    }, [fetchVariations]);
+        if (effectiveOrganizationId) fetchVariations();
+    }, [fetchVariations, effectiveOrganizationId]);
 
     const handleDelete = async (id: string) => {
         try {

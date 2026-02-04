@@ -81,7 +81,8 @@ export function BookingsCalendarWrapper() {
                     pricing_schedule_id, booking_option_schedule_id, transportation_route_id,
                     driver_id, guide_id, vehicle_id, private_announcement, public_announcement,
                     is_repeating, duration_type, hours_long, online_booking_status, repeat_days,
-                    experiences!inner(id, name, short_code)
+                    experiences!inner(id, name, short_code),
+                    availability_assignments(transportation_route_id)
                 )
             `)
             .eq('id', bookingId)
@@ -103,7 +104,7 @@ export function BookingsCalendarWrapper() {
                 experience_short_code: avail.experiences?.short_code || '',
                 pricing_schedule_id: avail.pricing_schedule_id,
                 booking_option_schedule_id: avail.booking_option_schedule_id,
-                transportation_route_id: avail.transportation_route_id,
+                // transportation_route_id: avail.transportation_route_id, // Handled below with assignments
                 driver_id: avail.driver_id,
                 guide_id: avail.guide_id,
                 vehicle_id: avail.vehicle_id,
@@ -114,7 +115,9 @@ export function BookingsCalendarWrapper() {
                 hours_long: avail.hours_long,
                 online_booking_status: avail.online_booking_status || 'closed',
                 repeat_days: avail.repeat_days,
-                booking_records_count: 0
+                booking_records_count: 0,
+                // Map the first assignment's transportation_route_id if available, fallback to legacy
+                transportation_route_id: avail.availability_assignments?.[0]?.transportation_route_id || avail.transportation_route_id
             } as Availability);
         }
 

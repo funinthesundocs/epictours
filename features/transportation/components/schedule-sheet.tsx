@@ -321,7 +321,8 @@ export function ScheduleSheet({ isOpen, onClose, onSuccess, initialData }: Sched
                 schedule_id: scheduleId,
                 pickup_point_id: stop.pickup_point_id,
                 pickup_time: stop.pickup_time,
-                order_index: index
+                order_index: index,
+                organization_id: effectiveOrganizationId // Add Org ID
             }));
 
             // We can't strictly upsert mixed new/old easily if 'id' is key.
