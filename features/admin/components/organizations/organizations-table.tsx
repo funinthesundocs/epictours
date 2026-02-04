@@ -102,12 +102,7 @@ export function OrganizationsTable({ data, onEdit, onToggleStatus, onRowClick }:
                             onClick={() => onRowClick?.(org)}
                         >
                             <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                                        {org.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <span className="font-medium text-foreground">{org.name}</span>
-                                </div>
+                                <span className="font-medium text-foreground">{org.name}</span>
                             </td>
                             <td className="py-3 px-4 font-mono text-sm text-muted-foreground">{org.slug}</td>
                             <td className="py-3 px-4 text-center">

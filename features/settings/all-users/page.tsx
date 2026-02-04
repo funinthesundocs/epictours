@@ -136,16 +136,23 @@ export default function AllUsersPage() {
         }
 
         // Search Filter
-        if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase();
-            result = result.filter(u =>
-                u.name.toLowerCase().includes(q) ||
-                u.email.toLowerCase().includes(q) ||
-                u.phone.replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
-                u.meta?.contactPerson?.toLowerCase().includes(q) ||
-                u.roles?.some(r => r.toLowerCase().includes(q))
-            );
-        }
+        const q = searchQuery.toLowerCase().trim();
+        result = result.filter(u => {
+            const nameMatch = (u.name || "").toLowerCase().includes(q);
+            const emailMatch = (u.email || "").toLowerCase().includes(q);
+
+            // Phone check: specific match on digits
+            const phoneClean = (u.phone || "").replace(/\D/g, "");
+            const qClean = q.replace(/\D/g, "");
+            const phoneMatch = qClean.length > 0 && phoneClean.includes(qClean);
+
+            const contactMatch = (u.meta?.contactPerson || "").toLowerCase().includes(q);
+            const roleMatch = (u.roles || []).some(r => (r || "").toLowerCase().includes(q));
+            // User Type Match
+            const typeMatch = (u.type || "").toLowerCase().includes(q);
+
+            return nameMatch || emailMatch || phoneMatch || contactMatch || roleMatch || typeMatch;
+        });
 
         return result;
     }, [data, searchQuery, typeFilter]);
@@ -166,7 +173,8 @@ export default function AllUsersPage() {
         >
             <div className="h-full flex flex-col space-y-4">
                 {/* Toolbar */}
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between shrink-0 bg-card p-4 rounded-xl border border-border">
+                {/* Toolbar */}
+                <div className="flex flex-col md:flex-row gap-4 items-center shrink-0">
                     <div className="relative w-full md:w-96">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
@@ -178,19 +186,17 @@ export default function AllUsersPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                        <Filter size={16} className="text-muted-foreground shrink-0" />
-                        <span className="text-sm font-medium text-muted-foreground shrink-0">Show:</span>
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                        <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-border">
                             {(['all', 'staff', 'customer', 'vendor'] as const).map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setTypeFilter(t)}
                                     className={cn(
-                                        "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize whitespace-nowrap",
+                                        "px-4 py-1.5 text-sm font-medium transition-colors capitalize whitespace-nowrap rounded-md",
                                         typeFilter === t
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                     )}
                                 >
                                     {t}

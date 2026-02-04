@@ -64,7 +64,7 @@ export function AllUsersTable({ data }: AllUsersTableProps) {
 
         switch (type) {
             case 'staff':
-                badge = <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"><Shield size={10} /> Staff</span>;
+                badge = <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"><UserCog size={10} /> Staff</span>;
                 break;
             case 'vendor':
                 badge = <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"><Briefcase size={10} /> Vendor</span>;
