@@ -162,11 +162,7 @@ export default function AllUsersPage() {
             title="All Users"
             description=" comprehensive view of all people associated with your organization."
             icon={Users}
-            stats={[
-                { label: "Total Users", value: data.length.toString(), icon: Users },
-                { label: "Staff", value: data.filter(u => u.type === 'staff').length.toString(), icon: Shield },
-                { label: "Customers", value: data.filter(u => u.type === 'customer').length.toString(), icon: Users },
-            ]}
+
             className="flex flex-col"
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
