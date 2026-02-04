@@ -45,6 +45,10 @@ export function ColumnTwo({
 
         const fetchSmartData = async () => {
             setIsLoadingSmartData(true);
+            console.log("DEBUG [ColumnTwo]: fetchSmartData starting", {
+                transportation_route_id: availability.transportation_route_id
+            });
+
             try {
                 // 1. Fetch Hotels
                 const { data: hotelsData } = await supabase.from('hotels' as any).select('id, name, pickup_point_id').eq('organization_id', effectiveOrganizationId).order('name');
@@ -56,12 +60,21 @@ export function ColumnTwo({
 
                 // 3. Fetch Schedule Stops if route exists
                 if (availability.transportation_route_id) {
-                    // Assumption: route_id maps to schedule_id
-                    const { data: stopsData } = await supabase
+                    console.log("DEBUG [ColumnTwo]: Querying schedule_stops for schedule_id:", availability.transportation_route_id);
+                    const { data: stopsData, error: stopsError } = await supabase
                         .from('schedule_stops' as any)
                         .select('pickup_point_id, pickup_time')
                         .eq('schedule_id', availability.transportation_route_id);
-                    if (stopsData) setScheduleStops(stopsData);
+
+                    if (stopsError) {
+                        console.error("DEBUG [ColumnTwo]: schedule_stops query error:", stopsError);
+                    } else {
+                        console.log("DEBUG [ColumnTwo]: schedule_stops returned", stopsData?.length, "stops:", stopsData);
+                        if (stopsData) setScheduleStops(stopsData);
+                    }
+                } else {
+                    console.log("DEBUG [ColumnTwo]: No transportation_route_id on availability");
+                    setScheduleStops([]); // Clear if no route
                 }
             } catch (err) {
                 console.error("Error fetching smart pickup data", err);
@@ -73,13 +86,26 @@ export function ColumnTwo({
         fetchSmartData();
     }, [availability.transportation_route_id, effectiveOrganizationId]);
 
+
     const resolvePickupDetails = (hotelId: string) => {
+        console.log("DEBUG [ColumnTwo]: resolvePickupDetails called", { hotelId, scheduleStopsCount: scheduleStops.length });
         if (!hotelId) return null;
         const hotel = hotels.find(h => h.id === hotelId);
-        if (!hotel || !hotel.pickup_point_id) return null;
+        if (!hotel || !hotel.pickup_point_id) {
+            console.log("DEBUG [ColumnTwo]: Hotel not found or no pickup_point_id", { hotel });
+            return null;
+        }
 
         const pickupPoint = pickupPoints.find(p => p.id === hotel.pickup_point_id);
         const stop = scheduleStops.find(s => s.pickup_point_id === hotel.pickup_point_id);
+
+        console.log("DEBUG [ColumnTwo]: Pickup resolution", {
+            hotel_pickup_point_id: hotel.pickup_point_id,
+            pickupPointName: pickupPoint?.name,
+            stopFound: !!stop,
+            stopTime: stop?.pickup_time,
+            allStops: scheduleStops.map(s => ({ pp: s.pickup_point_id, time: s.pickup_time }))
+        });
 
         return {
             locationName: pickupPoint?.name || "Unknown Location",

@@ -185,7 +185,10 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                     .select(`
                         id, status, pax_count, pax_breakdown, option_values, 
                         payment_status, amount_paid, total_amount, voucher_numbers, confirmation_number, notes, check_in_status_id,
-                        customers!inner(name, email, phone),
+                        customers!inner(
+                            id,
+                            users!inner(name, email, phone_number)
+                        ),
                         availabilities!inner(
                             start_date, 
                             start_time, 
@@ -215,9 +218,9 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                         confirmation_number: b.confirmation_number || "",
                         notes: b.notes || "",
                         check_in_status_id: b.check_in_status_id || null,
-                        customer_name: b.customers?.name || "Unknown",
-                        customer_email: b.customers?.email || "",
-                        customer_phone: b.customers?.phone || "",
+                        customer_name: b.customers?.users?.name || "Unknown",
+                        customer_email: b.customers?.users?.email || "",
+                        customer_phone: b.customers?.users?.phone_number || "",
                         start_date: b.availabilities?.start_date,
                         start_time: b.availabilities?.start_time,
                         transportation_route_id: b.availabilities?.transportation_route_id,

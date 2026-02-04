@@ -18,7 +18,13 @@ export default function PickupPointsPage() {
     const [editingItem, setEditingItem] = useState<any>(null);
 
     const fetchPoints = useCallback(async () => {
-        if (!effectiveOrganizationId) return;
+        console.log("Fetching points. effectiveOrganizationId:", effectiveOrganizationId);
+        if (!effectiveOrganizationId) {
+            console.warn("No Organization ID selected. Aborting fetch.");
+            setPoints([]); // Clear points if no org
+            setIsLoading(false); // Stop loading
+            return;
+        }
         setIsLoading(true);
         try {
             const { data, error } = await supabase

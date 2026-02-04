@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Handshake, MapPin, Phone, Mail, FileText } from "lucide-react";
+import { Edit2, Trash2, ArrowUpDown, ArrowUp, ArrowDown, MapPin, Phone, Mail, FileText, User } from "lucide-react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
 interface Vendor {
     id: string;
     name: string;
+    contact_name?: string | null;
     address: string;
     city?: string;
     state?: string;
@@ -99,14 +100,122 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-muted-foreground">
-                        {sortedData.map((v) => (
-                            <tr key={v.id} className="hover:bg-muted/50 transition-colors group">
-                                <td className="px-6 py-4 align-middle font-medium text-foreground">
-                                    {v.name}
-                                </td>
-                                <td className="px-6 py-4 align-middle truncate max-w-xs" title={v.address || ""}>
-                                    <div className="flex items-start gap-2 text-muted-foreground">
-                                        <MapPin size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
+                        {sortedData.map((v, index) => {
+                            if (!v.id) console.warn("Vendor missing ID:", v);
+                            const rowKey = v.id || `vendor-${index}`;
+                            return (
+                                <tr key={rowKey} className="hover:bg-muted/50 transition-colors group">
+                                    <td className="px-6 py-4 align-middle font-medium text-foreground">
+                                        <div className="flex flex-col">
+                                            <span>{v.name}</span>
+                                            {v.contact_name && (
+                                                <span className="text-xs text-muted-foreground font-normal flex items-center gap-1 mt-0.5">
+                                                    <User size={10} /> {v.contact_name}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 align-middle truncate max-w-xs" title={v.address || ""}>
+                                        <div className="flex items-start gap-2 text-muted-foreground">
+                                            <MapPin size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
+                                            <div className="flex flex-col">
+                                                <span>{v.address || "—"}</span>
+                                                {(v.city || v.state || v.zip_code) && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {[v.city, v.state].filter(Boolean).join(", ")} {v.zip_code}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 align-middle">
+                                        <span className="flex items-center gap-2 text-muted-foreground">
+                                            <Phone size={14} className="shrink-0 text-muted-foreground" />
+                                            {formatPhoneNumber(v.phone)}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 align-middle">
+                                        <span className="flex items-center gap-2 text-muted-foreground">
+                                            <Mail size={14} className="shrink-0 text-muted-foreground" />
+                                            {v.email || "—"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 align-middle">
+                                        <span className="flex items-center gap-2 text-muted-foreground">
+                                            <FileText size={14} className="shrink-0 text-muted-foreground" />
+                                            {v.ein_number || "—"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 align-middle border-l border-border">
+                                        <div className="flex items-center gap-2 justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onEdit(v);
+                                                }}
+                                                className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDeletingItem(v);
+                                                }}
+                                                className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4 p-4">
+                    {sortedData.map((v, index) => {
+                        const rowKey = v.id || `vendor-mobile-${index}`;
+                        return (
+                            <div key={rowKey} className="bg-card border border-border rounded-xl p-4 space-y-4">
+                                {/* Header */}
+                                <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-foreground leading-tight">
+                                            {v.name}
+                                        </h3>
+                                        {v.contact_name && (
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                                <User size={12} />
+                                                {v.contact_name}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <button
+                                            onClick={() => onEdit(v)}
+                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => setDeletingItem(v)}
+                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Body Grid */}
+                                <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
+                                    <div className="text-muted-foreground">Address</div>
+                                    <div className="text-muted-foreground truncate flex items-start gap-2">
+                                        <MapPin size={14} className="mt-0.5 shrink-0" />
                                         <div className="flex flex-col">
                                             <span>{v.address || "—"}</span>
                                             {(v.city || v.state || v.zip_code) && (
@@ -116,114 +225,28 @@ export function VendorsTable({ data, onEdit, onDelete }: VendorsTableProps) {
                                             )}
                                         </div>
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 align-middle">
-                                    <span className="flex items-center gap-2 text-muted-foreground">
-                                        <Phone size={14} className="shrink-0 text-muted-foreground" />
+
+                                    <div className="text-muted-foreground">Phone</div>
+                                    <div className="text-muted-foreground flex items-center gap-2">
+                                        <Phone size={14} />
                                         {formatPhoneNumber(v.phone)}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 align-middle">
-                                    <span className="flex items-center gap-2 text-muted-foreground">
-                                        <Mail size={14} className="shrink-0 text-muted-foreground" />
+                                    </div>
+
+                                    <div className="text-muted-foreground">Email</div>
+                                    <div className="text-muted-foreground text-xs truncate flex items-center gap-2">
+                                        <Mail size={14} />
                                         {v.email || "—"}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 align-middle">
-                                    <span className="flex items-center gap-2 text-muted-foreground">
-                                        <FileText size={14} className="shrink-0 text-muted-foreground" />
+                                    </div>
+
+                                    <div className="text-muted-foreground">EIN</div>
+                                    <div className="text-muted-foreground flex items-center gap-2">
+                                        <FileText size={14} />
                                         {v.ein_number || "—"}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 align-middle border-l border-border">
-                                    <div className="flex items-center gap-2 justify-end">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onEdit(v);
-                                            }}
-                                            className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setDeletingItem(v);
-                                            }}
-                                            className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                {/* Mobile Card View */}
-                <div className="md:hidden space-y-4 p-4">
-                    {sortedData.map((v) => (
-                        <div key={v.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
-                            {/* Header */}
-                            <div className="flex items-start justify-between gap-4 border-b border-border pb-3">
-                                <h3 className="text-lg font-bold text-foreground leading-tight">
-                                    {v.name}
-                                </h3>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <button
-                                        onClick={() => onEdit(v)}
-                                        className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
-                                    >
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => setDeletingItem(v)}
-                                        className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Body Grid */}
-                            <div className="grid grid-cols-[1fr_2fr] gap-x-4 gap-y-3 text-sm">
-                                <div className="text-muted-foreground">Address</div>
-                                <div className="text-muted-foreground truncate flex items-start gap-2">
-                                    <MapPin size={14} className="mt-0.5 shrink-0" />
-                                    <div className="flex flex-col">
-                                        <span>{v.address || "—"}</span>
-                                        {(v.city || v.state || v.zip_code) && (
-                                            <span className="text-xs text-muted-foreground">
-                                                {[v.city, v.state].filter(Boolean).join(", ")} {v.zip_code}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
-
-                                <div className="text-muted-foreground">Phone</div>
-                                <div className="text-muted-foreground flex items-center gap-2">
-                                    <Phone size={14} />
-                                    {formatPhoneNumber(v.phone)}
-                                </div>
-
-                                <div className="text-muted-foreground">Email</div>
-                                <div className="text-muted-foreground text-xs truncate flex items-center gap-2">
-                                    <Mail size={14} />
-                                    {v.email || "—"}
-                                </div>
-
-                                <div className="text-muted-foreground">EIN</div>
-                                <div className="text-muted-foreground flex items-center gap-2">
-                                    <FileText size={14} />
-                                    {v.ein_number || "—"}
-                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

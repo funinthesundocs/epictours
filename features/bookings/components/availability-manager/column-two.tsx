@@ -140,14 +140,25 @@ export function ColumnTwo({ availability, onBookingClick, onManifestClick }: Col
         const summary: Record<string, number> = {};
         activeBookings.forEach(b => {
             if (b.pax_breakdown) {
-                Object.entries(b.pax_breakdown).forEach(([typeId, count]) => {
-                    summary[typeId] = (summary[typeId] || 0) + (count as number);
-                });
+                // Handle if pax_breakdown is an array (e.g., [{name, type}...]) vs object ({typeId: count})
+                if (Array.isArray(b.pax_breakdown)) {
+                    // Array format - just count total, can't categorize by type
+                    return;
+                }
+                // Object format - expected { customer_type_id: count }
+                if (typeof b.pax_breakdown === 'object' && b.pax_breakdown !== null) {
+                    Object.entries(b.pax_breakdown).forEach(([typeId, count]) => {
+                        if (typeof count === 'number') {
+                            summary[typeId] = (summary[typeId] || 0) + count;
+                        }
+                    });
+                }
             }
         });
-        return Object.entries(summary).map(([typeId, count]) =>
+        const summaryStr = Object.entries(summary).map(([typeId, count]) =>
             `${count} ${customerTypeMap[typeId] || 'Pax'}`
-        ).join(', ') || `${totalBooked} Pax`;
+        ).join(', ');
+        return summaryStr || `${totalBooked} Pax`;
     };
 
     if (isLoading) {

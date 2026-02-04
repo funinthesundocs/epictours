@@ -243,11 +243,21 @@ export function BookingDesk({ isOpen, onClose, onSuccess, availability, editingB
                     }
 
                     // Populate pax breakdown (or fallback to simple pax_count)
-                    if (booking.pax_breakdown && Object.keys(booking.pax_breakdown).length > 0) {
-                        console.log("DEBUG: Using pax_breakdown:", booking.pax_breakdown);
-                        setPaxCounts(booking.pax_breakdown);
+                    // Handle both formats: object {typeId: count} or array [{name, type}...]
+                    if (booking.pax_breakdown && !Array.isArray(booking.pax_breakdown) && Object.keys(booking.pax_breakdown).length > 0) {
+                        // Valid object format - use directly
+                        const isValidFormat = Object.values(booking.pax_breakdown).every(v => typeof v === 'number');
+                        if (isValidFormat) {
+                            console.log("DEBUG: Using pax_breakdown:", booking.pax_breakdown);
+                            setPaxCounts(booking.pax_breakdown);
+                        } else {
+                            // Object but values aren't numbers - fallback to pax_count
+                            console.log("DEBUG: pax_breakdown has invalid values, using pax_count");
+                            setPendingPaxCount(booking.pax_count || 0);
+                            waitingForPaxMap = true;
+                        }
                     } else if (booking.pax_count && booking.pax_count > 0) {
-                        // Store pending pax count - will be mapped when rates load
+                        // Array format or no breakdown - use pax_count
                         console.log("DEBUG: Setting pending pax_count:", booking.pax_count);
                         setPendingPaxCount(booking.pax_count);
                         waitingForPaxMap = true;

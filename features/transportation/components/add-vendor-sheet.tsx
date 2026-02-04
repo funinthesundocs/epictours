@@ -186,8 +186,8 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
             if (initialData) {
                 reset({
                     name: initialData.name,
-                    full_name: "", // We don't have this on vendor yet, unless we fetch linked user
-                    nickname: "", // Same as above
+                    full_name: initialData.contact_name || initialData.user?.name || "", // Pre-fill Contact Name
+                    nickname: initialData.nickname || "", // Same as above
                     address: initialData.address || "",
                     city: initialData.city || "",
                     state: initialData.state || "",
@@ -226,7 +226,12 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
         setIsSubmitting(true);
         try {
             // Strip formatting and create payload (no name/email/phone - those go to users table)
+            // UPDATE: We DO want 'name' (Business Name) on the vendors table!
             const payload: Record<string, any> = {
+                name: data.name, // Save Business Name
+                contact_name: data.full_name || null, // Save Contact Person Name
+                email: data.email || null, // Save Company Email
+                phone: data.phone?.replace(/\D/g, "") || null, // Save Company Phone
                 address: data.address || null,
                 city: data.city || null,
                 state: data.state || null,
@@ -319,16 +324,22 @@ export function AddVendorSheet({ isOpen, onClose, onSuccess, initialData }: AddV
                     .eq("id", initialData.id);
                 if (error) throw error;
             } else {
-                const { error } = await supabase
+                const { data: newVendor, error } = await supabase
                     .from("vendors")
-                    .insert([{ ...payload, organization_id: effectiveOrganizationId }] as any);
+                    .insert([{ ...payload, organization_id: effectiveOrganizationId }] as any)
+                    .select()
+                    .single();
+
                 if (error) throw error;
+                console.log("Newly created vendor:", newVendor);
             }
             onSuccess();
             onClose();
         } catch (err) {
             console.error("Error saving vendor:", err);
-            toast.error("Failed to save vendor.");
+            console.error("Error details:", JSON.stringify(err, null, 2));
+            // console.log("Payload was:", payload); // Payload isn't available in catch block scope easily without moving it
+            toast.error("Failed to save vendor. Check console for details.");
         } finally {
             setIsSubmitting(false);
         }

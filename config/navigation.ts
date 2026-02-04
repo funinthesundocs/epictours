@@ -104,11 +104,11 @@ export const navigation: NavSection[] = [
                 icon: Bus,
                 requiredModule: "bookings",
                 children: [
-                    { title: "Vehicles", href: "/booking/transportation/vehicles", icon: Bus, requiredModule: "bookings" },
-                    { title: "Vendors", href: "/booking/transportation/vendors", icon: Handshake, requiredModule: "bookings" },
-                    { title: "Pickup Points", href: "/booking/transportation/pickup-points", icon: MapPin, requiredModule: "bookings" },
-                    { title: "Hotel List", href: "/booking/transportation/hotels", icon: Building2, requiredModule: "bookings" },
-                    { title: "Schedules", href: "/booking/transportation/schedules", icon: CalendarClock, requiredModule: "bookings" }
+                    { title: "Vehicles", href: "/booking/transportation/vehicles", icon: Bus, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Vendors", href: "/booking/transportation/vendors", icon: Handshake, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Pickup Points", href: "/booking/transportation/pickup-points", icon: MapPin, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Hotel List", href: "/booking/transportation/hotels", icon: Building2, requiredModule: "bookings", requiresOrgContext: true },
+                    { title: "Schedules", href: "/booking/transportation/schedules", icon: CalendarClock, requiredModule: "bookings", requiresOrgContext: true }
                 ]
             },
             {
@@ -165,12 +165,13 @@ export const navigation: NavSection[] = [
             { title: "Organization Profile", href: "/settings/organization", icon: Building2, organizationAdminOnly: true, requiresOrgContext: true },
             {
                 title: "Users",
-                href: "/settings/users",
+                href: "/settings/staff",
                 icon: UserCog,
                 organizationAdminOnly: true,
                 requiresOrgContext: true,
                 children: [
-                    { title: "Staff", href: "/settings/users", icon: Users, requiresOrgContext: true },
+                    { title: "All Users", href: "/settings/all-users", icon: Users, requiresOrgContext: true },
+                    { title: "Staff", href: "/settings/staff", icon: UserCog, requiresOrgContext: true },
                     { title: "Roles & Permissions", href: "/settings/permissions", icon: Shield, organizationAdminOnly: true, requiresOrgContext: true },
                     { title: "Partners & Affiliates", href: "/settings/partners", icon: Handshake, organizationAdminOnly: true, requiresOrgContext: true }
                 ]

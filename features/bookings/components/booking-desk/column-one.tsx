@@ -148,13 +148,13 @@ export function ColumnOne({
                                 <div>
                                     <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Capacity</div>
                                     <div className="text-foreground font-medium">
-                                        {(availability.booked_count || 0) + Object.values(paxCounts).reduce((a, b) => a + b, 0)} / {availability.max_capacity} Pax
+                                        {(Number(availability.booked_count) || 0) + Object.values(paxCounts).reduce((a, b) => a + (Number(b) || 0), 0)} / {availability.max_capacity} Pax
                                     </div>
                                 </div>
                                 <div>
                                     <div className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Remaining</div>
-                                    <div className={`font-medium ${Math.max(0, availability.max_capacity - (availability.booked_count || 0) - Object.values(paxCounts).reduce((a, b) => a + b, 0)) <= 5 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                                        {Math.max(0, availability.max_capacity - (availability.booked_count || 0) - Object.values(paxCounts).reduce((a, b) => a + b, 0))} Pax
+                                    <div className={`font-medium ${Math.max(0, (Number(availability.max_capacity) || 0) - (Number(availability.booked_count) || 0) - Object.values(paxCounts).reduce((a, b) => a + (Number(b) || 0), 0)) <= 5 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                        {Math.max(0, (Number(availability.max_capacity) || 0) - (Number(availability.booked_count) || 0) - Object.values(paxCounts).reduce((a, b) => a + (Number(b) || 0), 0))} Pax
                                     </div>
                                 </div>
                             </div>

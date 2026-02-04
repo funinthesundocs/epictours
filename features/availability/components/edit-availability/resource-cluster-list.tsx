@@ -241,7 +241,12 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 <CustomSelect
                                     value={newCluster.driver_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, driver_id: val })}
-                                    options={[{ value: "", label: "No Driver" }, ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))]}
+                                    options={[
+                                        { value: "", label: "No Driver" },
+                                        ...staff
+                                            .filter(s => s.role?.name?.toLowerCase().includes("driver"))
+                                            .map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                    ]}
                                     placeholder="Select Driver..."
                                 />
                             </div>
@@ -251,7 +256,12 @@ export function ResourceClusterList({ assignments, onChange, vehicles, routes, s
                                 <CustomSelect
                                     value={newCluster.guide_id || ""}
                                     onChange={(val) => setNewCluster({ ...newCluster, guide_id: val })}
-                                    options={[{ value: "", label: "No Guide" }, ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))]}
+                                    options={[
+                                        { value: "", label: "No Guide" },
+                                        ...staff
+                                            .filter(s => s.role?.name?.toLowerCase().includes("guide"))
+                                            .map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                    ]}
                                     placeholder="Select Guide..."
                                 />
                             </div>

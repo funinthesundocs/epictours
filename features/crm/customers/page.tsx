@@ -52,14 +52,15 @@ export function CustomersPage() {
 
             let query = supabase
                 .from('customers')
-                .select('*, user:users(name, email, phone_number)', { count: 'exact' })
+                .select('*, user:users!inner(name, email, phone_number)', { count: 'exact' })
                 .eq('organization_id', effectiveOrganizationId);
 
             // Text Search
             if (searchQuery) {
                 const q = searchQuery.replace(/[(),]/g, " ").trim();
                 if (q) {
-                    query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,status.ilike.%${q}%,total_value.ilike.%${q}%,metadata->>hotel.ilike.%${q}%,metadata->>source.ilike.%${q}%,preferences->>preferred_messaging_app.ilike.%${q}%`);
+                    // Search on related Users table
+                    query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone_number.ilike.%${q}%`, { foreignTable: 'users' });
                 }
             }
 

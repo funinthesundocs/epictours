@@ -230,7 +230,7 @@ export function BulkEditSheet({
 
                 // Fetch Roles explicitly to avoid Join issues
                 const { data: rolesData } = await supabase
-                    .from("roles" as any)
+                    .from("staff_positions" as any)
                     .select("id, name");
                 const roleMap = new Map((rolesData as any[] || []).map(r => [r.id, r.name]));
 
@@ -246,7 +246,7 @@ export function BulkEditSheet({
                 }
 
                 const mappedStaff = (staffData || []).map((s: any) => {
-                    const rName = s.role_id ? roleMap.get(s.role_id) : null;
+                    const rName = s.position_id ? roleMap.get(s.position_id) : (s.role_id ? roleMap.get(s.role_id) : null);
                     // Provide name from user link if missing on staff
                     const displayName = s.user?.name || s.name || 'Unknown Staff';
                     return { ...s, name: displayName, role: { name: rName } };
@@ -1668,7 +1668,9 @@ export function BulkEditSheet({
                                                                 onChange={(val) => setValues(prev => ({ ...prev, driver_id: val }))}
                                                                 options={[
                                                                     { value: '', label: 'None' },
-                                                                    ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                                                    ...staff
+                                                                        .filter(s => s.role?.name?.toLowerCase().includes("driver"))
+                                                                        .map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
                                                                 ]}
                                                                 placeholder="Select driver..."
                                                             />
@@ -1681,7 +1683,9 @@ export function BulkEditSheet({
                                                                 onChange={(val) => setValues(prev => ({ ...prev, guide_id: val }))}
                                                                 options={[
                                                                     { value: '', label: 'None' },
-                                                                    ...staff.map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
+                                                                    ...staff
+                                                                        .filter(s => s.role?.name?.toLowerCase().includes("guide"))
+                                                                        .map((s: any) => ({ value: s.id, label: s.name || s.user?.email || 'Unknown Staff' }))
                                                                 ]}
                                                                 placeholder="Select guide..."
                                                             />
