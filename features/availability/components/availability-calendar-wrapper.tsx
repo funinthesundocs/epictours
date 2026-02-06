@@ -99,7 +99,7 @@ export function AvailabilityCalendarWrapper() {
 
     const handleHeaderCreate = () => {
         const currentExpId = experiences.find(e => e.name === selectedExperience)?.id;
-        handleCreateEvent(format(currentDate, 'yyyy-MM-dd'), currentExpId);
+        handleCreateEvent(format(currentDate, 'yyyy-MM-dd'), currentExpId === "all" ? undefined : currentExpId);
     };
 
     if (isLoading) {

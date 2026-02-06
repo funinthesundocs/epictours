@@ -56,8 +56,10 @@ export function Sidebar() {
     const platformAdminSection = navigation.find(section => section.title === "Platform Admin");
 
     // Accordion State
-    const [openSection, setOpenSection] = useState<string | null>(() => {
-        // Find which section should be open based on current path
+    const [openSection, setOpenSection] = useState<string | null>(null);
+
+    // Effect: Update open section when pathname changes
+    useEffect(() => {
         const activeSection = navigation.find((section: NavSection) =>
             section.title &&
             section.items.some(item =>
@@ -66,8 +68,10 @@ export function Sidebar() {
                 (item.children && item.children.some(child => pathname.startsWith(child.href)))
             )
         );
-        return activeSection?.title || null;
-    });
+        if (activeSection?.title) {
+            setOpenSection(activeSection.title);
+        }
+    }, [pathname, navigation]);
 
     const toggleSection = (title: string) => {
         if (isCollapsed) return; // Disable accordion when collapsed

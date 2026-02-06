@@ -215,6 +215,7 @@ export function EditAvailabilitySheet({
             reset({
                 ...defaultState, // Apply defaults first
                 ...safeData,     // Override with initialData (if present)
+                experience_id: safeData.experience_id === "all" ? null : safeData.experience_id, // Sanitize "all"
                 start_date: safeData.start_date || selectedDate || "",
                 // Coerce numbers to strings for 'isDirty' compatibility with HTML inputs
                 max_capacity: safeData.max_capacity !== undefined && safeData.max_capacity !== null ? String(safeData.max_capacity) : "0",
