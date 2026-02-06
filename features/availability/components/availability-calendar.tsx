@@ -198,7 +198,7 @@ export function AvailabilityCalendar({
 
             let query = supabase
                 .from('availabilities' as any)
-                .select('*, bookings:bookings(pax_count, status)')
+                .select('*, bookings:bookings(pax_count, status), experience:experiences(short_code)')
                 .eq('organization_id', effectiveOrganizationId)
                 .gte('start_date', format(startOfMonth, 'yyyy-MM-dd'))
                 .lte('start_date', format(endOfMonth, 'yyyy-MM-dd'))
@@ -232,7 +232,8 @@ export function AvailabilityCalendar({
                         booking_records_count: bookingRecords,
                         staff_display: item.staff_ids?.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || "",
                         route_name: routeMap[item.transportation_route_id] || "",
-                        vehicle_name: vehicleMap[item.vehicle_id] || ""
+                        vehicle_name: vehicleMap[item.vehicle_id] || "",
+                        experience_short_code: item.experience?.short_code
                     };
                 });
                 setAvailabilities(enriched);
@@ -402,7 +403,7 @@ export function AvailabilityCalendar({
                             onClick={() => setViewMode('calendar')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'calendar' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                "text-muted-foreground hover:text-foreground"
                             )}
                             title="Calendar View"
                         >
@@ -412,7 +413,7 @@ export function AvailabilityCalendar({
                             onClick={() => setViewMode('list')}
                             className={cn(
                                 "p-1.5 rounded-md transition-all",
-                                viewMode === 'list' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                "text-muted-foreground hover:text-foreground"
                             )}
                             title="List View"
                         >
@@ -628,7 +629,20 @@ function MonthView({
                                     : null;
                                 const isToday = isCurrentMonth && dayNumber === today.getDate();
                                 const daysEvents = isValidDay && cellDateString
-                                    ? availabilities.filter(a => a.start_date === cellDateString)
+                                    ? availabilities
+                                        .filter(a => a.start_date === cellDateString)
+                                        .sort((a, b) => {
+                                            // Primary Sort: Experience Aborth Code (Clustering)
+                                            const expA = a.experience_short_code || "";
+                                            const expB = b.experience_short_code || "";
+                                            if (expA < expB) return -1;
+                                            if (expA > expB) return 1;
+
+                                            // Secondary Sort: Start Time
+                                            const timeA = a.start_time || "";
+                                            const timeB = b.start_time || "";
+                                            return timeA.localeCompare(timeB);
+                                        })
                                     : [];
 
                                 return (
@@ -645,39 +659,81 @@ function MonthView({
                                         {isValidDay && (
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
                                                 <span className={cn(
-                                                    "text-base font-bold block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
+                                                    "text-base font-medium block mb-2 transition-colors w-8 h-8 flex items-center justify-center rounded-full",
                                                     isToday ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground group-hover:text-foreground"
                                                 )}>{dayNumber}</span>
 
-                                                {daysEvents.map((event) => (
-                                                    <EventChip
-                                                        key={event.id}
-                                                        color="cyan"
-                                                        abbr={abbr}
-                                                        time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookings={`${event.booking_records_count || 0} Bookings`}
-                                                        cap={`${(event.max_capacity - (event.booked_count || 0))} / ${event.max_capacity} Capacity`}
-                                                        note={event.private_announcement}
-                                                        onClick={(e) => {
-                                                            e?.stopPropagation();
-                                                            if (!isSelectMode) {
-                                                                onEditEvent?.(event);
-                                                            }
-                                                        }}
-                                                        selected={selectedIds?.has(event.id)}
-                                                        onMouseDown={(e) => {
-                                                            if (isSelectMode) {
-                                                                e.stopPropagation();
-                                                                onSetIsDragging?.(true);
-                                                                onToggleSelection?.(event.id);
-                                                            }
-                                                        }}
-                                                        onMouseEnter={() => {
-                                                            if (isSelectMode && isDragging) {
-                                                                onToggleSelection?.(event.id, true);
-                                                            }
-                                                        }}
-                                                    />
+                                                {/* Group Events by Experience Short Code */}
+                                                {Object.entries(daysEvents.reduce((acc, event) => {
+                                                    const key = event.experience_short_code || "EXP";
+                                                    if (!acc[key]) acc[key] = [];
+                                                    acc[key].push(event);
+                                                    return acc;
+                                                }, {} as Record<string, typeof daysEvents>)).map(([shortCode, events]) => (
+                                                    <div key={shortCode} className="mb-2 bg-primary/50 dark:bg-primary/90 rounded-md overflow-hidden shadow-sm backdrop-blur-sm text-primary-foreground">
+                                                        {/* Group Header */}
+                                                        <div className="bg-primary dark:bg-black/20 px-2 py-1 text-[10px] font-bold text-primary-foreground/90 tracking-wider uppercase">
+                                                            {shortCode}
+                                                        </div>
+                                                        {/* Events List */}
+                                                        <div className="flex flex-col">
+                                                            {events.map((event) => {
+                                                                const timeText = event.duration_type === 'all_day'
+                                                                    ? 'All Day'
+                                                                    : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+
+                                                                return (
+                                                                    <div
+                                                                        key={event.id}
+                                                                        className={cn(
+                                                                            "group/item px-2 py-1.5 border-b border-white/70 dark:border-black/20 last:border-0 cursor-pointer transition-colors hover:bg-white/30 dark:hover:bg-black/20",
+                                                                            selectedIds?.has(event.id) && "bg-black/40 text-primary-foreground hover:bg-black/40"
+                                                                        )}
+                                                                        onClick={(e) => {
+                                                                            e?.stopPropagation();
+                                                                            if (!isSelectMode) {
+                                                                                onEditEvent?.(event);
+                                                                            }
+                                                                        }}
+                                                                        onMouseDown={(e) => {
+                                                                            if (isSelectMode) {
+                                                                                e.stopPropagation();
+                                                                                onSetIsDragging?.(true);
+                                                                                onToggleSelection?.(event.id);
+                                                                            }
+                                                                        }}
+                                                                        onMouseEnter={() => {
+                                                                            if (isSelectMode && isDragging) {
+                                                                                onToggleSelection?.(event.id, true);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {/* Line 1: Start Time */}
+                                                                        <div className={cn("text-xs font-medium leading-tight text-primary-foreground")}>
+                                                                            Start: {timeText}
+                                                                        </div>
+
+                                                                        {/* Line 2: Bookings & Capacity (Same Row, Justified) */}
+                                                                        <div className="flex items-center justify-between gap-2 mt-0.5">
+                                                                            <span className={cn("text-xs font-medium leading-tight text-primary-foreground")}>
+                                                                                {event.booking_records_count || 0} Bookings
+                                                                            </span>
+                                                                            <span className={cn("text-xs font-medium leading-tight text-right text-primary-foreground")}>
+                                                                                {(event.max_capacity - (event.booked_count || 0))}/{event.max_capacity} Capacity
+                                                                            </span>
+                                                                        </div>
+
+                                                                        {/* Line 3: Note (if exists) */}
+                                                                        {event.private_announcement && (
+                                                                            <div className={cn("text-xs font-medium italic mt-0.5 truncate opacity-90 text-primary-foreground/90")}>
+                                                                                {event.private_announcement}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
                                         )}
@@ -718,7 +774,7 @@ function ToolbarButton({
             onClick={onClick}
             disabled={disabled}
             className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all border hover:border-sidebar-accent",
+                "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium uppercase tracking-wider transition-all border hover:border-sidebar-accent",
                 primary
                     ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-glow"
                     : active
@@ -769,11 +825,11 @@ function EventChip({
             onMouseDown={onMouseDown}
             onMouseEnter={onMouseEnter}
         >
-            <span className="font-bold text-primary-foreground group-hover:text-primary-foreground text-xs leading-tight">{abbr}</span>
-            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">Start: {time}</span>
-            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">{bookings}</span>
-            <span className="text-primary-foreground group-hover:text-primary-foreground font-bold text-xs leading-tight">{cap}</span>
-            {note && <span className="text-primary-foreground group-hover:text-primary-foreground font-bold italic text-xs leading-tight mt-0.5">{note}</span>}
+            <span className="font-medium text-primary-foreground group-hover:text-primary-foreground text-xs leading-tight">{abbr}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-medium text-xs leading-tight">Start: {time}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-medium text-xs leading-tight">{bookings}</span>
+            <span className="text-primary-foreground group-hover:text-primary-foreground font-medium text-xs leading-tight">{cap}</span>
+            {note && <span className="text-primary-foreground group-hover:text-primary-foreground font-medium italic text-xs leading-tight mt-0.5">{note}</span>}
         </div>
     );
 }
@@ -816,7 +872,7 @@ function CustomSelect({
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-bold py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
+                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-medium py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
                     className
                 )}
             >
