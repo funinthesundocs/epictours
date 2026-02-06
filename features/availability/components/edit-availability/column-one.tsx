@@ -8,6 +8,7 @@ import { CustomSelect } from "@/components/ui/custom-select";
 import { TimePicker } from "@/components/ui/time-picker";
 import { format } from "date-fns";
 
+
 const DAYS_OF_WEEK = [
     { key: "SUN", label: "S" },
     { key: "MON", label: "M" },
@@ -25,12 +26,17 @@ const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
     </div>
 );
 
-export function ColumnOne() {
+interface ColumnOneProps {
+    experiences?: { id: string; name: string }[];
+}
+
+export function ColumnOne({ experiences = [] }: ColumnOneProps) {
     const { register, watch, setValue, formState: { errors } } = useFormContext();
 
     const isRepeating = watch("is_repeating");
     const durationType = watch("duration_type");
     const repeatDays = watch("repeat_days");
+    const experienceId = watch("experience_id");
 
     // Toggle day in repeat_days array
     const toggleDay = (day: string) => {
@@ -55,6 +61,20 @@ export function ColumnOne() {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <div className="p-6 space-y-8 animate-in fade-in duration-300 delay-100">
+
+                    {/* Experience Selector */}
+                    <div>
+                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Experience <span className="text-destructive">*</span></label>
+                        <CustomSelect
+                            value={experienceId}
+                            onChange={(val) => setValue("experience_id", val, { shouldValidate: true, shouldDirty: true })}
+                            options={experiences.map(e => ({ label: e.name, value: e.id }))}
+                            placeholder="Select Experience"
+                            className={cn(errors.experience_id && "border-destructive/50")}
+                        />
+                        {errors.experience_id && <p className="text-destructive text-xs mt-1">{errors.experience_id?.message as string}</p>}
+                    </div>
+
                     {/* Schedule Section */}
                     <div className="space-y-5">
                         <div>

@@ -443,13 +443,13 @@ export function BookingsCalendar({
                                 {/* Date Range Selectors - Double Decker */}
                                 <div className="flex flex-col gap-1 shrink-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider w-10">From</span>
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider w-10">From</span>
                                         <CustomSelect value={listStartDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listStartDate); d.setMonth(val); setListStartDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listStartDate.getDate()} options={Array.from({ length: new Date(listStartDate.getFullYear(), listStartDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listStartDate); d.setDate(val); setListStartDate(d); }} className="w-[60px] text-xs" />
                                         <CustomSelect value={listStartDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listStartDate); d.setFullYear(val); setListStartDate(d); }} className="w-[80px] text-xs text-primary" />
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider w-10">To</span>
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider w-10">To</span>
                                         <CustomSelect value={listEndDate.getMonth()} options={monthNames.map((m, i) => ({ label: m, value: i }))} onChange={(val) => { const d = new Date(listEndDate); d.setMonth(val); setListEndDate(d); }} className="w-[80px] text-xs" />
                                         <CustomSelect value={listEndDate.getDate()} options={Array.from({ length: new Date(listEndDate.getFullYear(), listEndDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((d) => ({ label: d.toString(), value: d }))} onChange={(val) => { const d = new Date(listEndDate); d.setDate(val); setListEndDate(d); }} className="w-[60px] text-xs" />
                                         <CustomSelect value={listEndDate.getFullYear()} options={years.map((y) => ({ label: y.toString(), value: y }))} onChange={(val) => { const d = new Date(listEndDate); d.setFullYear(val); setListEndDate(d); }} className="w-[80px] text-xs text-primary" />
@@ -519,6 +519,85 @@ export function BookingsCalendar({
     );
 }
 
+
+function BookingEventRow({
+    event,
+    isSelected,
+    onClick
+}: {
+    event: Availability;
+    isSelected?: boolean;
+    onClick: (e: React.MouseEvent) => void;
+}) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const timeText = event.duration_type === 'all_day'
+        ? 'All Day'
+        : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    const openCount = event.max_capacity - (event.booked_count || 0);
+    const resources = [event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ");
+    const bookingRecordsCount = event.booking_records_count || 0;
+
+    return (
+        <div
+            className={cn(
+                "group/item px-2 py-1.5 border-b border-white/70 dark:border-black/20 last:border-0 cursor-pointer transition-colors hover:bg-white/30 dark:hover:bg-black/20",
+                isSelected && "bg-black/40 text-primary-foreground hover:bg-black/40"
+            )}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick(e);
+            }}
+        >
+            {/* Line 1: Start Time + Toggle */}
+            <div className="flex justify-between items-start w-full gap-2 relative">
+                <div className={cn("text-xs font-medium leading-tight text-primary-foreground")}>
+                    Start: {timeText}
+                </div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className="text-primary-foreground/80 hover:text-primary-foreground p-0.5 rounded hover:bg-primary/50 dark:hover:bg-primary/90 transition-colors shrink-0 -mt-1 -mr-1"
+                >
+                    <ChevronDown size={14} className={cn("transition-transform duration-200 stroke-[3]", isExpanded && "rotate-180")} />
+                </button>
+            </div>
+
+            {/* Line 2: Capacity Stats */}
+            <div className={cn("text-xs font-medium leading-tight text-primary-foreground mt-0.5 truncate")}>
+                {event.booked_count || 0}/{event.max_capacity} Capacity {openCount} Open
+            </div>
+
+            {/* Line 3: Note (if exists) */}
+            {event.private_announcement && (
+                <div className={cn("text-xs font-medium italic mt-0.5 truncate opacity-90 text-primary-foreground/90")}>
+                    {event.private_announcement}
+                </div>
+            )}
+
+            {/* Expanded Details */}
+            {isExpanded && (
+                <div className="mt-1 pt-1 w-full space-y-1 animate-in slide-in-from-top-1 fade-in duration-200">
+                    {/* Line 4: Booking Records */}
+                    <div className="text-xs font-medium text-primary-foreground/90">
+                        {bookingRecordsCount} Booking{bookingRecordsCount !== 1 && 's'}
+                    </div>
+                    {/* Line 5: Resources (Driver & Guide Only) */}
+                    {(event.driver_name || event.guide_name) && (
+                        <div className="text-xs font-medium text-primary-foreground/90 truncate">
+                            {[
+                                event.driver_name ? `Driver: ${event.driver_name}` : null,
+                                event.guide_name ? `Guide: ${event.guide_name}` : null
+                            ].filter(Boolean).join(" • ")}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function MonthView({
     currentDate,
     availabilities,
@@ -582,7 +661,22 @@ function MonthView({
                                 const isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
                                 const cellDateString = isValidDay ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}` : null;
                                 const isToday = isCurrentMonth && dayNumber === today.getDate();
-                                const daysEvents = isValidDay && cellDateString ? availabilities.filter(a => a.start_date === cellDateString) : [];
+                                const daysEvents = isValidDay && cellDateString
+                                    ? availabilities
+                                        .filter(a => a.start_date === cellDateString)
+                                        .sort((a, b) => {
+                                            // Primary Sort: Experience Short Code
+                                            const expA = a.experience_short_code || "EXP";
+                                            const expB = b.experience_short_code || "EXP";
+                                            if (expA < expB) return -1;
+                                            if (expA > expB) return 1;
+
+                                            // Secondary Sort: Start Time
+                                            const timeA = a.start_time || "";
+                                            const timeB = b.start_time || "";
+                                            return timeA.localeCompare(timeB);
+                                        })
+                                    : [];
 
                                 return (
                                     <td key={colIndex} className={cn(
@@ -591,23 +685,32 @@ function MonthView({
                                     )} style={{ minHeight: '160px', height: '160px' }}>
                                         {isValidDay && (
                                             <div className="flex flex-col pl-1 pt-1 gap-1">
-                                                <span className={cn("text-base font-bold block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground")}>{dayNumber}</span>
-                                                {daysEvents.map((event) => (
-                                                    <EventChip
-                                                        key={event.id}
-                                                        abbr={event.experience_short_code || "EXP"}
-                                                        time={event.duration_type === 'all_day' ? 'All Day' : new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                        bookedCount={event.booked_count || 0}
-                                                        maxCapacity={event.max_capacity}
-                                                        bookingRecordsCount={event.booking_records_count || 0}
-                                                        resources={[event.vehicle_name, event.driver_name, event.guide_name].filter(Boolean).join(", ")}
-                                                        onClick={(e) => {
-                                                            e?.stopPropagation();
-                                                            if (onEventClick) onEventClick(event, e);
-                                                        }}
-                                                        note={event.private_announcement}
-                                                        isSelected={selectedAvailabilityId === event.id}
-                                                    />
+                                                <span className={cn("text-base font-medium block mb-2 w-8 h-8 flex items-center justify-center rounded-full", isToday ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground")}>{dayNumber}</span>
+                                                {Object.entries(daysEvents.reduce((acc, event) => {
+                                                    const key = event.experience_short_code || "EXP";
+                                                    if (!acc[key]) acc[key] = [];
+                                                    acc[key].push(event);
+                                                    return acc;
+                                                }, {} as Record<string, typeof daysEvents>)).map(([shortCode, events]) => (
+                                                    <div key={shortCode} className="mb-2 bg-primary/50 dark:bg-primary/90 rounded-md overflow-hidden shadow-sm backdrop-blur-sm text-primary-foreground">
+                                                        {/* Group Header */}
+                                                        <div className="bg-primary dark:bg-black/20 px-2 py-1 text-[10px] font-bold text-primary-foreground/90 tracking-wider uppercase">
+                                                            {shortCode}
+                                                        </div>
+                                                        {/* Events List */}
+                                                        <div className="flex flex-col">
+                                                            {events.map((event) => (
+                                                                <BookingEventRow
+                                                                    key={event.id}
+                                                                    event={event}
+                                                                    isSelected={selectedAvailabilityId === event.id}
+                                                                    onClick={(e) => {
+                                                                        if (onEventClick) onEventClick(event, e);
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
                                         )}
@@ -640,7 +743,20 @@ function WeekView({
     // Helper to get events
     const getEventsForDay = (day: Date) => {
         const dateStr = format(day, "yyyy-MM-dd");
-        return availabilities.filter(a => a.start_date === dateStr);
+        return availabilities
+            .filter(a => a.start_date === dateStr)
+            .sort((a, b) => {
+                // Primary Sort: Experience Short Code
+                const expA = a.experience_short_code || "EXP";
+                const expB = b.experience_short_code || "EXP";
+                if (expA < expB) return -1;
+                if (expA > expB) return 1;
+
+                // Secondary Sort: Start Time
+                const timeA = a.start_time || "";
+                const timeB = b.start_time || "";
+                return timeA.localeCompare(timeB);
+            });
     };
 
     return (
@@ -656,11 +772,11 @@ function WeekView({
                             "flex-1 min-w-[220px] p-2 text-center transition-colors border-b border-border",
                             isDayToday ? "bg-primary/20 border-t-2 border-primary" : "bg-card backdrop-blur-sm"
                         )}>
-                            <div className="text-muted-foreground text-sm font-bold uppercase tracking-wider">{format(day, 'EEE')}</div>
+                            <div className="text-muted-foreground text-sm font-medium uppercase tracking-wider">{format(day, 'EEE')}</div>
                             <div className={cn("text-3xl font-black mt-0 tracking-tight", isDayToday ? "text-primary" : "text-foreground")}>
                                 {format(day, 'd')}
                             </div>
-                            <div className="mt-1 text-sm text-muted-foreground font-bold uppercase">
+                            <div className="mt-1 text-sm text-muted-foreground font-medium uppercase">
                                 {events.length} Event{events.length !== 1 && 's'}
                             </div>
                         </div>
@@ -862,7 +978,7 @@ function DailyView({
                             return (
                                 <div
                                     key={hourRaw}
-                                    className="absolute bottom-1 text-xs font-bold text-muted-foreground pl-1 border-l-2 border-border h-4"
+                                    className="absolute bottom-1 text-xs font-medium text-muted-foreground pl-1 border-l-2 border-border h-4"
                                     style={{ left: offset }}
                                 >
                                     {label}
@@ -903,7 +1019,7 @@ function DailyView({
                             className="absolute top-0 bottom-0 border-l-[2px] border-red-500/80 z-30 pointer-events-none"
                             style={{ left: 200 + (nowOffset * pixelsPerMinute) }}
                         >
-                            <div className="bg-red-500 text-black text-[9px] font-bold px-1 rounded absolute -top-1 -left-4">Now</div>
+                            <div className="bg-red-500 text-black text-[9px] font-medium px-1 rounded absolute -top-1 -left-4">Now</div>
                         </div>
                     )}
 
@@ -924,7 +1040,7 @@ function DailyView({
                                     <div className="sticky left-0 bg-background border-b border-border p-2 pl-4 flex items-center justify-between z-20 w-[200px] border-r border-border/50">
                                         <div className="flex flex-col">
                                             <span className="text-lg font-black text-foreground tracking-tight">{exp.short_code}</span>
-                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">{events.length} Trips</span>
+                                            <span className="text-[10px] text-muted-foreground uppercase font-medium">{events.length} Trips</span>
                                         </div>
                                     </div>
 
@@ -1076,7 +1192,7 @@ function CustomSelect({
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-bold py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
+                    "flex items-center justify-between gap-2 bg-muted/50 border border-border text-foreground text-lg font-medium py-1.5 px-3 rounded-lg hover:border-sidebar-accent transition-all min-w-[fit-content]",
                     className
                 )}
             >
@@ -1134,7 +1250,7 @@ function EventChip({
     const openCount = maxCapacity - bookedCount;
 
     // Uniform text class
-    const textClass = `font-bold text-xs leading-tight pointer-events-none ${isSelected ? 'text-primary-foreground' : 'text-primary-foreground group-hover/chip:text-primary-foreground'}`;
+    const textClass = `font-medium text-xs leading-tight pointer-events-none ${isSelected ? 'text-primary-foreground' : 'text-primary-foreground group-hover/chip:text-primary-foreground'}`;
 
     return (
         <div
@@ -1165,7 +1281,7 @@ function EventChip({
 
             {/* Line 2: Capacity Stats */}
             <div className={cn(textClass, "truncate w-full")}>
-                {bookedCount} / {maxCapacity} Capacity | {openCount} Open
+                {bookedCount}/{maxCapacity} Capacity | {openCount} Open
             </div>
 
             {/* Line 3: Private Note (Always visible if present) */}

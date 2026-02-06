@@ -20,7 +20,7 @@ import { useAuth } from "@/features/auth/auth-context";
 // Schema
 const AvailabilitySchema = z.object({
     id: z.string().optional(),
-    experience_id: z.string().optional().nullable(),
+    experience_id: z.string().min(1, "Experience is required"), // REQUIRED
     start_date: z.string().min(1, "Start date required"),
 
     // Repeat
@@ -77,6 +77,7 @@ export function EditAvailabilitySheet({
     const [isLoading, setIsLoading] = useState(true);
 
     // Reference data
+    const [experiences, setExperiences] = useState<{ id: string, name: string }[]>([]); // New State
     const [bookingSchedules, setBookingSchedules] = useState<{ id: string, name: string }[]>([]);
     const [pricingSchedules, setPricingSchedules] = useState<{ id: string, name: string }[]>([]);
     const [pricingVariations, setPricingVariations] = useState<{ id: string, name: string }[]>([]);
@@ -91,7 +92,7 @@ export function EditAvailabilitySheet({
         resolver: zodResolver(AvailabilitySchema) as any,
         defaultValues: {
             id: undefined,
-            experience_id: null,
+            experience_id: "", // Default to empty string for required validation
             start_date: "",
             is_repeating: false,
             repeat_days: [],
@@ -127,6 +128,7 @@ export function EditAvailabilitySheet({
             try {
                 // ... (existing fetches)
                 const [
+                    { data: exps }, // Fetch experiences
                     { data: bookings },
                     { data: pricing },
                     { data: variations },
@@ -135,6 +137,7 @@ export function EditAvailabilitySheet({
                     { data: staffData },
                     { data: rolesData } // Fetch roles separately
                 ] = await Promise.all([
+                    supabase.from("experiences" as any).select("id, name").order("name"), // Added
                     supabase.from("booking_option_schedules" as any).select("id, name").order("name"),
                     supabase.from("pricing_schedules" as any).select("id, name").order("name"),
                     supabase.from("pricing_variations" as any).select("id, name").order("sort_order"),
@@ -145,6 +148,17 @@ export function EditAvailabilitySheet({
                     supabase.from("staff_positions" as any).select("id, name")
                 ]);
 
+                // Deduplicate experiences by name
+                const uniqueExps = (exps as any[] || []).reduce((acc: any[], current) => {
+                    const x = acc.find(item => item.name === current.name);
+                    if (!x) {
+                        return acc.concat([current]);
+                    } else {
+                        return acc;
+                    }
+                }, []);
+
+                setExperiences(uniqueExps);
                 setBookingSchedules((bookings as any) || []);
                 setPricingSchedules((pricing as any) || []);
                 setPricingVariations((variations as any) || []);
@@ -197,6 +211,7 @@ export function EditAvailabilitySheet({
         if (!isOpen) return;
 
         const defaultState = {
+            experience_id: "", // Default required string
             start_date: selectedDate || "",
             is_repeating: false,
             duration_type: "all_day" as "all_day" | "time_range",
@@ -215,7 +230,7 @@ export function EditAvailabilitySheet({
             reset({
                 ...defaultState, // Apply defaults first
                 ...safeData,     // Override with initialData (if present)
-                experience_id: safeData.experience_id === "all" ? null : safeData.experience_id, // Sanitize "all"
+                experience_id: safeData.experience_id === "all" ? "" : (safeData.experience_id || ""), // Sanitize "all" to empty
                 start_date: safeData.start_date || selectedDate || "",
                 // Coerce numbers to strings for 'isDirty' compatibility with HTML inputs
                 max_capacity: safeData.max_capacity !== undefined && safeData.max_capacity !== null ? String(safeData.max_capacity) : "0",
@@ -363,7 +378,7 @@ export function EditAvailabilitySheet({
                             <div className="flex-1 grid grid-cols-[25fr_37.5fr_37.5fr] min-h-0 divide-x divide-border bg-transparent">
                                 {/* COLUMN 1: Schedule */}
                                 <div className="h-full overflow-hidden">
-                                    <ColumnOne />
+                                    <ColumnOne experiences={experiences} />
                                 </div>
 
                                 {/* COLUMN 2: Pricing & Resources */}
