@@ -565,8 +565,9 @@ function BookingEventRow({
             </div>
 
             {/* Line 2: Capacity Stats */}
-            <div className={cn("text-xs font-medium leading-tight text-primary-foreground mt-0.5 truncate")}>
-                {event.booked_count || 0}/{event.max_capacity} Capacity {openCount} Open
+            <div className={cn("text-xs font-medium leading-tight text-primary-foreground mt-0.5 flex justify-between items-center")}>
+                <span>{event.booked_count || 0}/{event.max_capacity} Capacity</span>
+                <span>{openCount} Open</span>
             </div>
 
             {/* Line 3: Note (if exists) */}
