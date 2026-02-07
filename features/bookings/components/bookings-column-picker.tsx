@@ -42,6 +42,8 @@ export const BOOKING_COLUMNS: BookingColumnConfig[] = [
     { key: "check_in_status", label: "Check-In", width: "150px", align: "center", category: "booking" },
     { key: "pickup_details", label: "Pickup", width: "180px", align: "left", category: "booking" },
     { key: "pax_count", label: "Pax", width: "60px", align: "center", category: "booking" },
+    { key: "agent", label: "Agent", width: "120px", align: "left", category: "booking" },
+    { key: "booking_source", label: "Source", width: "140px", align: "left", category: "booking" },
     { key: "voucher_numbers", label: "Vouchers", width: "120px", align: "left", category: "booking" },
     { key: "notes", label: "Notes", width: "200px", align: "left", category: "booking" },
 

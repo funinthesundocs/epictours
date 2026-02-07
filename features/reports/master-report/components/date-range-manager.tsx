@@ -33,11 +33,13 @@ interface DateRangeManagerProps {
     startDate: Date;
     endDate: Date;
     onRangeChange: (start: Date, end: Date) => void;
+    onPresetChange?: (presetName: string | null) => void;
+    activePreset?: string | null;
     className?: string;
 }
 
 // Built-in preset definitions
-const getBuiltInPresets = () => {
+export const getBuiltInPresets = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -125,14 +127,18 @@ const getBuiltInPresets = () => {
     ];
 };
 
-export function DateRangeManager({ startDate, endDate, onRangeChange, className }: DateRangeManagerProps) {
+export function DateRangeManager(props: DateRangeManagerProps) {
+    const { startDate, endDate, onRangeChange, onPresetChange, className } = props;
     const [isOpen, setIsOpen] = useState(false);
     const [customPresets, setCustomPresets] = useState<DateRangePreset[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [newPresetName, setNewPresetName] = useState("");
-    const [selectedPresetName, setSelectedPresetName] = useState<string | null>(null);
+    const [localSelectedPreset, setLocalSelectedPreset] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Use props.activePreset if provided, otherwise local state
+    const selectedPresetName = props.activePreset !== undefined ? props.activePreset : localSelectedPreset;
 
     const builtInPresets = getBuiltInPresets();
 
@@ -200,13 +206,15 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
     const handleSelectBuiltIn = (preset: { name: string; getRange: () => { start: Date; end: Date } }) => {
         const range = preset.getRange();
         onRangeChange(range.start, range.end);
-        setSelectedPresetName(preset.name);
+        if (onPresetChange) onPresetChange(preset.name);
+        setLocalSelectedPreset(preset.name);
         setIsOpen(false);
     };
 
     const handleSelectCustom = (preset: DateRangePreset) => {
         onRangeChange(new Date(preset.start_date), new Date(preset.end_date));
-        setSelectedPresetName(preset.name);
+        if (onPresetChange) onPresetChange(preset.name);
+        setLocalSelectedPreset(preset.name);
         setIsOpen(false);
     };
 
@@ -256,7 +264,8 @@ export function DateRangeManager({ startDate, endDate, onRangeChange, className 
                         {/* Custom Range Option */}
                         <button
                             onClick={() => {
-                                setSelectedPresetName("Custom Range");
+                                if (onPresetChange) onPresetChange("Custom Range");
+                                setLocalSelectedPreset("Custom Range");
                                 setIsOpen(false);
                             }}
                             className={cn(

@@ -13,6 +13,10 @@ export interface MasterReportRow {
     voucher_numbers: string | null;
     notes: string | null;
     booking_created_at: string;
+    agent_name: string | null;
+    booking_source: string | null;
+    check_in_status: string | null;
+    check_in_status_id?: string | null;
 
     // Customer fields
     customer_id: string;

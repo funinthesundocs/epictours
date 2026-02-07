@@ -34,6 +34,9 @@ interface ReportToolbarProps {
     onLoadPreset: (settings: PresetSettings) => void;
     // Export data
     exportData: MasterReportRow[];
+    // Dynamic date preset
+    activeDatePreset?: string | null;
+    onDatePresetChange?: (presetName: string | null) => void;
 }
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -57,7 +60,9 @@ export function ReportToolbar({
     onDateFilterTypeChange,
     currentPresetSettings,
     onLoadPreset,
-    exportData
+    exportData,
+    activeDatePreset,
+    onDatePresetChange
 }: ReportToolbarProps) {
     const hasActiveFilters = searchQuery.trim().length > 0;
 
@@ -115,6 +120,8 @@ export function ReportToolbar({
                     startDate={startDate}
                     endDate={endDate}
                     onRangeChange={handleDateRangeChange}
+                    activePreset={activeDatePreset}
+                    onPresetChange={onDatePresetChange}
                     className="w-[238px]"
                 />
             </div>

@@ -211,8 +211,8 @@ export function SortManager({ sortCriteria, onSortChange }: SortManagerProps) {
             // Remove if already active
             onSortChange(sortCriteria.filter(c => c.key !== key));
         } else {
-            // Add with default DESC
-            onSortChange([...sortCriteria, { key, direction: "desc" }]);
+            // Add with default ASC
+            onSortChange([...sortCriteria, { key, direction: "asc" }]);
         }
     };
 

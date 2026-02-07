@@ -381,6 +381,12 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
             case "notes":
                 return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm max-w-[150px] truncate", alignClass)} title={booking.notes}>{booking.notes || "-"}</td>;
 
+            case "agent":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.option_values?.agent || "-"}</td>;
+
+            case "booking_source":
+                return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>{booking.option_values?.booking_source || "-"}</td>;
+
             case "total_amount":
                 return <td key={columnKey} className={cn("px-6 py-4 text-foreground text-sm", alignClass)}>${booking.total_amount.toFixed(2)}</td>;
 
@@ -418,12 +424,24 @@ export function BookingsListTable({ startDate, endDate, searchQuery = "", onBook
                                 if (!searchQuery.trim()) return true;
                                 const q = searchQuery.toLowerCase();
                                 const pickupDetails = resolvePickupDetails(booking).toLowerCase();
+
+                                // Resolve Check-In Status Label
+                                const checkInStatus = checkInStatuses.find(s => s.id === booking.check_in_status_id);
+                                const statusLabel = checkInStatus?.status.toLowerCase() || "";
+
+                                // Safe Option Values
+                                const agent = (booking.option_values?.agent || "").toLowerCase();
+                                const source = (booking.option_values?.booking_source || "").toLowerCase();
+
                                 return (
                                     booking.customer_name.toLowerCase().includes(q) ||
                                     booking.customer_email.toLowerCase().includes(q) ||
                                     booking.customer_phone.toLowerCase().includes(q) ||
                                     booking.experience_short_code.toLowerCase().includes(q) ||
                                     booking.status.toLowerCase().includes(q) ||
+                                    statusLabel.includes(q) ||
+                                    agent.includes(q) ||
+                                    source.includes(q) ||
                                     booking.id.toLowerCase().includes(q) ||
                                     (booking.voucher_numbers || "").toLowerCase().includes(q) ||
                                     (booking.confirmation_number || "").toLowerCase().includes(q) ||

@@ -8,6 +8,8 @@ import { ReportToolbar } from "./components/report-toolbar";
 import { useColumnVisibility, REPORT_COLUMNS } from "./components/column-picker";
 import { SortCriteria } from "./components/sort-manager";
 import { PresetSettings } from "./components/preset-manager";
+import { getBuiltInPresets } from "./components/date-range-manager";
+import { startOfDay, endOfDay, parseISO } from "date-fns";
 import { Loader2, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -23,6 +25,7 @@ const MAX_RECORDS = 10000;
 export function MasterReportPage() {
     const { effectiveOrganizationId } = useAuth();
     const [data, setData] = useState<MasterReportRow[]>([]);
+    const [checkInStatuses, setCheckInStatuses] = useState<{ id: string; status: string; color: string }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -40,13 +43,14 @@ export function MasterReportPage() {
         d.setDate(d.getDate() + 30);
         return d;
     });
+    const [activeDatePreset, setActiveDatePreset] = useState<string | null>("Today"); // Default to Today preset
 
     // Date filter type state
     const [dateFilterType, setDateFilterType] = useState<"activity" | "booking">("activity");
 
     // Sort State - array for multi-level sorting
     const [sortCriteria, setSortCriteria] = useState<SortCriteria[]>([
-        { key: "start_date", direction: "desc" }
+        { key: "start_date", direction: "asc" }
     ]);
 
     // Column Filters State
@@ -154,13 +158,37 @@ export function MasterReportPage() {
         sortCriteria,
         columnFilters: Object.fromEntries(
             Object.entries(columnFilters).map(([k, v]) => [k, Array.from(v)])
-        )
-    }), [startDate, endDate, dateFilterType, searchQuery, visibleColumns, sortCriteria, columnFilters]);
+        ),
+        dateRangePreset: activeDatePreset
+    }), [startDate, endDate, dateFilterType, searchQuery, visibleColumns, sortCriteria, columnFilters, activeDatePreset]);
 
     // Handle loading a preset
     const handleLoadPreset = (settings: PresetSettings) => {
-        setStartDate(new Date(settings.startDate));
-        setEndDate(new Date(settings.endDate));
+        // Handle Dynamic Date Presets
+        if (settings.dateRangePreset && settings.dateRangePreset !== "Custom Range") {
+            const builtIn = getBuiltInPresets().find(p => p.name === settings.dateRangePreset);
+            if (builtIn && 'getRange' in builtIn) {
+                const { start, end } = builtIn.getRange();
+                setStartDate(start);
+                setEndDate(end);
+                setActiveDatePreset(settings.dateRangePreset);
+            } else {
+                // Fallback to saved static dates if preset not found
+                try {
+                    setStartDate(parseISO(settings.startDate));
+                    setEndDate(parseISO(settings.endDate));
+                    setActiveDatePreset(null);
+                } catch (e) { console.error("Error parsing dates", e); }
+            }
+        } else {
+            // Static dates
+            try {
+                setStartDate(parseISO(settings.startDate));
+                setEndDate(parseISO(settings.endDate));
+                setActiveDatePreset(null);
+            } catch (e) { console.error("Error parsing dates", e); }
+        }
+
         setDateFilterType(settings.dateFilterType);
         setSearchQuery(settings.searchQuery);
         reorderColumns(settings.visibleColumns);
@@ -171,6 +199,30 @@ export function MasterReportPage() {
             restoredFilters[key] = new Set(values);
         }
         setColumnFilters(restoredFilters);
+    };
+
+    const handleUpdateCheckInStatus = async (bookingId: string, statusId: string) => {
+        // Optimistic update
+        const statusMap = Object.fromEntries(checkInStatuses.map(s => [s.id, s.status]));
+        const previousData = [...data];
+
+        setData(prev => prev.map(row =>
+            row.booking_id === bookingId
+                ? { ...row, check_in_status_id: statusId, check_in_status: statusMap[statusId] || null }
+                : row
+        ));
+
+        // Background update
+        const { error } = await supabase
+            .from('bookings')
+            .update({ check_in_status_id: statusId === 'null' ? null : statusId })
+            .eq('id', bookingId);
+
+        if (error) {
+            // Revert on error
+            console.error("Failed to update check-in status:", error);
+            setData(previousData);
+        }
     };
 
     const fetchReportData = useCallback(async () => {
@@ -184,7 +236,7 @@ export function MasterReportPage() {
                 .from('bookings' as any)
                 .select(`
                     id, status, pax_count, total_amount, amount_paid, payment_status,
-                    voucher_numbers, notes, organization_id, confirmation_number, created_at, option_values,
+                    voucher_numbers, notes, organization_id, confirmation_number, created_at, option_values, check_in_status_id,
                     customers(id, status, total_value, metadata, preferences, user:users(name, email, phone_number)),
                     availabilities(
                         id, start_date, start_time, max_capacity, experience_id, transportation_route_id,
@@ -200,7 +252,9 @@ export function MasterReportPage() {
             let schedulesQuery = supabase.from('schedules' as any).select('id, name');
             let hotelsQuery = supabase.from('hotels' as any).select('id, name, pickup_point_id');
             let pickupPointsQuery = supabase.from('pickup_points' as any).select('id, name');
+
             let scheduleStopsQuery = supabase.from('schedule_stops' as any).select('schedule_id, pickup_point_id, pickup_time');
+            let checkInStatusesQuery = supabase.from('check_in_statuses' as any).select('id, status, color');
 
             // Apply organization filter if we have one
             if (effectiveOrganizationId) {
@@ -212,14 +266,15 @@ export function MasterReportPage() {
                 pickupPointsQuery = pickupPointsQuery.eq('organization_id', effectiveOrganizationId);
             }
 
-            const [bookingsRes, staffRes, vehiclesRes, routesRes, hotelsRes, pickupPointsRes, scheduleStopsRes] = await Promise.all([
+            const [bookingsRes, staffRes, vehiclesRes, routesRes, hotelsRes, pickupPointsRes, scheduleStopsRes, checkInStatusesRes] = await Promise.all([
                 bookingsQuery,
                 staffQuery,
                 vehiclesQuery,
                 schedulesQuery,
                 hotelsQuery,
                 pickupPointsQuery,
-                scheduleStopsQuery
+                scheduleStopsQuery,
+                checkInStatusesQuery
             ]);
 
             if (bookingsRes.error) throw bookingsRes.error;
@@ -265,6 +320,13 @@ export function MasterReportPage() {
                     }
                     scheduleStopsMap[stop.schedule_id][stop.pickup_point_id] = stop.pickup_time;
                 });
+            }
+
+            // Check-in status map
+            const checkInStatusMap: Record<string, string> = {};
+            if (checkInStatusesRes.data) {
+                setCheckInStatuses(checkInStatusesRes.data as any[]);
+                (checkInStatusesRes.data as any[]).forEach(s => { checkInStatusMap[s.id] = s.status; });
             }
 
             if (bookingsRes.data) {
@@ -320,6 +382,11 @@ export function MasterReportPage() {
                         }
                     }
 
+                    // Extract Agent and Source from option_values if present
+                    const agentName = (optionValues.agent as string) || null;
+                    const bookingSource = (optionValues.booking_source as string) || null;
+                    const checkInStatusLabel = b.check_in_status_id ? (checkInStatusMap[b.check_in_status_id] || null) : null;
+
                     return {
                         // Booking fields
                         booking_id: b.id,
@@ -333,6 +400,10 @@ export function MasterReportPage() {
                         voucher_numbers: b.voucher_numbers,
                         notes: b.notes,
                         booking_created_at: b.created_at,
+                        agent_name: agentName,
+                        booking_source: bookingSource,
+                        check_in_status: checkInStatusLabel,
+                        check_in_status_id: b.check_in_status_id || null,
 
                         // Customer fields - now from user relation
                         customer_id: customer.id || "",
@@ -453,7 +524,11 @@ export function MasterReportPage() {
             row.guide_name?.toLowerCase().includes(q) ||
             row.vehicle_name?.toLowerCase().includes(q) ||
             row.route_name?.toLowerCase().includes(q) ||
-            row.start_date.includes(q)
+            row.route_name?.toLowerCase().includes(q) ||
+            row.start_date.includes(q) ||
+            row.agent_name?.toLowerCase().includes(q) ||
+            row.booking_source?.toLowerCase().includes(q) ||
+            row.check_in_status?.toLowerCase().includes(q)
         );
     });
 
@@ -528,13 +603,15 @@ export function MasterReportPage() {
                     filteredRecords={fullyFilteredData.length}
                     startDate={startDate}
                     endDate={endDate}
-                    onStartDateChange={setStartDate}
-                    onEndDateChange={setEndDate}
+                    onStartDateChange={(d) => { setStartDate(d); setActiveDatePreset(null); }}
+                    onEndDateChange={(d) => { setEndDate(d); setActiveDatePreset(null); }}
                     dateFilterType={dateFilterType}
                     onDateFilterTypeChange={setDateFilterType}
                     currentPresetSettings={currentPresetSettings}
                     onLoadPreset={handleLoadPreset}
                     exportData={fullyFilteredData}
+                    activeDatePreset={activeDatePreset}
+                    onDatePresetChange={setActiveDatePreset}
                 />
             </div>
 
@@ -561,6 +638,8 @@ export function MasterReportPage() {
                                 columnFilters={columnFilters}
                                 onColumnFilterChange={handleColumnFilterChange}
                                 onCellClick={handleCellClick}
+                                checkInStatuses={checkInStatuses}
+                                onUpdateCheckInStatus={handleUpdateCheckInStatus}
                             />
                         </div>
                     )}

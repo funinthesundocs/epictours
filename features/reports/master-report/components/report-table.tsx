@@ -20,9 +20,22 @@ interface ReportTableProps {
     columnFilters: ColumnFilters;
     onColumnFilterChange: (key: string, values: Set<string>) => void;
     onCellClick?: (row: MasterReportRow, columnKey: string) => void;
+    checkInStatuses?: { id: string; status: string; color: string }[];
+    onUpdateCheckInStatus?: (bookingId: string, statusId: string) => Promise<void>;
 }
 
 const ROW_HEIGHT = 44;
+
+// Color options (70% opacity for soft effect)
+const COLOR_MAP: Record<string, string> = {
+    red: "bg-red-500/70",
+    orange: "bg-orange-500/70",
+    yellow: "bg-yellow-500/70",
+    green: "bg-emerald-500/70",
+    blue: "bg-blue-500/70",
+    indigo: "bg-indigo-500/70",
+    violet: "bg-violet-500/70",
+};
 
 // Columns that can be summed for totals row
 const SUMMABLE_COLUMNS = new Set([
@@ -250,7 +263,7 @@ function ColumnFilterDropdown({
     );
 }
 
-export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange, onCellClick }: ReportTableProps) {
+export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange, onCellClick, checkInStatuses = [], onUpdateCheckInStatus }: ReportTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
@@ -296,6 +309,38 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                 return formatDate(row.booking_created_at);
             case "booking_id":
                 return <span className="font-mono text-sm text-foreground">{row.booking_id}</span>;
+
+            case "check_in_status":
+                if (!onUpdateCheckInStatus) {
+                    return row.check_in_status || "-";
+                }
+                const currentStatus = checkInStatuses.find(s => s.id === row.check_in_status_id);
+                // Standard UI color map or fallback
+                const colorClass = currentStatus
+                    ? COLOR_MAP[currentStatus.color] || "bg-muted"
+                    : "bg-muted text-muted-foreground";
+
+                return (
+                    <div onClick={(e) => e.stopPropagation()} className="w-full">
+                        <select
+                            value={row.check_in_status_id || ""}
+                            onChange={(e) => {
+                                onUpdateCheckInStatus(row.booking_id, e.target.value);
+                            }}
+                            className={cn(
+                                "h-8 px-2 rounded text-xs font-medium text-white border-0 cursor-pointer w-full max-w-[140px] [&>option]:bg-zinc-900 [&>option]:text-white focus:ring-1 focus:ring-primary/50",
+                                colorClass
+                            )}
+                        >
+                            <option value="">Pending</option>
+                            {checkInStatuses.map(status => (
+                                <option key={status.id} value={status.id}>
+                                    {status.status}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                );
 
             // Customer fields
             case "customer_name":

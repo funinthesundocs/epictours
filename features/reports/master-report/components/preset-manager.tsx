@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { ChevronDown, Save, Check, Trash2, X } from "lucide-react";
+import { ChevronDown, Save, Check, Trash2, X, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SortCriteria } from "./sort-manager";
 import { ColumnFilters } from "./report-table";
@@ -16,6 +16,7 @@ export interface PresetSettings {
     visibleColumns: string[];
     sortCriteria: SortCriteria[];
     columnFilters: { [key: string]: string[] };  // Serialized from Set
+    dateRangePreset?: string | null;  // Name of the dynamic date range preset (e.g., "Today")
 }
 
 interface ReportPreset {
@@ -149,6 +150,26 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
         }
     };
 
+    const handleUpdatePreset = async (e: React.MouseEvent, presetId: string) => {
+        e.stopPropagation();
+        if (!confirm("Update this preset with current settings?")) return;
+
+        try {
+            const { error } = await supabase
+                .from("report_presets")
+                .update({ settings: currentSettings })
+                .eq("id", presetId);
+
+            if (error) throw error;
+
+            await fetchPresets();
+            // If updating the currently selected preset, logic holds (settings match now)
+        } catch (err) {
+            console.error("Error updating preset:", err);
+            alert("Failed to update preset");
+        }
+    };
+
     return (
         <>
             <div ref={dropdownRef} className="relative">
@@ -223,12 +244,25 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
                                             )}
                                             <span className="text-sm">{preset.name}</span>
                                         </div>
-                                        <button
-                                            onClick={(e) => handleDeletePreset(e, preset.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded transition-all"
-                                        >
-                                            <Trash2 size={14} className="text-destructive" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            {/* Update Button */}
+                                            <button
+                                                onClick={(e) => handleUpdatePreset(e, preset.id)}
+                                                className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-primary/20 rounded-md transition-all text-primary"
+                                                title="Update with current settings"
+                                            >
+                                                <RefreshCw size={14} />
+                                            </button>
+
+                                            {/* Delete Button */}
+                                            <button
+                                                onClick={(e) => handleDeletePreset(e, preset.id)}
+                                                className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/20 rounded-md transition-all text-destructive"
+                                                title="Delete preset"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

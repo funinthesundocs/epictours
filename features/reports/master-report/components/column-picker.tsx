@@ -37,6 +37,9 @@ export const REPORT_COLUMNS: ColumnConfig[] = [
     { key: "voucher_numbers", label: "Vouchers", width: "120px", align: "left", category: "booking" },
     { key: "notes", label: "Notes", width: "300px", align: "left", category: "booking" },
     { key: "booking_created_at", label: "Booked On", width: "120px", align: "center", format: "date", category: "booking" },
+    { key: "agent_name", label: "Agent", width: "120px", align: "left", category: "booking" },
+    { key: "booking_source", label: "Source", width: "120px", align: "left", category: "booking" },
+    { key: "check_in_status", label: "Check-In", width: "140px", align: "left", category: "booking" },
 
     // Customer fields
     { key: "customer_name", label: "Customer", width: "160px", align: "left", category: "customer" },
@@ -140,7 +143,7 @@ export function useColumnVisibility() {
 
 // Column groups for the available columns section
 const COLUMN_GROUPS = [
-    { label: "Booking", keys: ["confirmation_number", "booking_status", "pax_count", "total_amount", "amount_paid", "balance_due", "payment_status", "voucher_numbers", "notes", "booking_created_at"] },
+    { label: "Booking", keys: ["confirmation_number", "booking_status", "pax_count", "total_amount", "amount_paid", "balance_due", "payment_status", "voucher_numbers", "notes", "booking_created_at", "agent_name", "booking_source", "check_in_status"] },
     { label: "Customer", keys: ["customer_name", "customer_email", "customer_phone", "customer_hotel", "customer_source", "customer_status", "preferred_messaging_app", "dietary_restrictions", "accessibility_needs", "emergency_contact_name", "emergency_contact_phone", "customer_total_value"] },
     { label: "Experience", keys: ["experience_code", "experience_name", "start_date", "start_time", "max_capacity"] },
     { label: "Staff & Resources", keys: ["driver_name", "guide_name", "vehicle_name", "route_name"] },
