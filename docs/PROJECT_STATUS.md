@@ -1,6 +1,6 @@
 # 📡 Project Status & Active Mission
-> **Last Updated**: 2026-01-20
-> **Current Phase**: "Availability Module Verification"
+> **Last Updated**: 2026-02-07
+> **Current Phase**: "Master Report & Navigation Polish"
 
 ## 🟢 Operational Status
 *   **EpicTours Core**: ✅ Initialized
@@ -102,7 +102,26 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
         *   **Interactions**: Empty cell click -> Create. Edit Sheet -> Delete workflow.
     *   **Ref**: `features/availability/*`.
 
-13. **[NEXT] Duplicate Check Logic**
+13. **✅ Manifest Navigation & Preset Auto-Load**
+    *   **Status**: COMPLETED.
+    *   **Features**:
+        *   Sidebar "Manifest" link navigates to Master Report with `?preset=today`.
+        *   `PresetManager` accepts `initialPresetName` prop to auto-select saved preset from Supabase.
+        *   Legacy `/booking/manifest` URL redirects to Master Report.
+        *   Active sidebar link detection strips query params for correct highlighting.
+    *   **Ref**: `config/navigation.ts`, `features/reports/master-report/components/preset-manager.tsx`.
+
+14. **✅ Bookings Calendar Blank Screen Fix**
+    *   **Status**: COMPLETED.
+    *   **Fix**: `initialView="calendar"` was not a valid view mode. Mapped `"calendar"` → `"month"`.
+    *   **Ref**: `features/bookings/components/bookings-calendar.tsx`.
+
+15. **✅ Manifest Button in Calendar Toolbar**
+    *   **Status**: COMPLETED.
+    *   **Features**: Added FileText icon to main calendar toolbar (before List icon). Navigates to Master Report preset page.
+    *   **Ref**: `features/bookings/components/bookings-calendar.tsx`.
+
+16. **[NEXT] Duplicate Check Logic**
     *   **Goal**: Implement the "Duplicate Check" logic defined in `CRM_STRATEGY.md` for the main Customers list.
 
 
@@ -117,3 +136,5 @@ We are currently focusing on the **Experiences** inventory module (`features/exp
 *   **Context Tagging**: We check for `// @read` tags at the top of complex files.
 *   **Primary Color**: **Teal/Cyan** (`cyan-500`) is the Law. No Purple/Rainbows for status indicators.
 *   **Math Safety**: Always cast form inputs to `Number()` before arithmetic (e.g. `const total = Number(price) + Number(tax)`).
+*   **Component State Ownership**: Always READ the owning component before modifying state from outside. Thread props through the tree, don't bypass.
+*   **Server Refresh**: ALWAYS restart the dev server after code changes before asking the user to test.

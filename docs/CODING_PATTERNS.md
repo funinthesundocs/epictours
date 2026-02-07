@@ -658,3 +658,22 @@ const vendors = (data || []).map(v => ({
 *   **Vendor Query**: `app/operations/transportation/vendors/page.tsx`
 *   **Quick Add Customer**: `features/bookings/components/booking-desk/quick-add-customer-dialog.tsx`
 
+## 16. Component State Ownership (Critical)
+*   **Rule**: Before modifying a component's behavior from outside, **READ** the component to understand what internal state it manages.
+*   **Anti-Pattern**: If a component (e.g., `PresetManager`) maintains its own `selectedPresetId`, you **CANNOT** bypass it by calling its parent's handler directly — the component's UI won't reflect the change.
+*   **Protocol**:
+    1.  **Identify** which component OWNS the state you want to change.
+    2.  **Read** that component's props interface — look for an existing prop or add one (e.g., `initialPresetName`).
+    3.  **Thread** the prop through the component tree rather than duplicating logic at the parent level.
+*   **Example**: To auto-select a saved preset on navigation, pass `initialPresetName` through `Page → Toolbar → PresetManager` so the PresetManager sets its own `selectedPresetId` internally — rather than fetching the preset at the page level and calling state setters the child also manages.
+*   **Ref**: `features/reports/master-report/components/preset-manager.tsx` (`initialPresetName` prop).
+
+## 17. View Mode Type Safety
+*   **Rule**: When a wrapper component defines view aliases (e.g., `"calendar"`), ensure they map to the actual view mode union type of the child component.
+*   **Problem**: TypeScript won't catch mismatches when using string literals loosely. A value like `"calendar"` passed to a component expecting `'month' | 'week' | 'day'` will silently render nothing.
+*   **Pattern**: Add explicit mapping at the boundary:
+    ```tsx
+    const mappedView = alias === 'calendar' ? 'month' : alias;
+    ```
+*   **Ref**: `features/bookings/components/bookings-calendar.tsx` (`mappedInitialView`).
+
