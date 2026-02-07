@@ -37,6 +37,13 @@ interface ReportToolbarProps {
     // Dynamic date preset
     activeDatePreset?: string | null;
     onDatePresetChange?: (presetName: string | null) => void;
+    // Vehicle assignment state for PDF export
+    vehicleAssignments?: Map<string, Set<string>>;
+    // User/Org info for smart PDF naming
+    userName?: string;
+    orgName?: string;
+    // Initial preset to auto-load by name
+    initialPresetName?: string | null;
 }
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -62,7 +69,11 @@ export function ReportToolbar({
     onLoadPreset,
     exportData,
     activeDatePreset,
-    onDatePresetChange
+    onDatePresetChange,
+    vehicleAssignments,
+    userName,
+    orgName,
+    initialPresetName,
 }: ReportToolbarProps) {
     const hasActiveFilters = searchQuery.trim().length > 0;
 
@@ -176,12 +187,16 @@ export function ReportToolbar({
                 <PresetManager
                     currentSettings={currentPresetSettings}
                     onLoadPreset={onLoadPreset}
+                    initialPresetName={initialPresetName}
                 />
 
                 {/* Export Manager */}
                 <ExportManager
                     data={exportData}
                     visibleColumns={visibleColumns}
+                    vehicleAssignments={vehicleAssignments}
+                    userName={userName}
+                    orgName={orgName}
                 />
             </div>
         </div>

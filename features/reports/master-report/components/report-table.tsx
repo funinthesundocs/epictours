@@ -22,6 +22,8 @@ interface ReportTableProps {
     onCellClick?: (row: MasterReportRow, columnKey: string) => void;
     checkInStatuses?: { id: string; status: string; color: string }[];
     onUpdateCheckInStatus?: (bookingId: string, statusId: string) => Promise<void>;
+    vehicleAssignments?: Map<string, Set<string>>;
+    onToggleVehicle?: (bookingId: string, vehicleName: string) => void;
 }
 
 const ROW_HEIGHT = 44;
@@ -263,7 +265,7 @@ function ColumnFilterDropdown({
     );
 }
 
-export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange, onCellClick, checkInStatuses = [], onUpdateCheckInStatus }: ReportTableProps) {
+export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery = "", columnFilters, onColumnFilterChange, onCellClick, checkInStatuses = [], onUpdateCheckInStatus, vehicleAssignments, onToggleVehicle }: ReportTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const virtualizer = useVirtualizer({
@@ -521,7 +523,8 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                                         <div
                                             key={column.key}
                                             className={cn(
-                                                "px-4 text-sm text-foreground truncate shrink-0",
+                                                "px-4 text-sm text-foreground shrink-0",
+                                                column.key !== "vehicle_name" && "truncate",
                                                 getColumnAlign(column.key) === "right" && "text-right",
                                                 getColumnAlign(column.key) === "center" && "text-center"
                                             )}
@@ -531,6 +534,31 @@ export function ReportTable({ data, unfilteredData, visibleColumns, searchQuery 
                                                 <span className="inline-block px-3 py-3 -mx-3 -my-3 rounded-lg hover:bg-primary/20 transition-colors">
                                                     {getCellValue(row, column.key)}
                                                 </span>
+                                            ) : column.key === "vehicle_name" && row.vehicle_name && row.vehicle_name !== "-" ? (
+                                                <div className="flex flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
+                                                    {row.vehicle_name.split(',').map((v, i) => {
+                                                        const name = v.trim();
+                                                        const isSelected = vehicleAssignments?.get(row.booking_id)?.has(name) || false;
+                                                        return (
+                                                            <button
+                                                                key={i}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onToggleVehicle?.(row.booking_id, name);
+                                                                }}
+                                                                className={cn(
+                                                                    "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
+                                                                    isSelected
+                                                                        ? "bg-primary text-primary-foreground shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+                                                                        : "bg-transparent border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                                                                )}
+                                                                title={isSelected ? `${name} (assigned)` : `Click to assign ${name}`}
+                                                            >
+                                                                {name}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
                                             ) : (
                                                 getCellValue(row, column.key)
                                             )}

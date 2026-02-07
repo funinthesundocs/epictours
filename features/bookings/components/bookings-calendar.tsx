@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
     ChevronLeft,
@@ -21,6 +22,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/features/auth/auth-context";
 import { Availability } from "@/features/availability/components/availability-list-table";
 import { BookingsListTable } from "./bookings-list-table";
+import { ManifestView } from "./views/manifest-view";
 import { BookingColumnPicker, useBookingColumnVisibility } from "./bookings-column-picker";
 import {
     addDays, addWeeks, subWeeks, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay, isToday, differenceInMinutes,
@@ -32,15 +34,34 @@ import {
 export function BookingsCalendar({
     onEventClick,
     selectedAvailabilityId,
-    onBookingEdit
+    onBookingEdit,
+    currentDate = new Date(),
+    onDateChange = () => { },
+    initialView = 'month'
 }: {
     onEventClick?: (availability: Availability, event: React.MouseEvent) => void;
     selectedAvailabilityId?: string | null;
     onBookingEdit?: (bookingId: string) => void;
+    currentDate?: Date;
+    onDateChange?: (date: Date) => void;
+    initialView?: 'month' | 'week' | 'day' | 'list' | 'manifest';
 }) {
     const { effectiveOrganizationId } = useAuth();
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
+    const router = useRouter();
+    const params = useParams();
+    const orgSlug = params.orgSlug as string;
+    // Adapter for controlled state that supports functional updates
+    const setCurrentDate = (action: Date | ((prev: Date) => Date)) => {
+        if (typeof action === 'function') {
+            onDateChange(action(currentDate));
+        } else {
+            onDateChange(action);
+        }
+    };
+
+    // Map 'calendar' alias to 'month' for backwards compatibility
+    const mappedInitialView = initialView === 'calendar' ? 'month' : initialView;
+    const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list' | 'manifest'>(mappedInitialView || 'month');
 
     // Zoom Level for Day View (Pixels Per Minute)
     // Default 1.5px = 1 min
@@ -390,6 +411,13 @@ export function BookingsCalendar({
                                 <Clock size={16} />
                             </button>
                             <button
+                                onClick={() => router.push(`/org/${orgSlug}/finance/reports?preset=today`)}
+                                className={cn("p-1.5 rounded-md transition-all", viewMode === 'manifest' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                                title="Manifest View"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
+                            </button>
+                            <button
                                 onClick={() => setViewMode('list')}
                                 className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")}
                                 title="List View"
@@ -404,7 +432,7 @@ export function BookingsCalendar({
             {/* CONTENT AREA */}
             <div className={cn(
                 "flex-1 min-h-0 bg-background border border-border rounded-2xl overflow-hidden relative",
-                viewMode === 'list' && "bg-transparent border-0 overflow-visible"
+                (viewMode === 'list' || viewMode === 'manifest') && "bg-transparent border-0 overflow-visible"
             )}>
                 {viewMode === 'month' && (
                     <MonthView
@@ -432,6 +460,13 @@ export function BookingsCalendar({
                         setPixelsPerMinute={setPixelsPerMinute}
                         expMap={expMap}
                         selectedAvailabilityId={selectedAvailabilityId}
+                    />
+                )}
+                {viewMode === 'manifest' && (
+                    <ManifestView
+                        currentDate={currentDate}
+                        onDateChange={setCurrentDate}
+                        onBookingEdit={onBookingEdit || (() => { })}
                     />
                 )}
                 {viewMode === 'list' && (
@@ -503,10 +538,20 @@ export function BookingsCalendar({
                                     )}
                                 </div>
                                 <div className="flex items-center bg-muted p-1 rounded-lg border border-border">
-                                    <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Month View"><Grid size={14} /></button>
-                                    <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Week View"><Columns size={14} /></button>
-                                    <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", "text-muted-foreground hover:text-foreground")} title="Day View"><Clock size={14} /></button>
-                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", "bg-primary/20 text-primary shadow-sm")} title="List View"><List size={14} /></button>
+                                    <button onClick={() => setViewMode('month')} className={cn("p-1.5 rounded-md transition-all", viewMode === 'month' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")} title="Month View"><Grid size={14} /></button>
+                                    <button onClick={() => setViewMode('week')} className={cn("p-1.5 rounded-md transition-all", viewMode === 'week' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")} title="Week View"><Columns size={14} /></button>
+                                    <button onClick={() => setViewMode('day')} className={cn("p-1.5 rounded-md transition-all", viewMode === 'day' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")} title="Day View"><Clock size={14} /></button>
+                                    <button onClick={() => setViewMode('list')} className={cn("p-1.5 rounded-md transition-all", viewMode === 'list' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")} title="List View"><List size={14} /></button>
+
+                                    {/* Manifest Button */}
+                                    <div className="w-px h-4 bg-border mx-1"></div>
+                                    <button
+                                        onClick={() => router.push(`/org/${orgSlug}/finance/reports?preset=today`)}
+                                        className={cn("p-1.5 rounded-md transition-all", viewMode === 'manifest' ? "bg-primary/20 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                                        title="Manifest View"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -13,8 +13,15 @@ import { PageShell } from "@/components/shell/page-shell";
 import { Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-export function BookingsCalendarWrapper() {
+
+interface BookingsCalendarWrapperProps {
+    initialView?: "calendar" | "manifest" | "list";
+}
+
+export function BookingsCalendarWrapper({ initialView = "calendar" }: BookingsCalendarWrapperProps) {
     const { zoom } = useSidebar();
+
+
     // Calendar refresh
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -142,8 +149,8 @@ export function BookingsCalendarWrapper() {
 
     return (
         <PageShell
-            title="Bookings Calendar"
-            description="View availability and create new bookings"
+            title="Bookings Platform"
+            description="Manage availability, bookings, and transportation manifest"
             action={
                 <NewBookingMenu onSelectAvailability={handleNewBooking}>
                     <button
@@ -156,10 +163,13 @@ export function BookingsCalendarWrapper() {
             }
         >
             <BookingsCalendar
+                // currentDate={currentDate} // Let Calendar manage its own date or reuse state if needed
+                // onDateChange={setCurrentDate}
                 onEventClick={handleEventClick}
                 onBookingEdit={handleBookingEdit}
                 key={refreshTrigger}
                 selectedAvailabilityId={selectedAvailability?.id}
+                initialView={initialView}
             />
 
             {/* Action Menu Popover */}

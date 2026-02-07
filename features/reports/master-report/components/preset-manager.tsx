@@ -31,9 +31,11 @@ interface PresetManagerProps {
     currentSettings: PresetSettings;
     // Callback when a preset is loaded
     onLoadPreset: (settings: PresetSettings) => void;
+    // If provided, auto-load this preset by name on mount
+    initialPresetName?: string | null;
 }
 
-export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerProps) {
+export function PresetManager({ currentSettings, onLoadPreset, initialPresetName }: PresetManagerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [presets, setPresets] = useState<ReportPreset[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +43,7 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
     const [newPresetName, setNewPresetName] = useState("");
     const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const initialPresetApplied = useRef(false);
 
     // Store the user's settings before loading a preset (for "Current Report" restore)
     const savedCurrentSettingsRef = useRef<PresetSettings | null>(null);
@@ -49,7 +52,7 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
     // Fetch presets on mount
     useEffect(() => {
         fetchPresets();
-    }, []);
+    }, []);;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -73,10 +76,28 @@ export function PresetManager({ currentSettings, onLoadPreset }: PresetManagerPr
 
             if (error) throw error;
             setPresets(data || []);
+            return data || [];
         } catch (err) {
             console.error("Error fetching presets:", err);
+            return [];
         }
     };
+
+    // Auto-load initial preset by name after presets are fetched
+    useEffect(() => {
+        if (initialPresetName && presets.length > 0 && !initialPresetApplied.current) {
+            const match = presets.find(p =>
+                p.name.toLowerCase().includes('today') && p.name.toLowerCase().includes('manifest')
+            );
+            if (match) {
+                initialPresetApplied.current = true;
+                setSelectedPresetId(match.id);
+                savedCurrentSettingsRef.current = { ...currentSettings };
+                setHasSavedCurrentSettings(true);
+                onLoadPreset(match.settings);
+            }
+        }
+    }, [initialPresetName, presets]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSavePreset = async () => {
         if (!newPresetName.trim()) return;

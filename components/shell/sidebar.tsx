@@ -503,8 +503,9 @@ export function Sidebar() {
 function NavItem({ item, pathname, depth = 0, isCollapsed = false, onMobileItemClick }: { item: any; pathname: string; depth?: number; isCollapsed?: boolean; onMobileItemClick?: () => void }) {
     const hasChildren = item.children && item.children.length > 0;
     const Icon = item.icon;
-    const isActive = pathname === item.href;
-    const isChildActive = hasChildren && item.children.some((child: any) => pathname === child.href);
+    const hrefPath = item.href.split('?')[0]; // Strip query params for active-state comparison
+    const isActive = pathname === hrefPath;
+    const isChildActive = hasChildren && item.children.some((child: any) => pathname === child.href.split('?')[0]);
 
     const [isOpen, setIsOpen] = useState(isChildActive);
 

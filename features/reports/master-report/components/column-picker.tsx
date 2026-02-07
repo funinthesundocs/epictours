@@ -44,7 +44,7 @@ export const REPORT_COLUMNS: ColumnConfig[] = [
     // Customer fields
     { key: "customer_name", label: "Customer", width: "160px", align: "left", category: "customer" },
     { key: "customer_email", label: "Email", width: "200px", align: "left", category: "customer" },
-    { key: "customer_phone", label: "Phone", width: "150px", align: "center", format: "phone", category: "customer" },
+    { key: "customer_phone", label: "Phone", width: "150px", align: "left", format: "phone", category: "customer" },
     { key: "customer_hotel", label: "Hotel", width: "140px", align: "left", category: "customer" },
     { key: "customer_source", label: "Source", width: "100px", align: "left", category: "customer" },
     { key: "customer_status", label: "Cust Status", width: "120px", align: "left", category: "customer" },
@@ -58,14 +58,14 @@ export const REPORT_COLUMNS: ColumnConfig[] = [
     // Experience/Availability fields
     { key: "experience_code", label: "Exp Code", width: "110px", align: "left", category: "experience" },
     { key: "experience_name", label: "Experience", width: "160px", align: "left", category: "experience" },
-    { key: "start_date", label: "Start Date", width: "120px", align: "center", format: "date", category: "experience" },
+    { key: "start_date", label: "Start Date", width: "120px", align: "left", format: "date", category: "experience" },
     { key: "start_time", label: "Start Time", width: "110px", align: "center", category: "experience" },
     { key: "max_capacity", label: "Capacity", width: "100px", align: "center", category: "experience" },
 
     // Staff & Resources
-    { key: "driver_name", label: "Driver", width: "120px", align: "left", category: "staff" },
-    { key: "guide_name", label: "Guide", width: "120px", align: "left", category: "staff" },
-    { key: "vehicle_name", label: "Vehicle", width: "120px", align: "left", category: "staff" },
+    { key: "driver_name", label: "Driver", width: "120px", align: "center", category: "staff" },
+    { key: "guide_name", label: "Guide", width: "120px", align: "center", category: "staff" },
+    { key: "vehicle_name", label: "Vehicle", width: "200px", align: "left", category: "staff" },
     { key: "route_name", label: "Route", width: "120px", align: "left", category: "staff" },
 
     // Pickup info

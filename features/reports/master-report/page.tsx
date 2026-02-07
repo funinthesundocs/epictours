@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { MasterReportRow } from "./types";
 import { ReportTable, ColumnFilters } from "./components/report-table";
@@ -23,7 +24,7 @@ import { Customer } from "@/features/crm/customers/types";
 const MAX_RECORDS = 10000;
 
 export function MasterReportPage() {
-    const { effectiveOrganizationId } = useAuth();
+    const { effectiveOrganizationId, user, adminSelectedOrg } = useAuth();
     const [data, setData] = useState<MasterReportRow[]>([]);
     const [checkInStatuses, setCheckInStatuses] = useState<{ id: string; status: string; color: string }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +45,11 @@ export function MasterReportPage() {
         return d;
     });
     const [activeDatePreset, setActiveDatePreset] = useState<string | null>("Today"); // Default to Today preset
+
+    // Detect ?preset=today from URL (works on both fresh load and SPA navigation)
+    const searchParams = useSearchParams();
+    const presetParam = searchParams.get('preset');
+    const presetAppliedRef = useRef(false);
 
     // Date filter type state
     const [dateFilterType, setDateFilterType] = useState<"activity" | "booking">("activity");
@@ -66,6 +72,46 @@ export function MasterReportPage() {
     const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
     const [availabilityPanelOpen, setAvailabilityPanelOpen] = useState(false);
     const [editingAvailability, setEditingAvailability] = useState<any>(undefined);
+
+    // Vehicle Assignment State (persisted to localStorage per org)
+    const storageKey = `vehicle-assignments-${effectiveOrganizationId || 'default'}`;
+
+    const [vehicleAssignments, setVehicleAssignments] = useState<Map<string, Set<string>>>(() => {
+        if (typeof window === 'undefined') return new Map();
+        try {
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+                const parsed: Record<string, string[]> = JSON.parse(stored);
+                const map = new Map<string, Set<string>>();
+                Object.entries(parsed).forEach(([k, v]) => map.set(k, new Set(v)));
+                return map;
+            }
+        } catch { /* ignore parse errors */ }
+        return new Map();
+    });
+
+    const toggleVehicleAssignment = useCallback((bookingId: string, vehicleName: string) => {
+        setVehicleAssignments(prev => {
+            const next = new Map(prev);
+            const current = next.get(bookingId) || new Set<string>();
+            const updated = new Set(current);
+            if (updated.has(vehicleName)) {
+                updated.delete(vehicleName);
+            } else {
+                updated.add(vehicleName);
+            }
+            if (updated.size === 0) {
+                next.delete(bookingId);
+            } else {
+                next.set(bookingId, updated);
+            }
+            // Persist to localStorage
+            const obj: Record<string, string[]> = {};
+            next.forEach((set, key) => { obj[key] = [...set]; });
+            try { localStorage.setItem(storageKey, JSON.stringify(obj)); } catch { /* quota */ }
+            return next;
+        });
+    }, [storageKey]);
 
     // Handle cell click - route to appropriate side panel based on column category
     const handleCellClick = useCallback(async (row: MasterReportRow, columnKey: string) => {
@@ -200,6 +246,7 @@ export function MasterReportPage() {
         }
         setColumnFilters(restoredFilters);
     };
+
 
     const handleUpdateCheckInStatus = async (bookingId: string, statusId: string) => {
         // Optimistic update
@@ -339,12 +386,26 @@ export function MasterReportPage() {
                     const preferences = customer.preferences || {};
                     const emergencyContact = preferences.emergency_contact || {};
 
-                    // Get assignment data (first assignment)
-                    const assignment = (availability.availability_assignments || [])[0] || {};
-                    const driverId = assignment.driver_id || null;
-                    const guideId = assignment.guide_id || null;
-                    const vehicleId = assignment.vehicle_id || null;
-                    const routeId = assignment.transportation_route_id || availability.transportation_route_id || null;
+                    // Get assignment data (ALL assignments, not just first)
+                    const assignments = availability.availability_assignments || [];
+                    const assignment = assignments[0] || {};
+
+                    // Aggregate all unique IDs across assignments
+                    const allDriverIds = [...new Set(assignments.map((a: any) => a.driver_id).filter(Boolean))];
+                    const allGuideIds = [...new Set(assignments.map((a: any) => a.guide_id).filter(Boolean))];
+                    const allVehicleIds = [...new Set(assignments.map((a: any) => a.vehicle_id).filter(Boolean))];
+                    const allRouteIds = [...new Set(assignments.map((a: any) => a.transportation_route_id).filter(Boolean))];
+
+                    const driverId = allDriverIds[0] || null;
+                    const guideId = allGuideIds[0] || null;
+                    const vehicleId = allVehicleIds[0] || null;
+                    const routeId = allRouteIds[0] || availability.transportation_route_id || null;
+
+                    // Build comma-separated name strings for multi-assignment fields
+                    const allDriverNames = allDriverIds.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || null;
+                    const allGuideNames = allGuideIds.map((id: string) => staffMap[id]).filter(Boolean).join(", ") || null;
+                    const allVehicleNames = allVehicleIds.map((id: string) => vehicleMap[id]).filter(Boolean).join(", ") || null;
+                    const allRouteNames = allRouteIds.map((id: string) => routeMap[id]).filter(Boolean).join(", ") || null;
 
                     // Get pickup info from booking's option_values
                     const optionValues = b.option_values || {};
@@ -431,15 +492,15 @@ export function MasterReportPage() {
                         start_time: availability.start_time || "",
                         max_capacity: availability.max_capacity || 0,
 
-                        // Staff & Resources - now from assignments
+                        // Staff & Resources - aggregated from ALL assignments
                         driver_id: driverId,
-                        driver_name: driverId ? staffMap[driverId] || null : null,
+                        driver_name: allDriverNames,
                         guide_id: guideId,
-                        guide_name: guideId ? staffMap[guideId] || null : null,
+                        guide_name: allGuideNames,
                         vehicle_id: vehicleId,
-                        vehicle_name: vehicleId ? vehicleMap[vehicleId] || null : null,
+                        vehicle_name: allVehicleNames,
                         route_id: routeId,
-                        route_name: routeId ? routeMap[routeId] || null : null,
+                        route_name: allRouteNames,
 
                         // Pickup info
                         pickup_location: pickupLocation,
@@ -570,7 +631,8 @@ export function MasterReportPage() {
     });
 
     return (
-        <div className="h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-4rem)] flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            style={{ height: 'calc(100dvh / var(--zoom-factor, 1) - 4rem)' }}>
             {/* Header */}
             <div className="flex flex-col space-y-4 shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -612,6 +674,10 @@ export function MasterReportPage() {
                     exportData={fullyFilteredData}
                     activeDatePreset={activeDatePreset}
                     onDatePresetChange={setActiveDatePreset}
+                    vehicleAssignments={vehicleAssignments}
+                    userName={user?.name || undefined}
+                    orgName={adminSelectedOrg?.name || user?.organizationName || undefined}
+                    initialPresetName={presetParam === 'today' ? "Today's Manifest" : null}
                 />
             </div>
 
@@ -640,6 +706,8 @@ export function MasterReportPage() {
                                 onCellClick={handleCellClick}
                                 checkInStatuses={checkInStatuses}
                                 onUpdateCheckInStatus={handleUpdateCheckInStatus}
+                                vehicleAssignments={vehicleAssignments}
+                                onToggleVehicle={toggleVehicleAssignment}
                             />
                         </div>
                     )}
