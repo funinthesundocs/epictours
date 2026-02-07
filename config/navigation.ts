@@ -156,7 +156,7 @@ export const navigation: NavSection[] = [
             { title: "Billing", href: "/finance/billing", icon: Receipt, requiredModule: "finance" },
             { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark, requiredModule: "finance" },
             { title: "Partners", href: "/finance/partners", icon: Handshake, requiredModule: "finance" },
-            { title: "Reports", href: "/finance/reports", icon: PieChart, requiredModule: "finance" },
+            { title: "Reports", href: "/finance/reports?preset=today", icon: PieChart, requiredModule: "finance" },
         ]
     },
     {
