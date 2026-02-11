@@ -8,18 +8,26 @@ import { CustomerTypeSheet } from "@/features/customer-types/components/customer
 import { supabase } from "@/lib/supabase";
 import { Plus, Tags } from "lucide-react";
 import { LoadingState } from "@/components/ui/loading-state";
+import { useAuth } from "@/features/auth/auth-context";
 
 export default function CustomerTypesPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [data, setData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
 
     const loadData = async () => {
+        if (!effectiveOrganizationId) {
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
         const { data: result, error } = await supabase
             .from("customer_types" as any)
             .select("*")
+            .eq("organization_id", effectiveOrganizationId)
             .order("name", { ascending: true });
 
         if (!error) {
@@ -30,7 +38,7 @@ export default function CustomerTypesPage() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     const handleCreate = () => {
         setEditingItem(null);
@@ -43,17 +51,20 @@ export default function CustomerTypesPage() {
     };
 
     const handleDelete = async (id: string) => {
+        if (!effectiveOrganizationId) return;
+
         const { error } = await supabase
             .from("customer_types" as any)
             .delete()
-            .eq("id", id);
+            .eq("id", id)
+            .eq("organization_id", effectiveOrganizationId);
 
         if (!error) {
             toast.success("Customer type deleted");
             loadData();
         } else {
+            console.error("Delete error:", error);
             alert("Failed to delete. Check console.");
-            console.error(error);
         }
     };
 

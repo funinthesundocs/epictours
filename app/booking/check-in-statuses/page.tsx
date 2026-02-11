@@ -1,24 +1,61 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Search, UserCheck, Trash2, Save } from "lucide-react";
+import { Plus, Search, UserCheck, Trash2, Save, Edit2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PageShell } from "@/components/shell/page-shell";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth/auth-context";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { LoadingState } from "@/components/ui/loading-state";
+import { CustomSelect } from "@/components/ui/custom-select";
 
-// Color options (70% opacity for soft effect)
+// Color options with colored dots for the selector
 const COLOR_OPTIONS = [
-    { value: "red", label: "Red", class: "bg-red-500/70" },
-    { value: "orange", label: "Orange", class: "bg-orange-500/70" },
-    { value: "yellow", label: "Yellow", class: "bg-yellow-500/70" },
-    { value: "green", label: "Green", class: "bg-emerald-500/70" },
-    { value: "blue", label: "Blue", class: "bg-blue-500/70" },
-    { value: "indigo", label: "Indigo", class: "bg-indigo-500/70" },
-    { value: "violet", label: "Violet", class: "bg-violet-500/70" },
+    {
+        value: "red",
+        label: "Red",
+        class: "bg-red-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-red-500" />
+    },
+    {
+        value: "orange",
+        label: "Orange",
+        class: "bg-orange-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-orange-500" />
+    },
+    {
+        value: "yellow",
+        label: "Yellow",
+        class: "bg-yellow-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-yellow-500" />
+    },
+    {
+        value: "green",
+        label: "Green",
+        class: "bg-emerald-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-emerald-500" />
+    },
+    {
+        value: "blue",
+        label: "Blue",
+        class: "bg-blue-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-blue-500" />
+    },
+    {
+        value: "indigo",
+        label: "Indigo",
+        class: "bg-indigo-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-indigo-500" />
+    },
+    {
+        value: "violet",
+        label: "Violet",
+        class: "bg-violet-500/70",
+        icon: <span className="w-3 h-3 rounded-full bg-violet-500" />
+    },
 ];
 
 export function getColorClass(color: string): string {
@@ -35,17 +72,26 @@ interface CheckInStatus {
 }
 
 export default function CheckInStatusesPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [statuses, setStatuses] = useState<CheckInStatus[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [statusToDelete, setStatusToDelete] = useState<string | null>(null);
     const [editForm, setEditForm] = useState({ status: "", color: "", notes: "" });
 
     const fetchStatuses = async () => {
+        if (!effectiveOrganizationId) {
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
         const { data, error } = await supabase
             .from("check_in_statuses")
             .select("*")
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: true });
 
         if (error) {
@@ -58,15 +104,10 @@ export default function CheckInStatusesPage() {
 
     useEffect(() => {
         fetchStatuses();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     const handleCreate = async () => {
-        // Get org ID from first status or fetch it
-        let orgId = statuses[0]?.organization_id;
-        if (!orgId) {
-            const { data: orgs } = await supabase.from("organizations").select("id").limit(1);
-            orgId = orgs?.[0]?.id;
-        }
+        if (!effectiveOrganizationId) return;
 
         const { error } = await supabase
             .from("check_in_statuses")
@@ -74,7 +115,7 @@ export default function CheckInStatusesPage() {
                 status: "New Status",
                 color: "blue",
                 notes: "",
-                organization_id: orgId
+                organization_id: effectiveOrganizationId
             }]);
 
         if (error) {
@@ -115,21 +156,30 @@ export default function CheckInStatusesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        const confirm = window.confirm("Delete this status? Bookings using it will have no status.");
-        if (!confirm) return;
+    const handleDeleteClick = (id: string) => {
+        setStatusToDelete(id);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!effectiveOrganizationId || !statusToDelete) return;
 
         const { error } = await supabase
             .from("check_in_statuses")
             .delete()
-            .eq("id", id);
+            .eq("id", statusToDelete)
+            .eq("organization_id", effectiveOrganizationId);
 
         if (error) {
+            console.error("Delete error:", error);
             toast.error("Failed to delete status");
         } else {
             toast.success("Status deleted");
             fetchStatuses();
         }
+
+        setDeleteDialogOpen(false);
+        setStatusToDelete(null);
     };
 
     const filteredStatuses = statuses.filter(s =>
@@ -146,12 +196,12 @@ export default function CheckInStatusesPage() {
             style={{ height: 'calc(100vh / var(--zoom-factor, 1) - 4rem)' }}
             contentClassName="flex-1 min-h-0 overflow-hidden flex flex-col"
             action={
-                <Button
+                <button
                     onClick={handleCreate}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm transition-all"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg text-sm transition-colors"
                 >
-                    <Plus className="mr-2 h-4 w-4" /> New Status
-                </Button>
+                    <Plus size={16} /> New Status
+                </button>
             }
         >
             <div className="h-full flex flex-col space-y-4">
@@ -176,9 +226,12 @@ export default function CheckInStatusesPage() {
                         <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
                             <UserCheck size={32} className="opacity-50" />
                             <p>No check-in statuses found</p>
-                            <Button variant="outline" size="sm" onClick={handleCreate}>
-                                <Plus className="mr-2 h-4 w-4" /> Create First Status
-                            </Button>
+                            <button
+                                onClick={handleCreate}
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted border border-border rounded-lg transition-colors"
+                            >
+                                <Plus size={14} /> Create First Status
+                            </button>
                         </div>
                     ) : (
                         <div className="h-full overflow-auto">
@@ -207,15 +260,12 @@ export default function CheckInStatusesPage() {
                                                         />
                                                     </td>
                                                     <td className="px-6 py-3">
-                                                        <select
+                                                        <CustomSelect
                                                             value={editForm.color}
-                                                            onChange={(e) => setEditForm({ ...editForm, color: e.target.value })}
-                                                            className="h-10 px-3 rounded-md border border-border bg-background text-foreground"
-                                                        >
-                                                            {COLOR_OPTIONS.map((opt) => (
-                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                            ))}
-                                                        </select>
+                                                            onChange={(value) => setEditForm({ ...editForm, color: value })}
+                                                            options={COLOR_OPTIONS}
+                                                            className="w-40"
+                                                        />
                                                     </td>
                                                     <td className="px-6 py-3">
                                                         <Input
@@ -227,20 +277,20 @@ export default function CheckInStatusesPage() {
                                                     </td>
                                                     <td className="px-6 py-3 text-right">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <Button
-                                                                size="sm"
+                                                            <button
+                                                                type="button"
                                                                 onClick={handleSave}
-                                                                className="bg-emerald-500 hover:bg-emerald-600"
+                                                                className="px-3 py-1.5 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-1.5"
                                                             >
-                                                                <Save size={14} className="mr-1" /> Save
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
+                                                                <Save size={14} /> Save
+                                                            </button>
+                                                            <button
+                                                                type="button"
                                                                 onClick={() => setEditingId(null)}
+                                                                className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                                             >
                                                                 Cancel
-                                                            </Button>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </>
@@ -268,21 +318,20 @@ export default function CheckInStatusesPage() {
                                                     </td>
                                                     <td className="px-6 py-3 text-right">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
+                                                            <button
+                                                                type="button"
                                                                 onClick={() => handleEdit(status)}
+                                                                className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                                                             >
-                                                                Edit
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className="text-destructive hover:bg-destructive/10"
-                                                                onClick={() => handleDelete(status.id)}
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteClick(status.id)}
+                                                                className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
                                                             >
-                                                                <Trash2 size={14} />
-                                                            </Button>
+                                                                <Trash2 size={16} />
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </>
@@ -295,6 +344,17 @@ export default function CheckInStatusesPage() {
                     )}
                 </div>
             </div>
-        </PageShell>
+
+            <AlertDialog
+                isOpen={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Check-in Status?"
+                description="This status will be removed. Bookings using it will have no status."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                isDestructive={true}
+            />
+        </PageShell >
     );
 }

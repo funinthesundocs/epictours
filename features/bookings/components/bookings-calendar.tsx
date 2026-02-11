@@ -225,7 +225,7 @@ export function BookingsCalendar({
         }
 
         fetchAvail();
-    }, [currentDate, viewMode, staffMap, routeMap, vehicleMap, effectiveOrganizationId]);
+    }, [currentDate, viewMode, effectiveOrganizationId]);
 
     // --- NAVIGATION LOGIC ---
     const handlePrev = () => {

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
+import { QueryClientProvider } from "@/lib/query-client";
 
 const outfit = Outfit({
     subsets: ["latin"],
@@ -26,16 +27,18 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body className={cn(outfit.variable, "bg-background min-h-screen antialiased")} suppressHydrationWarning>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    <AuthProvider>
-                        {/* 
-                            PageLayout handles the SidebarProvider, Sidebar, 
-                            and the Main Content area with dynamic margins.
-                        */}
-                        <PageLayout>
-                            {children}
-                        </PageLayout>
-                        <Toaster />
-                    </AuthProvider>
+                    <QueryClientProvider>
+                        <AuthProvider>
+                            {/* 
+                                PageLayout handles the SidebarProvider, Sidebar, 
+                                and the Main Content area with dynamic margins.
+                            */}
+                            <PageLayout>
+                                {children}
+                            </PageLayout>
+                            <Toaster />
+                        </AuthProvider>
+                    </QueryClientProvider>
                 </ThemeProvider>
             </body>
         </html>

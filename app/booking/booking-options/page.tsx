@@ -5,6 +5,7 @@ import { Plus, Search, Settings, List } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { PageShell } from "@/components/shell/page-shell";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/auth-context";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function BookingOptionsPage() {
+    const { effectiveOrganizationId } = useAuth();
     const [schedules, setSchedules] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -28,10 +30,16 @@ export default function BookingOptionsPage() {
     const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
 
     const fetchSchedules = async () => {
+        if (!effectiveOrganizationId) {
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
         const { data, error } = await supabase
             .from("booking_option_schedules")
             .select("*")
+            .eq("organization_id", effectiveOrganizationId)
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -45,7 +53,7 @@ export default function BookingOptionsPage() {
 
     useEffect(() => {
         fetchSchedules();
-    }, []);
+    }, [effectiveOrganizationId]);
 
     const handleCreate = () => {
         setEditingSchedule(null);
@@ -58,6 +66,8 @@ export default function BookingOptionsPage() {
     };
 
     const handleDuplicate = async (schedule: any) => {
+        if (!effectiveOrganizationId) return;
+
         const confirm = window.confirm(`Duplicate "${schedule.name}"?`);
         if (!confirm) return;
 
@@ -68,7 +78,8 @@ export default function BookingOptionsPage() {
             .from("booking_option_schedules")
             .insert([{
                 ...rest,
-                name: newName
+                name: newName,
+                organization_id: effectiveOrganizationId
             }]);
 
         if (error) {
@@ -80,12 +91,16 @@ export default function BookingOptionsPage() {
     };
 
     const handleDelete = async (id: string) => {
+        if (!effectiveOrganizationId) return;
+
         const { error } = await supabase
             .from("booking_option_schedules")
             .delete()
-            .eq("id", id);
+            .eq("id", id)
+            .eq("organization_id", effectiveOrganizationId);
 
         if (error) {
+            console.error("Delete error:", error);
             toast.error("Failed to delete schedule");
         } else {
             toast.success("Schedule deleted");

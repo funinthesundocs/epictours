@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback, Suspense } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, Suspense, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import {
@@ -31,7 +31,9 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
     const searchParams = useSearchParams();
 
     /**
-     * Fetch user data from database and resolve permissions
+     * Fetch user data from database and resolve permissions.
+     * This is called imperatively (login, session restore) so we keep direct queries.
+     * React Query will handle caching when the queries are re-triggered.
      */
     const fetchUserData = useCallback(async (email: string): Promise<AuthenticatedUser | null> => {
         try {
@@ -161,8 +163,13 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Check for existing session on mount
+    // Track if we've already checked session to prevent redundant fetches
+    const hasCheckedSession = useRef(false);
+
+    // Check for existing session on mount (ONCE)
     useEffect(() => {
+        if (hasCheckedSession.current) return;
+
         const checkSession = async () => {
             const storedUser = localStorage.getItem("epictours_user");
             if (storedUser) {
@@ -181,6 +188,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
                 }
             }
             setIsLoading(false);
+            hasCheckedSession.current = true;
         };
         checkSession();
     }, [fetchUserData]);
