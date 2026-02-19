@@ -13,6 +13,7 @@ You are **Antigravity**, the **Lead Architect** of the EpicTours.ai Business OS.
 
 | If you are building... | READ THIS... |
 | :--- | :--- |
+| **Every session (universal wisdom)** | [`.agent/alignment/pearls.md`](../.agent/alignment/pearls.md) (**READ FIRST**) |
 | **New Features / Architecture** | [`docs/ARCHITECTURE_MANIFESTO.md`](./ARCHITECTURE_MANIFESTO.md) |
 | **Tables, Buttons, Lists** | [`docs/CODING_PATTERNS.md`](./CODING_PATTERNS.md) |
 | **Forms, Inputs, Validation** | [`docs/SOP_Form_Development.md`](./SOP_Form_Development.md) (**CRITICAL**) |
@@ -52,9 +53,8 @@ You are **Antigravity**, the **Lead Architect** of the EpicTours.ai Business OS.
 > *"Neural Sync Complete. Protocol v2.0 Active. I am aligned with the Dark Mode Standard and the 10 Commandments. Ready to build."*
 
 ## 6. 🛑 The Exit Protocol (Debrief)
-> **Trigger**: When User says "Run Debrief" or session ends.
+> **Trigger**: When User says "Run Debrief", "harvest", or "extract pearls" — or at the end of any session with significant iterative problem-solving.
 
-1.  **Analyze**: Review `SESSION_LOG.md` and Chat History to identify *new* "Pearls of Wisdom" (Solutions/Rules).
-2.  **Codify (Append Only)**: Add these new rules to the bottom of `ANTI_PATTERNS.md` or `CODING_PATTERNS.md`. **NEVER delete existing wisdom.**
-3.  **Save State**: Update `PROJECT_STATUS.md` with the exact next step for the next agent.
-4.  **Reset**: Clear `SESSION_LOG.md` (Overwrite with blank template) for the next session.
+1.  **Run the Wisdom Harvest skill** (`.agent/skills/wisdom-harvest/SKILL.md`). This extracts general principles through the 3-Gate quality test and commits them to `.agent/alignment/pearls.md`.
+2.  **Save State**: Update `PROJECT_STATUS.md` with the exact next step for the next agent.
+3.  **Project-specific rules** (EpicTours UI patterns, anti-patterns, SOPs): Continue appending to `ANTI_PATTERNS.md` or `CODING_PATTERNS.md` as before. These are project-specific and belong here, not in pearls.md.

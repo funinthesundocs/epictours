@@ -35,3 +35,34 @@
 | Dense formats scale better | When designing a living document with a token budget, choose the densest readable format (tables > heading blocks) because format density determines how much knowledge fits before you hit limits | Seed | 2026-02-19 |
 | Append-only for merge safety | Design shared files so edits are row appends rather than in-place modifications — this makes concurrent contributor merge conflicts trivial to resolve | Seed | 2026-02-19 |
 | Externalized judgment scales capability | Writing judgment criteria into a document (gates, contrast examples, litmus tests) lets mid-tier models perform tasks that otherwise require frontier models — the quality ceiling shifts with the quality of the framework, not just the model | Seed | 2026-02-19 |
+
+## React & UI Architecture
+
+| Pearl | Rule | Maturity | Added |
+|-------|------|----------|-------|
+| CSS portals don't inherit zoom | Radix UI Dialog, Popover, Tooltip, and Select render in React Portals detached from the app root and do NOT inherit the parent container's CSS zoom — apply zoom style manually to every portal Content component | Established | 2026-02-19 |
+| Visual coords vs CSS coords | When calculating manual top/left positions after a zoom/scale transform, DOM getBoundingClientRect() returns visual viewport pixels but CSS expects layout viewport pixels — divide by (zoom/100) before applying as CSS style | Established | 2026-02-19 |
+| Component state ownership | Before modifying a component's behavior from outside, read the component to find what internal state it owns — bypassing internal state setters causes UI desyncs where the data changes but the component display doesn't | Established | 2026-02-19 |
+| Progressive loading: shell first | Render the page shell (header, toolbar, container) immediately without a loading gate — place the loading spinner INSIDE the data container so users understand the page structure before data arrives | Confirmed | 2026-02-19 |
+| dvh over vh on mobile | Use dvh (dynamic viewport height) instead of vh for any full-height container — vh includes the browser chrome area and causes content cutoff until the user scrolls on mobile | Confirmed | 2026-02-19 |
+| Cast form inputs before arithmetic | Always cast form inputs to Number() before arithmetic operations — React form values are strings by default and silent string concatenation instead of addition is a calculation bug that passes TypeScript | Confirmed | 2026-02-19 |
+| Silent form errors need a callback | Always pass an error callback to form submit handlers (e.g. handleSubmit(onSubmit, err => console.error(err))) — submitting without one silently swallows validation errors and leaves the user with no feedback | Established | 2026-02-19 |
+| Overflow-hidden traps portal z-index | Applying overflow-hidden to any container that has portal-based children (Dropdown, Tooltip, Dialog) will clip those portals at the container boundary — use overflow-visible and apply border-radius to inner elements instead | Established | 2026-02-19 |
+
+## Database Design
+
+| Pearl | Rule | Maturity | Added |
+|-------|------|----------|-------|
+| Indexes belong in the same migration | Always add database indexes in the same migration file as the table creation, using IF NOT EXISTS — indexes added later are often forgotten, causing slow queries that take hours to diagnose | Established | 2026-02-19 |
+| Separate identity from role data | Store identity data (name, email, phone) in one canonical table and create module-specific extension tables that link by foreign key — a person who is both a customer and a staff member should have one identity row, not two | Confirmed | 2026-02-19 |
+| TEXT over CHECK for dynamic enums | Use plain TEXT NOT NULL instead of CHECK constraints on columns whose valid values may grow (status, type, tier) — a CHECK constraint on dynamic values causes INSERT failures when new categories are added without a migration | Established | 2026-02-19 |
+| Nullable DB columns need .nullable() | Use z.string().optional().nullable() for any form field that maps to a nullable database column — .optional() alone only handles undefined, not null, causing silent Zod validation failures on real DB values | Established | 2026-02-19 |
+| Always join for identity fields | Never select name, email, or phone from module tables — they live in the identity table and querying them from role tables returns stale or missing data after schema normalization | Established | 2026-02-19 |
+| Orphan records come from missing parent IDs | When creating child records from a filtered view, always pass the parent ID explicitly to the create form — if it lives in a filter dropdown rather than the form's initialData, the created record will have a NULL parent ID and disappear from all filtered views | Established | 2026-02-19 |
+
+## Debugging Strategy
+
+| Pearl | Rule | Maturity | Added |
+|-------|------|----------|-------|
+| Find a working example before debugging | Before guessing the cause of a broken feature, locate a parallel working feature in the same codebase and diff the implementations — copying established working patterns beats inventing new solutions | Established | 2026-02-19 |
+
