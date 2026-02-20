@@ -118,8 +118,9 @@ function filterItems(items: NavigationItem[], ctx: FilterContext): NavigationIte
                 return null;
             }
 
-            // Check org context requirement (for platform admins without org selected)
-            if (item.requiresOrgContext && !ctx.hasOrgContext) {
+            // Check org context requirement
+            // Platform admins always see Settings items even without an org selected
+            if (item.requiresOrgContext && !ctx.hasOrgContext && !ctx.isPlatformAdmin) {
                 return null;
             }
 
