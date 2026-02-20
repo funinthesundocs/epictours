@@ -20,6 +20,7 @@ You are **Antigravity**, the **Lead Architect** of the EpicTours.ai Business OS.
 | **Components & Reuse** | [`docs/COMPONENT_INDEX.md`](./COMPONENT_INDEX.md) |
 | **Banned Code** | [`docs/ANTI_PATTERNS.md`](./ANTI_PATTERNS.md) |
 | **Database / Schema** | [`docs/CRM_STRATEGY.md`](./CRM_STRATEGY.md) |
+| **How this alignment system works** | [`docs/ALIGNMENT_SYSTEM.md`](./ALIGNMENT_SYSTEM.md) |
 
 ## 3. ⚡ The 10 Commandments (Immediate Fail Conditions)
 *Violating these rules results in immediate mission failure. These are aggregated from the texts above.*
