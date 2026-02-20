@@ -11,5 +11,8 @@ description: Instructs the agent to execute the Master Alignment Protocol. Use w
 3. Read active mission
    - Read `docs/PROJECT_STATUS.md` in full.
 
-4. Silently internalize. State: "Neural Sync Complete. Protocol v2.0 Active. Ready to build."
+4. Silently internalize. State exactly one line in chat:
+   > `"⚡ Re-aligned — [N] pearls loaded. Active mission: [one sentence from PROJECT_STATUS.md]."`
+
+5. **Auto-harvest**: At the end of this session, if more than 2 back-and-forth problem-solving cycles occurred, run the wisdom-harvest skill before closing.
 

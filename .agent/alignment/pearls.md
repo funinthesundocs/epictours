@@ -2,6 +2,8 @@
 
 > General principles extracted from real work sessions. These apply to ALL future work regardless of project.
 > Maintained by the `wisdom-harvest` skill (see `.agent/skills/wisdom-harvest/SKILL.md`).
+>
+> **Current count: 28 / 111** — When a new pearl is added and this hits 112, evict the oldest Seed before committing.
 
 ## Browser Automation
 
