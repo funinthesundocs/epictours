@@ -2,22 +2,25 @@
 description: Instructs the agent to execute the Reactive Master Debrief Protocol.
 ---
 
-1. [ANALYSIS] Read Documents
-   - Read `docs/MASTER_DEBRIEF_PROMPT.md`
+1. [HARVEST] Run the Wisdom Harvest skill
+   - Read `.agent/skills/wisdom-harvest/SKILL.md` and execute it in full.
+   - Extract general principles from this session, run 3-gate test, add survivors to `.agent/alignment/pearls.md`.
+
+2. [ANALYSIS] Assess project state
    - Read `docs/PROJECT_STATUS.md`
-   - Read `task.md`
+   - Identify what was accomplished this session and what the next step is.
 
-2. [PROPOSAL] Formulate Debrief Plan
-   - Synthesize the session's achievements.
-   - Draft specific updates for Project Status and Patterns.
+3. [PROPOSAL] Formulate update plan
+   - Draft specific updates for Project Status.
+   - Identify any new EpicTours-specific patterns for `CODING_PATTERNS.md` or `ANTI_PATTERNS.md`.
    - **CRITICAL**: Do NOT update the files yet.
-   - Create a summary of these proposed changes.
+   - Create a summary of proposed changes.
 
-3. [ALIGNMENT] Request Authorization
+4. [ALIGNMENT] Request Authorization
    - Present the "Debrief Proposal" to the user via `notify_user`.
    - Ask: "Does this plan align with your view of our progress? Say PROCEED to execute."
 
-4. [EXECUTION] (Wait for User "PROCEED")
+5. [EXECUTION] (Wait for User "PROCEED")
    - Update `docs/PROJECT_STATUS.md`
-   - Update `docs/CODING_PATTERNS.md` (if applicable)
-   - Clear/Archive `task.md` (if applicable)
+   - Append new EpicTours patterns to `docs/CODING_PATTERNS.md` or `docs/ANTI_PATTERNS.md` (if applicable)
+
