@@ -2,6 +2,9 @@
 
 > This document is for any agent or human inheriting this system. It explains what exists, why it was built this way, and how every file fits together.
 
+> [!NOTE]
+> **EpicTours Workspace Override**: In this workspace, `.agent/alignment/` is **colocated inside the project repo** — it is NOT a separate git repo. All git operations (pull, commit, push) use the project root. The separate-git-repo instructions in this document do not apply here. Entry point is `.agent/workflows/boot.md`.
+
 ---
 
 ## The Vision

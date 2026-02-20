@@ -21,10 +21,15 @@ At the end of a session, the user says "harvest" or "extract pearls." Follow the
 4. **Quality gate** — Run EVERY candidate through the 3-Gate Test below. Discard any that fail.
 5. **Dedup check** — Read `.agent/alignment/pearls.md` and check if a similar pearl already exists
 6. **Write or promote** — If new, add as a Seed row in the appropriate category table. If similar exists, promote its maturity level (Seed -> Confirmed -> Established)
-7. **Aging audit** — Scan all existing Seed-maturity pearls. If any Seed's Added date is more than 90 days old, flag it in the summary as "Needs review — still valid?" Do not delete, only flag.
-8. **Present summary** — Show the user a table of what was harvested: action (NEW/PROMOTED/FLAGGED/DISCARDED), pearl title, category, and which gates rocks failed
-9. **Pre-commit check** — Run `git status` inside the alignment folder. If there are no changes, warn the user that another agent may have already harvested this session. Do NOT commit or push if there is nothing new.
-10. **Git sync** — Stage, commit, and push the alignment folder. If `.agent/alignment/` is a separate git repo, commit and push inside it. Otherwise, commit and push the project repo.
+7. **Cap enforcement (111-pearl limit)** — Count the total number of pearl rows across ALL tables in `pearls.md`. If the count **exceeds 111**, evict exactly one pearl using this priority order:
+   - **Evict first**: The oldest Seed-maturity pearl (lowest Added date among Seeds)
+   - **If no Seeds**: The oldest Confirmed-maturity pearl
+   - **Never evict**: Established pearls unless the user explicitly approves
+   - Delete that row from `pearls.md` and include `EVICTED` in the harvest summary with the reason
+8. **Aging audit** — Scan all existing Seed-maturity pearls. If any Seed's Added date is more than 90 days old, flag it in the summary as "Needs review — still valid?" Do not delete, only flag.
+9. **Present summary** — Show the user a table of what was harvested: action (NEW/PROMOTED/EVICTED/FLAGGED/DISCARDED), pearl title, category, and which gates rocks failed
+10. **Pre-commit check** — Run `git status` inside the alignment folder. If there are no changes, warn the user that another agent may have already harvested this session. Do NOT commit or push if there is nothing new.
+11. **Git sync** — Stage, commit, and push the alignment folder. If `.agent/alignment/` is a separate git repo, commit and push inside it. Otherwise, commit and push the project repo.
 
 ---
 
@@ -118,6 +123,7 @@ Starter categories (expand as needed):
 | Pearl too vague | "Be careful with code" | Must be actionable — "Use X instead of Y" or "Do X before Y" |
 | Git push fails | No upstream configured | Run `git push --set-upstream origin main` first |
 | Nothing to commit | Another agent already harvested the same session | Warn the user and skip git sync |
+| Pearl count exceeds 111 but no eviction done | Skipped cap check | Count all rows in pearls.md after adding; evict oldest Seed if over limit |
 
 ## Success Criteria
 
@@ -126,6 +132,7 @@ Starter categories (expand as needed):
 - [OK] New pearl(s) added to correct category table
 - [OK] No project-specific details in any pearl
 - [OK] No duplicates — existing similar pearls were promoted instead
+- [OK] Cap check: total pearl count is 111 or fewer (oldest Seed evicted if exceeded)
 - [OK] Aging audit completed — Seed pearls older than 90 days flagged if any
 - [OK] Pre-commit check confirmed changes exist before pushing
 - [OK] Changes committed and pushed

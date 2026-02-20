@@ -25,6 +25,10 @@ cd .agent/alignment && git pull && cd ../..
 
 6. Silently internalize everything. Do NOT list any of it back to the user. Apply it to all work in this session.
 
-7. **Auto-harvest obligation**: At the end of this session, if more than 2 back-and-forth problem-solving cycles occurred, automatically run the wisdom-harvest skill (`.agent/skills/wisdom-harvest/SKILL.md`) before closing — do not ask, just run it.
+7. **Boot canary**: State exactly one line in chat to confirm alignment loaded:
+   > `"⚡ Boot confirmed — [N] pearls loaded. Active mission: [one sentence from PROJECT_STATUS.md]."`
+   Then go silent. This is the only permitted output from the boot process.
 
-8. Proceed with the user's request.
+8. **Auto-harvest obligation**: At the end of this session, if more than 2 back-and-forth problem-solving cycles occurred, automatically run the wisdom-harvest skill (`.agent/skills/wisdom-harvest/SKILL.md`) before closing — do not ask, just run it.
+
+9. Proceed with the user's request.
