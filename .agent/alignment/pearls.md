@@ -3,7 +3,7 @@
 > General principles extracted from real work sessions. These apply to ALL future work regardless of project.
 > Maintained by the `wisdom-harvest` skill (see `.agent/skills/wisdom-harvest/SKILL.md`).
 >
-> **Current count: 28 / 111** — When a new pearl is added and this hits 112, evict the oldest Seed before committing.
+> **Current count: 32 / 111** — When a new pearl is added and this hits 112, evict the oldest Seed before committing.
 
 ## Browser Automation
 
@@ -28,6 +28,8 @@
 | Additive enhancement only | After each test or iteration, add what you learned to the documentation — never remove existing rules, only add new ones | Established | 2026-02-19 |
 | Consistency grep after every change | After modifying any code or documentation, grep the entire file for stale references to the old approach — one contradictory line wastes more debugging time than no documentation | Established | 2026-02-19 |
 | Curated knowledge drifts without audits | Any curated knowledge base (pearls, codebase, test suite, docs) slowly accumulates low-quality entries unless a scheduled quality-review pass is built into the process | Seed | 2026-02-19 |
+| Multi-round auditing compounds gap detection | A single review pass catches surface issues; each additional self-review round finds contradictions and staleness invisible to the first pass — schedule at least 3 audit rounds before declaring a rule system stable | Seed | 2026-02-19 |
+| Contradictions between rules cause silent non-compliance | When two rules in the same system prescribe opposite behavior, agents pick one arbitrarily and appear compliant while violating the other — audit all rules for cross-rule conflicts before a system is considered stable | Seed | 2026-02-19 |
 
 ## General Engineering
 
@@ -37,6 +39,8 @@
 | Dense formats scale better | When designing a living document with a token budget, choose the densest readable format (tables > heading blocks) because format density determines how much knowledge fits before you hit limits | Seed | 2026-02-19 |
 | Append-only for merge safety | Design shared files so edits are row appends rather than in-place modifications — this makes concurrent contributor merge conflicts trivial to resolve | Seed | 2026-02-19 |
 | Externalized judgment scales capability | Writing judgment criteria into a document (gates, contrast examples, litmus tests) lets mid-tier models perform tasks that otherwise require frontier models — the quality ceiling shifts with the quality of the framework, not just the model | Seed | 2026-02-19 |
+| Hard cap with eviction forces quality competition | Any curated collection (knowledge base, rules list, training examples) should have a hard maximum size with a priority eviction policy — without a cap, volume growth outpaces quality control and the weakest entries never face replacement pressure | Seed | 2026-02-19 |
+| One-line canaries prove loaded state | When an agent or system loads context (config, rules, knowledge), require it to emit a single structured confirmation line (e.g., "N items loaded, mission: X") — this gives ground-truth observability with zero conversation pollution | Seed | 2026-02-19 |
 
 ## React & UI Architecture
 
