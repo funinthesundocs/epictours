@@ -30,7 +30,10 @@ import {
     Settings,
     List,
     Palette,
-    UserCheck      // Check-In Statuses
+    UserCheck,     // Check-In Statuses
+    Scan,          // Scraper
+    Library,       // Library
+    Clapperboard,  // Remix
 } from "lucide-react";
 import type { ModuleCode, PermissionAction } from "@/features/auth/types";
 
@@ -157,6 +160,14 @@ export const navigation: NavSection[] = [
             { title: "Bank Accounts", href: "/finance/bank-accounts", icon: Landmark, requiredModule: "finance" },
             { title: "Partners", href: "/finance/partners", icon: Handshake, requiredModule: "finance" },
             { title: "Reports", href: "/finance/reports?preset=today", icon: PieChart, requiredModule: "finance" },
+        ]
+    },
+    {
+        title: "Content",
+        items: [
+            { title: "Scraper", href: "/scraper", icon: Scan, requiresOrgContext: true },
+            { title: "Library", href: "/library", icon: Library, requiresOrgContext: true },
+            { title: "Remix", href: "/remix", icon: Clapperboard, requiresOrgContext: true },
         ]
     },
     {
