@@ -24,6 +24,8 @@ interface Job {
     created_at: string;
     started_at?: string;
     completed_at?: string;
+    item_title?: string | null;
+    thumbnail_signed_url?: string | null;
 }
 
 export default function ScraperPage() {

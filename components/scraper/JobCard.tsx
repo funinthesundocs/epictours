@@ -17,6 +17,8 @@ interface Job {
   created_at: string;
   started_at?: string;
   completed_at?: string;
+  item_title?: string | null;
+  thumbnail_signed_url?: string | null;
 }
 
 interface JobCardProps {
@@ -48,16 +50,33 @@ export function JobCard({ job, onCancel, onDelete, onClick }: JobCardProps) {
   return (
     <div
       className={cn(
-        "border border-border rounded-lg p-4 bg-card hover:bg-muted/30 transition-colors cursor-pointer",
+        "border border-border rounded-lg bg-card hover:bg-muted/30 transition-colors cursor-pointer overflow-hidden",
         isActive && "border-primary/30"
       )}
       onClick={() => onClick?.(job.id)}
     >
+      <div className="flex items-stretch gap-0">
+        {/* Thumbnail — 80×56px fixed, always present */}
+        <div className="w-20 shrink-0 bg-muted/40 flex items-center justify-center relative overflow-hidden">
+          {job.thumbnail_signed_url ? (
+            <img
+              src={job.thumbnail_signed_url}
+              alt={job.item_title || domain}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <SourceTypeIcon sourceType={job.source_type} className="h-6 w-6 text-muted-foreground/40" />
+          )}
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 min-w-0 p-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <SourceTypeIcon sourceType={job.source_type} className="h-5 w-5 shrink-0" />
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{domain}</p>
+            <p className="text-sm font-medium text-foreground truncate">
+              {job.item_title || domain}
+            </p>
             <p className="text-xs text-muted-foreground truncate">{job.source_url}</p>
           </div>
         </div>
@@ -112,6 +131,8 @@ export function JobCard({ job, onCancel, onDelete, onClick }: JobCardProps) {
       {job.status === "error" && job.error_message && (
         <p className="mt-2 text-xs text-destructive truncate">{job.error_message}</p>
       )}
+        </div>{/* end main content */}
+      </div>{/* end flex row */}
     </div>
   );
 }

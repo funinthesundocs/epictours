@@ -38,9 +38,55 @@ export async function GET(request: Request) {
             );
         }
 
+        const jobs = data || [];
+
+        // Enrich completed jobs with item title + thumbnail signed URL
+        if (jobs.length > 0) {
+            const jobIds = jobs.map((j: any) => j.id);
+
+            const { data: items } = await supabaseAdmin
+                .from('scraper_items')
+                .select('job_id, title, scraper_assets(asset_type, storage_path)')
+                .in('job_id', jobIds);
+
+            // Build a lookup: jobId → { title, thumbnailPath }
+            const itemMap: Record<string, { title: string | null; thumbnailPath: string | null }> = {};
+            for (const item of (items || []) as any[]) {
+                const thumb = item.scraper_assets?.find(
+                    (a: any) => (a.asset_type === 'thumbnail' || a.asset_type === 'image') && a.storage_path
+                ) || item.scraper_assets?.find(
+                    (a: any) => a.asset_type === 'video' && a.storage_path
+                );
+                itemMap[item.job_id] = { title: item.title || null, thumbnailPath: thumb?.storage_path || null };
+            }
+
+            // Generate signed URLs for thumbnails in parallel
+            const BUCKET = 'epic-assets';
+            const enriched = await Promise.all(
+                jobs.map(async (job: any) => {
+                    const meta = itemMap[job.id];
+                    if (!meta) return job;
+                    let thumbnail_signed_url: string | null = null;
+                    if (meta.thumbnailPath) {
+                        const { data: signed } = await supabaseAdmin.storage
+                            .from(BUCKET)
+                            .createSignedUrl(meta.thumbnailPath, 3600);
+                        thumbnail_signed_url = signed?.signedUrl ?? null;
+                    }
+                    return { ...job, item_title: meta.title, thumbnail_signed_url };
+                })
+            );
+
+            return NextResponse.json({
+                success: true,
+                data: enriched,
+                pagination: { page, pageSize, total: count || 0 },
+            });
+        }
+
         return NextResponse.json({
             success: true,
-            data,
+            data: jobs,
             pagination: { page, pageSize, total: count || 0 },
         });
     } catch (error: any) {
