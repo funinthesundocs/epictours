@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "paths": {}
+  },
+  "include": [
+    "worker/**/*",
+    "lib/scraper/**/*",
+    "lib/queue/**/*",
+    "lib/logger.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

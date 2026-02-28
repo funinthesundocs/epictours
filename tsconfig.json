@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "types/database.types.ts"
+    "types/database.types.ts",
+    "supabase/database.types.ts"
   ]
 }
