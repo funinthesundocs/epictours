@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS='--no-deprecation' next dev",
+    "dev": "cross-env NODE_OPTIONS='--no-deprecation' next dev --webpack",
     "worker:dev": "tsx --env-file=.env.local --tsconfig tsconfig.worker.json worker/index.ts",
     "prebuild": "npx kill-port 3001 || true",
     "build": "cross-env NODE_OPTIONS='--no-deprecation' next build",
